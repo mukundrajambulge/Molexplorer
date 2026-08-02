@@ -196,22 +196,34 @@ export default function SidebarLeft({ onLoadMolecule, filters, setFilters }: Sid
               <h2 className="text-[10px] tracking-[0.3em] uppercase opacity-50 mb-3 flex items-center gap-2">
                 <Search size={12} /> Fetch from PubChem
               </h2>
-              <div className="flex flex-col gap-3">
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleFetchPubChem();
+                }} 
+                className="flex flex-col gap-3"
+              >
                 <input 
                   type="text"
-                  placeholder="CID (e.g. 2244)"
+                  placeholder="CID or Name (e.g. 2244 or aspirin)"
                   className="w-full text-[11px] font-mono bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-[#F0F0F0] placeholder:opacity-30 focus:outline-none focus:border-[#F27D26]/50 transition-colors"
                   value={pubchemId}
                   onChange={(e) => setPubchemId(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleFetchPubChem();
+                    }
+                  }}
                 />
                 <button 
-                  onClick={handleFetchPubChem}
+                  type="submit"
                   disabled={isProcessing}
                   className="bg-white text-black py-2 rounded-xl text-[10px] uppercase font-bold tracking-[0.2em] hover:bg-[#F27D26] hover:text-white transition-all disabled:opacity-50"
                 >
                   Fetch API
                 </button>
-              </div>
+              </form>
             </div>
           </div>
         ) : (

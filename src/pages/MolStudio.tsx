@@ -1,4 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useStore } from "../store";
+import { useDocking } from "../hooks/useDocking";
+import { useProteinPrep } from "../hooks/useProteinPrep";
+import { useAlignment } from "../hooks/useAlignment";
+import { useAssembly } from "../hooks/useAssembly";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Upload, RefreshCw, Layers, Droplet, CheckSquare, Settings2, Info, Box, Cuboid, SlidersHorizontal, X, Save, FolderOpen } from "lucide-react";
 import MolStudioViewer, { MolStudioViewerRef } from "../components/MolStudioViewer";
@@ -10,85 +15,37 @@ import { convertToPDBQT, runWebina, formatError } from "../lib/Docking";
 import { SelectionParser } from "../lib/SelectionParser";
 import { calculateInteractions, Interaction } from "../lib/Interactions";
 
-interface CleaningState {
-  bond_tolerance: number;
-  altloc_filtered: boolean;
-  solvent_stripped: boolean;
-  hydrogens_added: boolean;
-  ss_mode: 'pdb' | 'quick' | 'dssp';
-}
 
-interface AssemblyState {
-  active_assembly_id: string | null;
-  generated_assembly_chains: string[];
-  symmetry_mates_generated: boolean;
-  symmetry_mate_count: number;
-}
 
 export default function MolStudio() {
-  const [molData, setMolData] = useState<{data: string | Uint8Array, format: 'pdb' | 'mmtf', name?: string} | null>(null);
-  const [processedPDB, setProcessedPDB] = useState<string | null>(null);
-  const [atoms, setAtoms] = useState<any[]>([]);
-  const [selectedAtomSerials, setSelectedAtomSerials] = useState<Set<number>>(new Set());
-  const [focusTrigger, setFocusTrigger] = useState<number>(0);
-  const [assemblyPDB, setAssemblyPDB] = useState<string | null>(null);
-  const [symmetryPDB, setSymmetryPDB] = useState<string | null>(null);
-  const [ssData, setSsData] = useState<SSInfo[]>([]);
-  
-  const defaultState: CleaningState = {
-    bond_tolerance: 1.15,
-    altloc_filtered: false,
-    solvent_stripped: false,
-    hydrogens_added: false,
-    ss_mode: 'pdb'
-  };
-  
-  const [cleaningState, setCleaningState] = useState<CleaningState>(defaultState);
+  const {
+    molData, setMolData,
+    processedPDB, setProcessedPDB,
+    atoms, setAtoms,
+    selectedAtomSerials, setSelectedAtomSerials,
+    ssData, setSsData,
+    renderStyle, setRenderStyle,
+    colorScheme, setColorScheme,
+    surfaceOpacity, setSurfaceOpacity,
+    backgroundColor, setBackgroundColor,
+    namedSelections, setNamedSelections,
+    focusTrigger, triggerFocus,
+    isMobileSidebarOpen, setIsMobileSidebarOpen
+  } = useStore();
 
-  const [assemblyState, setAssemblyState] = useState<AssemblyState>({
-    active_assembly_id: null,
-    generated_assembly_chains: [],
-    symmetry_mates_generated: false,
-    symmetry_mate_count: 0
-  });
-
-  const [availableAssemblies, setAvailableAssemblies] = useState<{id: string, isIdentityOnly: boolean}[]>([]);
-  const [hasSymmetryInfo, setHasSymmetryInfo] = useState(false);
   const [debugRemarks, setDebugRemarks] = useState<string[]>([]);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [renderStyle, setRenderStyle] = useState<RenderStyle>("Cartoon");
-  const [colorScheme, setColorScheme] = useState<string>("spectrum");
-  const [surfaceOpacity, setSurfaceOpacity] = useState<number>(0.7);
-  const [backgroundColor, setBackgroundColor] = useState<string>('#f0f0f0');
-  const [namedSelections, setNamedSelections] = useState<NamedSelection[]>([]);
+  const { cleaningState, setCleaningState } = useProteinPrep();
+  const { assemblyState, setAssemblyState, availableAssemblies, setAvailableAssemblies, hasSymmetryInfo, setHasSymmetryInfo, assemblyPDB, setAssemblyPDB, symmetryPDB, setSymmetryPDB } = useAssembly();
+  const { alignMol, setAlignMol, alignmentResult, setAlignmentResult, alignError, setAlignError, alignFetchId, setAlignFetchId, isAlignFetching, setIsAlignFetching, handleAlignFetch, handleAlignFileUpload, runAlignment } = useAlignment(molData);
   
-  // Alignment state
-  const [alignMol, setAlignMol] = useState<{data: string | Uint8Array, format: 'pdb' | 'mmtf', name: string} | null>(null);
-  const [alignmentResult, setAlignmentResult] = useState<AlignmentResult | null>(null);
-  const [alignError, setAlignError] = useState("");
-  const [alignFetchId, setAlignFetchId] = useState("");
-  const [isAlignFetching, setIsAlignFetching] = useState(false);
-
-  // Docking state
-  const [ligandData, setLigandData] = useState<{data: string, format: string, name: string} | null>(null);
-  const [dockingBox, setDockingBox] = useState<{center: {x: number, y: number, z: number}, size: {x: number, y: number, z: number}} | null>(null);
-  const [isDocking, setIsDocking] = useState(false);
-  const [dockingLog, setDockingLog] = useState<string[]>([]);
-  const [dockingResultPdbqt, setDockingResultPdbqt] = useState<string | null>(null);
-  const [exhaustiveness, setExhaustiveness] = useState<number>(8);
-  const [dockingInputPdbqt, setDockingInputPdbqt] = useState<string | null>(null);
-  const [dockingReceptorPdbqt, setDockingReceptorPdbqt] = useState<string | null>(null);
-  const [interactions, setInteractions] = useState<any[]>([]);
-  const [redockRmsd, setRedockRmsd] = useState<number | null>(null);
-  const [showDockingBox, setShowDockingBox] = useState(false);
-  const [gridBoxThickness, setGridBoxThickness] = useState(0.2);
-  const [gridBoxOpacity, setGridBoxOpacity] = useState(1.0);
-  const [dockingPrep, setDockingPrep] = useState({
-    addHydrogens: true,
-    assignGasteiger: true,
-    stripSolvent: true,
-    stripLigandsIons: true,
-  });
+  const dockingContext = useDocking(molData, atoms, selectedAtomSerials);
+  const {
+    ligandData, setLigandData, dockingBox, setDockingBox, isDocking, setIsDocking, dockingLog, setDockingLog,
+    dockingResultPdbqt, setDockingResultPdbqt, exhaustiveness, setExhaustiveness, dockingInputPdbqt, setDockingInputPdbqt,
+    dockingReceptorPdbqt, setDockingReceptorPdbqt, interactions, setInteractions, redockRmsd, setRedockRmsd,
+    showDockingBox, setShowDockingBox, gridBoxThickness, setGridBoxThickness, gridBoxOpacity, setGridBoxOpacity,
+    dockingPrep, setDockingPrep, handleLigandUpload, handleSetBoxFromSelection, handleAutoSuggestBox, handleRunDocking, handleCancelDocking
+  } = dockingContext;
 
   const viewerRef = useRef<MolStudioViewerRef>(null);
 
@@ -207,48 +164,7 @@ export default function MolStudio() {
     }
   };
 
-  const handleAlignFetch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!alignFetchId) return;
-    setIsAlignFetching(true);
-    try {
-       const res = await fetch(`https://files.rcsb.org/download/${alignFetchId.toUpperCase()}.pdb`);
-       if (!res.ok) throw new Error("Failed to fetch PDB from RCSB");
-       const text = await res.text();
-       setAlignMol({ data: text, format: 'pdb', name: alignFetchId.toUpperCase() });
-       setAlignFetchId("");
-    } catch (err: any) {
-       alert("Error fetching structure: " + err.message);
-    } finally {
-       setIsAlignFetching(false);
-    }
-  };
-
-  const handleAlignFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const isMMTF = file.name.toLowerCase().endsWith('.mmtf');
-    const reader = new FileReader();
-    setAlignError("");
-    setAlignmentResult(null);
-    reader.onload = (e) => {
-      const res = e.target?.result;
-      if (res) {
-        if (isMMTF) {
-           setAlignMol({ data: new Uint8Array(res as ArrayBuffer), format: 'mmtf', name: file.name });
-        } else {
-           setAlignMol({ data: res as string, format: 'pdb', name: file.name });
-        }
-      }
-    };
-    if (isMMTF) {
-      reader.readAsArrayBuffer(file);
-    } else {
-      reader.readAsText(file);
-    }
-  };
-
-  useEffect(() => {
+useEffect(() => {
     if (molData && alignMol) {
       try {
         const p1 = new MolProcessor(molData.data, molData.format);
@@ -345,53 +261,7 @@ export default function MolStudio() {
     e.target.value = '';
   };
 
-  const handleLigandUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const res = e.target?.result as string;
-      if (res) {
-        setLigandData({ data: res, format: file.name.split('.').pop() || 'sdf', name: file.name });
-        setDockingResultPdbqt(null);
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  const handleSetBoxFromSelection = () => {
-    if (selectedAtomSerials.size === 0) {
-      alert("Please select some atoms first to define the binding site center.");
-      return;
-    }
-    const selectedAtoms = atoms.filter(a => selectedAtomSerials.has(a.serial));
-    let cx = 0, cy = 0, cz = 0;
-    selectedAtoms.forEach(a => { cx += a.x; cy += a.y; cz += a.z; });
-    cx /= selectedAtoms.length;
-    cy /= selectedAtoms.length;
-    cz /= selectedAtoms.length;
-    
-    // Find max distance from center to estimate size
-    let maxDistX = 0, maxDistY = 0, maxDistZ = 0;
-    selectedAtoms.forEach(a => {
-      maxDistX = Math.max(maxDistX, Math.abs(a.x - cx));
-      maxDistY = Math.max(maxDistY, Math.abs(a.y - cy));
-      maxDistZ = Math.max(maxDistZ, Math.abs(a.z - cz));
-    });
-    
-    // Add some padding (e.g., 5 Å on each side)
-    const padding = 10;
-    setDockingBox({
-      center: { x: cx, y: cy, z: cz },
-      size: { 
-        x: Math.max(20, (maxDistX * 2) + padding), 
-        y: Math.max(20, (maxDistY * 2) + padding), 
-        z: Math.max(20, (maxDistZ * 2) + padding) 
-      }
-    });
-    setShowDockingBox(true);
-  };
-  const handleAutoSuggestBox = () => {
+const handleAutoSuggestBox = () => {
     if (!molData) return;
     try {
       const p = new MolProcessor(molData.data, molData.format as any);
@@ -434,95 +304,7 @@ export default function MolStudio() {
     }
   };
 
-  const handleRunDocking = async () => {
-    if (typeof SharedArrayBuffer === "undefined") {
-      alert("Docking requires a dedicated browser tab to run the Webina engine (SharedArrayBuffer support). The app will now open in a new tab.");
-      window.open(window.location.href, '_blank');
-      return;
-    }
-    if (!molData || !ligandData || !dockingBox) return;
-    setIsDocking(true);
-    setDockingLog([]);
-    setDockingResultPdbqt(null);
-    try {
-      // 1. Prepare Receptor
-      setDockingLog(l => [...l, "Preparing receptor..."]);
-      const p = new MolProcessor(molData.data, molData.format as any);
-      if (dockingPrep.stripSolvent) {
-        p.stripSolvent();
-        setDockingLog(l => [...l, "Stripped solvent."]);
-      }
-      if (dockingPrep.stripLigandsIons) {
-        p.stripLigandsIons();
-        setDockingLog(l => [...l, "Stripped co-crystallized ligands/ions."]);
-      }
-      if (dockingPrep.addHydrogens) {
-        p.addHydrogens(); // This is the step 1 logic
-        setDockingLog(l => [...l, "Added hydrogens."]);
-      }
-      // Note: Gasteiger charges are added automatically by OpenBabel PDBQT writer.
-      if (dockingPrep.assignGasteiger) {
-        setDockingLog(l => [...l, "Gasteiger charges will be assigned by Open Babel."]);
-      }
-
-      const preppedPDB = p.toPDB();
-
-      // 2. Convert receptor to PDBQT 
-      const receptorPDBQT = await convertToPDBQT(preppedPDB, 'pdb', true, false);
-      
-      // 3. Convert ligand to PDBQT
-      setDockingLog(l => [...l, "Converting ligand to PDBQT..."]);
-      const ligandPDBQT = await convertToPDBQT(ligandData.data, ligandData.format, false, true);
-
-      setDockingInputPdbqt(ligandPDBQT);
-      setDockingReceptorPdbqt(receptorPDBQT);
-      setRedockRmsd(null);
-
-      // 4. Run Webina
-      setDockingLog(l => [...l, "Running Webina (this may take several seconds to minutes)..."]);
-      const result = await runWebina(
-        receptorPDBQT,
-        ligandPDBQT,
-        {
-          receptor: "",
-          ligand: "",
-          center_x: dockingBox.center.x,
-          center_y: dockingBox.center.y,
-          center_z: dockingBox.center.z,
-          size_x: dockingBox.size.x,
-          size_y: dockingBox.size.y,
-          size_z: dockingBox.size.z,
-          exhaustiveness
-        },
-        (msg) => {
-          setDockingLog(l => {
-             const newLogs = [...l, msg];
-             if (newLogs.length > 20) return newLogs.slice(newLogs.length - 20);
-             return newLogs;
-          });
-        }
-      );
-      
-      setDockingLog(l => [...l, "Docking complete!"]);
-      setDockingResultPdbqt(result);
-
-      // 5. Calculate interactions for the first pose
-      const firstPoseStr = result.split("ENDMDL")[0] + "ENDMDL\n";
-      const ints = calculateInteractions(receptorPDBQT, firstPoseStr);
-      setInteractions(ints);
-      if (ints.length > 0) {
-         setDockingLog(l => [...l, `Found ${ints.length} potential interactions for top pose.`]);
-      }
-    } catch (err: any) {
-      console.error("Docking process caught error:", err);
-      const errMsg = formatError(err);
-      setDockingLog(l => [...l, `Error: ${errMsg}`]);
-    } finally {
-      setIsDocking(false);
-    }
-  };
-
-  const handleValidateRedocking = () => {
+const handleValidateRedocking = () => {
     if (!dockingResultPdbqt || !dockingInputPdbqt) {
        alert("No docking result or input found to validate against.");
        return;

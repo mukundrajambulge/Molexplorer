@@ -1,0 +1,11 @@
+[build]
+builder = "NIXPACKS"
+
+[[deploy]]
+service = "web"
+dockerfilePath = "Dockerfile.frontend"
+dependsOn = ["api"]
+
+[[deploy]]
+service = "api"
+dockerfilePath = "Dockerfile.backend"
