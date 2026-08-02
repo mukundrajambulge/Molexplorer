@@ -7,6 +7,8 @@ import { useAssembly } from "../hooks/useAssembly";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Upload, RefreshCw, Layers, Droplet, CheckSquare, Settings2, Info, Box, Cuboid, SlidersHorizontal, X, Save, FolderOpen } from "lucide-react";
 import MolStudioViewer, { MolStudioViewerRef } from "../components/MolStudioViewer";
+import { StudioRibbonBar } from "../components/StudioRibbonBar";
+import { SelectionQueryConsole } from "../components/SelectionQueryConsole";
 import QueryBar from "../components/QueryBar";
 import { RenderStyle, NamedSelection } from "../types";
 import { SSInfo, MolProcessor } from "../lib/MolProcessor";
@@ -18,6 +20,7 @@ import { calculateInteractions, Interaction } from "../lib/Interactions";
 
 
 export default function MolStudio() {
+  const [isConsoleOpen, setIsConsoleOpen] = useState(true);
   const {
     molData, setMolData,
     processedPDB, setProcessedPDB,
@@ -293,10 +296,32 @@ useEffect(() => {
       hydrogens_added: true,
       ss_mode: 'pdb'
     });
-  };
-
   return (
-    <div className="h-full w-full flex flex-col md:flex-row font-sans bg-[#0A0A0A] text-[#F0F0F0] overflow-hidden relative">
+    <div className="h-screen w-screen flex flex-col font-sans bg-[#0A0A0A] text-[#F0F0F0] overflow-hidden relative">
+      {/* Top Ribbon Control Panel (PyMOL / MS Office Ribbon Style) */}
+      <StudioRibbonBar
+        onFileUpload={handleFileUpload}
+        onFetchPdb={(id) => { setFetchId(id); }}
+        renderStyle={renderStyle}
+        setRenderStyle={setRenderStyle}
+        colorScheme={colorScheme}
+        setColorScheme={setColorScheme}
+        surfaceOpacity={surfaceOpacity}
+        setSurfaceOpacity={setSurfaceOpacity}
+        backgroundColor={backgroundColor}
+        setBackgroundColor={setBackgroundColor}
+        onRunQuery={handleRunQuery}
+        onClearSelection={handleClearSelection}
+        selectedAtomCount={selectedAtomSerials.size}
+        totalAtomCount={atoms.length}
+        isDocking={isDocking}
+        onStartDocking={handleRunDocking}
+        onAutoSuggestBox={handleAutoSuggestBox}
+        onAlignFetch={(id) => { setAlignFetchId(id); }}
+        onSaveSession={handleSaveSession}
+      />
+
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
       
       {/* Mobile Top Header */}
       <header className="md:hidden h-14 border-b border-white/10 bg-[#0C0C0C] flex items-center justify-between px-4 z-30 shrink-0">
@@ -1054,7 +1079,14 @@ useEffect(() => {
               </button>
             </div>
           </div>
-        )}
+        {/* PyMOL Interactive Selection Query Console */}
+        <SelectionQueryConsole
+          onRunQuery={handleRunQuery}
+          selectedAtomCount={selectedAtomSerials.size}
+          totalAtomCount={atoms.length}
+          isOpen={isConsoleOpen}
+          setIsOpen={setIsConsoleOpen}
+        />
       </div>
 
     </div>
