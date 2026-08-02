@@ -1079,6 +1079,8 @@ useEffect(() => {
               </button>
             </div>
           </div>
+        )}
+
         {/* PyMOL Interactive Selection Query Console */}
         <SelectionQueryConsole
           onRunQuery={handleRunQuery}
@@ -1088,8 +1090,8 @@ useEffect(() => {
           setIsOpen={setIsConsoleOpen}
         />
       </div>
-
     </div>
   );
+}
 }
 
