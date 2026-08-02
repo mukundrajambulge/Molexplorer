@@ -146,7 +146,7 @@ export default function MolExplorer() {
   });
 
   return (
-    <div className="h-screen w-screen flex flex-col font-sans overflow-hidden bg-[#0A0A0A] text-[#F0F0F0] relative">
+    <div className="h-full w-full flex flex-col font-sans overflow-hidden bg-[#0A0A0A] text-[#F0F0F0] relative">
       <div className="absolute top-[-100px] left-[-100px] w-[500px] h-[500px] bg-gradient-to-br from-[#1a1a1a] to-transparent rounded-full blur-[100px] opacity-40 pointer-events-none z-0"></div>
 
       <header className="h-16 border-b border-white/10 flex items-center justify-between px-4 sm:px-8 bg-transparent flex-shrink-0 z-20 relative">

@@ -261,50 +261,8 @@ useEffect(() => {
     e.target.value = '';
   };
 
-const handleAutoSuggestBox = () => {
-    if (!molData) return;
-    try {
-      const p = new MolProcessor(molData.data, molData.format as any);
-      const ligands = p.getLigands();
-      if (ligands.length === 0) {
-        alert("No co-crystallized ligands detected in the receptor.");
-        return;
-      }
-      // Pick the first ligand
-      const ligAtoms = ligands[0];
-      let cx = 0, cy = 0, cz = 0;
-      ligAtoms.forEach(a => { cx += a.x; cy += a.y; cz += a.z; });
-      cx /= ligAtoms.length;
-      cy /= ligAtoms.length;
-      cz /= ligAtoms.length;
-      
-      let maxDistX = 0, maxDistY = 0, maxDistZ = 0;
-      ligAtoms.forEach(a => {
-        maxDistX = Math.max(maxDistX, Math.abs(a.x - cx));
-        maxDistY = Math.max(maxDistY, Math.abs(a.y - cy));
-        maxDistZ = Math.max(maxDistZ, Math.abs(a.z - cz));
-      });
-      
-      const padding = 10;
-      setDockingBox({
-        center: { x: cx, y: cy, z: cz },
-        size: { 
-          x: Math.max(20, (maxDistX * 2) + padding), 
-          y: Math.max(20, (maxDistY * 2) + padding), 
-          z: Math.max(20, (maxDistZ * 2) + padding) 
-        }
-      });
-      setShowDockingBox(true);
-      
-      // Auto-populate the ligand box if empty, this makes testing easy
-      // But the spec doesn't require extracting the ligand, just setting the box.
-      alert(`Auto-suggested grid box around ligand: ${ligAtoms[0].resName}`);
-    } catch (e: any) {
-      alert("Failed to auto-suggest box: " + e.message);
-    }
-  };
 
-const handleValidateRedocking = () => {
+  const handleValidateRedocking = () => {
     if (!dockingResultPdbqt || !dockingInputPdbqt) {
        alert("No docking result or input found to validate against.");
        return;
@@ -338,7 +296,7 @@ const handleValidateRedocking = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col md:flex-row font-sans bg-[#0A0A0A] text-[#F0F0F0] overflow-hidden relative">
+    <div className="h-full w-full flex flex-col md:flex-row font-sans bg-[#0A0A0A] text-[#F0F0F0] overflow-hidden relative">
       
       {/* Mobile Top Header */}
       <header className="md:hidden h-14 border-b border-white/10 bg-[#0C0C0C] flex items-center justify-between px-4 z-30 shrink-0">
