@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://3dmol.csb.pitt.edu/build/3Dmol.js"></script>
+</head>
+<body>
+<div id="container" style="width: 400px; height: 400px; position: relative;"></div>
+<script>
+const viewer = $3Dmol.createViewer("container");
+const pdb = `
+ATOM      1  N   ALA A   1      -0.525   1.362   0.000  1.00 10.00           N
+ATOM      2  CA  ALA A   1       0.000   0.000   0.000  1.00 10.00           C
+ATOM      3  C   ALA A   1       1.528   0.000   0.000  1.00 10.00           C
+ATOM      4  O   ALA A   1       2.112   1.042   0.000  1.00 10.00           O
+ATOM      5  N   ALA A   2       2.112   1.042   0.000  1.00 10.00           N
+ATOM      6  CA  ALA A   2       0.000   0.000   0.000  1.00 10.00           C
+ATOM      7  C   ALA A   2       1.528   0.000   0.000  1.00 10.00           C
+ATOM      8  O   ALA A   2       2.112   1.042   0.000  1.00 10.00           O
+ATOM      9  N   ALA A   3       2.112   1.042   0.000  1.00 10.00           N
+ATOM     10  CA  ALA A   3       0.000   0.000   0.000  1.00 10.00           C
+ATOM     11  C   ALA A   3       1.528   0.000   0.000  1.00 10.00           C
+ATOM     12  O   ALA A   3       2.112   1.042   0.000  1.00 10.00           O
+`;
+viewer.addModel(pdb, "pdb");
+viewer.getModel().selectedAtoms({}).forEach(a => {
+  if (a.resi == 1) a.ss = 'h';
+  else if (a.resi == 2) a.ss = 's';
+  else a.ss = 'c';
+});
+viewer.setStyle({}, { cartoon: { colorfunc: (a) => {
+    if (a.ss === 'h') return 'blue';
+    if (a.ss === 's') return 'orange';
+    return 'gray';
+}}});
+viewer.render();
+</script>
+</body>
+</html>

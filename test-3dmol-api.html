@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.4.2/3Dmol-min.js"></script>
+</head>
+<body>
+  <div id="container-01" class="mol-container" style="width: 400px; height: 400px;"></div>
+  <script>
+    var viewer = $3Dmol.createViewer("container-01");
+    viewer.addModel("ATOM      1  N   ALA A   1      -0.525   1.362   0.000  1.00  0.00           N\nATOM      2  CA  ALA A   1       0.000   0.000   0.000  1.00  0.00           C\nATOM      3  C   ALA A   1       1.520   0.000   0.000  1.00  0.00           C\nATOM      4  O   ALA A   1       2.110   1.040   0.000  1.00  0.00           O\nATOM      5  CB  ALA A   1      -0.525  -0.701  -1.225  1.00  0.00           C", "pdb", {assignBonds: false});
+    var m = viewer.getModel(0);
+    console.log("assignBonds=false", m.selectedAtoms({}).map(a => a.bonds));
+  </script>
+</body>
+</html>

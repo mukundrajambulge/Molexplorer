@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://3Dmol.org/build/3Dmol.js"></script>
+</head>
+<body>
+  <script>
+    async function test() {
+      const res = await fetch("https://models.rcsb.org/v1/1hvr/full?encoding=bcif");
+      const buf = await res.arrayBuffer();
+      const models = $3Dmol.Parsers.mmtf(new Uint8Array(buf), { keepH: true });
+      console.log(models.modelData[0].biomt);
+    }
+    test();
+  </script>
+</body>
+</html>

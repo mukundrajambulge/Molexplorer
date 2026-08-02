@@ -1,0 +1,10 @@
+import fs from 'fs';
+const text = fs.readFileSync('1HVR.pdb', 'utf8');
+const $3Dmol = { Parsers: { mmtf: () => [] } };
+global.$3Dmol = $3Dmol as any;
+import { MolProcessor } from './src/lib/MolProcessor.ts';
+const processor = new MolProcessor(text, 'pdb');
+processor.calculateSecondaryStructure('quick');
+console.log("Helices length:", processor.ss_per_residue.filter(r => r.ss_type === 'helix').length);
+console.log("Sheets length:", processor.ss_per_residue.filter(r => r.ss_type === 'sheet').length);
+console.log("Loops length:", processor.ss_per_residue.filter(r => r.ss_type === 'loop').length);

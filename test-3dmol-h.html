@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+</head>
+<body>
+  <div id="container-01" class="mol-container" style="width: 400px; height: 400px; position: relative;"></div>
+  <script>
+    console.log(Object.keys(window.$3Dmol).filter(k => k.toLowerCase().includes('hydro')));
+    console.log(Object.keys(window.$3Dmol.GLModel.prototype).filter(k => k.toLowerCase().includes('hydro')));
+  </script>
+</body>
+</html>

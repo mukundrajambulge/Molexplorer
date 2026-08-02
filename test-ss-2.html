@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.4.2/3Dmol-min.js"></script>
+</head>
+<body>
+  <div id="container" class="mol-container" style="width: 400px; height: 400px;"></div>
+  <script>
+    var viewer = $3Dmol.createViewer("container");
+    // a small PDB
+    var pdb = `ATOM      1  N   ALA A   1       0.000   0.000   0.000  1.00  0.00           N
+ATOM      2  CA  ALA A   1       1.458   0.000   0.000  1.00  0.00           C
+ATOM      3  C   ALA A   1       2.009   1.424   0.000  1.00  0.00           C
+ATOM      4  O   ALA A   1       1.306   2.435   0.000  1.00  0.00           O
+ATOM      5  N   ALA A   2       3.336   1.468   0.000  1.00  0.00           N
+ATOM      6  CA  ALA A   2       4.053   2.730   0.000  1.00  0.00           C
+ATOM      7  C   ALA A   2       3.921   3.491   1.312  1.00  0.00           C
+ATOM      8  O   ALA A   2       3.799   4.717   1.266  1.00  0.00           O
+ATOM      9  N   ALA A   3       3.931   2.756   2.428  1.00  0.00           N
+ATOM     10  CA  ALA A   3       3.834   3.333   3.766  1.00  0.00           C
+ATOM     11  C   ALA A   3       2.420   3.844   3.993  1.00  0.00           C
+ATOM     12  O   ALA A   3       2.193   5.056   3.966  1.00  0.00           O`;
+    viewer.addModel(pdb, "pdb");
+    
+    var atoms = viewer.getModel(0).selectedAtoms({});
+    atoms.forEach(a => {
+        if (a.resi === 1) a.ss = 'h';
+        if (a.resi === 2) a.ss = 's';
+        if (a.resi === 3) a.ss = 'c';
+    });
+    viewer.setStyle({}, {cartoon: {}});
+    viewer.render();
+    console.log("cartoon applied");
+  </script>
+</body>
+</html>

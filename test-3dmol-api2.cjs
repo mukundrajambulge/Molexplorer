@@ -1,0 +1,11 @@
+const fs = require('fs');
+let file = fs.readFileSync('node_modules/3dmol/build/3Dmol-min.js', 'utf8');
+const { JSDOM } = require('jsdom');
+const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>');
+global.window = dom.window;
+global.document = dom.window.document;
+global.navigator = dom.window.navigator;
+global.TextEncoder = require('util').TextEncoder;
+global.TextDecoder = require('util').TextDecoder;
+eval(file);
+console.log(Object.keys(window.$3Dmol.SurfaceType));

@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html><body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.4.2/3Dmol-min.js"></script>
+<div id="container-01" class="mol-container" style="width: 400px; height: 400px; position: relative;"></div>
+<script>
+  var viewer = $3Dmol.createViewer("container-01", {defaultcolors: $3Dmol.elementColors.rasmol});
+  viewer.addModel("C C", "smi"); // fake
+  viewer.setClickable({}, true, function(atom) { console.log(atom); });
+</script>
+</body></html>

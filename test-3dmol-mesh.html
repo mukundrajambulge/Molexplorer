@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+</head>
+<body>
+  <div id="container" style="width: 400px; height: 400px; position: relative;"></div>
+  <script>
+    let viewer = $3Dmol.createViewer("container");
+    $3Dmol.download("pdb:1crn", viewer, {}, function() {
+      viewer.addSurface($3Dmol.SurfaceType.VDW, {wireframe: true, opacity: 0.8, color: "blue"});
+      viewer.render();
+      console.log("Rendered wireframe VDW surface");
+    });
+  </script>
+</body>
+</html>
