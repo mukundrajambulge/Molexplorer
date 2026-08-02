@@ -146,7 +146,7 @@ export function useDocking(molData: any, atoms: any[], selectedAtomSerials: Set<
       setRedockRmsd(null);
 
       setDockingLog(l => [...l, "Running Webina (this may take several seconds to minutes)..."]);
-      const result = await runWebina(
+      const resultPdbqt = await runWebina(
         receptorPDBQT,
         ligandPDBQT,
         {
@@ -169,13 +169,8 @@ export function useDocking(molData: any, atoms: any[], selectedAtomSerials: Set<
         }
       );
       
-      setDockingResultPdbqt(result.output_pdbqt);
-      if (result.rmsd !== null && result.rmsd !== undefined) {
-         setRedockRmsd(result.rmsd);
-         setDockingLog(l => [...l, `Docking finished! RMSD to input pose: ${result.rmsd.toFixed(2)} Å`]);
-      } else {
-         setDockingLog(l => [...l, "Docking finished!"]);
-      }
+      setDockingResultPdbqt(resultPdbqt);
+      setDockingLog(l => [...l, "Docking finished!"]);
     } catch (e: any) {
       console.error(e);
       setDockingLog(l => [...l, `Error: ${e.message}`]);

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useStore } from "../store";
 import { useDocking } from "../hooks/useDocking";
-import { useProteinPrep } from "../hooks/useProteinPrep";
+import { useProteinPrep, defaultCleaningState } from "../hooks/useProteinPrep";
 import { useAlignment } from "../hooks/useAlignment";
 import { useAssembly } from "../hooks/useAssembly";
 import { Link } from "react-router-dom";
@@ -62,7 +62,7 @@ export default function MolStudio() {
   const handleSaveSelection = (name: string, query: string) => {
     const parser = new SelectionParser(atoms);
     const atomIds = Array.from(parser.parse(query));
-    setNamedSelections(prev => [...prev, { name, query, atomIds }]);
+    setNamedSelections([...namedSelections, { name, query, atomIds }]);
     alert(`Saved selection: ${name}`);
   };
 
@@ -139,7 +139,7 @@ export default function MolStudio() {
         } else {
            setMolData({ data: res as string, format: 'pdb' });
         }
-        setCleaningState(defaultState); // Reset state on new file
+        setCleaningState(defaultCleaningState); // Reset state on new file
       }
     };
     if (isMMTF) {
@@ -158,7 +158,7 @@ export default function MolStudio() {
        if (!res.ok) throw new Error("Failed to fetch PDB from RCSB");
        const text = await res.text();
        setMolData({ data: text, format: 'pdb' });
-       setCleaningState(defaultState);
+       setCleaningState(defaultCleaningState);
        setFetchId("");
     } catch (err: any) {
        alert("Error fetching structure: " + err.message);
@@ -296,6 +296,8 @@ useEffect(() => {
       hydrogens_added: true,
       ss_mode: 'pdb'
     });
+  };
+
   return (
     <div className="h-screen w-screen flex flex-col font-sans bg-[#0A0A0A] text-[#F0F0F0] overflow-hidden relative">
       {/* Top Ribbon Control Panel (PyMOL / MS Office Ribbon Style) */}
@@ -423,7 +425,7 @@ useEffect(() => {
                 </div>
                 <div className="flex gap-2">
                 <button 
-                  onClick={() => setCleaningState(defaultState)}
+                  onClick={() => setCleaningState(defaultCleaningState)}
                   className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg border border-white/10 text-xs font-medium hover:bg-white/5 transition-colors"
                 >
                   <RefreshCw size={12} />
@@ -448,7 +450,7 @@ useEffect(() => {
              {selectedAtomSerials.size > 0 && (
                  <div className="flex items-center justify-between">
                    <p className="text-sm text-white/70">Selected atoms: {selectedAtomSerials.size}</p>
-                   <button onClick={() => setFocusTrigger(p => p + 1)} className="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-md transition-colors">
+                   <button onClick={triggerFocus} className="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-md transition-colors">
                      Focus on Selection
                    </button>
                  </div>
@@ -1091,7 +1093,7 @@ useEffect(() => {
         />
       </div>
     </div>
+    </div>
   );
-}
 }
 

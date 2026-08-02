@@ -54,11 +54,11 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
   const [alignInput, setAlignInput] = useState("");
 
   const representations: { id: RenderStyle; label: string; icon: any }[] = [
-    { id: "cartoon", label: "Cartoon", icon: RibbonIcon },
-    { id: "stick", label: "Sticks", icon: StickIcon },
-    { id: "sphere", label: "Spheres / VDW", icon: SphereIcon },
-    { id: "surface", label: "Solid Surface", icon: SurfaceIcon },
-    { id: "mesh", label: "Mesh Surface", icon: MeshIcon }
+    { id: "Cartoon", label: "Cartoon", icon: RibbonIcon },
+    { id: "Stick", label: "Sticks", icon: StickIcon },
+    { id: "Non-bonded (small spheres)", label: "Spheres / VDW", icon: SphereIcon },
+    { id: "Van der Waals Surface", label: "Solid Surface", icon: SurfaceIcon },
+    { id: "Mesh", label: "Mesh Surface", icon: MeshIcon }
   ];
 
   const colorSchemes = [

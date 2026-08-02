@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { alignStructures, AlignmentResult } from '../lib/Alignment';
+import { MolProcessor } from '../lib/MolProcessor';
 
 export function useAlignment(molData: any) {
-  const [alignMol, setAlignMol] = useState<{data: string | Uint8Array, format: 'pdb' | 'mmtf', name: string} | null>(null);
+  const [alignMol, setAlignMol] = useState<{data: string | Uint8Array, format: 'pdb' | 'mmtf', name?: string} | null>(null);
   const [alignmentResult, setAlignmentResult] = useState<AlignmentResult | null>(null);
   const [alignError, setAlignError] = useState("");
   const [alignFetchId, setAlignFetchId] = useState("");
@@ -22,15 +23,15 @@ export function useAlignment(molData: any) {
       res = await fetch(`https://files.rcsb.org/download/${pdbId}.mmtf`);
       if (res.ok) {
         const buffer = await res.arrayBuffer();
-        setAlignMol({ data: new Uint8Array(buffer), format: 'mmtf', name: pdbId });
-        runAlignment({ data: new Uint8Array(buffer), format: 'mmtf', name: pdbId });
+        setAlignMol({ data: new Uint8Array(buffer), format: 'mmtf' });
+        runAlignment({ data: new Uint8Array(buffer), format: 'mmtf' });
         return;
       }
       res = await fetch(`https://files.rcsb.org/download/${pdbId}.pdb`);
       if (res.ok) {
         const text = await res.text();
-        setAlignMol({ data: text, format: 'pdb', name: pdbId });
-        runAlignment({ data: text, format: 'pdb', name: pdbId });
+        setAlignMol({ data: text, format: 'pdb' });
+        runAlignment({ data: text, format: 'pdb' });
         return;
       }
       throw new Error("Could not find MMTF or PDB format for " + pdbId);
@@ -75,10 +76,9 @@ export function useAlignment(molData: any) {
       return;
     }
     try {
-      const result = alignStructures(
-        molData.data, molData.format,
-        targetMol.data, targetMol.format
-      );
+      const refProc = new MolProcessor(molData.data, molData.format);
+      const targetProc = new MolProcessor(targetMol.data, targetMol.format);
+      const result = alignStructures(refProc.atoms, targetProc.atoms);
       setAlignmentResult(result);
     } catch (e: any) {
       setAlignError("Alignment failed: " + e.message);

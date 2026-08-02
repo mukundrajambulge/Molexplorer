@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { RenderStyle } from '../types';
 
 export interface Molecule {
   data: string | Uint8Array;
@@ -20,13 +21,13 @@ interface MoleculeState {
 }
 
 interface ViewerState {
-  renderStyle: string;
+  renderStyle: RenderStyle;
   colorScheme: string;
   surfaceOpacity: number;
   backgroundColor: string;
   namedSelections: any[];
   focusTrigger: number;
-  setRenderStyle: (style: string) => void;
+  setRenderStyle: (style: RenderStyle) => void;
   setColorScheme: (scheme: string) => void;
   setSurfaceOpacity: (opacity: number) => void;
   setBackgroundColor: (color: string) => void;
