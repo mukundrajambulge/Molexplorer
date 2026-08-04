@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { 
   FileUp, Download, Eye, Palette, Layers, Box, Cpu, Sparkles, 
   Ruler, AlignLeft, ShieldCheck, RefreshCw, Scissors, Plus, 
-  Flame, HelpCircle, ChevronDown, Check, Command, Activity, Zap
+  Flame, HelpCircle, ChevronDown, Check, Command, Activity, Zap, SlidersHorizontal, Droplet, CheckSquare
 } from "lucide-react";
 import { RenderStyle } from "../types";
 
@@ -26,6 +26,23 @@ interface StudioRibbonBarProps {
   onAutoSuggestBox: () => void;
   onAlignFetch: (id: string) => void;
   onSaveSession: () => void;
+  
+  // Protein Prep Props
+  cleaningState: {
+    bond_tolerance: number;
+    altloc_filtered: boolean;
+    solvent_stripped: boolean;
+    hydrogens_added: boolean;
+    ss_mode: 'pdb' | 'quick' | 'dssp';
+  };
+  setCleaningState: React.Dispatch<React.SetStateAction<{
+    bond_tolerance: number;
+    altloc_filtered: boolean;
+    solvent_stripped: boolean;
+    hydrogens_added: boolean;
+    ss_mode: 'pdb' | 'quick' | 'dssp';
+  }>>;
+  onResetCleaning: () => void;
 }
 
 export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
@@ -47,25 +64,38 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
   onStartDocking,
   onAutoSuggestBox,
   onAlignFetch,
-  onSaveSession
+  onSaveSession,
+  cleaningState,
+  setCleaningState,
+  onResetCleaning
 }) => {
   const [activeTab, setActiveTab] = useState<"file" | "display" | "select" | "prep" | "docking" | "align">("display");
   const [pdbInput, setPdbInput] = useState("");
   const [alignInput, setAlignInput] = useState("");
 
-  const representations: { id: RenderStyle; label: string; icon: any }[] = [
-    { id: "Cartoon", label: "Cartoon", icon: RibbonIcon },
-    { id: "Stick", label: "Sticks", icon: StickIcon },
-    { id: "Non-bonded (small spheres)", label: "Spheres / VDW", icon: SphereIcon },
-    { id: "Van der Waals Surface", label: "Solid Surface", icon: SurfaceIcon },
-    { id: "Mesh", label: "Mesh Surface", icon: MeshIcon }
+  const representations: { id: RenderStyle; label: string }[] = [
+    { id: "Line", label: "Line" },
+    { id: "Stick", label: "Stick" },
+    { id: "Ball-and-Stick", label: "Ball & Stick" },
+    { id: "Space-Filling", label: "Space-Filling (CPK)" },
+    { id: "Cartoon", label: "Cartoon" },
+    { id: "Van der Waals Surface", label: "VDW Surface" },
+    { id: "Solvent-Accessible Surface", label: "Solvent Accessible" },
+    { id: "Solvent-Excluded Surface", label: "Solvent Excluded" },
+    { id: "Mesh", label: "Mesh" },
+    { id: "Dots", label: "Dots" },
+    { id: "Dot Surface", label: "Dot Surface" },
+    { id: "Non-bonded (small spheres)", label: "Non-bonded Spheres" }
   ];
 
   const colorSchemes = [
     { id: "spectrum", label: "Rainbow Spectrum" },
-    { id: "element", label: "CPK Element" },
+    { id: "rainbow", label: "Rainbow" },
+    { id: "ssPyMol", label: "Secondary Structure (PyMOL)" },
+    { id: "ssJmol", label: "Secondary Structure (Jmol)" },
     { id: "chain", label: "By Chain" },
-    { id: "ss", label: "Secondary Structure" },
+    { id: "element", label: "By Element (CPK)" },
+    { id: "white", label: "White" },
     { id: "b_factor", label: "B-Factor Heatmap" }
   ];
 
@@ -79,7 +109,7 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
   ];
 
   return (
-    <div className="w-full bg-[#0E0E12] border-b border-white/10 select-none flex flex-col shrink-0 text-white">
+    <div className="w-full bg-[#0E0E12] border-b border-white/10 select-none flex flex-col shrink-0 text-white z-30">
       {/* Top Menu Bar Tabs (Word / PyMOL Ribbon style) */}
       <div className="flex items-center justify-between px-3 border-b border-white/[0.06] bg-[#070709] h-9 text-xs">
         <div className="flex items-center gap-1">
@@ -167,22 +197,16 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
           <div className="flex items-center gap-6">
             {/* Representation Presets */}
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider">Representation</span>
-              <div className="flex items-center gap-1">
+              <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider">Representation Style</span>
+              <select
+                value={renderStyle}
+                onChange={(e) => setRenderStyle(e.target.value as RenderStyle)}
+                className="bg-white/[0.04] border border-white/10 rounded-md px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#4A90E2]"
+              >
                 {representations.map(rep => (
-                  <button
-                    key={rep.id}
-                    onClick={() => setRenderStyle(rep.id)}
-                    className={`px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all ${
-                      renderStyle === rep.id
-                        ? "bg-[#4A90E2] text-white shadow"
-                        : "bg-white/[0.04] text-white/70 hover:text-white hover:bg-white/[0.08]"
-                    }`}
-                  >
-                    <span>{rep.label}</span>
-                  </button>
+                  <option key={rep.id} value={rep.id} className="bg-[#0E0E12]">{rep.label}</option>
                 ))}
-              </div>
+              </select>
             </div>
 
             <div className="h-8 w-[1px] bg-white/10"></div>
@@ -193,12 +217,28 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
               <select
                 value={colorScheme}
                 onChange={(e) => setColorScheme(e.target.value)}
-                className="bg-white/[0.04] border border-white/10 rounded-md px-2 py-1 text-xs text-white focus:outline-none"
+                className="bg-white/[0.04] border border-white/10 rounded-md px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#4A90E2]"
               >
                 {colorSchemes.map(cs => (
                   <option key={cs.id} value={cs.id} className="bg-[#0E0E12]">{cs.label}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10"></div>
+
+            {/* Surface Opacity */}
+            <div className="flex flex-col gap-1 w-32">
+              <div className="flex justify-between text-[10px] font-mono text-white/40 uppercase tracking-wider">
+                <span>Opacity</span>
+                <span>{(surfaceOpacity * 100).toFixed(0)}%</span>
+              </div>
+              <input 
+                type="range" min="0.1" max="1.0" step="0.05"
+                value={surfaceOpacity}
+                onChange={(e) => setSurfaceOpacity(parseFloat(e.target.value))}
+                className="w-full accent-[#4A90E2]"
+              />
             </div>
 
             <div className="h-8 w-[1px] bg-white/10"></div>
@@ -240,7 +280,7 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
             <div className="flex flex-col gap-1">
               <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider">Preset Quick Select</span>
               <div className="flex items-center gap-1">
-                {presetQueries.slice(0, 3).map(q => (
+                {presetQueries.slice(0, 4).map(q => (
                   <button
                     key={q.label}
                     onClick={() => onRunQuery(queryToSelector(q.query))}
@@ -251,6 +291,86 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* PROTEIN PREP TAB */}
+        {activeTab === "prep" && (
+          <div className="flex items-center gap-6">
+            {/* Toggles */}
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 text-xs text-white/80 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={cleaningState.solvent_stripped}
+                  onChange={(e) => setCleaningState(s => ({ ...s, solvent_stripped: e.target.checked }))}
+                  className="accent-[#4A90E2]"
+                />
+                <span>Strip Solvent (H2O)</span>
+              </label>
+
+              <label className="flex items-center gap-2 text-xs text-white/80 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={cleaningState.hydrogens_added}
+                  onChange={(e) => setCleaningState(s => ({ ...s, hydrogens_added: e.target.checked }))}
+                  className="accent-[#4A90E2]"
+                />
+                <span>Add Hydrogens</span>
+              </label>
+
+              <label className="flex items-center gap-2 text-xs text-white/80 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={cleaningState.altloc_filtered}
+                  onChange={(e) => setCleaningState(s => ({ ...s, altloc_filtered: e.target.checked }))}
+                  className="accent-[#4A90E2]"
+                />
+                <span>Filter AltLocs</span>
+              </label>
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10"></div>
+
+            {/* Secondary Structure Mode */}
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider">SS Mode</span>
+              <select
+                value={cleaningState.ss_mode}
+                onChange={(e) => setCleaningState(s => ({ ...s, ss_mode: e.target.value as any }))}
+                className="bg-white/[0.04] border border-white/10 rounded-md px-2 py-1 text-xs text-white focus:outline-none"
+              >
+                <option value="pdb" className="bg-[#0E0E12]">PDB Original</option>
+                <option value="quick" className="bg-[#0E0E12]">Quick Geometric</option>
+                <option value="dssp" className="bg-[#0E0E12]">Full DSSP Engine</option>
+              </select>
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10"></div>
+
+            {/* Bond Tolerance */}
+            <div className="flex flex-col gap-1 w-28">
+              <div className="flex justify-between text-[10px] font-mono text-white/40 uppercase tracking-wider">
+                <span>Bond Tol</span>
+                <span>{cleaningState.bond_tolerance.toFixed(2)}</span>
+              </div>
+              <input
+                type="range" min="0.8" max="1.5" step="0.05"
+                value={cleaningState.bond_tolerance}
+                onChange={(e) => setCleaningState(s => ({ ...s, bond_tolerance: parseFloat(e.target.value) }))}
+                className="w-full accent-[#4A90E2]"
+              />
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10"></div>
+
+            <button
+              onClick={onResetCleaning}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-xs"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Reset</span>
+            </button>
           </div>
         )}
 
@@ -302,10 +422,3 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
 function queryToSelector(query: string): string {
   return query;
 }
-
-// Dummy icon components for representations
-function RibbonIcon(props: any) { return <span {...props}>🎗️</span>; }
-function StickIcon(props: any) { return <span {...props}>🥢</span>; }
-function SphereIcon(props: any) { return <span {...props}>⚪</span>; }
-function SurfaceIcon(props: any) { return <span {...props}>🗻</span>; }
-function MeshIcon(props: any) { return <span {...props}>🌐</span>; }
