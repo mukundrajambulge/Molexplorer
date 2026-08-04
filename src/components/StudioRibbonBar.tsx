@@ -144,13 +144,13 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
         </div>
 
         {/* Global Quick Action Stats */}
-        <div className="flex items-center gap-4 text-[11px] font-mono text-white/50">
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-4 text-[11px] font-mono text-white/50 shrink-0 pr-2">
+          <div className="flex items-center gap-1.5 whitespace-nowrap">
             <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
             <span>Atoms: <strong className="text-white">{totalAtomCount}</strong></span>
           </div>
           {selectedAtomCount > 0 && (
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#F27D26]/20 text-[#F27D26] border border-[#F27D26]/30">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#F27D26]/20 text-[#F27D26] border border-[#F27D26]/30 whitespace-nowrap">
               <span>Selected: <strong>{selectedAtomCount}</strong></span>
               <button onClick={onClearSelection} className="hover:text-white ml-1">×</button>
             </div>

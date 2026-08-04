@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Terminal, Send, Trash2, CheckCircle2, AlertCircle, HelpCircle, ChevronRight, CornerDownLeft } from "lucide-react";
+import { Terminal, Send, Trash2, CheckCircle2, AlertCircle, HelpCircle, ChevronRight, CornerDownLeft, Minus, X } from "lucide-react";
 
 interface QueryConsoleProps {
   onRunQuery: (query: string) => void;
@@ -92,19 +92,27 @@ export const SelectionQueryConsole: React.FC<QueryConsoleProps> = ({
           <Terminal className="w-4 h-4 text-[#4A90E2]" />
           <span className="font-semibold text-white tracking-wide">PyMOL Selection Algebra Console</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-1.5 hover:bg-white/10 rounded text-white/60 hover:text-white transition-colors"
+            title="Minimize Console (-)"
+          >
+            <Minus className="w-3.5 h-3.5" />
+          </button>
           <button
             onClick={() => setLogs([])}
-            className="p-1 hover:bg-white/10 rounded text-white/50 hover:text-white transition-colors"
+            className="p-1.5 hover:bg-white/10 rounded text-white/60 hover:text-white transition-colors"
             title="Clear logs"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setIsOpen(false)}
-            className="p-1 hover:bg-white/10 rounded text-white/50 hover:text-white transition-colors font-bold"
+            className="p-1.5 hover:bg-red-500/20 rounded text-white/60 hover:text-red-400 transition-colors font-bold"
+            title="Close Console (✕)"
           >
-            ✕
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -163,8 +171,8 @@ export const SelectionQueryConsole: React.FC<QueryConsoleProps> = ({
       </div>
 
       {/* Quick Presets Bar at Bottom */}
-      <div className="px-3 py-1.5 bg-[#070709] border-t border-white/[0.06] flex items-center gap-1 overflow-x-auto text-[10px]">
-        <span className="text-white/40 mr-1">Examples:</span>
+      <div className="px-3 py-1.5 bg-[#070709] border-t border-white/[0.06] flex items-center gap-1 overflow-x-auto text-[10px] custom-scrollbar">
+        <span className="text-white/40 mr-1 shrink-0">Examples:</span>
         {[
           "byres (resn LIG around 5)",
           "chain A and resn ALA",
@@ -173,7 +181,7 @@ export const SelectionQueryConsole: React.FC<QueryConsoleProps> = ({
           <button
             key={ex}
             onClick={() => { setInputQuery(ex); handleExecute(ex); }}
-            className="px-2 py-0.5 rounded bg-white/[0.04] hover:bg-white/[0.08] text-white/70 hover:text-white border border-white/[0.06] whitespace-nowrap"
+            className="px-2 py-0.5 rounded bg-white/[0.04] hover:bg-white/[0.08] text-white/70 hover:text-white border border-white/[0.06] whitespace-nowrap shrink-0"
           >
             {ex}
           </button>

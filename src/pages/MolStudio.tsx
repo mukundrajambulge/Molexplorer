@@ -20,7 +20,7 @@ import { calculateInteractions, Interaction } from "../lib/Interactions";
 
 
 export default function MolStudio() {
-  const [isConsoleOpen, setIsConsoleOpen] = useState(true);
+  const [isConsoleOpen, setIsConsoleOpen] = useState(false);
   const {
     molData, setMolData,
     processedPDB, setProcessedPDB,
@@ -354,21 +354,6 @@ useEffect(() => {
         
         {/* Status Overlay */}
         <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-          {molData && ssData.some(d => d.confidence_or_undetermined) && (
-            <div className="bg-black/40 border border-white/10 px-3 py-2 rounded-lg backdrop-blur-md flex items-center gap-3 shadow-lg pointer-events-auto">
-              <span className="text-xs text-white/70 font-medium">SS:</span>
-              <select 
-                value={cleaningState.ss_mode}
-                onChange={(e) => setCleaningState(s => ({...s, ss_mode: e.target.value as 'pdb' | 'quick' | 'dssp'}))}
-                className="bg-transparent text-sm text-[#4A90E2] font-semibold border-none outline-none cursor-pointer p-0 appearance-none hover:text-[#5fa1ec] transition-colors"
-                style={{ WebkitAppearance: 'none' }}
-              >
-                <option value="pdb" className="bg-gray-900 text-white">PDB Original</option>
-                <option value="quick" className="bg-gray-900 text-white">Quick</option>
-                <option value="dssp" className="bg-gray-900 text-white">DSSP</option>
-              </select>
-            </div>
-          )}
           {cleaningState.hydrogens_added && (
             <div className="bg-orange-500/10 border border-orange-500/20 text-orange-400 px-3 py-1.5 rounded-lg text-xs backdrop-blur-md flex items-center gap-2 shadow-lg pointer-events-none">
               <Info size={12} />
