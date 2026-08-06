@@ -14,6 +14,9 @@ Comprehensive record of all feature implementations, bug fixes, software updates
   - Standardized the 3Dmol.js initialization, rendering loop, and background configuration across the entire application.
 
 ### 🐛 Bug Fixes & Refactoring
+- **Fixed Canvas Background Sync**: Added missing properties (`props.backgroundColor`, `props.surfaceOpacity`, `props.ssData`, `props.ssMode`, etc.) to the `useEffect` dependency array in `CoreViewer3D.tsx`, ensuring immediate canvas updates when switching background colors or toggle states.
+- **Restored Ligand & HETATM Styling**: Re-implemented standard sticks representation for organic ligands/inhibitors and red crosses for solvent water molecules inside `CoreViewer3D.tsx`.
+- **Restored Secondary Structure Overrides**: Fixed DSSP geometric mapping in `CoreViewer3D.tsx` to properly override residue helices and sheets.
 - Deprecated and removed legacy viewer files to eliminate duplicate code.
 - Reduced React re-renders by centralizing context bounds.
 
