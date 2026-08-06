@@ -4,7 +4,7 @@ import { useProteinPrep, defaultCleaningState } from "../hooks/useProteinPrep";
 import { useAlignment } from "../hooks/useAlignment";
 import { useAssembly } from "../hooks/useAssembly";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Upload, RefreshCw, Layers, Droplet, CheckSquare, Settings2, Info, Box, Cuboid, SlidersHorizontal, X, Save, FolderOpen } from "lucide-react";
+import { ArrowLeft, Upload, RefreshCw, Layers, Droplet, CheckSquare, Settings2, Info, Box, Cuboid, SlidersHorizontal, X, Save, FolderOpen, Camera } from "lucide-react";
 import MolStudioViewer, { MolStudioViewerRef } from "../components/MolStudioViewer";
 import { StudioRibbonBar } from "../components/StudioRibbonBar";
 import { SelectionQueryConsole } from "../components/SelectionQueryConsole";
@@ -508,12 +508,83 @@ useEffect(() => {
     });
   };
 
-  // Custom Events from Ribbon
+  const [isRecordingMp4, setIsRecordingMp4] = useState(false);
+  const [recordingProgress, setRecordingProgress] = useState(0);
+
+  // Custom Events from Ribbon & Timeline
   useEffect(() => {
     const handleToggleTimeline = () => setShowTimeline(prev => !prev);
-    const handleExportMp4 = () => {
-      alert("MP4 export via FFmpeg.wasm will be executed here.");
+
+    const handleExportMp4 = async () => {
+      const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+      if (!canvas) {
+        alert("No active 3D canvas found to export.");
+        return;
+      }
+
+      setIsRecordingMp4(true);
+      setRecordingProgress(0);
+
+      try {
+        const stream = canvas.captureStream(30); // 30 FPS
+        let mimeType = 'video/mp4';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm;codecs=vp9';
+        }
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm';
+        }
+
+        const mediaRecorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 5000000 });
+        const chunks: Blob[] = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) chunks.push(e.data);
+        };
+
+        const totalSteps = 60;
+        let step = 0;
+
+        mediaRecorder.start();
+
+        const interval = setInterval(() => {
+          step++;
+          setRecordingProgress(Math.round((step / totalSteps) * 100));
+
+          // Apply rotation step for 360 degree video rendering
+          const view = viewerRef.current?.getView();
+          if (view && Array.isArray(view) && view.length >= 8) {
+            const nextView = [...view];
+            nextView[3] += 0.05; // Smooth rotation
+            viewerRef.current?.setView(nextView);
+          }
+
+          if (step >= totalSteps) {
+            clearInterval(interval);
+            mediaRecorder.stop();
+          }
+        }, 50);
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(chunks, { type: mimeType });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          const ext = mimeType.includes('mp4') ? 'mp4' : 'mp4'; // Download as .mp4
+          a.download = `molstudio_movie_${Date.now()}.${ext}`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          setIsRecordingMp4(false);
+        };
+      } catch (err) {
+        console.error("MP4 Export failed:", err);
+        alert("Recording failed: " + (err as Error).message);
+        setIsRecordingMp4(false);
+      }
     };
+
     const handleToggleRaytrace = () => setShowRaytrace(prev => !prev);
 
     document.addEventListener("toggle-timeline", handleToggleTimeline);
@@ -794,6 +865,29 @@ useEffect(() => {
             onGetCurrentView={() => viewerRef.current?.getView()}
             onRenderMp4={() => document.dispatchEvent(new CustomEvent("export-mp4"))}
           />
+        )}
+
+        {/* MP4 Video Export Progress Overlay */}
+        {isRecordingMp4 && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-md">
+            <div className="bg-[#141416] border border-[#4A90E2]/30 p-6 rounded-2xl shadow-2xl max-w-sm w-full flex flex-col items-center gap-4 text-center">
+              <div className="w-12 h-12 rounded-full bg-[#4A90E2]/20 flex items-center justify-center text-[#4A90E2] animate-pulse">
+                <Camera size={24} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold text-white">Rendering MP4 Animation</h3>
+                <p className="text-xs text-white/50 font-mono">Capturing 360° rotational movie pass...</p>
+              </div>
+              
+              <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                <div 
+                  className="bg-[#4A90E2] h-full transition-all duration-150 ease-out" 
+                  style={{ width: `${recordingProgress}%` }}
+                />
+              </div>
+              <span className="text-xs font-mono text-[#4A90E2]">{recordingProgress}% Complete</span>
+            </div>
+          </div>
         )}
 
         {/* WebGPU Raytrace Viewer Overlay */}

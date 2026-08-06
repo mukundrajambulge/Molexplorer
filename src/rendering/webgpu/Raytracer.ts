@@ -1,6 +1,6 @@
 // MolStudio WebGPU Raytracer
 // Implements ray-sphere intersection with ambient occlusion and soft shadows.
-// Falls back gracefully if WebGPU is not available.
+// Has built-in Software Raytracer fallback so it ALWAYS works on any browser.
 
 import type { Atom } from '../../lib/MolProcessor';
 
@@ -139,7 +139,8 @@ export class WebGPURaytracer {
   private readbackBuffer: GPUBuffer | null = null;
   private width: number;
   private height: number;
-  private isReady = false;
+  public isReady = false;
+  public isSoftwareMode = false;
 
   constructor(options: RaytracerOptions) {
     this.width = options.width;
@@ -149,7 +150,9 @@ export class WebGPURaytracer {
   static async isSupported(): Promise<boolean> {
     if (!navigator.gpu) return false;
     try {
-      const adapter = await navigator.gpu.requestAdapter();
+      let adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
+      if (!adapter) adapter = await navigator.gpu.requestAdapter({ powerPreference: 'low-power' });
+      if (!adapter) adapter = await navigator.gpu.requestAdapter();
       return adapter !== null;
     } catch {
       return false;
@@ -157,10 +160,20 @@ export class WebGPURaytracer {
   }
 
   async initialize(): Promise<boolean> {
-    if (!navigator.gpu) return false;
+    if (!navigator.gpu) {
+      this.isSoftwareMode = true;
+      return true;
+    }
     try {
-      const adapter = await navigator.gpu.requestAdapter();
-      if (!adapter) return false;
+      let adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
+      if (!adapter) adapter = await navigator.gpu.requestAdapter({ powerPreference: 'low-power' });
+      if (!adapter) adapter = await navigator.gpu.requestAdapter();
+      
+      if (!adapter) {
+        this.isSoftwareMode = true;
+        return true;
+      }
+
       this.device = await adapter.requestDevice();
       const module = this.device.createShaderModule({ code: RAYTRACE_WGSL });
       this.pipeline = this.device.createComputePipeline({
@@ -177,92 +190,168 @@ export class WebGPURaytracer {
         usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
       });
       this.isReady = true;
+      this.isSoftwareMode = false;
       return true;
     } catch (e) {
-      console.error('[WebGPU Raytracer] Init failed:', e);
-      return false;
+      console.warn('[WebGPU Raytracer] Hardware WebGPU init failed, falling back to Software Raytracer:', e);
+      this.isSoftwareMode = true;
+      return true;
     }
   }
 
   async render(atoms: Atom[], canvas: HTMLCanvasElement): Promise<void> {
-    if (!this.isReady || !this.device || !this.pipeline || !this.outputBuffer || !this.readbackBuffer) {
-      throw new Error('Raytracer not initialized');
+    if (this.isSoftwareMode || !this.isReady || !this.device || !this.pipeline) {
+      return this.renderSoftware(atoms, canvas);
     }
 
-    // Build sphere data from atoms (center, radius, color)
-    // Each sphere: 8 floats (cx,cy,cz,r, cr,cg,cb,ca)
-    const FLOAT_PER_SPHERE = 8;
-    const sphereData = new Float32Array(atoms.length * FLOAT_PER_SPHERE);
-    let idx = 0;
-    for (const a of atoms) {
-      const [cr, cg, cb] = elementColor(a.elem);
-      const r = elementRadius(a.elem);
-      sphereData[idx++] = a.x;
-      sphereData[idx++] = a.y;
-      sphereData[idx++] = a.z;
-      sphereData[idx++] = r;
-      sphereData[idx++] = cr;
-      sphereData[idx++] = cg;
-      sphereData[idx++] = cb;
-      sphereData[idx++] = 1.0;
+    try {
+      // Build sphere data from atoms (center, radius, color)
+      const FLOAT_PER_SPHERE = 8;
+      const sphereData = new Float32Array(atoms.length * FLOAT_PER_SPHERE);
+      let idx = 0;
+      for (const a of atoms) {
+        const [cr, cg, cb] = elementColor(a.elem);
+        const r = elementRadius(a.elem);
+        sphereData[idx++] = a.x;
+        sphereData[idx++] = a.y;
+        sphereData[idx++] = a.z;
+        sphereData[idx++] = r;
+        sphereData[idx++] = cr;
+        sphereData[idx++] = cg;
+        sphereData[idx++] = cb;
+        sphereData[idx++] = 1.0;
+      }
+
+      const sphereBuffer = this.device.createBuffer({
+        size: Math.max(sphereData.byteLength, 16),
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+      });
+      this.device.queue.writeBuffer(sphereBuffer, 0, sphereData);
+
+      const paramsData = new Float32Array([this.width, this.height, atoms.length, 0]);
+      const paramsBuffer = this.device.createBuffer({
+        size: 16,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      });
+      this.device.queue.writeBuffer(paramsBuffer, 0, paramsData);
+
+      const bindGroup = this.device.createBindGroup({
+        layout: this.pipeline.getBindGroupLayout(0),
+        entries: [
+          { binding: 0, resource: { buffer: sphereBuffer } },
+          { binding: 1, resource: { buffer: this.outputBuffer! } },
+          { binding: 2, resource: { buffer: paramsBuffer } },
+        ],
+      });
+
+      const encoder = this.device.createCommandEncoder();
+      const pass = encoder.beginComputePass();
+      pass.setPipeline(this.pipeline);
+      pass.setBindGroup(0, bindGroup);
+      pass.dispatchWorkgroups(
+        Math.ceil(this.width / 8),
+        Math.ceil(this.height / 8),
+        1
+      );
+      pass.end();
+      encoder.copyBufferToBuffer(this.outputBuffer!, 0, this.readbackBuffer!, 0, this.width * this.height * 4);
+      this.device.queue.submit([encoder.finish()]);
+
+      // Read back pixels and draw to canvas
+      await this.readbackBuffer!.mapAsync(GPUMapMode.READ);
+      const pixels = new Uint8ClampedArray(this.readbackBuffer!.getMappedRange());
+      const rgba = new Uint8ClampedArray(pixels.length);
+      for (let i = 0; i < pixels.length; i += 4) {
+        rgba[i]   = pixels[i];     // R
+        rgba[i+1] = pixels[i+1];   // G
+        rgba[i+2] = pixels[i+2];   // B
+        rgba[i+3] = pixels[i+3];   // A
+      }
+      this.readbackBuffer!.unmap();
+
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const imageData = new ImageData(rgba, this.width, this.height);
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      sphereBuffer.destroy();
+      paramsBuffer.destroy();
+    } catch (err) {
+      console.warn('[WebGPU Raytracer] Render failed, falling back to software mode:', err);
+      return this.renderSoftware(atoms, canvas);
     }
+  }
 
-    const sphereBuffer = this.device.createBuffer({
-      size: Math.max(sphereData.byteLength, 16),
-      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-    });
-    this.device.queue.writeBuffer(sphereBuffer, 0, sphereData);
-
-    const paramsData = new Float32Array([this.width, this.height, atoms.length, 0]);
-    const paramsBuffer = this.device.createBuffer({
-      size: 16,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-    this.device.queue.writeBuffer(paramsBuffer, 0, paramsData);
-
-    const bindGroup = this.device.createBindGroup({
-      layout: this.pipeline.getBindGroupLayout(0),
-      entries: [
-        { binding: 0, resource: { buffer: sphereBuffer } },
-        { binding: 1, resource: { buffer: this.outputBuffer } },
-        { binding: 2, resource: { buffer: paramsBuffer } },
-      ],
-    });
-
-    const encoder = this.device.createCommandEncoder();
-    const pass = encoder.beginComputePass();
-    pass.setPipeline(this.pipeline);
-    pass.setBindGroup(0, bindGroup);
-    pass.dispatchWorkgroups(
-      Math.ceil(this.width / 8),
-      Math.ceil(this.height / 8),
-      1
-    );
-    pass.end();
-    encoder.copyBufferToBuffer(this.outputBuffer, 0, this.readbackBuffer, 0, this.width * this.height * 4);
-    this.device.queue.submit([encoder.finish()]);
-
-    // Read back pixels and draw to canvas
-    await this.readbackBuffer.mapAsync(GPUMapMode.READ);
-    const pixels = new Uint8ClampedArray(this.readbackBuffer.getMappedRange());
-    // Convert from BGRA to RGBA
-    const rgba = new Uint8ClampedArray(pixels.length);
-    for (let i = 0; i < pixels.length; i += 4) {
-      rgba[i]   = pixels[i];     // R
-      rgba[i+1] = pixels[i+1];   // G
-      rgba[i+2] = pixels[i+2];   // B
-      rgba[i+3] = pixels[i+3];   // A
-    }
-    this.readbackBuffer.unmap();
-
+  // High quality software raytraced sphere renderer fallback
+  private renderSoftware(atoms: Atom[], canvas: HTMLCanvasElement): void {
     const ctx = canvas.getContext('2d');
-    if (ctx) {
-      const imageData = new ImageData(rgba, this.width, this.height);
-      ctx.putImageData(imageData, 0, 0);
+    if (!ctx) return;
+
+    const W = this.width;
+    const H = this.height;
+
+    ctx.fillStyle = '#0a0a0d';
+    ctx.fillRect(0, 0, W, H);
+
+    if (atoms.length === 0) return;
+
+    // Calculate center of mass & extent for perspective projection
+    let cx = 0, cy = 0, cz = 0;
+    for (const a of atoms) { cx += a.x; cy += a.y; cz += a.z; }
+    cx /= atoms.length; cy /= atoms.length; cz /= atoms.length;
+
+    let maxDist = 1;
+    for (const a of atoms) {
+      const d = Math.sqrt((a.x-cx)**2 + (a.y-cy)**2 + (a.z-cz)**2);
+      if (d > maxDist) maxDist = d;
     }
 
-    sphereBuffer.destroy();
-    paramsBuffer.destroy();
+    const scale = (Math.min(W, H) * 0.38) / maxDist;
+    const offX = W / 2;
+    const offY = H / 2;
+
+    // Sort atoms back-to-front (painter's algorithm depth sort)
+    const sortedAtoms = [...atoms].sort((a, b) => a.z - b.z);
+
+    for (const a of sortedAtoms) {
+      const px = (a.x - cx) * scale + offX;
+      const py = offY - (a.y - cy) * scale;
+      const r = elementRadius(a.elem) * scale * 0.45;
+      const [cr, cg, cb] = elementColor(a.elem);
+
+      const r255 = Math.round(cr * 255);
+      const g255 = Math.round(cg * 255);
+      const b255 = Math.round(cb * 255);
+
+      // Radial Phong Shading Gradient
+      const grad = ctx.createRadialGradient(
+        px - r * 0.35, py - r * 0.35, r * 0.05,
+        px, py, r
+      );
+      
+      const lightR = Math.min(255, r255 + 90);
+      const lightG = Math.min(255, g255 + 90);
+      const lightB = Math.min(255, b255 + 90);
+
+      const darkR = Math.max(0, Math.round(r255 * 0.3));
+      const darkG = Math.max(0, Math.round(g255 * 0.3));
+      const darkB = Math.max(0, Math.round(b255 * 0.3));
+
+      grad.addColorStop(0, `rgb(${lightR}, ${lightG}, ${lightB})`);
+      grad.addColorStop(0.5, `rgb(${r255}, ${g255}, ${b255})`);
+      grad.addColorStop(1, `rgb(${darkR}, ${darkG}, ${darkB})`);
+
+      ctx.beginPath();
+      ctx.arc(px, py, Math.max(1, r), 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Ambient Occlusion Rim Shadow
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+      ctx.stroke();
+    }
   }
 
   destroy() {

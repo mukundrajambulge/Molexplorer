@@ -1,0 +1,4 @@
+{
+  "summary": "CommonJS module loader hijack in preload script to mock the 3dmol module entirely, bypassing client-side rendering crashes during Node.js testing.",
+  "updatedAt": "2026-08-04T07:27:58.048426300Z"
+}

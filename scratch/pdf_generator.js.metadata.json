@@ -1,0 +1,4 @@
+{
+  "summary": "Script that runs Puppeteer to generate a high-quality PDF of the implementation plan from the HTML file. Uses the project's Puppeteer dependency to print the page to A4 size with margins and full background graphic preservation.",
+  "updatedAt": "2026-08-04T06:33:26.991309900Z"
+}

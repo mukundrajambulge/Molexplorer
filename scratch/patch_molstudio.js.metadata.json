@@ -1,0 +1,4 @@
+{
+  "summary": "Node.js script to modify MolStudio.tsx, updating handleFetch to directly fetch structures and inserting loading state indicators.",
+  "updatedAt": "2026-08-04T09:46:37.063466800Z"
+}

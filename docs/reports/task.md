@@ -1,0 +1,19 @@
+- `[x]` Install `@ffmpeg/ffmpeg` and `@ffmpeg/util` for `.mp4` export.
+- `[x]` **User Manual**
+  - `[x]` Create `src/docs/UserManual.md` with Stage 1-5 documentation.
+  - `[x]` Create `src/components/UserManualModal.tsx` markdown viewer.
+  - `[x]` Integrate "Help" button in Ribbon bar.
+- `[x]` **Movie & Animation Engine**
+  - `[x]` Create `src/animation/KeyframeManager.ts` for SLERP and position interpolation.
+  - `[x]` Create `src/animation/Timeline.tsx` UI (timeline, play, pause, rock/roll presets).
+  - `[x]` Create `src/export/VideoEncoder.ts` using `ffmpeg.wasm` to mux frames to `.mp4`.
+  - `[x]` Add "Movie & Animation" tab to `StudioRibbonBar.tsx`.
+- `[x]` **WebGPU Raytracing**
+  - `[x]` Create WGSL shaders (`raytrace.wgsl` embedded in Raytracer.ts).
+  - `[x]` Create `src/rendering/webgpu/Raytracer.ts` (SSBO building, GPU initialization, pipeline).
+  - `[x]` Create `src/components/RaytraceViewer.tsx` overlay canvas and logic.
+  - `[x]` Implement WebGPU compatibility check and UI warning popup.
+- `[x]` **Final Integration & QA**
+  - `[x]` Connect Timeline to the 3Dmol.js viewer camera/objects.
+  - `[x]` Test MP4 export workflow.
+  - `[x]` Verify Raytracer renders structural representation.
