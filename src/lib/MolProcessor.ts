@@ -1,4 +1,8 @@
-import * as $3Dmol from '3dmol';
+// Safe non-top-level-await import for 3dmol
+let $3Dmol: any = { Parsers: { mmtf: () => [] } };
+if (typeof window !== 'undefined') {
+  import('3dmol').then(m => { $3Dmol = m.default || m; });
+}
 
 export type SSType = 'helix' | 'sheet' | 'loop' | 'undetermined';
 
@@ -39,10 +43,13 @@ export interface Atom {
   isHetero: boolean;
   bonds: number[]; // indices of bonded atoms
   isModeledH?: boolean;
+  ss?: string; // secondary structure: 'helix' | 'sheet' | 'loop'
+  bFactor?: number;
+  occupancy?: number;
 }
 
 const COVALENT_RADII: Record<string, number> = {
-  H: 0.31, C: 0.76, N: 0.71, O: 0.66, S: 1.05, P: 1.07, F: 0.57, Cl: 1.02, Br: 1.20, I: 1.39,
+  H: 0.31, C: 0.76, N: 0.71, O: 0.66, S: 1.05, P: 1.07, F: 0.57, CL: 1.02, BR: 1.20, I: 1.39,
   MG: 1.41, ZN: 1.22, FE: 1.32, CA: 1.76, NA: 1.66, K: 2.03
 };
 
@@ -67,12 +74,14 @@ function dihedral(p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3): number {
   const n1 = cross(b1, b2);
   const n2 = cross(b2, b3);
 
-  const m = cross(n1, b2);
-  
-  const x = dot(n1, n2);
-  const y = dot(m, n2) / norm(b2);
+  const b2Norm = norm(b2);
+  if (b2Norm === 0) return 0;
+  const b2Unit = { x: b2.x / b2Norm, y: b2.y / b2Norm, z: b2.z / b2Norm };
 
-  return Math.atan2(y, x) * 180 / Math.PI;
+  const x = dot(n1, n2);
+  const y = dot(cross(n1, n2), b2Unit);
+
+  return Math.atan2(-y, x) * 180 / Math.PI;
 }
 
 export function formatAtomLine(a: Atom): string {
@@ -694,6 +703,17 @@ export class MolProcessor {
             ss_type: res.ss,
             confidence_or_undetermined: res.ss !== 'undetermined'
         });
+    }
+
+    // Map computed SS back to atoms
+    for (let i = 0; i < this.atoms.length; i++) {
+        const a = this.atoms[i];
+        if (a.isHetero) continue;
+        const key = `${a.chainID}:${a.resSeq}`;
+        const res = residuesMap.get(key);
+        if (res && res.ss && res.ss !== 'undetermined') {
+            a.ss = res.ss;
+        }
     }
   }
 

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Terminal, Send, Trash2, CheckCircle2, AlertCircle, HelpCircle, ChevronRight, CornerDownLeft, Minus, X } from "lucide-react";
 
 interface QueryConsoleProps {
-  onRunQuery: (query: string) => void;
+  onRunQuery: (query: string) => string | undefined;
   selectedAtomCount: number;
   totalAtomCount: number;
   isOpen: boolean;
@@ -16,6 +16,7 @@ interface QueryLog {
   status: "success" | "error";
   timestamp: string;
   error?: string;
+  textOutput?: string;
 }
 
 export const SelectionQueryConsole: React.FC<QueryConsoleProps> = ({
@@ -47,12 +48,13 @@ export const SelectionQueryConsole: React.FC<QueryConsoleProps> = ({
     if (!q) return;
 
     try {
-      onRunQuery(q);
+      const outputText = onRunQuery(q);
       const newLog: QueryLog = {
         id: crypto.randomUUID(),
         query: q,
         count: selectedAtomCount,
         status: "success",
+        textOutput: outputText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
       };
       setLogs(prev => [...prev, newLog]);
@@ -130,9 +132,16 @@ export const SelectionQueryConsole: React.FC<QueryConsoleProps> = ({
             </div>
             
             {log.status === "success" ? (
-              <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 pl-4">
-                <CheckCircle2 className="w-3 h-3" />
-                <span>Selected <strong>{log.count}</strong> / {totalAtomCount} atoms</span>
+              <div className="flex flex-col gap-1 pl-4 text-[11px] text-emerald-400">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>Selected <strong>{log.count}</strong> / {totalAtomCount} atoms</span>
+                </div>
+                {log.textOutput && (
+                  <div className="mt-1 text-white/90 whitespace-pre-wrap bg-black/40 p-2 rounded border border-white/5 font-mono text-[10px] max-w-full overflow-x-auto leading-relaxed">
+                    {log.textOutput}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-1.5 text-[11px] text-rose-400 pl-4">

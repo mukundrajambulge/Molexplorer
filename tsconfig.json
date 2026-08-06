@@ -21,7 +21,8 @@
       ]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
+    "types": ["@webgpu/types"]
   },
   "include": ["src/**/*", "server.ts"],
   "exclude": ["node_modules", "dist", "public"]

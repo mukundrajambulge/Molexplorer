@@ -13,7 +13,7 @@ export const Header: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[#0A0A0C]/80 border-b border-white/[0.08] transition-all">
+    <header className="relative z-50 w-full backdrop-blur-xl bg-[#0A0A0C]/80 border-b border-white/[0.08] transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           

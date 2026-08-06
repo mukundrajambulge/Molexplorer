@@ -380,7 +380,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, molec
                     <div className="text-[9px] opacity-40 normal-case tracking-normal">Cartesian Coordinates</div>
                   </div>
                 </button>
-                {(molecule.format === 'pdbqt' || molecule.format === 'mol2' || molecule.format === 'cif') && (
+                {(molecule.format === 'sdf' || molecule.format === 'mol2' || molecule.format === 'cif') && (
                   <button onClick={() => {
                     const contentStr = typeof molecule.rawContent === "string" ? molecule.rawContent : new TextDecoder().decode(molecule.rawContent);
                     downloadFile(contentStr, `${molecule.name || 'molecule'}.${molecule.format}`, 'text/plain');

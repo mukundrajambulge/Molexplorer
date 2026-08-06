@@ -9,13 +9,17 @@ export function useAlignment(molData: any) {
   const [alignFetchId, setAlignFetchId] = useState("");
   const [isAlignFetching, setIsAlignFetching] = useState(false);
 
-  const handleAlignFetch = async () => {
-    if (!alignFetchId) return;
+  const handleAlignFetch = async (targetId?: string) => {
+    const idToFetch = targetId || alignFetchId;
+    if (!idToFetch) return;
     setIsAlignFetching(true);
     setAlignError("");
     setAlignmentResult(null);
     try {
-      const pdbId = alignFetchId.trim().toLowerCase();
+      const pdbId = idToFetch.trim().toLowerCase();
+      if (targetId) {
+        setAlignFetchId(targetId);
+      }
       let res = await fetch(`https://models.rcsb.org/${pdbId}.bcif`);
       if (res.ok) {
         throw new Error("BCIF not supported for alignment yet");

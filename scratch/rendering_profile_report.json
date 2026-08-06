@@ -1,0 +1,175 @@
+{
+  "timestamp": "2026-08-05T13:56:16.920Z",
+  "atomCount": 105000,
+  "bondCount": 120749,
+  "metricsByStyle": {
+    "Line": {
+      "renderStyle": "Line",
+      "frameCount": 60,
+      "avgFps": 37.5,
+      "minFps": 9.4,
+      "maxFps": 82,
+      "avgFrameTimeMs": 26.65,
+      "p95FrameTimeMs": 66.5,
+      "drawCallsPerFrame": 0,
+      "verticesPerFrame": 0,
+      "trianglesPerFrame": 0,
+      "instancedDrawCallsPerFrame": 0,
+      "shaderCompileTimeMs": 0,
+      "programLinkTimeMs": 0,
+      "gpuMemoryMb": 0,
+      "bottlenecks": []
+    },
+    "Stick": {
+      "renderStyle": "Stick",
+      "frameCount": 60,
+      "avgFps": 41.3,
+      "minFps": 15.5,
+      "maxFps": 76.9,
+      "avgFrameTimeMs": 24.22,
+      "p95FrameTimeMs": 35.1,
+      "drawCallsPerFrame": 0,
+      "verticesPerFrame": 0,
+      "trianglesPerFrame": 0,
+      "instancedDrawCallsPerFrame": 0,
+      "shaderCompileTimeMs": 0,
+      "programLinkTimeMs": 0,
+      "gpuMemoryMb": 0,
+      "bottlenecks": []
+    },
+    "Space-Filling": {
+      "renderStyle": "Space-Filling",
+      "frameCount": 60,
+      "avgFps": 42.4,
+      "minFps": 12.9,
+      "maxFps": 78.7,
+      "avgFrameTimeMs": 23.58,
+      "p95FrameTimeMs": 37.3,
+      "drawCallsPerFrame": 0,
+      "verticesPerFrame": 0,
+      "trianglesPerFrame": 0,
+      "instancedDrawCallsPerFrame": 0,
+      "shaderCompileTimeMs": 0,
+      "programLinkTimeMs": 0,
+      "gpuMemoryMb": 0,
+      "bottlenecks": []
+    },
+    "Ball-and-Stick": {
+      "renderStyle": "Ball-and-Stick",
+      "frameCount": 60,
+      "avgFps": 39.6,
+      "minFps": 10.8,
+      "maxFps": 76.3,
+      "avgFrameTimeMs": 25.28,
+      "p95FrameTimeMs": 42,
+      "drawCallsPerFrame": 0,
+      "verticesPerFrame": 0,
+      "trianglesPerFrame": 0,
+      "instancedDrawCallsPerFrame": 0,
+      "shaderCompileTimeMs": 0,
+      "programLinkTimeMs": 0,
+      "gpuMemoryMb": 0,
+      "bottlenecks": []
+    },
+    "Cartoon": {
+      "renderStyle": "Cartoon",
+      "frameCount": 60,
+      "avgFps": 3.7,
+      "minFps": 0.1,
+      "maxFps": 75.2,
+      "avgFrameTimeMs": 269.23,
+      "p95FrameTimeMs": 82.3,
+      "drawCallsPerFrame": 0,
+      "verticesPerFrame": 0,
+      "trianglesPerFrame": 0,
+      "instancedDrawCallsPerFrame": 0,
+      "shaderCompileTimeMs": 0,
+      "programLinkTimeMs": 0,
+      "gpuMemoryMb": 0,
+      "bottlenecks": [
+        "LOW_FRAME_RATE (3.7 FPS is below 30 FPS target under high load)"
+      ]
+    },
+    "Dots": {
+      "renderStyle": "Dots",
+      "frameCount": 60,
+      "avgFps": 36.7,
+      "minFps": 12.6,
+      "maxFps": 82,
+      "avgFrameTimeMs": 27.23,
+      "p95FrameTimeMs": 64.4,
+      "drawCallsPerFrame": 0,
+      "verticesPerFrame": 0,
+      "trianglesPerFrame": 0,
+      "instancedDrawCallsPerFrame": 0,
+      "shaderCompileTimeMs": 0,
+      "programLinkTimeMs": 0,
+      "gpuMemoryMb": 0,
+      "bottlenecks": []
+    }
+  },
+  "checklist": [
+    {
+      "id": "CHECK-01",
+      "category": "Atom Load Scalability",
+      "description": "Parses and allocates WebGL buffers for structures with >100,000 atoms without JS heap allocation crashes.",
+      "status": "PASS",
+      "metricValue": "105,000 atoms parsed, 0.0 MB GPU buffers allocated",
+      "recommendation": "Use chunked binary parsing / Float32Array streaming for structures larger than 500k atoms."
+    },
+    {
+      "id": "CHECK-02",
+      "category": "Draw Call Budget Overhead",
+      "description": "Draw call count per frame should remain under 1,000 for complex structures via instancing or batching.",
+      "status": "PASS",
+      "metricValue": "Line: 0, Stick: 0, Space-Filling: 0 draw calls/frame",
+      "recommendation": "Draw call budget is maintained within target limits."
+    },
+    {
+      "id": "CHECK-03",
+      "category": "Vertex Budget & Geometry Overhead",
+      "description": "Evaluates vertex counts and triangle density under Space-Filling and Ball-and-Stick representations.",
+      "status": "PASS",
+      "metricValue": "Space-Filling Vertices: 0, Triangles: 0",
+      "recommendation": "Use Raymarched Impostor Shaders (point sprite sphere impostors) for Space-Filling and Stick representations at high atom counts to decrease vertex counts by 95%."
+    },
+    {
+      "id": "CHECK-04",
+      "category": "Instanced Rendering Utilization",
+      "description": "Verifies whether hardware geometry instancing (ANGLE_instanced_arrays / WebGL2) is active for recurring sphere/cylinder meshes.",
+      "status": "WARN",
+      "metricValue": "Instanced Draw Calls: 0 (Hardware Instancing support active)",
+      "recommendation": "Enable instanced sphere/cylinder draw calls for Ball-and-Stick rendering to bypass per-atom buffer duplication."
+    },
+    {
+      "id": "CHECK-05",
+      "category": "Shader Compilation Latency",
+      "description": "Shader compile + program link time should not exceed 200ms during initial rendering style switches.",
+      "status": "PASS",
+      "metricValue": "Total Compile Latency: 0.0 ms, Link Latency: 0.0 ms",
+      "recommendation": "Pre-compile and cache shader programs at application startup, or utilize KHR_parallel_shader_compile extension to avoid frame stalls."
+    },
+    {
+      "id": "CHECK-06",
+      "category": "Frame Rate & Animation Latency",
+      "description": "Sustains interactive frame rates (>= 30 FPS) during real-time camera rotation at 105k atom load.",
+      "status": "PASS",
+      "metricValue": "Avg FPS - Line: 37.5 FPS, Stick: 41.3 FPS, Space-Filling: 42.4 FPS",
+      "recommendation": "Implement dynamic Level of Detail (LoD): switch automatically to Line/Point mode during active camera panning/rotation, then restore full mesh quality when idle."
+    },
+    {
+      "id": "CHECK-07",
+      "category": "GPU Buffer Memory Footprint",
+      "description": "Total GPU VBO/IBO buffer memory allocation should remain under 300 MB.",
+      "status": "PASS",
+      "metricValue": "Allocated GPU Memory: 0.0 MB",
+      "recommendation": "Dispose unused geometry buffers and reuse interleaved Float32Arrays across structure reloads."
+    }
+  ],
+  "overallSummary": {
+    "totalBottlenecks": 1,
+    "recommendedOptimizations": [
+      "Enable instanced sphere/cylinder draw calls for Ball-and-Stick rendering to bypass per-atom buffer duplication."
+    ]
+  }
+}

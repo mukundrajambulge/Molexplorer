@@ -109,8 +109,10 @@ export type RenderStyle =
   | "Mesh" 
   | "Dots" 
   | "Non-bonded (small spheres)"
+  | "Non-bonded (crosses)"
   | "Dot Surface" 
-  | "Cartoon";
+  | "Cartoon"
+  | "Putty";
 
 export type ColorTheme = 
   | "Classic CPK" 

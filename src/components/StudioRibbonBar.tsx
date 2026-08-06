@@ -21,11 +21,9 @@ interface StudioRibbonBarProps {
   onClearSelection: () => void;
   selectedAtomCount: number;
   totalAtomCount: number;
-  isDocking: boolean;
-  onStartDocking: () => void;
-  onAutoSuggestBox: () => void;
   onAlignFetch: (id: string) => void;
   onSaveSession: () => void;
+  onToggleHelp: () => void;
   
   // Protein Prep Props
   cleaningState: {
@@ -43,6 +41,24 @@ interface StudioRibbonBarProps {
     ss_mode: 'pdb' | 'quick' | 'dssp';
   }>>;
   onResetCleaning: () => void;
+
+  // Biophysical Validation Props
+  showDipoleArrow: boolean;
+  setShowDipoleArrow: (val: boolean) => void;
+  dipoleMoment: {
+    charge: number;
+    magnitude: number;
+    vector: { x: number; y: number; z: number };
+    com: { x: number; y: number; z: number };
+  } | null;
+  isValidationOpen: boolean;
+  setIsValidationOpen: (val: boolean) => void;
+
+  // Measurement Wizard Props
+  activeMeasurementMode: "distance" | "angle" | "dihedral" | "label" | null;
+  setMeasurementMode: (mode: "distance" | "angle" | "dihedral" | "label" | null) => void;
+  clearMeasurements: () => void;
+  measurements: any[];
 }
 
 export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
@@ -60,43 +76,59 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
   onClearSelection,
   selectedAtomCount,
   totalAtomCount,
-  isDocking,
-  onStartDocking,
-  onAutoSuggestBox,
   onAlignFetch,
   onSaveSession,
+  onToggleHelp,
   cleaningState,
   setCleaningState,
-  onResetCleaning
+  onResetCleaning,
+  showDipoleArrow,
+  setShowDipoleArrow,
+  dipoleMoment,
+  isValidationOpen,
+  setIsValidationOpen,
+  activeMeasurementMode,
+  setMeasurementMode,
+  clearMeasurements,
+  measurements
 }) => {
-  const [activeTab, setActiveTab] = useState<"file" | "display" | "select" | "prep" | "docking" | "align">("display");
+  const [activeTab, setActiveTab] = useState<"file" | "display" | "select" | "prep" | "align" | "analysis" | "movie">("display");
   const [pdbInput, setPdbInput] = useState("");
   const [alignInput, setAlignInput] = useState("");
 
   const representations: { id: RenderStyle; label: string }[] = [
     { id: "Line", label: "Line" },
     { id: "Stick", label: "Stick" },
-    { id: "Ball-and-Stick", label: "Ball & Stick" },
-    { id: "Space-Filling", label: "Space-Filling (CPK)" },
-    { id: "Cartoon", label: "Cartoon" },
-    { id: "Van der Waals Surface", label: "VDW Surface" },
-    { id: "Solvent-Accessible Surface", label: "Solvent Accessible" },
-    { id: "Solvent-Excluded Surface", label: "Solvent Excluded" },
+    { id: "Ball-and-Stick", label: "Ball-and-Stick" },
+    { id: "Space-Filling", label: "Space-Filling" },
+    { id: "Van der Waals Surface", label: "Van der Waals Surface" },
+    { id: "Solvent-Accessible Surface", label: "Solvent-Accessible Surface" },
+    { id: "Solvent-Excluded Surface", label: "Solvent-Excluded Surface" },
     { id: "Mesh", label: "Mesh" },
     { id: "Dots", label: "Dots" },
     { id: "Dot Surface", label: "Dot Surface" },
-    { id: "Non-bonded (small spheres)", label: "Non-bonded Spheres" }
+    { id: "Cartoon", label: "Cartoon" },
+    { id: "Putty", label: "Putty" },
+    { id: "Non-bonded (crosses)", label: "Non-bonded (crosses)" },
+    { id: "Non-bonded (small spheres)", label: "Non-bonded (spheres)" }
   ];
 
   const colorSchemes = [
-    { id: "spectrum", label: "Rainbow Spectrum" },
-    { id: "rainbow", label: "Rainbow" },
+    { id: "Classic CPK", label: "Classic CPK" },
+    { id: "Modern/Jmol", label: "Modern/Jmol" },
+    { id: "By Molecule", label: "By Molecule" },
+    { id: "By Formal Charge", label: "By Formal Charge" },
+    { id: "By Partial Charge", label: "By Partial Charge" },
+    { id: "ESP", label: "ESP" },
+    { id: "Hydrophobicity", label: "Hydrophobicity" },
+    { id: "Rainbow", label: "Rainbow" },
+    { id: "Monochrome", label: "Monochrome" },
+    { id: "Colourblind-safe", label: "Colourblind-safe" },
     { id: "ssPyMol", label: "Secondary Structure (PyMOL)" },
     { id: "ssJmol", label: "Secondary Structure (Jmol)" },
     { id: "chain", label: "By Chain" },
     { id: "element", label: "By Element (CPK)" },
-    { id: "white", label: "White" },
-    { id: "b_factor", label: "B-Factor Heatmap" }
+    { id: "white", label: "White" }
   ];
 
   const presetQueries = [
@@ -125,8 +157,9 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
               { id: "display", label: "Display & Render" },
               { id: "select", label: "Selection & Query" },
               { id: "prep", label: "Protein Prep" },
-              { id: "docking", label: "Molecular Docking" },
-              { id: "align", label: "Structural Alignment" }
+              { id: "align", label: "Structural Alignment" },
+              { id: "analysis", label: "Structure Analysis" },
+              { id: "movie", label: "Movie & Animation" }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -145,6 +178,13 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
 
         {/* Global Quick Action Stats */}
         <div className="flex items-center gap-4 text-[11px] font-mono text-white/50 shrink-0 pr-2">
+          <button 
+            onClick={onToggleHelp}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#F27D26]/10 hover:bg-[#F27D26]/20 text-[#F27D26] border border-[#F27D26]/20 transition-all font-sans cursor-pointer"
+          >
+            <HelpCircle className="w-3.5 h-3.5" />
+            <span>Science & FAQ</span>
+          </button>
           <div className="flex items-center gap-1.5 whitespace-nowrap">
             <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
             <span>Atoms: <strong className="text-white">{totalAtomCount}</strong></span>
@@ -374,27 +414,7 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
           </div>
         )}
 
-        {/* DOCKING TAB */}
-        {activeTab === "docking" && (
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onAutoSuggestBox}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-xs"
-            >
-              <Box className="w-4 h-4 text-[#F27D26]" />
-              <span>Auto-Detect Grid Box</span>
-            </button>
 
-            <button
-              onClick={onStartDocking}
-              disabled={isDocking}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#F27D26] to-[#E85D04] hover:from-[#f48434] hover:to-[#f16712] text-white text-xs font-medium shadow-lg shadow-[#F27D26]/20 disabled:opacity-50"
-            >
-              <Zap className="w-4 h-4" />
-              <span>{isDocking ? "Running Docking..." : "Launch Docking Engine"}</span>
-            </button>
-          </div>
-        )}
 
         {/* ALIGNMENT TAB */}
         {activeTab === "align" && (
@@ -411,6 +431,133 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
                 Superimpose (Kabsch RMSD)
               </button>
             </form>
+          </div>
+        )}
+
+        {/* STRUCTURE ANALYSIS TAB */}
+        {activeTab === "analysis" && (
+          <div className="flex items-center gap-6">
+            {/* Measurement Wizard Block */}
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col gap-1">
+                <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider">Measure Mode</span>
+                <div className="flex items-center gap-1">
+                  {(['distance', 'angle', 'dihedral', 'label'] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => setMeasurementMode(activeMeasurementMode === mode ? null : mode)}
+                      className={`px-2 py-1 rounded text-[11px] font-medium transition-all capitalize cursor-pointer ${
+                        activeMeasurementMode === mode
+                          ? "bg-[#4A90E2] text-white font-semibold"
+                          : "bg-white/[0.04] text-white/60 hover:bg-white/[0.08] hover:text-white"
+                      }`}
+                    >
+                      {mode === 'dihedral' ? 'Dihed' : mode}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {measurements.length > 0 && (
+                <div className="flex flex-col gap-1">
+                  <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider">Actions</span>
+                  <button
+                    onClick={clearMeasurements}
+                    className="px-2 py-1 text-[10px] font-mono bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded transition-all border border-rose-500/20 cursor-pointer"
+                  >
+                    Clear ({measurements.length})
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10"></div>
+
+            {/* Biophysical Validation Block */}
+            <div className="flex items-center gap-5">
+              <div className="flex flex-col gap-1">
+                <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider">Biophysical Options</span>
+                <div className="flex items-center gap-4 h-6">
+                  <label className="flex items-center gap-2 text-xs text-white/80 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={showDipoleArrow}
+                      onChange={(e) => setShowDipoleArrow(e.target.checked)}
+                      className="accent-[#4A90E2] cursor-pointer"
+                    />
+                    <span>Show Dipole Arrow</span>
+                  </label>
+
+                  {dipoleMoment !== null && (
+                    <div className="flex items-center gap-1.5 text-xs text-white/60 font-mono">
+                      <span>Dipole:</span>
+                      <strong className="text-white bg-white/10 px-1.5 py-0.5 rounded font-mono">
+                        {dipoleMoment.magnitude.toFixed(1)} D
+                      </strong>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="h-8 w-[1px] bg-white/10"></div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider">Validation Details</span>
+                <button
+                  onClick={() => setIsValidationOpen(!isValidationOpen)}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-[11px] h-6 cursor-pointer"
+                >
+                  <SlidersHorizontal className="w-3 h-3 text-[#4A90E2]" />
+                  <span>{isValidationOpen ? "Close Panel" : "Open Panel"}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MOVIE & ANIMATION TAB */}
+        {activeTab === "movie" && (
+          <div className="flex items-center gap-6">
+            <div className="flex flex-col gap-1">
+              <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider">Animation Timeline</span>
+              <div className="flex items-center gap-2">
+                <button
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#4A90E2]/20 hover:bg-[#4A90E2]/40 text-[#4A90E2] text-[11px] font-semibold cursor-pointer border border-[#4A90E2]/30 transition-all"
+                  onClick={() => document.dispatchEvent(new CustomEvent("toggle-timeline"))}
+                >
+                  Toggle Timeline UI
+                </button>
+              </div>
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10"></div>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider">Export</span>
+              <div className="flex items-center gap-2">
+                <button
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-[11px] font-semibold cursor-pointer border border-amber-500/20 transition-all"
+                  onClick={() => document.dispatchEvent(new CustomEvent("export-mp4"))}
+                >
+                  Export MP4 (FFmpeg)
+                </button>
+              </div>
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10"></div>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider">Experimental</span>
+              <div className="flex items-center gap-2">
+                <button
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[11px] font-semibold cursor-pointer border border-emerald-500/20 transition-all"
+                  onClick={() => document.dispatchEvent(new CustomEvent("toggle-raytrace"))}
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                  WebGPU Raytrace
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

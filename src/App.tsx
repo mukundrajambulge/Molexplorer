@@ -9,6 +9,20 @@ import ErrorBoundary from "./components/ErrorBoundary";
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const isWorkspace = location.pathname === "/molexplorer" || location.pathname === "/molstudio";
+
+  if (isWorkspace) {
+    return (
+      <div className="flex flex-col h-screen w-screen overflow-y-auto scroll-smooth bg-[#0A0A0C] text-[#F0F0F0] selection:bg-[#F27D26]/30 selection:text-white">
+        <Header />
+        <main className="h-screen w-full flex-shrink-0 overflow-hidden relative flex flex-col">
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen font-sans bg-[#0A0A0C] text-[#F0F0F0] selection:bg-[#F27D26]/30 selection:text-white">
