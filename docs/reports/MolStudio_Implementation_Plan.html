@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MolStudio vs PyMOL — Complete Gap Analysis & Implementation Plan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #ffffff;
+    --text: #1a1a2e;
+    --text-secondary: #4a4a6a;
+    --border: #e2e8f0;
+    --accent: #4f46e5;
+    --accent-light: #eef2ff;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--bg);
+    padding: 40px 50px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+  }
+
+  h1 + h2 {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 30px;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--accent);
+    page-break-after: avoid;
+  }
+
+  h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 20px;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+  }
+
+  h4 { font-size: 12px; font-weight: 600; margin-top: 14px; margin-bottom: 6px; }
+
+  p { margin-bottom: 8px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 16px 0;
+    font-size: 10.5px;
+    page-break-inside: avoid;
+  }
+
+  thead th {
+    background: #f1f5f9;
+    font-weight: 600;
+    text-align: left;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--text-secondary);
+  }
+
+  tbody td {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tbody tr:nth-child(even) { background: #f8fafc; }
+  tbody tr:hover { background: #f1f5f9; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    background: #f1f5f9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: #d63384;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  .alert {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 12px 0;
+    font-size: 11px;
+    page-break-inside: avoid;
+  }
+
+  .alert-important {
+    background: #eef2ff;
+    border-left: 4px solid var(--accent);
+    color: #3730a3;
+  }
+
+  .alert-tip {
+    background: #ecfdf5;
+    border-left: 4px solid var(--success);
+    color: #065f46;
+  }
+
+  .alert-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-done { background: #d1fae5; color: #065f46; }
+  .badge-missing { background: #fee2e2; color: #991b1b; }
+  .badge-partial { background: #fef3c7; color: #92400e; }
+  .badge-high { background: #fee2e2; color: #991b1b; }
+  .badge-medium { background: #fef3c7; color: #92400e; }
+  .badge-low { background: #e0e7ff; color: #3730a3; }
+
+  .formula {
+    font-family: 'JetBrains Mono', monospace;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 6px;
+    margin: 8px 0;
+    font-size: 11px;
+    text-align: center;
+    display: block;
+  }
+
+  .priority-matrix td:first-child {
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .cover-page {
+    text-align: center;
+    padding: 120px 0 60px 0;
+    page-break-after: always;
+  }
+
+  .cover-page h1 {
+    font-size: 36px;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .cover-page .subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+
+  .cover-page .meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 60px;
+  }
+
+  .cover-page .meta strong { color: var(--text); }
+
+  .cover-page .logo {
+    font-size: 48px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+
+  .stage-header {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin: 24px 0 14px 0;
+    page-break-after: avoid;
+  }
+
+  .stage-header h2 {
+    color: white;
+    border-bottom: none;
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+  }
+
+  .stage-header .stage-sub {
+    font-size: 11px;
+    opacity: 0.85;
+    font-weight: 300;
+  }
+
+  .toc {
+    padding: 20px 0;
+    page-break-after: always;
+  }
+
+  .toc h2 { font-size: 20px; }
+
+  .toc ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .toc li {
+    padding: 6px 0;
+    border-bottom: 1px dotted var(--border);
+    font-size: 12px;
+  }
+
+  .toc li a { color: var(--text); font-weight: 500; }
+  .toc li .page { float: right; color: var(--text-secondary); }
+
+  strong { font-weight: 600; }
+
+  @media print {
+    body { padding: 20px 30px; font-size: 10px; }
+    .stage-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    thead th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .alert { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .cover-page .logo { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    table { page-break-inside: auto; }
+    tr { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover-page">
+  <div class="logo">MolStudio</div>
+  <h1>Complete Gap Analysis &<br>Implementation Plan</h1>
+  <div class="subtitle">MolStudio vs PyMOL — Science + Engineering + Architecture</div>
+  <div class="subtitle" style="font-size:13px; margin-top:30px;">Every Feature. Every Equation. Every Citation.</div>
+  <div class="meta">
+    <p><strong>Document Type:</strong> Technical Implementation Plan</p>
+    <p><strong>Version:</strong> 1.0</p>
+    <p><strong>Date:</strong> August 4, 2026</p>
+    <p><strong>Classification:</strong> Internal — Engineering Team</p>
+    <p style="margin-top:30px;"><strong>Goal:</strong> Achieve industry-grade parity with PyMOL, backed by<br>peer-reviewed science and traceable to 24+ research paper citations.</p>
+  </div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ul>
+    <li><a href="#summary">Executive Summary</a></li>
+    <li><a href="#stage1">Stage 1: Foundation Corrections (Week 1–2)</a></li>
+    <li style="padding-left:20px; border-bottom:none;font-size:11px;color:#666;">1.1 H-Bond Angle Fix · 1.2 Missing Interactions · 1.3 Alignment Outlier Rejection · 1.4 NW Scoring</li>
+    <li><a href="#stage2">Stage 2: Selection Engine Parity (Week 2–3)</a></li>
+    <li style="padding-left:20px; border-bottom:none;font-size:11px;color:#666;">Full inventory of 45 selection keywords — 33 missing</li>
+    <li><a href="#stage3">Stage 3: Measurement & Label System (Week 3–4)</a></li>
+    <li style="padding-left:20px; border-bottom:none;font-size:11px;color:#666;">Distance · Angle · Dihedral · Labels</li>
+    <li><a href="#stage4">Stage 4: Representation & Rendering (Week 4–6)</a></li>
+    <li style="padding-left:20px; border-bottom:none;font-size:11px;color:#666;">14 representations · 12 color schemes · Unit cell · Putty</li>
+    <li><a href="#stage5">Stage 5: Electrostatics & Protein Prep (Week 6–8)</a></li>
+    <li style="padding-left:20px; border-bottom:none;font-size:11px;color:#666;">ESP · Gasteiger charges · Ramachandran · Protein prep</li>
+    <li><a href="#stage6">Stage 6: Advanced Analysis (Week 8–12)</a></li>
+    <li style="padding-left:20px; border-bottom:none;font-size:11px;color:#666;">super/cealign · Mutagenesis wizard · Electron density</li>
+    <li><a href="#stage7">Stage 7: Animation, Scripting & Export (Week 12–16)</a></li>
+    <li style="padding-left:20px; border-bottom:none;font-size:11px;color:#666;">Multi-state · Morphing · Command interpreter · Formats</li>
+    <li><a href="#stage8">Stage 8: Ray Tracing & Publication Quality (Week 16–20)</a></li>
+    <li style="padding-left:20px; border-bottom:none;font-size:11px;color:#666;">SSAO · Fog · High-res export</li>
+    <li><a href="#priority">Implementation Priority Matrix</a></li>
+    <li><a href="#arch">Architecture: Where Science Runs</a></li>
+    <li><a href="#cred">Scientific Credibility Checklist</a></li>
+  </ul>
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+<h2 id="summary">Executive Summary</h2>
+
+<div class="alert alert-important">
+  <span class="alert-label">Important</span>
+  This document maps <strong>every feature</strong> in PyMOL against our MolStudio implementation, identifies gaps, and provides a staged plan to achieve industry-grade parity. Each feature is traced to its scientific foundation with research paper citations.
+</div>
+
+<table>
+  <thead>
+    <tr><th>Metric</th><th>MolStudio (Current)</th><th>PyMOL</th><th>Gap</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Representation Modes</td><td>11</td><td>14</td><td><span class="badge badge-partial">3 missing</span></td></tr>
+    <tr><td>Color Schemes</td><td>8</td><td>12+</td><td><span class="badge badge-partial">4+ missing</span></td></tr>
+    <tr><td>Selection Keywords</td><td>~12</td><td>45+</td><td><span class="badge badge-missing">33+ missing</span></td></tr>
+    <tr><td>Interaction Types Detected</td><td>2 (H-bond, Hydrophobic)</td><td>6+</td><td><span class="badge badge-missing">4+ missing</span></td></tr>
+    <tr><td>Surface Algorithms</td><td>3Dmol.js built-in</td><td>MSMS / Marching Cubes</td><td><span class="badge badge-partial">Need validation</span></td></tr>
+    <tr><td>Electrostatics</td><td>❌ None</td><td>APBS + Vacuum ESP</td><td><span class="badge badge-missing">Critical gap</span></td></tr>
+    <tr><td>Measurements</td><td>❌ None</td><td>Distance, Angle, Dihedral</td><td><span class="badge badge-missing">Critical gap</span></td></tr>
+    <tr><td>Alignment Methods</td><td>1 (align-like)</td><td>3 (align, super, cealign)</td><td><span class="badge badge-partial">2 missing</span></td></tr>
+    <tr><td>Movie/Animation</td><td>❌ None</td><td>Full movie system</td><td><span class="badge badge-missing">Major gap</span></td></tr>
+    <tr><td>Ray Tracing</td><td>❌ None</td><td>Built-in CPU ray tracer</td><td><span class="badge badge-missing">Major gap</span></td></tr>
+    <tr><td>Mutagenesis</td><td>❌ None</td><td>Rotamer wizard</td><td><span class="badge badge-missing">Major gap</span></td></tr>
+    <tr><td>Scripting/API</td><td>❌ None</td><td>Full Python API</td><td><span class="badge badge-missing">Major gap</span></td></tr>
+    <tr><td>Labels</td><td>❌ None</td><td>Full label system</td><td><span class="badge badge-partial">Gap</span></td></tr>
+    <tr><td>Electron Density Maps</td><td>❌ None</td><td>isomesh/isosurface</td><td><span class="badge badge-partial">Gap</span></td></tr>
+  </tbody>
+</table>
+
+<!-- STAGE 1 -->
+<div class="stage-header" id="stage1">
+  <h2>Stage 1: Foundation Corrections</h2>
+  <div class="stage-sub">Week 1–2 · Fix Scientific Accuracy of Existing Features</div>
+</div>
+
+<p>These are bugs and inaccuracies in code we already have. Must fix <em>before</em> adding new features.</p>
+
+<h3>1.1 Hydrogen Bond Detection — Add Angle Criterion</h3>
+
+<table>
+  <thead><tr><th style="width:140px;">Aspect</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Current Code</strong></td><td><code>Interactions.ts</code> checks only distance: 2.5Å ≤ d ≤ 3.5Å between N/O/S atoms</td></tr>
+    <tr><td><strong>Problem</strong></td><td>No angle check. A backbone N near a carbonyl O at 90° is NOT a hydrogen bond — it's a steric contact. This produces <strong>massive false positives</strong>.</td></tr>
+    <tr><td><strong>PyMOL</strong></td><td>Uses both distance (≤ 3.2Å D···A) AND angle (≥ 120° D–H···A)</td></tr>
+    <tr><td><strong>Science</strong></td><td>Baker & Hubbard (1984) DOI: <a href="https://doi.org/10.1016/0079-6107(84)90007-5">10.1016/0079-6107(84)90007-5</a></td></tr>
+    <tr><td><strong>Fix</strong></td><td>Add D–H···A angle calculation. If H position unknown, estimate from D–H vector using VSEPR geometry. Require angle ≥ 120°.</td></tr>
+    <tr><td><strong>Implementation</strong></td><td>In <code>Interactions.ts</code>, after distance check, compute angle using <code>atan2</code> of cross/dot products between D→H and H→A vectors</td></tr>
+  </tbody>
+</table>
+
+<h3>1.2 Add Missing Interaction Types</h3>
+
+<table>
+  <thead><tr><th>Interaction</th><th>Distance Cutoff</th><th>Angle/Geometry</th><th>Science</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Salt Bridge</strong></td><td>N⁺···O⁻ ≤ 4.0Å</td><td>Charged N (Lys/Arg) ↔ Charged O (Asp/Glu)</td><td>Coulomb attraction at biological pH</td><td><span class="badge badge-missing">Missing</span></td></tr>
+    <tr><td><strong>π–π Stacking</strong></td><td>Centroid 3.3–5.5Å</td><td>Normal angle &lt;30° (parallel) or 60–90° (T-shaped)</td><td>Hunter & Sanders (1990) DOI: <a href="https://doi.org/10.1021/ja00170a016">10.1021/ja00170a016</a></td><td><span class="badge badge-partial">Stubbed</span></td></tr>
+    <tr><td><strong>Cation–π</strong></td><td>Cation to ring ≤ 6.0Å</td><td>Cation above ring face</td><td>Dougherty (1996) DOI: <a href="https://doi.org/10.1126/science.271.5246.163">10.1126/science.271.5246.163</a></td><td><span class="badge badge-missing">Missing</span></td></tr>
+    <tr><td><strong>Halogen Bond</strong></td><td>C–X···O/N/S ≤ 3.5Å</td><td>C–X···A angle 140–180°</td><td>σ-hole electrostatic interaction</td><td><span class="badge badge-missing">Missing</span></td></tr>
+  </tbody>
+</table>
+
+<p><strong>Implementation:</strong> Create ring detection (DFS cycle search on bonded graph), compute ring centroids and normal vectors, then apply geometric filters.</p>
+
+<h3>1.3 Fix Alignment — Add Iterative Outlier Rejection</h3>
+
+<table>
+  <thead><tr><th style="width:140px;">Aspect</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Current Code</strong></td><td><code>Alignment.ts</code> does single-pass Kabsch on all matched Cα pairs</td></tr>
+    <tr><td><strong>Problem</strong></td><td>Flexible loops heavily skew RMSD. PyMOL's <code>align</code> iteratively removes pairs with d &gt; 2σ from the mean</td></tr>
+    <tr><td><strong>PyMOL</strong></td><td><code>align</code>: 5 cycles of outlier rejection (default <code>cycles=5</code>, <code>cutoff=2.0</code> sigma)</td></tr>
+    <tr><td><strong>Science</strong></td><td>Kabsch (1976) DOI: <a href="https://doi.org/10.1107/S0567739476001873">10.1107/S0567739476001873</a></td></tr>
+    <tr><td><strong>Fix</strong></td><td>After initial Kabsch, compute per-pair distances. Remove pairs where d<sub>i</sub> &gt; d̄ + 2σ. Repeat Kabsch. Iterate 5 times.</td></tr>
+  </tbody>
+</table>
+
+<h3>1.4 Fix Needleman-Wunsch Scoring Matrix</h3>
+
+<table>
+  <thead><tr><th style="width:140px;">Aspect</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Current Code</strong></td><td>Match=1, Mismatch=−1, Gap=−1 (trivial scoring)</td></tr>
+    <tr><td><strong>Problem</strong></td><td>Doesn't account for amino acid similarity. Leu↔Ile substitution should score higher than Leu↔Asp.</td></tr>
+    <tr><td><strong>Fix</strong></td><td>Replace with <strong>BLOSUM62</strong> substitution matrix. Add affine gap penalties (gap open=−10, gap extend=−1).</td></tr>
+  </tbody>
+</table>
+
+<!-- STAGE 2 -->
+<div class="stage-header" id="stage2">
+  <h2>Stage 2: Selection Engine Parity</h2>
+  <div class="stage-sub">Week 2–3 · Complete the PyMOL Selection Algebra</div>
+</div>
+
+<p>Our <code>SelectionParser.ts</code> currently supports ~12 keywords. PyMOL has 45+. <strong>Current coverage: 27%.</strong> Must reach 90%+ for industry grade.</p>
+
+<h3>2.1 Missing Selection Keywords — Full Inventory</h3>
+
+<table>
+  <thead><tr><th>Keyword</th><th>What It Selects</th><th>PyMOL</th><th>MolStudio</th><th>Priority</th><th>Implementation</th></tr></thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>Atom name (CA, CB, N, O)</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Done</span></td><td>—</td></tr>
+    <tr><td><code>resn</code></td><td>Residue name (ALA, GLY)</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Done</span></td><td>—</td></tr>
+    <tr><td><code>resi</code></td><td>Residue index (1-10, 50+100)</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Done</span></td><td>—</td></tr>
+    <tr><td><code>chain</code></td><td>Chain ID (A, B)</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Done</span></td><td>—</td></tr>
+    <tr><td><code>elem</code></td><td>Element symbol (C, N, O)</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Done</span></td><td>—</td></tr>
+    <tr><td><code>ss</code></td><td>Secondary structure (H, S, L)</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Done</span></td><td>—</td></tr>
+    <tr><td><code>b</code></td><td>B-factor range (<code>b &gt; 40</code>)</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td><td>Add numeric comparison in parser</td></tr>
+    <tr><td><code>q</code></td><td>Occupancy (<code>q &lt; 1.0</code>)</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td><td>Add occupancy to Atom type</td></tr>
+    <tr><td><code>alt</code></td><td>Alternate conformer (A, B)</td><td>✅</td><td>❌</td><td><span class="badge badge-medium">Medium</span></td><td>Filter by altLoc field</td></tr>
+    <tr><td><code>id</code></td><td>Atom serial number</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td><td>Match by <code>atom.serial</code></td></tr>
+    <tr><td><code>polymer</code></td><td>Protein + nucleic acid</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td><td><code>!isHetero</code> filter</td></tr>
+    <tr><td><code>organic</code></td><td>Organic ligands</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td><td><code>isHetero && !isSolvent && hasCarbons</code></td></tr>
+    <tr><td><code>inorganic</code></td><td>Metal ions, inorganic</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td><td><code>isHetero && !hasCarbons && !isSolvent</code></td></tr>
+    <tr><td><code>solvent</code></td><td>Water molecules</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td><td><code>resName in [HOH, WAT, DOD]</code></td></tr>
+    <tr><td><code>hetatm</code></td><td>All HETATM records</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td><td><code>isHetero === true</code></td></tr>
+    <tr><td><code>hydrogens</code></td><td>All hydrogen atoms</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td><td><code>elem === 'H'</code></td></tr>
+    <tr><td><code>metals</code></td><td>Metal ions</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td><td>Element in metals set</td></tr>
+    <tr><td><code>donors</code></td><td>H-bond donors (N-H, O-H)</td><td>✅</td><td>❌</td><td><span class="badge badge-medium">Medium</span></td><td>N/O with bonded H</td></tr>
+    <tr><td><code>acceptors</code></td><td>H-bond acceptors</td><td>✅</td><td>❌</td><td><span class="badge badge-medium">Medium</span></td><td>N/O not fully protonated</td></tr>
+    <tr><td><code>within X of Y</code></td><td>Distance-based (inside)</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td><td>Like <code>around</code> but inverted target</td></tr>
+    <tr><td><code>bychain</code></td><td>Expand to full chain</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td><td>Group by chainID</td></tr>
+    <tr><td><code>neighbor</code></td><td>Directly bonded atoms</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td><td>1-hop bond graph traversal</td></tr>
+    <tr><td><code>extend N</code></td><td>Expand selection by N bonds</td><td>✅</td><td>❌</td><td><span class="badge badge-medium">Medium</span></td><td>N-hop BFS on bond graph</td></tr>
+    <tr><td><code>bymolecule</code></td><td>Expand to connected component</td><td>✅</td><td>❌</td><td><span class="badge badge-medium">Medium</span></td><td>BFS on bond graph</td></tr>
+    <tr><td><code>beyond X of Y</code></td><td>Farther than X from Y</td><td>✅</td><td>❌</td><td><span class="badge badge-medium">Medium</span></td><td>Invert <code>within</code></td></tr>
+    <tr><td><code>pepseq</code></td><td>1-letter sequence pattern</td><td>✅</td><td>❌</td><td><span class="badge badge-medium">Medium</span></td><td>Sliding window match</td></tr>
+  </tbody>
+</table>
+
+<!-- STAGE 3 -->
+<div class="stage-header" id="stage3">
+  <h2>Stage 3: Measurement & Label System</h2>
+  <div class="stage-sub">Week 3–4 · Distance, Angle, Dihedral, Labels</div>
+</div>
+
+<h3>3.1 Distance Measurement</h3>
+<table>
+  <thead><tr><th style="width:140px;">Aspect</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>PyMOL</strong></td><td><code>distance dist1, /mol//A/100/CA, /mol//A/200/CA</code> — draws dashed line with Å label</td></tr>
+    <tr><td><strong>Science</strong></td><td>d = √[(x₂−x₁)² + (y₂−y₁)² + (z₂−z₁)²]</td></tr>
+    <tr><td><strong>MolStudio</strong></td><td><span class="badge badge-missing">Not implemented</span></td></tr>
+    <tr><td><strong>Implementation</strong></td><td>Click-to-measure mode: user clicks two atoms, draw dashed cylinder + floating Å label. Store in Zustand.</td></tr>
+  </tbody>
+</table>
+
+<h3>3.2 Angle Measurement</h3>
+<table>
+  <thead><tr><th style="width:140px;">Aspect</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>PyMOL</strong></td><td><code>angle ang1, atom1, atom2, atom3</code> — shows angle arc with degree label</td></tr>
+    <tr><td><strong>Science</strong></td><td>θ = arccos[(BA⃗ · BC⃗) / (|BA⃗| × |BC⃗|)]</td></tr>
+    <tr><td><strong>Implementation</strong></td><td>3-atom click mode. Draw two lines at vertex + arc indicator + degree label.</td></tr>
+  </tbody>
+</table>
+
+<h3>3.3 Dihedral Measurement</h3>
+<table>
+  <thead><tr><th style="width:140px;">Aspect</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>PyMOL</strong></td><td><code>dihedral dih1, a1, a2, a3, a4</code></td></tr>
+    <tr><td><strong>Science</strong></td><td>ω = atan2(|n₁ × n₂| · b̂₂, n₁ · n₂) where n₁ = b₁ × b₂, n₂ = b₂ × b₃</td></tr>
+    <tr><td><strong>Implementation</strong></td><td>4-atom click mode. Already have <code>dihedral()</code> in <code>MolProcessor.ts</code> — expose to UI.</td></tr>
+  </tbody>
+</table>
+
+<h3>3.4 Label System</h3>
+<table>
+  <thead><tr><th style="width:140px;">Aspect</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>PyMOL</strong></td><td><code>label n. CA, resn+resi</code> — places text at atom positions</td></tr>
+    <tr><td><strong>Implementation</strong></td><td>Use 3Dmol.js <code>addLabel()</code> API. Support templates: <code>{resn}</code>, <code>{resi}</code>, <code>{chain}</code>, <code>{name}</code>, <code>{elem}</code>, <code>{b}</code>.</td></tr>
+  </tbody>
+</table>
+
+<!-- STAGE 4 -->
+<div class="stage-header" id="stage4">
+  <h2>Stage 4: Representation & Rendering Upgrades</h2>
+  <div class="stage-sub">Week 4–6 · Complete Visual Parity with PyMOL</div>
+</div>
+
+<h3>4.1 Representation Gap Analysis</h3>
+<table>
+  <thead><tr><th>Representation</th><th>Science</th><th>PyMOL</th><th>MolStudio</th><th>Gap</th></tr></thead>
+  <tbody>
+    <tr><td>Line</td><td>Bond connectivity</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>Stick</td><td>Cylindrical bonds</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>Ball-and-Stick</td><td>Spheres + sticks</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>Space-Filling</td><td>Bondi VDW spheres (1964)</td><td>✅</td><td>✅</td><td><span class="badge badge-partial">Verify radii</span></td></tr>
+    <tr><td>Cartoon</td><td>Richardson diagrams, Pauling (1951)</td><td>✅</td><td>✅</td><td><span class="badge badge-partial">Limited customization</span></td></tr>
+    <tr><td><strong>Ribbon</strong></td><td>Backbone trace</td><td>✅</td><td>❌</td><td><span class="badge badge-missing">Missing</span></td></tr>
+    <tr><td>Surface (SAS)</td><td>Lee & Richards (1971), probe=1.4Å</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>Surface (SES)</td><td>Connolly (1983)</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>Mesh</td><td>Surface wireframe</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>Dots</td><td>Fibonacci sphere VDW</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td><strong>Unit Cell</strong></td><td>CRYST1 a, b, c, α, β, γ</td><td>✅</td><td>❌</td><td><span class="badge badge-missing">Missing</span></td></tr>
+    <tr><td><strong>Putty/Sausage</strong></td><td>B-factor → tube radius (Debye-Waller)</td><td>✅</td><td>❌</td><td><span class="badge badge-missing">Missing</span></td></tr>
+  </tbody>
+</table>
+
+<h3>4.2 Color Scheme Gap Analysis</h3>
+<table>
+  <thead><tr><th>Color Scheme</th><th>Science</th><th>PyMOL</th><th>MolStudio</th><th>Gap</th></tr></thead>
+  <tbody>
+    <tr><td>By Element (CPK)</td><td>Corey-Pauling-Koltun</td><td>✅</td><td>✅</td><td><span class="badge badge-partial">Verify RGB</span></td></tr>
+    <tr><td>By Chain</td><td>Distinct hue per chain</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>SS (PyMOL)</td><td>Helix=Red, Sheet=Yellow</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>SS (Jmol)</td><td>Helix=Magenta, Sheet=Gold</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>Rainbow (N→C)</td><td>Sequence → spectrum</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>B-factor</td><td>Debye-Waller thermal motion</td><td>✅</td><td>✅</td><td><span class="badge badge-partial">Verify gradient</span></td></tr>
+    <tr><td><strong>Hydrophobicity</strong></td><td>Kyte-Doolittle scale (1982)</td><td>✅</td><td>❌</td><td><span class="badge badge-missing">Missing</span></td></tr>
+    <tr><td><strong>By Charge</strong></td><td>Gasteiger → Red(−)/Blue(+)</td><td>✅</td><td>❌</td><td><span class="badge badge-missing">Missing</span></td></tr>
+    <tr><td><strong>Custom Ramps</strong></td><td>User-defined gradients</td><td>✅</td><td>❌</td><td><span class="badge badge-missing">Missing</span></td></tr>
+  </tbody>
+</table>
+
+<!-- STAGE 5 -->
+<div class="stage-header" id="stage5">
+  <h2>Stage 5: Electrostatics & Protein Preparation</h2>
+  <div class="stage-sub">Week 6–8 · Poisson-Boltzmann, Gasteiger Charges, Ramachandran</div>
+</div>
+
+<h3>5.1 Electrostatic Surface Potential</h3>
+<table>
+  <thead><tr><th style="width:140px;">Aspect</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>PyMOL</strong></td><td><code>util.protein_vacuum_esp</code> (quick) + APBS plugin (rigorous)</td></tr>
+    <tr><td><strong>Science</strong></td><td>Poisson-Boltzmann: ∇·[ε(r)∇φ(r)] − κ²(r)φ(r) = −4πρ(r)/ε(r)<br>Baker et al. (2001) DOI: <a href="https://doi.org/10.1073/pnas.181342398">10.1073/pnas.181342398</a></td></tr>
+    <tr><td><strong>MolStudio</strong></td><td><span class="badge badge-missing">Not implemented</span></td></tr>
+    <tr><td><strong>Phase A</strong></td><td>Vacuum Coulomb ESP: φ(r) = Σ qᵢ / (εᵣ · |r − rᵢ|) with distance-dependent dielectric εᵣ = 4r. Map onto surface as Red(−)/White(0)/Blue(+).</td></tr>
+    <tr><td><strong>Phase B</strong></td><td>Integrate PDB2PQR → APBS via server-side API on Oracle VPS.</td></tr>
+  </tbody>
+</table>
+
+<h3>5.2 Gasteiger Partial Charges</h3>
+<table>
+  <thead><tr><th style="width:140px;">Aspect</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Science</strong></td><td>Gasteiger & Marsili (1980) DOI: <a href="https://doi.org/10.1016/0040-4020(80)80168-2">10.1016/0040-4020(80)80168-2</a></td></tr>
+    <tr><td><strong>Current</strong></td><td><code>Docking.ts</code> hardcodes charge = <code>0.000</code> for all protein atoms</td></tr>
+    <tr><td><strong>Fix</strong></td><td>Implement PEOE iterative algorithm: Δq = (χ_A − χ_B) / (χ_A + χ_B) × damping. 6 iterations.</td></tr>
+  </tbody>
+</table>
+
+<h3>5.3 Ramachandran Plot</h3>
+<table>
+  <thead><tr><th style="width:140px;">Aspect</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Science</strong></td><td>Ramachandran et al. (1963) DOI: <a href="https://doi.org/10.1016/S0022-2836(63)80023-6">10.1016/S0022-2836(63)80023-6</a></td></tr>
+    <tr><td><strong>Implementation</strong></td><td>Compute (φ, ψ) using <code>dihedral()</code> in <code>MolProcessor.ts</code>. Render as 2D scatter plot with allowed regions. Color by SS type. Click → highlight in 3D.</td></tr>
+  </tbody>
+</table>
+
+<h3>5.4 Protein Preparation Completeness</h3>
+<table>
+  <thead><tr><th>Feature</th><th>PyMOL</th><th>MolStudio</th><th>Gap</th></tr></thead>
+  <tbody>
+    <tr><td>Strip solvent</td><td>✅ <code>remove solvent</code></td><td>✅ <code>stripSolvent()</code></td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>Remove alt conformers</td><td>✅</td><td>✅ <code>filterAltlocs()</code></td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>Add hydrogens</td><td>✅ <code>h_add</code></td><td>⚠️ VSEPR heuristic</td><td><span class="badge badge-partial">No pKa optimization</span></td></tr>
+    <tr><td>Assign SS</td><td>✅ <code>dss</code></td><td>✅ DSSP (Kabsch & Sander 1983)</td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>Bond perception</td><td>✅</td><td>✅ Cordero et al. (2008)</td><td><span class="badge badge-done">Match</span></td></tr>
+    <tr><td>pKa estimation</td><td>⚠️ PROPKA plugin</td><td>❌</td><td><span class="badge badge-missing">Gap</span></td></tr>
+  </tbody>
+</table>
+
+<!-- STAGE 6 -->
+<div class="stage-header" id="stage6">
+  <h2>Stage 6: Advanced Analysis Tools</h2>
+  <div class="stage-sub">Week 8–12 · Alignment Methods, Mutagenesis, Electron Density</div>
+</div>
+
+<h3>6.1 Additional Alignment Methods</h3>
+<table>
+  <thead><tr><th>Method</th><th>Algorithm</th><th>When to Use</th><th>PyMOL</th><th>MolStudio</th></tr></thead>
+  <tbody>
+    <tr><td><code>align</code></td><td>NW → Kabsch + outlier rejection</td><td>Closely related sequences (&gt;30% identity)</td><td>✅</td><td><span class="badge badge-partial">No outlier rejection</span></td></tr>
+    <tr><td><code>super</code></td><td>Structure-based DP → Kabsch</td><td>Low sequence similarity</td><td>✅</td><td><span class="badge badge-missing">Missing</span></td></tr>
+    <tr><td><code>cealign</code></td><td>Combinatorial Extension (CE)</td><td>Very distant homologs</td><td>✅</td><td><span class="badge badge-missing">Missing</span></td></tr>
+  </tbody>
+</table>
+
+<h3>6.2 Mutagenesis Wizard</h3>
+<table>
+  <thead><tr><th style="width:140px;">Aspect</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Science</strong></td><td>Dunbrack rotamer library (2002) DOI: <a href="https://doi.org/10.1002/prot.10286">10.1002/prot.10286</a></td></tr>
+    <tr><td><strong>Implementation</strong></td><td>Load Dunbrack library (JSON). Replace side chains with target rotamers. Score by VDW clash energy. Display ranked options.</td></tr>
+  </tbody>
+</table>
+
+<h3>6.3 Electron Density Maps</h3>
+<table>
+  <thead><tr><th style="width:140px;">Aspect</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>PyMOL</strong></td><td><code>isomesh map_mesh, my_map, 1.5</code> — contour at 1.5σ</td></tr>
+    <tr><td><strong>Implementation</strong></td><td>Parse CCP4/MRC maps → marching cubes at user σ level → render in 3Dmol.js</td></tr>
+  </tbody>
+</table>
+
+<!-- STAGE 7 -->
+<div class="stage-header" id="stage7">
+  <h2>Stage 7: Animation, Scripting & Export</h2>
+  <div class="stage-sub">Week 12–16 · Multi-State, Morphing, Command Engine, Formats</div>
+</div>
+
+<h3>7.1 Multi-State / Trajectory</h3>
+<p>Parse <code>MODEL</code>/<code>ENDMDL</code> blocks → store as <code>state[]</code> → frame slider → animate with <code>requestAnimationFrame</code></p>
+
+<h3>7.2 Morphing</h3>
+<p>After Kabsch alignment, interpolate: <strong>r<sub>t</sub> = (1−t)r<sub>A</sub> + t·R·r<sub>B</sub></strong> for t ∈ [0, 1], generate 30 intermediate frames</p>
+
+<h3>7.3 Scripting Engine</h3>
+<p>Extend <code>SelectionQueryConsole</code> into full command interpreter supporting: <code>load</code>, <code>fetch</code>, <code>color</code>, <code>show</code>, <code>hide</code>, <code>select</code>, <code>distance</code>, <code>angle</code>, <code>set</code>, <code>get</code>, <code>save</code>, <code>png</code></p>
+
+<h3>7.4 Export Formats</h3>
+<table>
+  <thead><tr><th>Format</th><th>PyMOL</th><th>MolStudio</th><th>Priority</th></tr></thead>
+  <tbody>
+    <tr><td>PNG screenshot</td><td>✅</td><td>❌</td><td><span class="badge badge-high">High</span></td></tr>
+    <tr><td>PDB file</td><td>✅</td><td>⚠️</td><td><span class="badge badge-partial">Verify columns</span></td></tr>
+    <tr><td>PDBQT</td><td>✅</td><td>✅</td><td><span class="badge badge-done">Done</span></td></tr>
+    <tr><td>MOL2/SDF</td><td>✅</td><td>❌</td><td><span class="badge badge-medium">Medium</span></td></tr>
+  </tbody>
+</table>
+
+<!-- STAGE 8 -->
+<div class="stage-header" id="stage8">
+  <h2>Stage 8: Ray Tracing & Publication Quality</h2>
+  <div class="stage-sub">Week 16–20 · SSAO, Fog, High-Resolution Export</div>
+</div>
+
+<h3>8.1 Ambient Occlusion (SSAO)</h3>
+<p>Use WebGL Screen-Space Ambient Occlusion shader — cheaper than true ray tracing but visually excellent.</p>
+
+<h3>8.2 Depth Cue / Fog</h3>
+<p>WebGL fog fading distant objects to background color for depth perception.</p>
+
+<h3>8.3 High-Resolution Export</h3>
+<p>Off-screen canvas at 4× resolution → export as publication-quality PNG.</p>
+
+<!-- PRIORITY MATRIX -->
+<div class="stage-header" id="priority" style="background: linear-gradient(135deg, #1e293b, #334155);">
+  <h2>Implementation Priority Matrix</h2>
+  <div class="stage-sub">Staged rollout over 20 weeks</div>
+</div>
+
+<table class="priority-matrix">
+  <thead><tr><th>Priority</th><th>Stage</th><th>Features</th><th>Key Science Papers</th><th>Effort</th></tr></thead>
+  <tbody>
+    <tr><td>🔴 P0</td><td>Stage 1</td><td>Fix H-bond angles, salt bridges, π-stacking, alignment outlier rejection</td><td>Baker (1984), Hunter (1990), Kabsch (1976)</td><td>1–2 weeks</td></tr>
+    <tr><td>🔴 P0</td><td>Stage 3</td><td>Distance/angle/dihedral measurements, labels</td><td>Basic geometry</td><td>1 week</td></tr>
+    <tr><td>🟠 P1</td><td>Stage 2</td><td>Selection engine (add 30+ keywords)</td><td>—</td><td>2 weeks</td></tr>
+    <tr><td>🟠 P1</td><td>Stage 4</td><td>Unit cell, putty representation, hydrophobicity coloring</td><td>Bondi (1964), Kyte-Doolittle (1982)</td><td>2 weeks</td></tr>
+    <tr><td>🟡 P2</td><td>Stage 5</td><td>Vacuum ESP, Gasteiger charges, Ramachandran plot</td><td>Gasteiger (1980), Ramachandran (1963)</td><td>3 weeks</td></tr>
+    <tr><td>🟡 P2</td><td>Stage 6</td><td>super/cealign, mutagenesis wizard, electron density</td><td>Dunbrack (2002), Shindyalov (1998)</td><td>4 weeks</td></tr>
+    <tr><td>🔵 P3</td><td>Stage 7</td><td>Multi-state, morphing, scripting, export</td><td>—</td><td>4 weeks</td></tr>
+    <tr><td>🔵 P3</td><td>Stage 8</td><td>SSAO, fog, high-res export</td><td>—</td><td>2 weeks</td></tr>
+  </tbody>
+</table>
+
+<!-- ARCHITECTURE -->
+<div class="stage-header" id="arch" style="background: linear-gradient(135deg, #0f766e, #14b8a6);">
+  <h2>Architecture: Where Science Runs</h2>
+  <div class="stage-sub">Client (Browser/WASM) vs Server (Oracle VPS)</div>
+</div>
+
+<table>
+  <thead><tr><th>Computation</th><th>Client</th><th>Server</th><th>Rationale</th></tr></thead>
+  <tbody>
+    <tr><td>Bond perception</td><td>✅</td><td></td><td>Fast, O(N) with spatial hash</td></tr>
+    <tr><td>DSSP assignment</td><td>✅</td><td></td><td>Performant implementation</td></tr>
+    <tr><td>Selection queries</td><td>✅</td><td></td><td>Must be interactive (&lt;50ms)</td></tr>
+    <tr><td>Measurements</td><td>✅</td><td></td><td>Trivial math</td></tr>
+    <tr><td>Gasteiger charges</td><td>✅</td><td></td><td>Iterative but lightweight</td></tr>
+    <tr><td>Vacuum ESP</td><td>✅</td><td></td><td>O(N×M) but feasible for &lt;10K atoms</td></tr>
+    <tr><td>APBS Poisson-Boltzmann</td><td></td><td>✅</td><td>Grid solver needs &gt;4GB RAM</td></tr>
+    <tr><td>Docking (Webina)</td><td>✅</td><td></td><td>Already works client-side</td></tr>
+    <tr><td>Rotamer scoring</td><td>✅</td><td></td><td>Lookup table + VDW clash</td></tr>
+    <tr><td>Electron density maps</td><td>✅</td><td></td><td>Marching cubes on typed arrays</td></tr>
+    <tr><td>Ray tracing (SSAO)</td><td>✅</td><td></td><td>WebGL shader</td></tr>
+  </tbody>
+</table>
+
+<!-- SCIENTIFIC CREDIBILITY -->
+<div class="stage-header" id="cred" style="background: linear-gradient(135deg, #7c2d12, #ea580c);">
+  <h2>Scientific Credibility Checklist</h2>
+  <div class="stage-sub">Every constant must cite its source paper</div>
+</div>
+
+<table>
+  <thead><tr><th>Constant</th><th>Value</th><th>Source Paper</th><th>DOI</th></tr></thead>
+  <tbody>
+    <tr><td>H-bond D···A distance</td><td>≤ 3.2 Å</td><td>Baker & Hubbard (1984)</td><td><a href="https://doi.org/10.1016/0079-6107(84)90007-5">10.1016/0079-6107(84)90007-5</a></td></tr>
+    <tr><td>H-bond D-H···A angle</td><td>≥ 120°</td><td>McDonald & Thornton (1994)</td><td><a href="https://doi.org/10.1006/jmbi.1994.1334">10.1006/jmbi.1994.1334</a></td></tr>
+    <tr><td>DSSP energy cutoff</td><td>−0.5 kcal/mol</td><td>Kabsch & Sander (1983)</td><td><a href="https://doi.org/10.1002/bip.360221211">10.1002/bip.360221211</a></td></tr>
+    <tr><td>DSSP q₁, q₂</td><td>0.42, 0.20 e</td><td>Kabsch & Sander (1983)</td><td><a href="https://doi.org/10.1002/bip.360221211">10.1002/bip.360221211</a></td></tr>
+    <tr><td>Water probe radius</td><td>1.4 Å</td><td>Lee & Richards (1971)</td><td><a href="https://doi.org/10.1016/0022-2836(71)90324-X">10.1016/0022-2836(71)90324-X</a></td></tr>
+    <tr><td>VDW radii (C, N, O, S, H)</td><td>1.70, 1.55, 1.52, 1.80, 1.20 Å</td><td>Bondi (1964)</td><td><a href="https://doi.org/10.1021/j100785a001">10.1021/j100785a001</a></td></tr>
+    <tr><td>Covalent radii</td><td>Per element</td><td>Cordero et al. (2008)</td><td><a href="https://doi.org/10.1039/b801115j">10.1039/b801115j</a></td></tr>
+    <tr><td>Salt bridge cutoff</td><td>≤ 4.0 Å</td><td>Barlow & Thornton (1983)</td><td><a href="https://doi.org/10.1016/0022-2836(83)90148-7">10.1016/0022-2836(83)90148-7</a></td></tr>
+    <tr><td>π-π stacking distance</td><td>3.3–5.5 Å</td><td>Hunter & Sanders (1990)</td><td><a href="https://doi.org/10.1021/ja00170a016">10.1021/ja00170a016</a></td></tr>
+    <tr><td>Cation-π distance</td><td>≤ 6.0 Å</td><td>Dougherty (1996)</td><td><a href="https://doi.org/10.1126/science.271.5246.163">10.1126/science.271.5246.163</a></td></tr>
+    <tr><td>α-helix φ, ψ</td><td>−57°, −47°</td><td>Ramachandran et al. (1963)</td><td><a href="https://doi.org/10.1016/S0022-2836(63)80023-6">10.1016/S0022-2836(63)80023-6</a></td></tr>
+    <tr><td>Peptide bond planarity</td><td>ω ≈ 180° (trans)</td><td>Pauling et al. (1951)</td><td><a href="https://doi.org/10.1073/pnas.37.4.205">10.1073/pnas.37.4.205</a></td></tr>
+  </tbody>
+</table>
+
+<div class="alert alert-tip" style="margin-top:30px;">
+  <span class="alert-label">The Goal</span>
+  Every scientist who uses MolStudio should be able to look at the "About" or documentation and see that our algorithms cite the same papers that PyMOL, Chimera, and VMD rely on. This is what makes an application industry-grade — not just features, but <strong>scientific trust</strong>.
+</div>
+
+<div style="text-align:center; margin-top:40px; padding-top:20px; border-top:2px solid var(--border); color: var(--text-secondary); font-size:10px;">
+  <p><strong>MolStudio</strong> — Complete Gap Analysis & Implementation Plan v1.0</p>
+  <p>August 2026 · Confidential · Engineering Team</p>
+</div>
+
+</body>
+</html>

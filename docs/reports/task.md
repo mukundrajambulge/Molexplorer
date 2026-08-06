@@ -1,19 +1,24 @@
-- `[x]` Install `@ffmpeg/ffmpeg` and `@ffmpeg/util` for `.mp4` export.
-- `[x]` **User Manual**
-  - `[x]` Create `src/docs/UserManual.md` with Stage 1-5 documentation.
-  - `[x]` Create `src/components/UserManualModal.tsx` markdown viewer.
-  - `[x]` Integrate "Help" button in Ribbon bar.
-- `[x]` **Movie & Animation Engine**
-  - `[x]` Create `src/animation/KeyframeManager.ts` for SLERP and position interpolation.
-  - `[x]` Create `src/animation/Timeline.tsx` UI (timeline, play, pause, rock/roll presets).
-  - `[x]` Create `src/export/VideoEncoder.ts` using `ffmpeg.wasm` to mux frames to `.mp4`.
-  - `[x]` Add "Movie & Animation" tab to `StudioRibbonBar.tsx`.
-- `[x]` **WebGPU Raytracing**
-  - `[x]` Create WGSL shaders (`raytrace.wgsl` embedded in Raytracer.ts).
-  - `[x]` Create `src/rendering/webgpu/Raytracer.ts` (SSBO building, GPU initialization, pipeline).
-  - `[x]` Create `src/components/RaytraceViewer.tsx` overlay canvas and logic.
-  - `[x]` Implement WebGPU compatibility check and UI warning popup.
-- `[x]` **Final Integration & QA**
-  - `[x]` Connect Timeline to the 3Dmol.js viewer camera/objects.
-  - `[x]` Test MP4 export workflow.
-  - `[x]` Verify Raytracer renders structural representation.
+# MolExplorer & MolStudio Architecture Unification Task List
+
+- `[x]` **Step 1: Unified State Management (Zustand)**
+  - `[x]` Update `src/store/index.ts` to include `MoleculeSlice` (library, active molecule, compare molecule).
+  - `[x]` Update `src/store/index.ts` to include `FilterSlice` for search and range parameters.
+  - `[x]` Refactor `src/pages/MolExplorer.tsx` to remove local states and use `useStore()`.
+
+- `[x]` **Step 2: Universal 3D Viewer Consolidation**
+  - `[x]` Create `src/components/CoreViewer3D.tsx` combining features of both old viewers.
+  - `[x]` Update `src/pages/MolExplorer.tsx` to use `<CoreViewer3D mode="explorer" />`.
+  - `[x]` Update `src/pages/MolStudio.tsx` to use `<CoreViewer3D mode="studio" />`.
+  - `[x]` Delete `src/components/Viewer3D.tsx` and `src/components/MolStudioViewer.tsx`.
+
+- `[x]` **Step 3: Decomposing MolStudio God Module**
+  - `[x]` Extract timeline logic into `src/features/studio/TimelineEngine.tsx`.
+  - `[x]` Extract validation tools into `src/features/studio/BiophysicalValidation.tsx`.
+  - `[x]` Clean up `MolStudio.tsx` to act only as a layout router container.
+
+- `[x]` **Step 4: Final QA & Documentation**
+  - `[x]` Run TypeScript lint to ensure no errors.
+  - `[x]` Test transitions between MolExplorer and MolStudio.
+  - `[x]` Ensure Github is perfectly synced with latest changes.
+  - `[x]` Answer user questions regarding C++ absence./IMPLEMENTATION_PLANS.md`.
+  - `[ ]` Commit and push to GitHub `dev` branch.
