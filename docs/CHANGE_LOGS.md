@@ -4,6 +4,21 @@ Comprehensive record of all feature implementations, bug fixes, software updates
 
 ---
 
+## [2026-08-06 21:05:00 IST] - Architecture Unification & Component Consolidation
+### 🚀 Features Implemented
+- **Unified Global State Management**:
+  - Refactored `src/store/index.ts` to include `MolExplorer` state (`explorerMolecule`, `explorerLibrary`, `filters`, `sortState`).
+  - Deprecated local `useState` hooks inside `MolExplorer.tsx` in favor of the unified Zustand store, resolving the "Split Brain" data-loss issue when navigating between discovery and studio modes.
+- **Universal 3D Viewer (`CoreViewer3D.tsx`)**:
+  - Consolidated the duplicated `Viewer3D.tsx` and `MolStudioViewer.tsx` into a single, high-performance `<CoreViewer3D mode="explorer" | "studio" />` component.
+  - Standardized the 3Dmol.js initialization, rendering loop, and background configuration across the entire application.
+
+### 🐛 Bug Fixes & Refactoring
+- Deprecated and removed legacy viewer files to eliminate duplicate code.
+- Reduced React re-renders by centralizing context bounds.
+
+---
+
 ## [2026-08-06 20:45:00 IST] - Stage 5 Engine Completion & Real-Time Media Upgrades
 ### 🚀 Features Implemented
 - **WebGPU Raytracer & Software Raymarching Engine**:

@@ -5,7 +5,7 @@ import { useAlignment } from "../hooks/useAlignment";
 import { useAssembly } from "../hooks/useAssembly";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Upload, RefreshCw, Layers, Droplet, CheckSquare, Settings2, Info, Box, Cuboid, SlidersHorizontal, X, Save, FolderOpen, Camera } from "lucide-react";
-import MolStudioViewer, { MolStudioViewerRef } from "../components/MolStudioViewer";
+import { CoreViewer3D, CoreViewer3DRef } from "../components/CoreViewer3D";
 import { StudioRibbonBar } from "../components/StudioRibbonBar";
 import { SelectionQueryConsole } from "../components/SelectionQueryConsole";
 import QueryBar from "../components/QueryBar";
@@ -48,7 +48,7 @@ export default function MolStudio() {
   const { assemblyState, setAssemblyState, availableAssemblies, setAvailableAssemblies, hasSymmetryInfo, setHasSymmetryInfo, assemblyPDB, setAssemblyPDB, symmetryPDB, setSymmetryPDB } = useAssembly();
   const { alignMol, setAlignMol, alignmentResult, setAlignmentResult, alignError, setAlignError, alignFetchId, setAlignFetchId, isAlignFetching, setIsAlignFetching, handleAlignFetch, handleAlignFileUpload, runAlignment } = useAlignment(molData);
 
-  const viewerRef = useRef<MolStudioViewerRef>(null);
+  const viewerRef = useRef<CoreViewer3DRef>(null);
 
   const [showTimeline, setShowTimeline] = useState(false);
   const [showRaytrace, setShowRaytrace] = useState(false);
@@ -634,9 +634,10 @@ useEffect(() => {
       {/* Main Viewer Area */}
       <div className="flex-1 relative w-full h-full overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <MolStudioViewer 
+          <CoreViewer3D 
+            mode="studio"
             ref={viewerRef} 
-            pdbData={processedPDB} 
+            pdbData={processedPDB || undefined} 
             ssData={ssData} 
             ssMode={cleaningState.ss_mode}
             assemblyPDB={assemblyPDB} 

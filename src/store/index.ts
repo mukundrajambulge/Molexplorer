@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { RenderStyle } from '../types';
+import { RenderStyle, MoleculeData, FilterState, TableSortState } from '../types';
 
 export interface Molecule {
   data: string | Uint8Array;
@@ -22,11 +22,18 @@ interface MoleculeState {
   atoms: any[];
   selectedAtomSerials: Set<number>;
   ssData: any[];
+  // MolExplorer integration
+  explorerMolecule: MoleculeData | null;
+  explorerCompareMolecule: MoleculeData | null;
+  explorerLibrary: MoleculeData[];
   setMolData: (data: Molecule | null) => void;
   setProcessedPDB: (data: string | null) => void;
   setAtoms: (atoms: any[]) => void;
   setSelectedAtomSerials: (serials: Set<number>) => void;
   setSsData: (data: any[]) => void;
+  setExplorerMolecule: (mol: MoleculeData | null) => void;
+  setExplorerCompareMolecule: (mol: MoleculeData | null) => void;
+  setExplorerLibrary: (lib: MoleculeData[]) => void;
 }
 
 interface ViewerState {
@@ -72,18 +79,31 @@ interface BiophysicalState {
   setDipoleMoment: (dipole: any | null) => void;
 }
 
-export const useStore = create<MoleculeState & ViewerState & UIState & MeasurementState & BiophysicalState>((set) => ({
+interface ExplorerFilterState {
+  filters: FilterState;
+  sortState: TableSortState;
+  setFilters: (filters: FilterState) => void;
+  setSortState: (sortState: TableSortState) => void;
+}
+
+export const useStore = create<MoleculeState & ViewerState & UIState & MeasurementState & BiophysicalState & ExplorerFilterState>((set) => ({
   // Molecule Slice
   molData: null,
   processedPDB: null,
   atoms: [],
   selectedAtomSerials: new Set(),
   ssData: [],
+  explorerMolecule: null,
+  explorerCompareMolecule: null,
+  explorerLibrary: [],
   setMolData: (data) => set({ molData: data }),
   setProcessedPDB: (data) => set({ processedPDB: data }),
   setAtoms: (atoms) => set({ atoms }),
   setSelectedAtomSerials: (serials) => set({ selectedAtomSerials: serials }),
   setSsData: (ssData) => set({ ssData }),
+  setExplorerMolecule: (mol) => set({ explorerMolecule: mol }),
+  setExplorerCompareMolecule: (mol) => set({ explorerCompareMolecule: mol }),
+  setExplorerLibrary: (lib) => set({ explorerLibrary: lib }),
 
   // Viewer Slice
   renderStyle: 'Cartoon',
@@ -230,6 +250,28 @@ export const useStore = create<MoleculeState & ViewerState & UIState & Measureme
   ramachandranData: [],
   setRamachandranData: (ramachandranData) => set({ ramachandranData }),
   dipoleMoment: null,
-  setDipoleMoment: (dipoleMoment) => set({ dipoleMoment })
+  setDipoleMoment: (dipoleMoment) => set({ dipoleMoment }),
+
+  // Explorer Filter Slice
+  filters: {
+    searchQuery: "",
+    massRange: [0, 2000],
+    logpRange: [-10, 15],
+    hbdRange: [0, 20],
+    hbaRange: [0, 20],
+    tpsaRange: [0, 300],
+    rotatableRange: [0, 50],
+    maxRo5Violations: null,
+    librarySmarts: "",
+    visualSmarts: "",
+    showStereoCenters: false,
+    hiddenElements: [],
+  },
+  sortState: {
+    column: "name",
+    direction: "asc"
+  },
+  setFilters: (filters) => set({ filters }),
+  setSortState: (sortState) => set({ sortState })
 }));
 

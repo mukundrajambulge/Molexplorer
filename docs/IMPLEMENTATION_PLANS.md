@@ -6,7 +6,11 @@ Central repository of all technical design documents, architectural proposals, a
 
 ## 📑 Registry of Stage Implementation Plans
 
-### 1. Stage 5: Movie & Keyframing Engine & WebGPU Raytracing
+### 1. Unified Application Architecture Refactoring
+- **File**: `docs/reports/MolExplorer_MolStudio_Architecture_Audit.md` & `docs/reports/implementation_plan.md`
+- **Objective**: Detailed architectural audit and step-by-step refactoring plan to eliminate the "Split Brain" state isolation between MolExplorer and MolStudio by transitioning to a unified Zustand global state and consolidated `CoreViewer3D.tsx`.
+
+### 2. Stage 5: Movie & Keyframing Engine & WebGPU Raytracing
 - **File**: `docs/reports/implementation_plan.md`
 - **Objective**: Enable cinematic animation timeline, spherical linear interpolation (SLERP) keyframing, real H.264 MP4 video encoding, WebGPU compute shader raytracing with software fallback, and in-app User Manual modal.
 
