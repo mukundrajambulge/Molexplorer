@@ -2,19 +2,28 @@ import { useState, useEffect, useRef } from "react";
 import SidebarLeft from "../components/SidebarLeft";
 import SidebarRight from "../components/SidebarRight";
 import Toolbar from "../components/Toolbar";
-import Viewer3D from "../components/Viewer3D";
+import { CoreViewer3D } from "../components/CoreViewer3D";
 import { ExportModal } from "../components/ExportModal";
 import SketcherModal from "../components/SketcherModal";
 import LibraryTable from "../components/LibraryTable";
-import { MoleculeData, ViewState, FilterState, TableSortState } from "../types";
+import { MoleculeData, ViewState } from "../types";
 import { getRDKit } from "../lib/rdkit";
 import { Info, Download, SlidersHorizontal, BarChart2, X, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useStore } from "../store";
 
 export default function MolExplorer() {
-  const [molecule, setMolecule] = useState<MoleculeData | null>(null);
-  const [compareMolecule, setCompareMolecule] = useState<MoleculeData | null>(null);
-  const [library, setLibrary] = useState<MoleculeData[]>([]);
+  const molecule = useStore(state => state.explorerMolecule);
+  const setMolecule = useStore(state => state.setExplorerMolecule);
+  const compareMolecule = useStore(state => state.explorerCompareMolecule);
+  const setCompareMolecule = useStore(state => state.setExplorerCompareMolecule);
+  const library = useStore(state => state.explorerLibrary);
+  const setLibrary = useStore(state => state.setExplorerLibrary);
+  const filters = useStore(state => state.filters);
+  const setFilters = useStore(state => state.setFilters);
+  const sortState = useStore(state => state.sortState);
+  const setSortState = useStore(state => state.setSortState);
+
   const [showLeftSidebar, setShowLeftSidebar] = useState(false);
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [isLibraryCollapsed, setIsLibraryCollapsed] = useState(false);
@@ -31,26 +40,6 @@ export default function MolExplorer() {
     };
     handleResize();
   }, []);
-
-  const [filters, setFilters] = useState<FilterState>({
-    searchQuery: "",
-    massRange: [0, 2000],
-    logpRange: [-10, 15],
-    hbdRange: [0, 20],
-    hbaRange: [0, 20],
-    tpsaRange: [0, 300],
-    rotatableRange: [0, 50],
-    maxRo5Violations: null,
-    librarySmarts: "",
-    visualSmarts: "",
-    showStereoCenters: false,
-    hiddenElements: [],
-  });
-
-  const [sortState, setSortState] = useState<TableSortState>({
-    column: "name",
-    direction: "asc"
-  });
 
   const [viewState, setViewState] = useState<ViewState>({
     renderStyle: "Ball-and-Stick",
@@ -115,7 +104,7 @@ export default function MolExplorer() {
       }
     }
     
-    setLibrary(prev => [...newMols, ...prev]);
+    setLibrary([...newMols, ...library]);
     setMolecule(newMols[0]);
   };
 
@@ -146,7 +135,7 @@ export default function MolExplorer() {
   });
 
   return (
-    <div className="h-screen w-screen flex flex-col font-sans overflow-hidden bg-[#0A0A0A] text-[#F0F0F0] relative">
+    <div className="h-full w-full flex flex-col font-sans overflow-hidden bg-[#0A0A0A] text-[#F0F0F0] relative">
       <div className="absolute top-[-100px] left-[-100px] w-[500px] h-[500px] bg-gradient-to-br from-[#1a1a1a] to-transparent rounded-full blur-[100px] opacity-40 pointer-events-none z-0"></div>
 
       <header className="h-16 border-b border-white/10 flex items-center justify-between px-4 sm:px-8 bg-transparent flex-shrink-0 z-20 relative">
@@ -234,7 +223,7 @@ export default function MolExplorer() {
           <Toolbar viewState={viewState} onViewStateChange={setViewState} />
           
           <div className="flex-1 relative min-h-0">
-            <Viewer3D ref={viewerRef} molecule={molecule} compareMolecule={compareMolecule} viewState={viewState} filters={filters} />
+            <CoreViewer3D mode="explorer" ref={viewerRef} molecule={molecule} compareMolecule={compareMolecule} viewState={viewState} filters={filters} />
           </div>
           {library.length > 1 && (
             <LibraryTable 

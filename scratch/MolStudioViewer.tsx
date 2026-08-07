@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useImperativeHandle, forwardRef, useState } f
 import * as $3Dmol from '3dmol';
 import { RenderStyle } from '../types';
 import { SSInfo } from '../lib/MolProcessor';
-
+import { useStore } from '../store';
 import { handleBoxPointerDown, handleBoxPointerMove, handleBoxPointerUp } from '../lib/BoxDragLogic';
+
 export interface MolStudioViewerRef {
   getView: () => any;
   setView: (view: any) => void;
@@ -58,10 +59,6 @@ function hslToHex(h: number, s: number, l: number): string {
   return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-/**
- * Returns a universal color function for 3Dmol atoms.
- * Guarantees distinct, consistent coloring across Cartoon, Stick, Ball-and-Stick, Space-Filling, Line, Surface, Mesh, Dots!
- */
 function getColorFunction(
   colorScheme: string,
   minResi: number,
@@ -101,7 +98,6 @@ function getColorFunction(
     }
 
     if (colorScheme === 'ssJmol') {
-      // Jmol Secondary Structure: Helix = Magenta, Sheet = Yellow, Loop = White
       const ss = (atom.ss || '').toLowerCase();
       if (ss === 'h') return '#ff0080'; // Magenta
       if (ss === 's' || ss === 'e') return '#ffc800'; // Gold/Yellow
@@ -109,7 +105,6 @@ function getColorFunction(
     }
 
     if (colorScheme === 'ssPyMol') {
-      // PyMOL Secondary Structure: Helix = Red, Sheet = Yellow, Loop = Green
       const ss = (atom.ss || '').toLowerCase();
       if (ss === 'h') return '#ff0000'; // Red
       if (ss === 's' || ss === 'e') return '#ffff00'; // Yellow
@@ -117,14 +112,12 @@ function getColorFunction(
     }
 
     if (colorScheme === 'spectrum') {
-      // Continuous Rainbow spectrum from N-terminus (Blue) to C-terminus (Red)
       const resi = typeof atom.resi === 'number' ? atom.resi : minResi;
       const t = Math.max(0, Math.min(1, (resi - minResi) / resiRange));
       const hue = (1 - t) * 240; // 240 (blue) down to 0 (red)
       return hslToHex(hue, 100, 48);
     }
 
-    // Custom or fallback color string (e.g. 'magenta', 'cyan', 'orange')
     return colorScheme || '#3b82f6';
   };
 }
@@ -191,6 +184,33 @@ export default forwardRef<MolStudioViewerRef, {
   const [isRendering, setIsRendering] = useState(false);
   const dragState = useRef({ active: false, mode: 'none', cornerIdx: -1, startX: 0, startY: 0, startBox: null as any, axes2d: null as any });
 
+  const {
+    measurements,
+    activeMeasurementMode,
+    addClickedAtom,
+    setSelectedAtomSerials,
+    showDipoleArrow,
+    dipoleMoment
+  } = useStore();
+
+  const handleAtomClick = (atom: any) => {
+    if (!atom) return;
+    const serial = atom.serial;
+    const coord = { x: atom.x, y: atom.y, z: atom.z };
+
+    if (activeMeasurementMode) {
+      addClickedAtom({ serial, ...coord });
+    } else {
+      const next = new Set(selectedAtomSerials);
+      if (next.has(serial)) {
+        next.delete(serial);
+      } else {
+        next.add(serial);
+      }
+      setSelectedAtomSerials(next);
+    }
+  };
+
   const onPointerDown = (e: React.PointerEvent) => {
     if (handleBoxPointerDown(e, viewerRef.current, dockingBox, onDockingBoxChange, dragState)) {
        e.stopPropagation();
@@ -232,7 +252,6 @@ export default forwardRef<MolStudioViewerRef, {
       });
     }
 
-    // Determine if this is a heavy render operation
     const isHeavy = pdbData && pdbData.length > 50000 && (renderStyle === 'Cartoon' || renderStyle.includes('Surface'));
     
     if (isHeavy) {
@@ -242,37 +261,41 @@ export default forwardRef<MolStudioViewerRef, {
     const timer = setTimeout(() => {
       const viewer = viewerRef.current;
       viewer.setBackgroundColor(backgroundColor);
-      
-      // IMPORTANT: must remove surfaces otherwise they linger when switching away from Surface representations
       viewer.removeAllSurfaces();
       viewer.clear();
       viewer.removeAllShapes();
+      viewer.removeAllLabels();
+
+      let mainAtoms: any[] = [];
+
+      const setClickStyle = (sel: any, style: any) => {
+        viewer.setStyle(sel, {
+          ...style,
+          clickable: true,
+          callback: handleAtomClick
+        });
+      };
 
       if (pdbData) {
-        // Base Molecule
         const m = viewer.addModel(pdbData, "pdb");
         
-        // Ensure secondary structure is computed on the 3Dmol model
         try {
           m.computeSecondaryStructure();
         } catch (e) {
-          // Ignore if 3Dmol structure calculation encounters non-standard residues
+          // Ignore
         }
         
         const atoms = m.selectedAtoms({});
+        mainAtoms = atoms;
 
-        // Secondary Structure Override if ssData supplied
         if (ssData.length > 0) {
           const ssMap = new Map();
-          
           for (let i = 0; i < ssData.length; i++) {
              const ss = ssData[i];
              const prev = ssData[i-1];
              const next = ssData[i+1];
-             
              let ssbegin = false;
              let ssend = false;
-             
              if (ss.ss_type !== 'loop' && ss.ss_type !== 'undetermined') {
                  if (!prev || prev.chainID !== ss.chainID || prev.ss_type !== ss.ss_type) {
                      ssbegin = true;
@@ -281,10 +304,8 @@ export default forwardRef<MolStudioViewerRef, {
                      ssend = true;
                  }
              }
-             
              ssMap.set(`${ss.chainID}:${ss.resi}`, { type: ss.ss_type, ssbegin, ssend });
           }
-          
           atoms.forEach((a: any) => {
              const key = `${a.chain}:${a.resi}`;
              if (ssMap.has(key)) {
@@ -292,14 +313,12 @@ export default forwardRef<MolStudioViewerRef, {
                 if (info.type === 'helix') a.ss = 'h';
                 else if (info.type === 'sheet') a.ss = 's';
                 else a.ss = 'c';
-                
                 if (info.ssbegin) a.ssbegin = true; else delete a.ssbegin;
                 if (info.ssend) a.ssend = true; else delete a.ssend;
              }
           });
         }
 
-        // Calculate residue range and chain palette map
         let minResi = Infinity;
         let maxResi = -Infinity;
         const presentChains = new Set<string>();
@@ -326,47 +345,38 @@ export default forwardRef<MolStudioViewerRef, {
         chainMap[' '] = CHAIN_PALETTE[0];
 
         // Base style
-        viewer.setStyle({}, getStyleObj(renderStyle, colorScheme, minResi, maxResi, chainMap, 1.0));
+        setClickStyle({}, getStyleObj(renderStyle, colorScheme, minResi, maxResi, chainMap, 1.0));
 
         // Apply selection styling
         if (selectedAtomSerials.size > 0) {
-          // Dim unselected
-          viewer.setStyle({}, getStyleObj(renderStyle, 'white', minResi, maxResi, chainMap, 0.25));
-          
-          // Highlight selected
+          setClickStyle({}, getStyleObj(renderStyle, 'white', minResi, maxResi, chainMap, 0.25));
           const selArray = Array.from(selectedAtomSerials);
-          viewer.setStyle({ serial: selArray }, { 
+          setClickStyle({ serial: selArray }, { 
             ...getStyleObj(renderStyle, '#ec4899', minResi, maxResi, chainMap, 1.0),
             stick: { radius: 0.2, color: '#ec4899' }
           });
         }
 
-        // Add surfaces or point cloud if requested by renderStyle
         if (renderStyle.includes("Surface") || renderStyle === "Mesh") {
            let surfType = $3Dmol.SurfaceType.VDW;
            if (renderStyle === "Solvent-Accessible Surface") surfType = $3Dmol.SurfaceType.SAS;
            if (renderStyle === "Solvent-Excluded Surface") surfType = $3Dmol.SurfaceType.SES;
-           
            const surfOpts: any = {
              opacity: surfaceOpacity,
              wireframe: renderStyle === "Mesh",
              colorfunc: getColorFunction(colorScheme, minResi, maxResi, chainMap)
            };
-           
            viewer.addSurface(surfType, surfOpts);
         } else if (renderStyle === "Dots") {
           const colorfunc = getColorFunction(colorScheme, minResi, maxResi, chainMap);
           const fibPoints = getFibonacciSpherePoints(16);
-
           const atomData = atoms.map((a: any) => ({
             x: a.x, y: a.y, z: a.z,
             r: getAtomVdwRadius(a.elem),
             color: colorfunc(a)
           }));
-
           const cellSize = 5.0;
           const grid = new Map<string, typeof atomData>();
-
           atomData.forEach((atom: any) => {
             const gx = Math.floor(atom.x / cellSize);
             const gy = Math.floor(atom.y / cellSize);
@@ -375,12 +385,10 @@ export default forwardRef<MolStudioViewerRef, {
             if (!grid.has(key)) grid.set(key, []);
             grid.get(key)!.push(atom);
           });
-
           atomData.forEach((atom: any) => {
             const gx = Math.floor(atom.x / cellSize);
             const gy = Math.floor(atom.y / cellSize);
             const gz = Math.floor(atom.z / cellSize);
-
             const neighbors: typeof atomData = [];
             for (let dx = -1; dx <= 1; dx++) {
               for (let dy = -1; dy <= 1; dy++) {
@@ -394,13 +402,11 @@ export default forwardRef<MolStudioViewerRef, {
                 }
               }
             }
-
             for (let p = 0; p < fibPoints.length; p++) {
               const u = fibPoints[p];
               const px = atom.x + u.x * atom.r;
               const py = atom.y + u.y * atom.r;
               const pz = atom.z + u.z * atom.r;
-
               let isBuried = false;
               for (let n = 0; n < neighbors.length; n++) {
                 const neighbor = neighbors[n];
@@ -411,7 +417,6 @@ export default forwardRef<MolStudioViewerRef, {
                   break;
                 }
               }
-
               if (!isBuried) {
                 viewer.addSphere({
                   center: { x: px, y: py, z: pz },
@@ -423,76 +428,225 @@ export default forwardRef<MolStudioViewerRef, {
             }
           });
         }
-        // 3. Biological Assemblies
+
         if (assemblyPDB) {
           viewer.addModel(assemblyPDB, "pdb");
-          viewer.setStyle({ model: 1 }, getStyleObj(renderStyle, 'cyan', minResi, maxResi, chainMap, 1.0));
+          setClickStyle({ model: 1 }, getStyleObj(renderStyle, 'cyan', minResi, maxResi, chainMap, 1.0));
         }
 
-        // 4. Crystal Symmetry Mates
         if (symmetryPDB) {
           const sm = viewer.addModel(symmetryPDB, "pdb");
-          viewer.setStyle({ model: sm.getID() }, getStyleObj(renderStyle, '#FFD700', minResi, maxResi, chainMap, 0.7));
+          setClickStyle({ model: sm.getID() }, getStyleObj(renderStyle, '#FFD700', minResi, maxResi, chainMap, 0.7));
         }
 
-        // 5. Alignment B (Reference)
         if (alignmentPDB) {
           const am = viewer.addModel(alignmentPDB, "pdb");
-          viewer.setStyle({ model: am.getID() }, { cartoon: { color: 'orange' } });
+          setClickStyle({ model: am.getID() }, { cartoon: { color: 'orange' } });
         }
         
-        // 6. Docking Ligand Input
         if (ligandData) {
            const lm = viewer.addModel(ligandData.data, ligandData.format);
-           viewer.setStyle({ model: lm.getID() }, { stick: { colorscheme: 'greenCarbon' } });
+           setClickStyle({ model: lm.getID() }, { stick: { colorscheme: 'greenCarbon' } });
         }
         
-        // 7. Docking Result Poses
         if (dockingPDBQT) {
-           const dm = viewer.addModel(dockingPDBQT, "pdb"); // Can parse PDBQT as PDB
-           viewer.setStyle({ model: dm.getID() }, { stick: { colorscheme: 'cyanCarbon' } });
+           const dm = viewer.addModel(dockingPDBQT, "pdb");
+           setClickStyle({ model: dm.getID() }, { stick: { colorscheme: 'cyanCarbon' } });
         }
 
-        // 8. Docking Grid Box
-        gridShapesRef.current = [];
-        if (dockingBox) {
-          const cx = dockingBox.center.x;
-          const cy = dockingBox.center.y;
-          const cz = dockingBox.center.z;
-          const hx = dockingBox.size.x / 2;
-          const hy = dockingBox.size.y / 2;
-          const hz = dockingBox.size.z / 2;
-             
-          const p = [
-             { x: cx - hx, y: cy - hy, z: cz - hz }, // 0
-             { x: cx + hx, y: cy - hy, z: cz - hz }, // 1
-             { x: cx + hx, y: cy + hy, z: cz - hz }, // 2
-             { x: cx - hx, y: cy + hy, z: cz - hz }, // 3
-             { x: cx - hx, y: cy - hy, z: cz + hz }, // 4
-             { x: cx + hx, y: cy - hy, z: cz + hz }, // 5
-             { x: cx + hx, y: cy + hy, z: cz + hz }, // 6
-             { x: cx - hx, y: cy + hy, z: cz + hz }  // 7
-          ];
-             
-          const edges = [
-             [0,1], [1,2], [2,3], [3,0], // bottom face
-             [4,5], [5,6], [6,7], [7,4], // top face
-             [0,4], [1,5], [2,6], [3,7]  // vertical edges
-          ];
-             
-          edges.forEach(([i, j]) => {
-             const shape = viewer.addCylinder({
-                start: p[i], 
-                end: p[j],
-                radius: gridBoxThickness,
-                color: 'red',
-                opacity: gridBoxOpacity, alpha: gridBoxOpacity,
-                fromCap: 1, 
-                toCap: 1
-             });
-             gridShapesRef.current.push(shape);
-          });
+        // Render Dipole Vector Arrow if enabled
+        if (showDipoleArrow && dipoleMoment) {
+          const com = dipoleMoment.com;
+          const vec = dipoleMoment.vector;
+          const mag = dipoleMoment.magnitude;
+          
+          if (mag > 0) {
+            const scale = 0.5; // 0.5 Å per Debye
+            const end = {
+              x: com.x + vec.x * scale,
+              y: com.y + vec.y * scale,
+              z: com.z + vec.z * scale
+            };
+            
+            // Draw shaft
+            viewer.addCylinder({
+              start: com,
+              end: end,
+              radius: 0.12,
+              color: '#06b6d4',
+              fromCap: true,
+              toCap: false
+            });
+
+            // Draw cone tip
+            const norm = { x: vec.x / mag, y: vec.y / mag, z: vec.z / mag };
+            const tip = {
+              x: end.x + norm.x * 0.8,
+              y: end.y + norm.y * 0.8,
+              z: end.z + norm.z * 0.8
+            };
+            viewer.addCylinder({
+              start: end,
+              end: tip,
+              radius: 0.30,
+              toRadius: 0.0,
+              color: '#06b6d4',
+              fromCap: true,
+              toCap: true
+            });
+
+            // Dipole Magnitude label
+            viewer.addLabel(`μ = ${mag.toFixed(2)} D`, {
+              position: tip,
+              backgroundColor: 'rgba(6, 182, 212, 0.85)',
+              borderColor: '#06b6d4',
+              fontColor: '#ffffff',
+              font: 'monospace',
+              fontSize: 10,
+              backgroundOpacity: 0.9
+            });
+          }
         }
+
+        // Render Measurements
+        measurements.forEach((m) => {
+          const isHighB = m.coordinates.some((coord, idx) => {
+            const s = m.atomSerials[idx];
+            const atom = mainAtoms.find((a: any) => a.serial === s);
+            return atom && (atom.bFactor || 0) > 50;
+          });
+          const labelColor = isHighB ? '#f59e0b' : '#F2CD5C';
+
+          if (m.type === 'distance' && m.coordinates.length === 2) {
+            const [p1, p2] = m.coordinates;
+            const steps = 15;
+            const dashColor = '#F2CD5C';
+            
+            // Render thicker/thinner dashed line based on whether it is an electrostatic h-bond with energy text
+            const isHBond = m.label.includes('kcal/mol');
+            const radius = isHBond ? 0.06 : 0.04;
+
+            for (let i = 0; i < steps; i += 2) {
+              const tStart = i / steps;
+              const tEnd = (i + 1) / steps;
+              const ptStart = {
+                x: p1.x + (p2.x - p1.x) * tStart,
+                y: p1.y + (p2.y - p1.y) * tStart,
+                z: p1.z + (p2.z - p1.z) * tStart
+              };
+              const ptEnd = {
+                x: p1.x + (p2.x - p1.x) * tEnd,
+                y: p1.y + (p2.y - p1.y) * tEnd,
+                z: p1.z + (p2.z - p1.z) * tEnd
+              };
+              viewer.addCylinder({
+                start: ptStart,
+                end: ptEnd,
+                radius,
+                color: dashColor,
+                fromCap: true,
+                toCap: true
+              });
+            }
+            const mid = {
+              x: (p1.x + p2.x) / 2,
+              y: (p1.y + p2.y) / 2,
+              z: (p1.z + p2.z) / 2
+            };
+            viewer.addLabel(m.label, {
+              position: mid,
+              backgroundColor: 'rgba(10, 10, 12, 0.85)',
+              borderColor: labelColor,
+              fontColor: labelColor,
+              font: 'monospace',
+              fontSize: 10,
+              backgroundOpacity: 0.9
+            });
+          }
+
+          if (m.type === 'angle' && m.coordinates.length === 3) {
+            const [p1, p2, p3] = m.coordinates;
+            viewer.addCylinder({ start: p1, end: p2, radius: 0.03, color: '#ffffff' });
+            viewer.addCylinder({ start: p3, end: p2, radius: 0.03, color: '#ffffff' });
+            const v1 = { x: p1.x - p2.x, y: p1.y - p2.y, z: p1.z - p2.z };
+            const v2 = { x: p3.x - p2.x, y: p3.y - p2.y, z: p3.z - p2.z };
+            const len1 = Math.sqrt(v1.x*v1.x + v1.y*v1.y + v1.z*v1.z);
+            const len2 = Math.sqrt(v2.x*v2.x + v2.y*v2.y + v2.z*v2.z);
+            if (len1 > 0 && len2 > 0) {
+              const u1 = { x: v1.x / len1, y: v1.y / len1, z: v1.z / len1 };
+              const u2 = { x: v2.x / len2, y: v2.y / len2, z: v2.z / len2 };
+              const bisector = { x: u1.x + u2.x, y: u1.y + u2.y, z: u1.z + u2.z };
+              const lenB = Math.sqrt(bisector.x*bisector.x + bisector.y*bisector.y + bisector.z*bisector.z);
+              const labelPos = {
+                x: p2.x + (lenB > 0 ? (bisector.x / lenB) * 1.2 : 0),
+                y: p2.y + (lenB > 0 ? (bisector.y / lenB) * 1.2 : 0),
+                z: p2.z + (lenB > 0 ? (bisector.z / lenB) * 1.2 : 0)
+              };
+              viewer.addLabel(m.label, {
+                position: labelPos,
+                backgroundColor: 'rgba(10, 10, 12, 0.85)',
+                borderColor: labelColor,
+                fontColor: labelColor,
+                font: 'monospace',
+                fontSize: 10,
+                backgroundOpacity: 0.9
+              });
+              const arcSteps = 10;
+              const arcRadius = 0.5;
+              let prevPt = { x: p2.x + u1.x * arcRadius, y: p2.y + u1.y * arcRadius, z: p2.z + u1.z * arcRadius };
+              for (let i = 1; i <= arcSteps; i++) {
+                const t = i / arcSteps;
+                const interp = {
+                  x: u1.x * (1 - t) + u2.x * t,
+                  y: u1.y * (1 - t) + u2.y * t,
+                  z: u1.z * (1 - t) + u2.z * t
+                };
+                const lenI = Math.sqrt(interp.x*interp.x + interp.y*interp.y + interp.z*interp.z);
+                const nextPt = {
+                  x: p2.x + (lenI > 0 ? (interp.x / lenI) * arcRadius : 0),
+                  y: p2.y + (lenI > 0 ? (interp.y / lenI) * arcRadius : 0),
+                  z: p2.z + (lenI > 0 ? (interp.z / lenI) * arcRadius : 0)
+                };
+                viewer.addCylinder({ start: prevPt, end: nextPt, radius: 0.02, color: '#F2CD5C' });
+                prevPt = nextPt;
+              }
+            }
+          }
+
+          if (m.type === 'dihedral' && m.coordinates.length === 4) {
+            const [p1, p2, p3, p4] = m.coordinates;
+            viewer.addCylinder({ start: p1, end: p2, radius: 0.03, color: '#ffffff' });
+            viewer.addCylinder({ start: p2, end: p3, radius: 0.04, color: '#ffffff' });
+            viewer.addCylinder({ start: p3, end: p4, radius: 0.03, color: '#ffffff' });
+            const midCentral = {
+              x: (p2.x + p3.x) / 2,
+              y: (p2.y + p3.y) / 2,
+              z: (p2.z + p3.z) / 2
+            };
+            viewer.addLabel(m.label, {
+              position: midCentral,
+              backgroundColor: 'rgba(10, 10, 12, 0.85)',
+              borderColor: labelColor,
+              fontColor: labelColor,
+              font: 'monospace',
+              fontSize: 10,
+              backgroundOpacity: 0.9
+            });
+          }
+
+          if (m.type === 'label' && m.coordinates.length === 1) {
+            const [p1] = m.coordinates;
+            viewer.addLabel(m.label, {
+              position: p1,
+              backgroundColor: 'rgba(10, 10, 12, 0.85)',
+              borderColor: '#60a5fa',
+              fontColor: '#ffffff',
+              font: 'monospace',
+              fontSize: 9,
+              backgroundOpacity: 0.85
+            });
+          }
+        });
 
         // 9. Interactions
         if (interactions && interactions.length > 0) {
@@ -501,7 +655,13 @@ export default forwardRef<MolStudioViewerRef, {
               start: { x: int.atom1.x, y: int.atom1.y, z: int.atom1.z },
               end: { x: int.atom2.x, y: int.atom2.y, z: int.atom2.z },
               radius: 0.05,
-              color: int.type === 'hbond' ? 'yellow' : int.type === 'hydrophobic' ? 'purple' : 'green',
+              color: int.type === 'hbond' ? 'yellow' :
+                     int.type === 'hydrophobic' ? '#a855f7' :
+                     int.type === 'pistacking' ? '#06b6d4' :
+                     int.type === 'saltbridge' ? '#ef4444' :
+                     int.type === 'halogen' ? '#f97316' :
+                     int.type === 'cationpi' ? '#ec4899' :
+                     '#10b981',
               dashed: true,
               fromCap: 1,
               toCap: 1
@@ -527,22 +687,20 @@ export default forwardRef<MolStudioViewerRef, {
       if (isHeavy) {
         setIsRendering(false);
       }
-    }, 10); // Small delay to allow React to paint the loading state
+    }, 10);
 
     return () => clearTimeout(timer);
-  }, [pdbData, ssData, ssMode, assemblyPDB, symmetryPDB, alignmentPDB, ligandData, dockingPDBQT, dockingBox, gridBoxThickness, gridBoxOpacity, interactions, renderStyle, colorScheme, surfaceOpacity, selectedAtomSerials, backgroundColor, focusTrigger]);
+  }, [pdbData, ssData, ssMode, assemblyPDB, symmetryPDB, alignmentPDB, ligandData, dockingPDBQT, dockingBox, gridBoxThickness, gridBoxOpacity, interactions, renderStyle, colorScheme, surfaceOpacity, selectedAtomSerials, backgroundColor, focusTrigger, measurements, activeMeasurementMode, showDipoleArrow, dipoleMoment]);
+
   const gridShapesRef = useRef<any[]>([]);
 
   useEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer) return;
-
-    // Remove previous grid shapes
     if (gridShapesRef.current.length > 0) {
       gridShapesRef.current.forEach(shape => viewer.removeShape(shape));
       gridShapesRef.current = [];
     }
-
     if (dockingBox) {
       const cx = dockingBox.center.x;
       const cy = dockingBox.center.y;
@@ -550,24 +708,21 @@ export default forwardRef<MolStudioViewerRef, {
       const hx = dockingBox.size.x / 2;
       const hy = dockingBox.size.y / 2;
       const hz = dockingBox.size.z / 2;
-         
       const p = [
-         { x: cx - hx, y: cy - hy, z: cz - hz }, // 0
-         { x: cx + hx, y: cy - hy, z: cz - hz }, // 1
-         { x: cx + hx, y: cy + hy, z: cz - hz }, // 2
-         { x: cx - hx, y: cy + hy, z: cz - hz }, // 3
-         { x: cx - hx, y: cy - hy, z: cz + hz }, // 4
-         { x: cx + hx, y: cy - hy, z: cz + hz }, // 5
-         { x: cx + hx, y: cy + hy, z: cz + hz }, // 6
-         { x: cx - hx, y: cy + hy, z: cz + hz }  // 7
+         { x: cx - hx, y: cy - hy, z: cz - hz },
+         { x: cx + hx, y: cy - hy, z: cz - hz },
+         { x: cx + hx, y: cy + hy, z: cz - hz },
+         { x: cx - hx, y: cy + hy, z: cz - hz },
+         { x: cx - hx, y: cy - hy, z: cz + hz },
+         { x: cx + hx, y: cy - hy, z: cz + hz },
+         { x: cx + hx, y: cy + hy, z: cz + hz },
+         { x: cx - hx, y: cy + hy, z: cz + hz }
       ];
-         
       const edges = [
-         [0,1], [1,2], [2,3], [3,0], // bottom face
-         [4,5], [5,6], [6,7], [7,4], // top face
-         [0,4], [1,5], [2,6], [3,7]  // vertical edges
+         [0,1], [1,2], [2,3], [3,0],
+         [4,5], [5,6], [6,7], [7,4],
+         [0,4], [1,5], [2,6], [3,7]
       ];
-         
       edges.forEach(([i, j]) => {
          const shape = viewer.addCylinder({
             start: p[i], 

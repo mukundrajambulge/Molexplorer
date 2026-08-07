@@ -1,0 +1,59 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports: ["3000:3000"]
+    environment:
+      - VITE_API_URL=http://api:8000
+    depends_on: [api]
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports: ["8000:8000"]
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://molexplorer:molexplorer@postgres:5432/molexplorer
+      - REDIS_URL=redis://redis:6379/0
+      - CORS_ORIGINS=["http://localhost:3000","http://web:3000"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: celery -A app.tasks.celery_app worker --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://molexplorer:molexplorer@postgres:5432/molexplorer
+      - REDIS_URL=redis://redis:6379/0
+    depends_on: [api, redis]
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: molexplorer
+      POSTGRES_PASSWORD: molexplorer
+      POSTGRES_DB: molexplorer
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U molexplorer"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

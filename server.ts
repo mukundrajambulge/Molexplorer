@@ -4,7 +4,7 @@ import { createServer as createViteServer } from "vite";
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5173;
 
   // Add COOP/COEP headers for SharedArrayBuffer support in Webina
   app.use((req, res, next) => {

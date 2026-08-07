@@ -1,0 +1,4 @@
+{
+  "summary": "Modified PDF generator script to remove the col_widths parameter from the fpdf2 table context manager. This allows fpdf2 to automatically divide the available width equally among columns, preventing column count mismatch crashes.",
+  "updatedAt": "2026-08-04T06:40:13.119506900Z"
+}

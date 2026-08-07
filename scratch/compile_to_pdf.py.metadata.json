@@ -1,0 +1,4 @@
+{
+  "summary": "Generic Python script utilizing fpdf2 to convert any markdown document containing tables, headers, lists, alerts, and inline styling to a clean PDF with em-dash and unicode cleanup, supporting cover page rendering and proper margins.",
+  "updatedAt": "2026-08-04T06:54:42.511479Z"
+}

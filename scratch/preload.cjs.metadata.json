@@ -1,0 +1,4 @@
+{
+  "summary": "Node preload script employing an ES6 Proxy for the global $3Dmol namespace to dynamically resolve all missing property reads to string-serializable mock functions.",
+  "updatedAt": "2026-08-04T07:30:48.129629200Z"
+}
