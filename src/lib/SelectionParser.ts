@@ -89,7 +89,7 @@ export class SelectionParser {
   }
 
   tokenize(query: string): string[] {
-    const tokenRegex = /\b(and|or|not|byres|bychain|bymolecule|neighbor|extend|around|within|beyond|of|resn|resi|chain|elem|name|b|q|id|alt|segi|metals|donors|acceptors|polymer|organic|inorganic|solvent|hetatm|hydrogens|all|none)\b|<=|>=|==|!=|<|>|=|\(|\)|[a-zA-Z0-9_\-\*\.]+/gi;
+    const tokenRegex = /\b(and|or|not|byres|bychain|bymolecule|neighbor|extend|around|within|beyond|of|resn|resi|chain|elem|name|b|q|id|alt|segi|metals|donors?|acceptors?|polymer\.protein|polymer\.nucleic|polymer|backbone|sidechain|organic|inorganic|solvent|hetatm|hydrogens|guide|visible|enabled|all|none)\b|<=|>=|==|!=|<|>|=|\(|\)|[a-zA-Z0-9_\-\*\.]+/gi;
     return query.match(tokenRegex) || [];
   }
 
@@ -160,7 +160,12 @@ export class SelectionParser {
         }
 
         // Global flag keywords
-        if (['organic', 'inorganic', 'polymer', 'solvent', 'hetatm', 'hydrogens', 'metals', 'donors', 'acceptors', 'all', 'none'].includes(currentToken)) {
+        if ([
+          'organic', 'inorganic', 'polymer', 'polymer.protein', 'polymer.nucleic',
+          'backbone', 'sidechain', 'solvent', 'hetatm', 'hydrogens', 'metals',
+          'donor', 'donors', 'acceptor', 'acceptors', 'guide', 'visible', 'enabled',
+          'all', 'none'
+        ].includes(currentToken)) {
             pos++;
             return { type: 'flag', flag: currentToken };
         }
@@ -445,32 +450,93 @@ export class SelectionParser {
   }
 
   matchFlag(atom: Atom, flag: string): boolean {
-    switch (flag) {
+    const fl = flag.toLowerCase();
+
+    const aminoAcids = new Set([
+      'ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS', 'ILE',
+      'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL',
+      'MSE', 'SEC', 'PYL', 'HYP'
+    ]);
+    const nucleicAcids = new Set([
+      'A', 'C', 'G', 'T', 'U', 'DA', 'DC', 'DG', 'DT', 'DU', 'RA', 'RC', 'RG', 'RU'
+    ]);
+
+    const resNameUpper = (atom.resName || '').trim().toUpperCase();
+    const elemUpper = (atom.elem || '').trim().toUpperCase();
+    const atomNameUpper = (atom.name || '').trim().toUpperCase();
+
+    const isProteinRes = aminoAcids.has(resNameUpper);
+    const isNucleicRes = nucleicAcids.has(resNameUpper);
+    const isPolymerRes = isProteinRes || isNucleicRes || !atom.isHetero;
+
+    const proteinBackboneAtoms = new Set(['N', 'CA', 'C', 'O', 'OXT', 'H', 'HA', 'H1', 'H2', 'H3']);
+    const nucleicBackboneAtoms = new Set(['P', 'OP1', 'OP2', 'OP3', "O3'", "O5'", "C3'", "C4'", "C5'", "O4'", "C1'", "C2'"]);
+
+    switch (fl) {
       case 'organic':
         return !!atom.isHetero && !isSolvent(atom) && hasCarbons(atom, this.atoms);
+
       case 'inorganic':
         return !!atom.isHetero && !isSolvent(atom) && !hasCarbons(atom, this.atoms);
+
       case 'polymer':
-        return !atom.isHetero;
+        return isPolymerRes && !isSolvent(atom);
+
+      case 'polymer.protein':
+        return isProteinRes && !isSolvent(atom);
+
+      case 'polymer.nucleic':
+        return isNucleicRes && !isSolvent(atom);
+
+      case 'backbone':
+        if (isSolvent(atom)) return false;
+        if (isProteinRes) return proteinBackboneAtoms.has(atomNameUpper);
+        if (isNucleicRes) return nucleicBackboneAtoms.has(atomNameUpper);
+        return proteinBackboneAtoms.has(atomNameUpper) || nucleicBackboneAtoms.has(atomNameUpper);
+
+      case 'sidechain':
+        if (isSolvent(atom)) return false;
+        if (isProteinRes) return !proteinBackboneAtoms.has(atomNameUpper);
+        if (isNucleicRes) return !nucleicBackboneAtoms.has(atomNameUpper);
+        return false;
+
+      case 'guide':
+        if (isProteinRes) return atomNameUpper === 'CA';
+        if (isNucleicRes) return atomNameUpper === 'P';
+        return atomNameUpper === 'CA' || atomNameUpper === 'P';
+
       case 'solvent':
         return isSolvent(atom);
+
       case 'hetatm':
         return !!atom.isHetero;
+
       case 'hydrogens':
-        return atom.elem.toUpperCase() === 'H' || atom.elem.toUpperCase() === 'D';
+        return elemUpper === 'H' || elemUpper === 'D';
+
       case 'metals':
-        return ['MG', 'ZN', 'FE', 'CA', 'NA', 'K', 'CU', 'MN', 'NI', 'CO'].includes(atom.elem.toUpperCase());
+        return ['MG', 'ZN', 'FE', 'CA', 'NA', 'K', 'CU', 'MN', 'NI', 'CO'].includes(elemUpper);
+
+      case 'donor':
       case 'donors': {
-        const hasH = atom.bonds.some(bIdx => {
+        if (elemUpper === 'H' || elemUpper === 'D') return true;
+        if (!['N', 'O', 'S'].includes(elemUpper)) return false;
+        if (!atom.bonds || atom.bonds.length === 0) return true;
+        return atom.bonds.some(bIdx => {
           const bAtom = this.atoms[bIdx];
           return bAtom && (bAtom.elem.toUpperCase() === 'H' || bAtom.name.trim().toUpperCase().startsWith('H'));
         });
-        return ['N', 'O', 'S'].includes(atom.elem.toUpperCase()) && hasH;
       }
+
+      case 'acceptor':
       case 'acceptors':
-        return ['O', 'N', 'F', 'S'].includes(atom.elem.toUpperCase());
+        return ['O', 'N', 'F', 'S'].includes(elemUpper);
+
+      case 'visible':
+      case 'enabled':
       case 'all':
         return true;
+
       case 'none':
         return false;
     }

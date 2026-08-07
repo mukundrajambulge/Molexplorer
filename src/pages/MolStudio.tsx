@@ -194,7 +194,7 @@ export default function MolStudio() {
 
   const handleClearSelection = () => setSelectedAtomSerials(new Set());
 
-  const handleRunQuery = (query: string): string | undefined => {
+  const handleRunQuery = (query: string): { count: number; textOutput?: string } => {
     const parser = new SelectionParser(atoms);
     const activeObjectName = molData?.name || "molecule";
     const result = parser.evaluateCommand(query, namedSelections, activeObjectName);
@@ -278,7 +278,7 @@ export default function MolStudio() {
       });
     }
 
-    return result.textOutput;
+    return { count: result.selectedSerials.size, textOutput: result.textOutput };
   };
 
   const handleSaveSelection = (name: string, query: string) => {

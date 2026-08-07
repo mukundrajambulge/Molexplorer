@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Terminal, Send, Trash2, CheckCircle2, AlertCircle, HelpCircle, ChevronRight, CornerDownLeft, Minus, X } from "lucide-react";
 
 interface QueryConsoleProps {
-  onRunQuery: (query: string) => string | undefined;
+  onRunQuery: (query: string) => { count: number; textOutput?: string } | string | undefined;
   selectedAtomCount: number;
   totalAtomCount: number;
   isOpen: boolean;
@@ -48,11 +48,21 @@ export const SelectionQueryConsole: React.FC<QueryConsoleProps> = ({
     if (!q) return;
 
     try {
-      const outputText = onRunQuery(q);
+      const res = onRunQuery(q);
+      let count = selectedAtomCount;
+      let outputText: string | undefined = undefined;
+
+      if (res && typeof res === 'object') {
+        count = res.count;
+        outputText = res.textOutput;
+      } else if (typeof res === 'string') {
+        outputText = res;
+      }
+
       const newLog: QueryLog = {
         id: crypto.randomUUID(),
         query: q,
-        count: selectedAtomCount,
+        count: count,
         status: "success",
         textOutput: outputText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
