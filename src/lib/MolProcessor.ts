@@ -865,4 +865,103 @@ export class MolProcessor {
     
     return out;
   }
+
+  getChainSummary(): {
+    chainID: string;
+    type: 'protein' | 'nucleic' | 'ligand' | 'ion' | 'water' | 'other';
+    atomCount: number;
+    residueCount: number;
+    residueTypes: string[];
+  }[] {
+    const chainMap = new Map<string, {
+      typeCounts: Record<string, number>;
+      atomCount: number;
+      residues: Set<number>;
+      resNames: Set<string>;
+    }>();
+
+    const solventNames = new Set(['HOH', 'WAT', 'DOD', 'TIP', 'SOL']);
+    const ionElems = new Set(['NA', 'K', 'MG', 'CA', 'ZN', 'FE', 'CL', 'BR', 'MN', 'CO', 'NI', 'CU']);
+    const nucleicRes = new Set(['A', 'C', 'G', 'T', 'U', 'DA', 'DC', 'DG', 'DT', 'DU']);
+
+    for (const a of this.atoms) {
+      const ch = a.chainID || 'A';
+      if (!chainMap.has(ch)) {
+        chainMap.set(ch, {
+          typeCounts: { protein: 0, nucleic: 0, ligand: 0, ion: 0, water: 0, other: 0 },
+          atomCount: 0,
+          residues: new Set(),
+          resNames: new Set()
+        });
+      }
+      const entry = chainMap.get(ch)!;
+      entry.atomCount++;
+      entry.residues.add(a.resSeq);
+      const resn = a.resName.trim().toUpperCase();
+      entry.resNames.add(resn);
+
+      if (solventNames.has(resn)) {
+        entry.typeCounts.water++;
+      } else if (ionElems.has(a.elem.toUpperCase()) && a.isHetero && entry.resNames.size === 1) {
+        entry.typeCounts.ion++;
+      } else if (nucleicRes.has(resn)) {
+        entry.typeCounts.nucleic++;
+      } else if (!a.isHetero) {
+        entry.typeCounts.protein++;
+      } else {
+        entry.typeCounts.ligand++;
+      }
+    }
+
+    return Array.from(chainMap.entries()).map(([chainID, data]) => {
+      let mainType: 'protein' | 'nucleic' | 'ligand' | 'ion' | 'water' | 'other' = 'protein';
+      let maxCount = -1;
+      for (const [t, count] of Object.entries(data.typeCounts)) {
+        if (count > maxCount) {
+          maxCount = count;
+          mainType = t as any;
+        }
+      }
+      return {
+        chainID,
+        type: mainType,
+        atomCount: data.atomCount,
+        residueCount: data.residues.size,
+        residueTypes: Array.from(data.resNames)
+      };
+    });
+  }
+
+  filterAtomsByChains(chainIDs: string[]): Atom[] {
+    const chainSet = new Set(chainIDs);
+    return this.atoms.filter(a => chainSet.has(a.chainID));
+  }
+
+  filterAtomsByComponentType(options: {
+    protein?: boolean;
+    nucleic?: boolean;
+    ligand?: boolean;
+    ion?: boolean;
+    water?: boolean;
+  }): Atom[] {
+    const solventNames = new Set(['HOH', 'WAT', 'DOD', 'TIP', 'SOL']);
+    const ionElems = new Set(['NA', 'K', 'MG', 'CA', 'ZN', 'FE', 'CL', 'BR', 'MN', 'CO', 'NI', 'CU']);
+    const nucleicRes = new Set(['A', 'C', 'G', 'T', 'U', 'DA', 'DC', 'DG', 'DT', 'DU']);
+
+    const showProtein = options.protein ?? true;
+    const showNucleic = options.nucleic ?? true;
+    const showLigand = options.ligand ?? true;
+    const showIon = options.ion ?? true;
+    const showWater = options.water ?? true;
+
+    return this.atoms.filter(a => {
+      const resn = a.resName.trim().toUpperCase();
+      if (solventNames.has(resn)) return showWater;
+      if (ionElems.has(a.elem.toUpperCase()) && a.isHetero) return showIon;
+      if (nucleicRes.has(resn)) return showNucleic;
+      if (!a.isHetero) return showProtein;
+      return showLigand;
+    });
+  }
 }
+

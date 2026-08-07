@@ -1,7 +1,7 @@
 {
-  "name": "react-example",
+  "name": "molexplorer-molstudio",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
@@ -38,7 +38,6 @@
     "react-router-dom": "^7.18.1",
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.6.0",
-    "vite": "^6.2.3",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
