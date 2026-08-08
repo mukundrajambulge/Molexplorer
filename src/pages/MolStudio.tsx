@@ -197,6 +197,19 @@ export default function MolStudio() {
 
   const handleClearSelection = () => setSelectedAtomSerials(new Set());
 
+  const handleAtomClick = (atom: any) => {
+    if (!atom || !atom.serial) return;
+    setSelectedAtomSerials((prev) => {
+      const next = new Set(prev);
+      if (next.has(atom.serial)) {
+        next.delete(atom.serial);
+      } else {
+        next.add(atom.serial);
+      }
+      return next;
+    });
+  };
+
   const handleRunQuery = (query: string): { count: number; textOutput?: string } => {
     const parser = new SelectionParser(atoms);
     const activeObjectName = molData?.name || "molecule";
