@@ -52,6 +52,7 @@ export default function MolStudio() {
   const { assemblyState, setAssemblyState, availableAssemblies, setAvailableAssemblies, hasSymmetryInfo, setHasSymmetryInfo, assemblyPDB, setAssemblyPDB, symmetryPDB, setSymmetryPDB } = useAssembly();
   const { alignMol, setAlignMol, alignmentResult, setAlignmentResult, alignError, setAlignError, alignFetchId, setAlignFetchId, isAlignFetching, setIsAlignFetching, handleAlignFetch, handleAlignFileUpload, runAlignment } = useAlignment(molData);
 
+  const viewerRef = useRef<CoreViewer3DRef>(null);
   const [showTimeline, setShowTimeline] = useState(false);
   const [showRaytrace, setShowRaytrace] = useState(false);
   const [activeWizard, setActiveWizard] = useState<string | null>(null);
