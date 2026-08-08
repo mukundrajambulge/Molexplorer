@@ -59,9 +59,10 @@ interface StudioRibbonBarProps {
   setMeasurementMode: (mode: "distance" | "angle" | "dihedral" | "label" | null) => void;
   clearMeasurements: () => void;
   measurements: any[];
+  onOpenWizard?: (wizard: string) => void;
 }
 
-export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
+export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (wizard: string) => void }> = ({
   onFileUpload,
   onFetchPdb,
   renderStyle,
@@ -90,9 +91,10 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
   activeMeasurementMode,
   setMeasurementMode,
   clearMeasurements,
-  measurements
+  measurements,
+  onOpenWizard
 }) => {
-  const [activeTab, setActiveTab] = useState<"file" | "display" | "select" | "prep" | "align" | "analysis" | "movie">("display");
+  const [activeTab, setActiveTab] = useState<"file" | "display" | "select" | "prep" | "align" | "analysis" | "wizards" | "movie">("display");
   const [pdbInput, setPdbInput] = useState("");
   const [alignInput, setAlignInput] = useState("");
 
@@ -159,6 +161,7 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
               { id: "prep", label: "Protein Prep" },
               { id: "align", label: "Structural Alignment" },
               { id: "analysis", label: "Structure Analysis" },
+              { id: "wizards", label: "Wizards & Maps" },
               { id: "movie", label: "Movie & Animation" }
             ].map(tab => (
               <button
@@ -512,6 +515,43 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps> = ({
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* WIZARDS & MAPS TAB */}
+        {activeTab === "wizards" && (
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => onOpenWizard && onOpenWizard('mutagenesis')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs transition-all cursor-pointer font-medium"
+            >
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <span>Mutagenesis Wizard</span>
+            </button>
+
+            <button
+              onClick={() => onOpenWizard && onOpenWizard('mapUpload')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs transition-all cursor-pointer font-medium"
+            >
+              <Box className="w-4 h-4 text-blue-400" />
+              <span>CCP4 Map Isosurfacing</span>
+            </button>
+
+            <button
+              onClick={() => onOpenWizard && onOpenWizard('pairfit')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs transition-all cursor-pointer font-medium"
+            >
+              <Scissors className="w-4 h-4 text-cyan-400" />
+              <span>Atom-Pair Superposition</span>
+            </button>
+
+            <button
+              onClick={() => onOpenWizard && onOpenWizard('fragment')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs transition-all cursor-pointer font-medium"
+            >
+              <Plus className="w-4 h-4 text-emerald-400" />
+              <span>Fragment Builder</span>
+            </button>
           </div>
         )}
 

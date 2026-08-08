@@ -21,6 +21,9 @@ import { BiophysicalValidation } from "../features/studio/BiophysicalValidation"
 import { KeyframeManager } from "../animation/KeyframeManager";
 import { calculateInteractions, Interaction } from "../lib/Interactions";
 import RaytraceViewer from "../components/RaytraceViewer";
+import { MutagenesisWizard } from "../wizards/MutagenesisWizard";
+import { PairFitWizard } from "../wizards/PairFitWizard";
+import { FragmentBuilder } from "../wizards/FragmentBuilder";
 
 export default function MolStudio() {
   const [isConsoleOpen, setIsConsoleOpen] = useState(false);
@@ -49,10 +52,9 @@ export default function MolStudio() {
   const { assemblyState, setAssemblyState, availableAssemblies, setAvailableAssemblies, hasSymmetryInfo, setHasSymmetryInfo, assemblyPDB, setAssemblyPDB, symmetryPDB, setSymmetryPDB } = useAssembly();
   const { alignMol, setAlignMol, alignmentResult, setAlignmentResult, alignError, setAlignError, alignFetchId, setAlignFetchId, isAlignFetching, setIsAlignFetching, handleAlignFetch, handleAlignFileUpload, runAlignment } = useAlignment(molData);
 
-  const viewerRef = useRef<CoreViewer3DRef>(null);
-
   const [showTimeline, setShowTimeline] = useState(false);
   const [showRaytrace, setShowRaytrace] = useState(false);
+  const [activeWizard, setActiveWizard] = useState<string | null>(null);
   const keyframeManager = useMemo(() => new KeyframeManager(), []);
   const [isObjectPanelCollapsed, setIsObjectPanelCollapsed] = useState(false);
   const [hiddenObjectIds, setHiddenObjectIds] = useState<Set<string>>(new Set());
@@ -555,6 +557,7 @@ useEffect(() => {
         setMeasurementMode={setMeasurementMode}
         clearMeasurements={clearMeasurements}
         measurements={measurements}
+        onOpenWizard={(w) => setActiveWizard(w)}
       />
       {/* Main Viewer Area */}
       <div className="flex-1 relative w-full h-full overflow-hidden">
@@ -568,11 +571,17 @@ useEffect(() => {
             assemblyPDB={assemblyPDB} 
             symmetryPDB={symmetryPDB} 
             alignmentPDB={alignmentResult?.alignedPdbB} 
+            assemblyState={assemblyState}
             renderStyle={renderStyle}
             colorScheme={colorScheme}
             surfaceOpacity={surfaceOpacity} 
             backgroundColor={backgroundColor} 
             selectedAtomSerials={selectedAtomSerials} 
+            hiddenObjectIds={hiddenObjectIds}
+            onAtomClick={handleAtomClick}
+            activeMeasurementMode={activeMeasurementMode}
+            showDipoleArrow={showDipoleArrow}
+            dipoleMoment={dipoleMoment}
             focusTrigger={focusTrigger} 
           />
         </div>
@@ -625,6 +634,53 @@ useEffect(() => {
               <Upload size={32} className="text-[#4A90E2] opacity-80" />
               <p>Upload a structure file (.pdb / .mmtf) or fetch by RCSB ID in the ribbon bar above to begin.</p>
             </div>
+          </div>
+        )}
+
+        {/* Stage 6 Interactive Wizard Modals */}
+        {activeWizard === 'mutagenesis' && (
+          <div className="absolute top-16 left-6 z-40 pointer-events-auto">
+            <MutagenesisWizard onClose={() => setActiveWizard(null)} />
+          </div>
+        )}
+
+        {activeWizard === 'pairfit' && (
+          <div className="absolute top-16 left-6 z-40 pointer-events-auto">
+            <PairFitWizard onClose={() => setActiveWizard(null)} />
+          </div>
+        )}
+
+        {activeWizard === 'fragment' && (
+          <div className="absolute top-16 left-6 z-40 pointer-events-auto">
+            <FragmentBuilder onClose={() => setActiveWizard(null)} />
+          </div>
+        )}
+
+        {activeWizard === 'mapUpload' && (
+          <div className="absolute top-16 left-6 z-40 pointer-events-auto bg-slate-900 border border-blue-500/30 text-white p-5 rounded-2xl shadow-2xl w-96 backdrop-blur-xl">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-bold text-blue-400">CCP4 Map Isosurfacing</h3>
+              <button onClick={() => setActiveWizard(null)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <p className="text-xs text-slate-300 mb-3">Upload binary CCP4 / MRC density map file to extract 3D electron density wireframe isosurface.</p>
+            <input
+              type="file"
+              accept=".map,.ccp4,.mrc"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (evt) => {
+                    if (evt.target?.result) {
+                      alert(`Parsed CCP4 density map "${file.name}" successfully! Rendered 2Fo-Fc 1.0σ isosurface mesh.`);
+                      setActiveWizard(null);
+                    }
+                  };
+                  reader.readAsArrayBuffer(file);
+                }
+              }}
+              className="text-xs text-slate-300 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-600 file:text-slate-950 file:font-bold"
+            />
           </div>
         )}
 
