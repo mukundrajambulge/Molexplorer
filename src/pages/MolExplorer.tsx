@@ -108,11 +108,13 @@ export default function MolExplorer() {
     setMolecule(newMols[0]);
   };
 
-  const filteredLibrary = library.filter(mol => {
+  const filteredLibrary = (library || []).filter(mol => {
+    if (!mol) return false;
+    
     // Text search
-    if (filters.searchQuery) {
+    if (filters?.searchQuery) {
       const q = filters.searchQuery.toLowerCase();
-      if (!mol.name.toLowerCase().includes(q) && 
+      if (!mol.name?.toLowerCase().includes(q) && 
           !mol.smiles?.toLowerCase().includes(q) && 
           !mol.properties?.formula?.toLowerCase().includes(q)) {
         return false;
@@ -120,15 +122,22 @@ export default function MolExplorer() {
     }
     
     // Properties ranges
-    if (mol.properties) {
+    if (mol.properties && filters) {
       const p = mol.properties;
-      if (p.amw < filters.massRange[0] || p.amw > filters.massRange[1]) return false;
-      if (p.CrippenClogP < filters.logpRange[0] || p.CrippenClogP > filters.logpRange[1]) return false;
-      if (p.NumHDonors < filters.hbdRange[0] || p.NumHDonors > filters.hbdRange[1]) return false;
-      if (p.NumHAcceptors < filters.hbaRange[0] || p.NumHAcceptors > filters.hbaRange[1]) return false;
-      if (p.tpsa < filters.tpsaRange[0] || p.tpsa > filters.tpsaRange[1]) return false;
-      if (p.NumRotatableBonds < filters.rotatableRange[0] || p.NumRotatableBonds > filters.rotatableRange[1]) return false;
-      if (filters.maxRo5Violations !== null && p.ro5Violations > filters.maxRo5Violations) return false;
+      const mass = filters.massRange || [0, 2000];
+      const logp = filters.logpRange || [-10, 15];
+      const hbd = filters.hbdRange || [0, 20];
+      const hba = filters.hbaRange || [0, 20];
+      const tpsa = filters.tpsaRange || [0, 300];
+      const rot = filters.rotatableRange || [0, 50];
+
+      if (typeof p.amw === 'number' && (p.amw < mass[0] || p.amw > mass[1])) return false;
+      if (typeof p.CrippenClogP === 'number' && (p.CrippenClogP < logp[0] || p.CrippenClogP > logp[1])) return false;
+      if (typeof p.NumHDonors === 'number' && (p.NumHDonors < hbd[0] || p.NumHDonors > hbd[1])) return false;
+      if (typeof p.NumHAcceptors === 'number' && (p.NumHAcceptors < hba[0] || p.NumHAcceptors > hba[1])) return false;
+      if (typeof p.tpsa === 'number' && (p.tpsa < tpsa[0] || p.tpsa > tpsa[1])) return false;
+      if (typeof p.NumRotatableBonds === 'number' && (p.NumRotatableBonds < rot[0] || p.NumRotatableBonds > rot[1])) return false;
+      if (filters.maxRo5Violations !== null && filters.maxRo5Violations !== undefined && typeof p.ro5Violations === 'number' && p.ro5Violations > filters.maxRo5Violations) return false;
     }
     
     return true;

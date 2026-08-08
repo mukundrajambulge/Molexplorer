@@ -29,6 +29,9 @@ export default function FilterPanel({ filters, setFilters }: FilterPanelProps) {
     }));
   };
 
+  const massRange = filters?.massRange || [0, 2000];
+  const logpRange = filters?.logpRange || [-10, 15];
+
   return (
     <div className="flex flex-col gap-8 h-full">
       {/* Library Text Search */}
@@ -40,7 +43,7 @@ export default function FilterPanel({ filters, setFilters }: FilterPanelProps) {
           type="text"
           placeholder="Name, Formula, SMILES..."
           className="w-full text-[11px] font-mono bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-[#F0F0F0] placeholder:opacity-30 focus:outline-none focus:border-[#F27D26]/50 transition-colors"
-          value={filters.searchQuery}
+          value={filters?.searchQuery || ""}
           onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
         />
       </div>
@@ -54,25 +57,25 @@ export default function FilterPanel({ filters, setFilters }: FilterPanelProps) {
           <div className="flex flex-col gap-1">
             <label className="opacity-60">Molecular Weight</label>
             <div className="flex items-center gap-2">
-              <input type="number" value={filters.massRange[0]} onChange={(e) => updateRange('massRange', e.target.value, filters.massRange[1].toString())} className="w-1/2 bg-white/[0.03] border border-white/10 rounded px-2 py-1" />
+              <input type="number" value={massRange[0]} onChange={(e) => updateRange('massRange', e.target.value, massRange[1].toString())} className="w-1/2 bg-white/[0.03] border border-white/10 rounded px-2 py-1" />
               <span>-</span>
-              <input type="number" value={filters.massRange[1]} onChange={(e) => updateRange('massRange', filters.massRange[0].toString(), e.target.value)} className="w-1/2 bg-white/[0.03] border border-white/10 rounded px-2 py-1" />
+              <input type="number" value={massRange[1]} onChange={(e) => updateRange('massRange', massRange[0].toString(), e.target.value)} className="w-1/2 bg-white/[0.03] border border-white/10 rounded px-2 py-1" />
             </div>
           </div>
           
           <div className="flex flex-col gap-1">
             <label className="opacity-60">cLogP</label>
             <div className="flex items-center gap-2">
-              <input type="number" value={filters.logpRange[0]} onChange={(e) => updateRange('logpRange', e.target.value, filters.logpRange[1].toString())} className="w-1/2 bg-white/[0.03] border border-white/10 rounded px-2 py-1" />
+              <input type="number" value={logpRange[0]} onChange={(e) => updateRange('logpRange', e.target.value, logpRange[1].toString())} className="w-1/2 bg-white/[0.03] border border-white/10 rounded px-2 py-1" />
               <span>-</span>
-              <input type="number" value={filters.logpRange[1]} onChange={(e) => updateRange('logpRange', filters.logpRange[0].toString(), e.target.value)} className="w-1/2 bg-white/[0.03] border border-white/10 rounded px-2 py-1" />
+              <input type="number" value={logpRange[1]} onChange={(e) => updateRange('logpRange', logpRange[0].toString(), e.target.value)} className="w-1/2 bg-white/[0.03] border border-white/10 rounded px-2 py-1" />
             </div>
           </div>
 
           <div className="flex flex-col gap-1">
             <label className="opacity-60">Lipinski Ro5 Violations</label>
             <select 
-              value={filters.maxRo5Violations === null ? "any" : filters.maxRo5Violations} 
+              value={filters?.maxRo5Violations === null || filters?.maxRo5Violations === undefined ? "any" : filters.maxRo5Violations} 
               onChange={(e) => setFilters(prev => ({ ...prev, maxRo5Violations: e.target.value === "any" ? null : parseInt(e.target.value) }))}
               className="w-full bg-white/[0.03] border border-white/10 rounded px-2 py-1 text-white"
             >
