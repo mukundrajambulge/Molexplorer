@@ -30,6 +30,7 @@ import { SequenceViewer } from "../components/SequenceViewer";
 import { HotkeyManager } from "../input/HotkeyManager";
 import { TopologyEditor } from "../editor/TopologyEditor";
 import { SculptingEngine } from "../simulation/SculptingEngine";
+import { MeasurementWizard } from "../components/MeasurementWizard";
 import { Command } from "lucide-react";
 
 export default function MolStudio() {
@@ -832,6 +833,9 @@ useEffect(() => {
 
         {/* Scientific Guide & Help Sidebar Panel */}
         <UserManualModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+
+        {/* Measurement & Density Map Wizards */}
+        <MeasurementWizard modal={activeWizard} onClose={() => setActiveWizard(null)} processor={processorRef.current} />
 
         {/* Hotkeys Guide Modal */}
         {showHotkeysModal && (
