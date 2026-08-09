@@ -60,6 +60,16 @@ interface StudioRibbonBarProps {
   clearMeasurements: () => void;
   measurements: any[];
   onOpenWizard?: (wizard: string) => void;
+
+  // Session & View Props
+  onLoadSession?: (file: File) => void;
+  showSequenceViewer?: boolean;
+  onToggleSequenceViewer?: () => void;
+  orthographic?: boolean;
+  onToggleOrthographic?: () => void;
+  stereoMode?: 'none' | 'cross-eye' | 'anaglyph';
+  setStereoMode?: (mode: 'none' | 'cross-eye' | 'anaglyph') => void;
+  onOpenHotkeysModal?: () => void;
 }
 
 export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (wizard: string) => void }> = ({
@@ -92,9 +102,17 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
   setMeasurementMode,
   clearMeasurements,
   measurements,
-  onOpenWizard
+  onOpenWizard,
+  onLoadSession,
+  showSequenceViewer,
+  onToggleSequenceViewer,
+  orthographic,
+  onToggleOrthographic,
+  stereoMode,
+  setStereoMode,
+  onOpenHotkeysModal
 }) => {
-  const [activeTab, setActiveTab] = useState<"file" | "display" | "select" | "prep" | "align" | "analysis" | "wizards" | "movie">("display");
+  const [activeTab, setActiveTab] = useState<"file" | "display" | "select" | "prep" | "align" | "analysis" | "wizards" | "movie" | "session">("display");
   const [pdbInput, setPdbInput] = useState("");
   const [alignInput, setAlignInput] = useState("");
 
@@ -162,7 +180,8 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
               { id: "align", label: "Structural Alignment" },
               { id: "analysis", label: "Structure Analysis" },
               { id: "wizards", label: "Wizards & Maps" },
-              { id: "movie", label: "Movie & Animation" }
+              { id: "movie", label: "Movie & Animation" },
+              { id: "session", label: "Session & View" }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -598,6 +617,88 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* SESSION & VIEW TAB */}
+        {activeTab === "session" && (
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onSaveSession}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs transition-all cursor-pointer font-medium"
+              >
+                <Download className="w-4 h-4 text-emerald-400" />
+                <span>Save Session (.PSE)</span>
+              </button>
+
+              <label className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] cursor-pointer text-xs transition-all">
+                <FileUp className="w-4 h-4 text-[#F27D26]" />
+                <span>Load Session (.PSE)</span>
+                <input 
+                  type="file" 
+                  accept=".json,.pse,.pse.json" 
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f && onLoadSession) onLoadSession(f);
+                  }} 
+                  className="hidden" 
+                />
+              </label>
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10"></div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onToggleSequenceViewer}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs transition-all cursor-pointer font-medium ${
+                  showSequenceViewer
+                    ? "border-[#F27D26] bg-[#F27D26]/20 text-[#F27D26]"
+                    : "border-white/10 bg-white/[0.03] text-white/70 hover:text-white"
+                }`}
+              >
+                <Layers className="w-4 h-4" />
+                <span>Sequence Viewer ({showSequenceViewer ? "ON" : "OFF"})</span>
+              </button>
+
+              <button
+                onClick={onToggleOrthographic}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs transition-all cursor-pointer font-medium ${
+                  orthographic
+                    ? "border-[#4A90E2] bg-[#4A90E2]/20 text-[#4A90E2]"
+                    : "border-white/10 bg-white/[0.03] text-white/70 hover:text-white"
+                }`}
+              >
+                <Eye className="w-4 h-4" />
+                <span>Projection: {orthographic ? "Orthographic" : "Perspective"}</span>
+              </button>
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10"></div>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider">3D Stereo</span>
+              <select
+                value={stereoMode || 'none'}
+                onChange={(e) => setStereoMode && setStereoMode(e.target.value as any)}
+                className="bg-white/[0.04] border border-white/10 rounded-md px-3 py-1 text-xs text-white focus:outline-none focus:border-[#4A90E2]"
+              >
+                <option value="none" className="bg-[#0E0E12]">Mono (Default)</option>
+                <option value="cross-eye" className="bg-[#0E0E12]">Cross-Eye 3D</option>
+                <option value="anaglyph" className="bg-[#0E0E12]">Anaglyph (Red-Cyan)</option>
+              </select>
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10"></div>
+
+            <button
+              onClick={onOpenHotkeysModal}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 text-xs transition-all cursor-pointer font-medium"
+            >
+              <Command className="w-4 h-4 text-purple-400" />
+              <span>Hotkeys Guide</span>
+            </button>
           </div>
         )}
 

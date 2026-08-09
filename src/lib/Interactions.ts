@@ -180,6 +180,35 @@ export function calculateInteractions(receptorPDB: string, ligandPDB: string): I
   const basicAtoms = ['NZ', 'NE', 'NH1', 'NH2', 'ND1', 'NE2'];
   const acidicAtoms = ['OD1', 'OD2', 'OE1', 'OE2'];
 
+  function isAnionicAtom(atom: Atom): boolean {
+    const resn = (atom.resName || '').toUpperCase();
+    const name = atom.name.trim().toUpperCase();
+    const elem = (atom.elem || '').toUpperCase();
+    if (atom.formalCharge && atom.formalCharge < 0) return true;
+    if (elem === 'O') {
+      if (acidicResidues.includes(resn) && acidicAtoms.includes(name)) return true;
+      if (['O', 'O1', 'O2', 'O3', 'O4', 'OP1', 'OP2', 'OP3'].includes(name)) return true;
+      if (!['ALA', 'CYS', 'ASP', 'GLU', 'PHE', 'GLY', 'HIS', 'ILE', 'LYS', 'LEU', 'MET', 'ASN', 'PRO', 'GLN', 'ARG', 'SER', 'THR', 'VAL', 'TRP', 'TYR', 'HOH', 'WAT'].includes(resn)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function isCationicAtom(atom: Atom): boolean {
+    const resn = (atom.resName || '').toUpperCase();
+    const name = atom.name.trim().toUpperCase();
+    const elem = (atom.elem || '').toUpperCase();
+    if (atom.formalCharge && atom.formalCharge > 0) return true;
+    if (elem === 'N') {
+      if (basicResidues.includes(resn) && basicAtoms.includes(name)) return true;
+      if (!['ALA', 'CYS', 'ASP', 'GLU', 'PHE', 'GLY', 'HIS', 'ILE', 'LYS', 'LEU', 'MET', 'ASN', 'PRO', 'GLN', 'ARG', 'SER', 'THR', 'VAL', 'TRP', 'TYR', 'HOH', 'WAT'].includes(resn)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // Heavy atom checks
   for (const latom of ligAtoms) {
     for (const ratom of recAtoms) {
@@ -237,10 +266,10 @@ export function calculateInteractions(receptorPDB: string, ligandPDB: string): I
 
       // --- 2.2 SALT BRIDGES ---
       else if (d <= 4.0) {
-        const isRBasic = basicResidues.includes(ratom.resName.toUpperCase()) && basicAtoms.includes(ratom.name.trim());
-        const isLAcidic = acidicResidues.includes(latom.resName.toUpperCase()) && acidicAtoms.includes(latom.name.trim());
-        const isRAcidic = acidicResidues.includes(ratom.resName.toUpperCase()) && acidicAtoms.includes(ratom.name.trim());
-        const isLBasic = basicResidues.includes(latom.resName.toUpperCase()) && basicAtoms.includes(latom.name.trim());
+        const isRBasic = isCationicAtom(ratom);
+        const isLAcidic = isAnionicAtom(latom);
+        const isRAcidic = isAnionicAtom(ratom);
+        const isLBasic = isCationicAtom(latom);
 
         if ((isRBasic && isLAcidic) || (isRAcidic && isLBasic)) {
           interactions.push({
@@ -249,7 +278,6 @@ export function calculateInteractions(receptorPDB: string, ligandPDB: string): I
             atom2: latom,
             distance: d
           });
-          continue;
         }
       }
 

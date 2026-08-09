@@ -36,6 +36,8 @@ interface CoreViewer3DProps {
   backgroundColor?: string;
   selectedAtomSerials?: Set<number>;
   focusTrigger?: number;
+  orthographic?: boolean;
+  stereoMode?: 'none' | 'cross-eye' | 'anaglyph';
 }
 
 const CHAIN_PALETTE = [
@@ -297,6 +299,9 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         ? (props.viewState?.canvasBackground || '#0A0A0A')
         : (props.backgroundColor || '#f0f0f0');
       viewer.setBackgroundColor(bgColor);
+      if (typeof viewer.setProjection === 'function') {
+        try { viewer.setProjection(props.orthographic ? 'orthographic' : 'perspective'); } catch (e) {}
+      }
 
       viewer.clear();
       viewer.removeAllSurfaces();

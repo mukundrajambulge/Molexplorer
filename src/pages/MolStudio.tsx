@@ -24,6 +24,11 @@ import RaytraceViewer from "../components/RaytraceViewer";
 import { MutagenesisWizard } from "../wizards/MutagenesisWizard";
 import { PairFitWizard } from "../wizards/PairFitWizard";
 import { FragmentBuilder } from "../wizards/FragmentBuilder";
+import { SessionManager } from "../session/SessionManager";
+import { MolStudioSession } from "../session/SessionSchema";
+import { SequenceViewer } from "../components/SequenceViewer";
+import { HotkeyManager } from "../input/HotkeyManager";
+import { Command } from "lucide-react";
 
 export default function MolStudio() {
   const [isConsoleOpen, setIsConsoleOpen] = useState(false);
@@ -59,6 +64,91 @@ export default function MolStudio() {
   const keyframeManager = useMemo(() => new KeyframeManager(), []);
   const [isObjectPanelCollapsed, setIsObjectPanelCollapsed] = useState(false);
   const [hiddenObjectIds, setHiddenObjectIds] = useState<Set<string>>(new Set());
+
+  // Stage 7 State Variables
+  const [showSequenceViewer, setShowSequenceViewer] = useState(false);
+  const [orthographic, setOrthographic] = useState(false);
+  const [stereoMode, setStereoMode] = useState<'none' | 'cross-eye' | 'anaglyph'>('none');
+  const [showHotkeysModal, setShowHotkeysModal] = useState(false);
+
+  const handleSaveSession = () => {
+    const session: MolStudioSession = {
+      version: '1.0',
+      timestamp: Date.now(),
+      molecule: molData ? {
+        data: molData.data instanceof Uint8Array ? new TextDecoder().decode(molData.data) : molData.data,
+        format: molData.format,
+        name: molData.name
+      } : null,
+      selectedAtomSerials: Array.from(selectedAtomSerials),
+      namedSelections,
+      measurements,
+      biophysical: {
+        showDipoleArrow,
+        ramachandranData,
+        dipoleMoment
+      },
+      viewState: {
+        renderStyle,
+        colorScheme,
+        surfaceOpacity,
+        backgroundColor,
+        orthographic,
+        stereoMode
+      }
+    };
+    SessionManager.downloadSessionFile(session, `${molData?.name || 'workspace'}_session.pse.json`);
+  };
+
+  const handleLoadSessionFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const text = ev.target?.result as string;
+        const session = SessionManager.importSession(text);
+        
+        if (session.molecule) {
+          setMolData({ data: session.molecule.data, format: session.molecule.format, name: session.molecule.name });
+        }
+        setSelectedAtomSerials(new Set(session.selectedAtomSerials));
+        setNamedSelections(session.namedSelections);
+        clearMeasurements();
+        session.measurements.forEach(m => addMeasurement(m));
+        
+        if (session.biophysical) {
+          setShowDipoleArrow(Boolean(session.biophysical.showDipoleArrow));
+          if (session.biophysical.ramachandranData) setRamachandranData(session.biophysical.ramachandranData);
+          if (session.biophysical.dipoleMoment) setDipoleMoment(session.biophysical.dipoleMoment);
+        }
+
+        if (session.viewState) {
+          setRenderStyle(session.viewState.renderStyle);
+          setColorScheme(session.viewState.colorScheme);
+          setSurfaceOpacity(session.viewState.surfaceOpacity);
+          setBackgroundColor(session.viewState.backgroundColor);
+          setOrthographic(session.viewState.orthographic);
+          setStereoMode(session.viewState.stereoMode);
+        }
+      } catch (err: any) {
+        alert(err.message || 'Failed to load session');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  // Mount Hotkey Manager
+  useEffect(() => {
+    const manager = new HotkeyManager({
+      onResetView: () => triggerFocus(),
+      onZoomSelection: () => triggerFocus(),
+      onClearSelection: () => setSelectedAtomSerials(new Set()),
+      onToggleSequence: () => setShowSequenceViewer(prev => !prev),
+      onToggleCamera: () => setOrthographic(prev => !prev),
+      onExportSession: () => handleSaveSession()
+    });
+    manager.register();
+    return () => manager.unregister();
+  }, [molData, selectedAtomSerials, namedSelections, measurements, renderStyle, colorScheme, orthographic, stereoMode]);
 
   // Bounded Undo/Redo State Stack (Max 100 snapshots)
   const [historyStack, setHistoryStack] = useState<string[]>([]);
@@ -432,86 +522,6 @@ useEffect(() => {
     }
   }, [molData, alignMol]);
 
-  const handleSaveSession = () => {
-     const view = viewerRef.current?.getView();
-     const session = {
-        molData: molData ? {
-          format: molData.format,
-          name: molData.name,
-          data: molData.format === 'mmtf' ? Array.from(molData.data as Uint8Array) : molData.data
-        } : null,
-        cleaningState,
-        assemblyState,
-        renderStyle,
-        surfaceOpacity,
-        backgroundColor,
-        namedSelections,
-        selectedAtomSerials: Array.from(selectedAtomSerials),
-        alignMol: alignMol ? {
-          format: alignMol.format,
-          name: alignMol.name,
-          data: alignMol.format === 'mmtf' ? Array.from(alignMol.data as Uint8Array) : alignMol.data
-        } : null,
-        cameraView: view
-     };
-     
-     const blob = new Blob([JSON.stringify(session)], { type: "application/json" });
-     const url = URL.createObjectURL(blob);
-     const a = document.createElement("a");
-     a.href = url;
-     a.download = "molstudio_session.json";
-     a.click();
-     URL.revokeObjectURL(url);
-  };
-
-  const handleLoadSession = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const session = JSON.parse(e.target?.result as string);
-        if (session.molData) {
-           setMolData({
-             format: session.molData.format,
-             name: session.molData.name,
-             data: session.molData.format === 'mmtf' ? new Uint8Array(session.molData.data) : session.molData.data
-           });
-        } else {
-           setMolData(null);
-        }
-        if (session.cleaningState) setCleaningState(session.cleaningState);
-        if (session.assemblyState) setAssemblyState(session.assemblyState);
-        if (session.renderStyle) setRenderStyle(session.renderStyle);
-        if (session.surfaceOpacity) setSurfaceOpacity(session.surfaceOpacity);
-        if (session.backgroundColor) setBackgroundColor(session.backgroundColor);
-        if (session.namedSelections) setNamedSelections(session.namedSelections);
-        if (session.selectedAtomSerials) setSelectedAtomSerials(new Set(session.selectedAtomSerials));
-        if (session.alignMol) {
-           setAlignMol({
-             format: session.alignMol.format,
-             name: session.alignMol.name,
-             data: session.alignMol.format === 'mmtf' ? new Uint8Array(session.alignMol.data) : session.alignMol.data
-           });
-        } else {
-           setAlignMol(null);
-        }
-        // Restore camera view after a short delay to allow 3Dmol to process models
-        if (session.cameraView) {
-           setTimeout(() => {
-              viewerRef.current?.setView(session.cameraView);
-           }, 500);
-        }
-      } catch (err) {
-        console.error("Failed to load session:", err);
-        alert("Failed to load session. The file might be corrupted.");
-      }
-    };
-    reader.readAsText(file);
-    // Reset file input
-    e.target.value = '';
-  };
-
 
 
 
@@ -572,32 +582,63 @@ useEffect(() => {
         clearMeasurements={clearMeasurements}
         measurements={measurements}
         onOpenWizard={(w) => setActiveWizard(w)}
+        onLoadSession={handleLoadSessionFile}
+        showSequenceViewer={showSequenceViewer}
+        onToggleSequenceViewer={() => setShowSequenceViewer(prev => !prev)}
+        orthographic={orthographic}
+        onToggleOrthographic={() => setOrthographic(prev => !prev)}
+        stereoMode={stereoMode}
+        setStereoMode={setStereoMode}
+        onOpenHotkeysModal={() => setShowHotkeysModal(true)}
       />
       {/* Main Viewer Area */}
-      <div className="flex-1 relative w-full h-full overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <CoreViewer3D 
-            mode="studio"
-            ref={viewerRef} 
-            pdbData={processedPDB || undefined} 
-            ssData={ssData} 
-            ssMode={cleaningState.ss_mode}
-            assemblyPDB={assemblyPDB} 
-            symmetryPDB={symmetryPDB} 
-            alignmentPDB={alignmentResult?.alignedPdbB} 
-            assemblyState={assemblyState}
-            renderStyle={renderStyle}
-            colorScheme={colorScheme}
-            surfaceOpacity={surfaceOpacity} 
-            backgroundColor={backgroundColor} 
-            selectedAtomSerials={selectedAtomSerials} 
-            hiddenObjectIds={hiddenObjectIds}
-            onAtomClick={handleAtomClick}
-            activeMeasurementMode={activeMeasurementMode}
-            showDipoleArrow={showDipoleArrow}
-            dipoleMoment={dipoleMoment}
-            focusTrigger={focusTrigger} 
-          />
+      <div className="flex-1 relative w-full h-full overflow-hidden flex flex-col">
+        <div className="flex-1 relative w-full h-full min-h-0">
+          <div className="absolute inset-0 z-0">
+            <CoreViewer3D 
+              mode="studio"
+              ref={viewerRef} 
+              pdbData={processedPDB || undefined} 
+              ssData={ssData} 
+              ssMode={cleaningState.ss_mode}
+              assemblyPDB={assemblyPDB} 
+              symmetryPDB={symmetryPDB} 
+              alignmentPDB={alignmentResult?.alignedPdbB} 
+              assemblyState={assemblyState}
+              renderStyle={renderStyle}
+              colorScheme={colorScheme}
+              surfaceOpacity={surfaceOpacity} 
+              backgroundColor={backgroundColor} 
+              selectedAtomSerials={selectedAtomSerials} 
+              hiddenObjectIds={hiddenObjectIds}
+              onAtomClick={handleAtomClick}
+              activeMeasurementMode={activeMeasurementMode}
+              showDipoleArrow={showDipoleArrow}
+              dipoleMoment={dipoleMoment}
+              focusTrigger={focusTrigger} 
+              orthographic={orthographic}
+              stereoMode={stereoMode}
+            />
+          </div>
+
+          {/* 1D Sequence Viewer Bar Overlay */}
+          {showSequenceViewer && atoms.length > 0 && (
+            <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-auto">
+              <SequenceViewer
+                atoms={atoms}
+                ssData={ssData}
+                selectedAtomSerials={selectedAtomSerials}
+                onSelectResidue={(serials, isToggle) => {
+                  setSelectedAtomSerials(prev => {
+                    const next = isToggle ? new Set(prev) : new Set();
+                    serials.forEach(s => next.add(s));
+                    return next;
+                  });
+                }}
+                onClose={() => setShowSequenceViewer(false)}
+              />
+            </div>
+          )}
         </div>
         
         {/* Per-Object Control Panel (PyMOL ASHLC Panel) */}
@@ -722,6 +763,50 @@ useEffect(() => {
 
         {/* Scientific Guide & Help Sidebar Panel */}
         <UserManualModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+
+        {/* Hotkeys Guide Modal */}
+        {showHotkeysModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xl p-4 select-none">
+            <div className="bg-[#0D0D11] border border-white/10 rounded-2xl w-full max-w-lg p-6 relative text-white shadow-2xl">
+              <button
+                onClick={() => setShowHotkeysModal(false)}
+                className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors text-lg"
+              >
+                ✕
+              </button>
+              <div className="flex items-center gap-2 text-[#4A90E2] font-bold text-lg mb-4">
+                <Command className="w-5 h-5 text-[#F27D26]" />
+                <span>MolStudio Keyboard Shortcuts & Hotkeys</span>
+              </div>
+              <div className="space-y-2 text-xs font-mono text-white/80">
+                <div className="flex justify-between py-1.5 border-b border-white/5">
+                  <span className="text-white/60">Export Session (.PSE)</span>
+                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-[#F27D26]">Ctrl + S</kbd>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-white/5">
+                  <span className="text-white/60">Reset Camera / Center View</span>
+                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-white font-bold">R</kbd>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-white/5">
+                  <span className="text-white/60">Zoom to Active Selection</span>
+                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-white font-bold">Z</kbd>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-white/5">
+                  <span className="text-white/60">Clear Active Selections</span>
+                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-white font-bold">C</kbd>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-white/5">
+                  <span className="text-white/60">Toggle 1D Sequence Bar</span>
+                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-white font-bold">S</kbd>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-white/5">
+                  <span className="text-white/60">Toggle Camera Projection (Ortho / Persp)</span>
+                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-white font-bold">P</kbd>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
