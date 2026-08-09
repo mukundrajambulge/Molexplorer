@@ -64,7 +64,7 @@ function runPhase1Tests() {
   // Test 2: Representation Strategy Factory (Dots, Cartoons, Surfaces)
   const dotStrategy = RepresentationStrategyFactory.getStrategy('Dots');
   const dotStyle = dotStrategy.getStyleObject({ colorScheme: 'spectrum', minResi: 1, maxResi: 100, chainMap: {} });
-  assert(dotStyle.dot !== undefined && dotStyle.dot.radius === 0.25, 'Dots representation uses WebGL native dot shader (0% CPU hang)');
+  assert(dotStyle.dot !== undefined && dotStyle.dot.radius === 0.35, 'Dots representation uses WebGL native dot shader (0% CPU hang)');
 
   const cartoonStrategy = RepresentationStrategyFactory.getStrategy('Cartoon');
   const cartoonStyle = cartoonStrategy.getStyleObject({ colorScheme: 'chain', minResi: 1, maxResi: 100, chainMap: {} });

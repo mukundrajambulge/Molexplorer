@@ -3,7 +3,7 @@ import * as $3Dmol from '3dmol';
 import { RenderStyle, MoleculeData, FilterState, ViewState } from '../types';
 import { SSInfo } from '../lib/MolProcessor';
 import { useStore } from '../store';
-import { RepresentationStrategyFactory } from '../rendering/RepresentationStrategy';
+import { RepresentationStrategyFactory, getColorFunction } from '../rendering/RepresentationStrategy';
 
 export interface CoreViewer3DRef {
   getView: () => any;
@@ -67,122 +67,6 @@ function getFibonacciSpherePoints(samples: number = 16) {
   return pts;
 }
 
-function hslToHex(h: number, s: number, l: number): string {
-  l /= 100;
-  const a = (s * Math.min(l, 1 - l)) / 100;
-  const f = (n: number) => {
-    const k = (n + h / 30) % 12;
-    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-    return Math.round(255 * color).toString(16).padStart(2, '0');
-  };
-  return `#${f(0)}${f(8)}${f(4)}`;
-}
-
-function getColorFunction(
-  colorScheme: string,
-  minResi: number,
-  maxResi: number,
-  chainMap: Record<string, string>
-) {
-  const resiRange = Math.max(maxResi - minResi, 1);
-
-  return (atom: any): string => {
-    if (!atom) return '#ffffff';
-
-    const csLower = (colorScheme || '').toLowerCase();
-
-    if (csLower === 'white' || csLower === 'monochrome') {
-      return '#ffffff';
-    }
-
-    if (csLower === 'element' || csLower === 'classic cpk') {
-      const elem = (atom.elem || '').toUpperCase();
-      switch (elem) {
-        case 'C': return '#909090';
-        case 'N': return '#3050f8';
-        case 'O': return '#ff0d0d';
-        case 'S': return '#ffff30';
-        case 'P': return '#ff8000';
-        case 'H': return '#ffffff';
-        case 'F': case 'CL': return '#1ff01f';
-        case 'FE': return '#e06633';
-        case 'ZN': return '#7d80b0';
-        case 'CA': return '#3dff00';
-        case 'MG': return '#8a99c7';
-        default: return '#b8b8b8';
-      }
-    }
-
-    if (csLower === 'modern/jmol') {
-      const elem = (atom.elem || '').toUpperCase();
-      switch (elem) {
-        case 'C': return '#909090';
-        case 'N': return '#3050f8';
-        case 'O': return '#ff0d0d';
-        case 'H': return '#ffffff';
-        default: return '#b8b8b8';
-      }
-    }
-
-    if (csLower === 'chain' || csLower === 'by chain') {
-      const ch = atom.chain || 'A';
-      return chainMap[ch] || chainMap[ch.toUpperCase()] || chainMap[''] || '#3b82f6';
-    }
-
-    if (csLower === 'ssjmol') {
-      const ss = (atom.ss || '').toLowerCase();
-      if (ss === 'h') return '#ff0080';
-      if (ss === 's' || ss === 'e') return '#ffc800';
-      return '#ffffff';
-    }
-
-    if (csLower === 'sspymol' || csLower === 'by ss') {
-      const ss = (atom.ss || '').toLowerCase();
-      if (ss === 'h') return '#ff0000';
-      if (ss === 's' || ss === 'e') return '#ffff00';
-      return '#22c55e';
-    }
-
-    if (csLower === 'spectrum' || csLower === 'rainbow') {
-      const resi = typeof atom.resi === 'number' ? atom.resi : minResi;
-      const t = Math.max(0, Math.min(1, (resi - minResi) / resiRange));
-      const hue = (1 - t) * 240;
-      return hslToHex(hue, 100, 48);
-    }
-
-    if (csLower === 'by formal charge') {
-      const charge = atom.formalCharge || 0;
-      if (charge < 0) return '#ef4444';
-      if (charge > 0) return '#3b82f6';
-      return '#ffffff';
-    }
-
-    if (csLower === 'by partial charge' || csLower === 'esp') {
-      const elem = (atom.elem || '').toUpperCase();
-      if (elem === 'O' || elem === 'F' || elem === 'CL') return '#ef4444';
-      if (elem === 'N' || elem === 'H') return '#3b82f6';
-      return '#f3f4f6';
-    }
-
-    if (csLower === 'hydrophobicity') {
-      const resn = (atom.resname || '').toUpperCase();
-      const hydrophobic = ['ALA', 'VAL', 'LEU', 'ILE', 'MET', 'PHE', 'TYR', 'TRP', 'PRO'];
-      if (hydrophobic.includes(resn)) return '#eab308';
-      return '#3b82f6';
-    }
-
-    if (csLower === 'colourblind-safe') {
-      const cbPalette = ['#0072B2', '#E69F00', '#009E73', '#F0E442', '#56B4E9', '#D55E00', '#CC79A7'];
-      const ch = atom.chain || 'A';
-      const idx = ch.charCodeAt(0) % cbPalette.length;
-      return cbPalette[idx];
-    }
-
-    const isHex = /^#[0-9A-F]{6}$/i.test(colorScheme);
-    return isHex ? colorScheme : '#3b82f6';
-  };
-}
-
 function getStyleObj(
   style: string,
   colorScheme: string = 'spectrum',
@@ -191,35 +75,13 @@ function getStyleObj(
   chainMap: Record<string, string> = {},
   opacity: number = 1.0
 ) {
-  const colorfunc = getColorFunction(colorScheme, minResi, maxResi, chainMap);
-  const csLower = (colorScheme || '').toLowerCase();
-  const base: any = { opacity };
-
-  if (csLower === 'spectrum' || csLower === 'rainbow') {
-    base.color = 'spectrum';
-  } else if (csLower === 'chain' || csLower === 'by chain') {
-    base.color = 'chain';
-  } else if (csLower === 'ssjmol') {
-    base.colorscheme = 'ssJmol';
-  } else if (csLower === 'sspymol' || csLower === 'by ss') {
-    base.colorscheme = 'ssPyMOL';
-  } else if (csLower === 'element' || csLower === 'classic cpk' || csLower === 'modern/jmol') {
-    base.colorscheme = 'default';
-  } else {
-    const isNamedColor = ['white', 'cyan', 'orange', 'red', 'green', 'blue', 'yellow', 'magenta', 'gray', 'purple'].includes(csLower);
-    if (colorScheme.startsWith('#') || isNamedColor) {
-      base.color = colorScheme;
-    } else {
-      base.colorfunc = colorfunc;
-    }
-  }
-
-  const strategy = RepresentationStrategyFactory.getStrategy(style);
+  const strategy = RepresentationStrategyFactory.getStrategy(style as any);
   return strategy.getStyleObject({
     colorScheme,
     minResi,
     maxResi,
-    chainMap
+    chainMap,
+    opacity
   });
 }
 
