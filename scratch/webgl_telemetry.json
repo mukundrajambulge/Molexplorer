@@ -1,0 +1,1010 @@
+[
+  {
+    "pdbId": "1ATN",
+    "atomCount": 2943,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 222.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 58.6,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 72.6,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 12,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 52.1,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1ATP",
+    "atomCount": 3070,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 65.9,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 55.3,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 57.5,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 6.6,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 13.3,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1DGF",
+    "atomCount": 3424,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 163.6,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 63.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 54.4,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 5,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 14.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1DGK",
+    "atomCount": 3356,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 71.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 46,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 52.5,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 6.6,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 14.4,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1F88",
+    "atomCount": 2676,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 41.1,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 47.4,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 58.6,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 7,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 17.3,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1F8A",
+    "atomCount": 1446,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 28.6,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 38.1,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 53.4,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 3.1,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 17.1,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1HAK",
+    "atomCount": 2593,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 44.3,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 38.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 58.7,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 5.6,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 21,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1HCO",
+    "atomCount": 2282,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 97.8,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 53.5,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 56.4,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 6.9,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 11.6,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1HLA",
+    "atomCount": 367,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 2.1,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 1,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 56.3,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 0.9,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 16.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1HLD",
+    "atomCount": 3071,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 52,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 56,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 50.4,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 5,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 10.8,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1HVR",
+    "atomCount": 1560,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 29.6,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 53,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 52.8,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 2.9,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 12.8,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1LDM",
+    "atomCount": 2843,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 34.8,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 58.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 52.4,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 5.5,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 11.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1NIK",
+    "atomCount": 3200,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 35.4,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 60,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 55.3,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 4.7,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 13.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1SMD",
+    "atomCount": 3480,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 114.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 54.9,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 51.1,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 8.7,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 12.1,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1TAQ",
+    "atomCount": 3200,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 55,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 51,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 57.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 5.3,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 11.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1TCR",
+    "atomCount": 3474,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 51.9,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 51.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 50.3,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 7.6,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 16.6,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "1TUB",
+    "atomCount": 3462,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 49.5,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 117.4,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 103.5,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 5.9,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 13.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "2D1S",
+    "atomCount": 3375,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 41.9,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 69.1,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 56,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 5.8,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 12.1,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "2POR",
+    "atomCount": 2580,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 35.4,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 66.3,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 58.8,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 4.6,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 12.8,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "3V03",
+    "atomCount": 3291,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 122.4,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 66.2,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 53.5,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 7.5,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 14,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  },
+  {
+    "pdbId": "4UN3",
+    "atomCount": 1882,
+    "styleMetrics": [
+      {
+        "style": "cartoon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 41.3,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "stick",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 57.8,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "sphere",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 51.7,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "ribbon",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 3.1,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      },
+      {
+        "style": "line",
+        "drawCalls": 0,
+        "elementsDrawn": 0,
+        "renderTimeMs": 12.4,
+        "heapUsedMB": 9.54,
+        "heapDeltaMB": 0
+      }
+    ],
+    "baselineMemoryMB": 9.54,
+    "retainedMemoryDeltaMB": 0
+  }
+]

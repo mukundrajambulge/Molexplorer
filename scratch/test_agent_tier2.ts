@@ -31,15 +31,50 @@ export const TIER2_MOLECULES: Tier2MoleculeDef[] = [
   { id: "t2_10", name: "Pyrrole", smiles: "c1cc[nH]c1", formula: "C4H5N", expectedHeavyAtoms: 5, expectedTotalAtoms: 10, expectedC_or_N: 5, expectedNotHydrogens: 5, expectedOrganic: 10, expectedHBD: 1, expectedHBA: 0 },
   { id: "t2_11", name: "Cyclohexane", smiles: "C1CCCCC1", formula: "C6H12", expectedHeavyAtoms: 6, expectedTotalAtoms: 18, expectedC_or_N: 6, expectedNotHydrogens: 6, expectedOrganic: 18, expectedHBD: 0, expectedHBA: 0 },
   { id: "t2_12", name: "Ethylene glycol", smiles: "OCCO", formula: "C2H6O2", expectedHeavyAtoms: 4, expectedTotalAtoms: 10, expectedC_or_N: 2, expectedNotHydrogens: 4, expectedOrganic: 10, expectedHBD: 2, expectedHBA: 2 },
-  { id: "t2_13", name: "Acetic acid", smiles: "CC(=O)O", formula: "C2H4O2", expectedHeavyAtoms: 4, expectedTotalAtoms: 8, expectedC_or_N: 2, expectedNotHydrogens: 4, expectedOrganic: 8, expectedHBD: 1, expectedHBA: 2 },
+  { id: "t2_13", name: "Acetic acid", smiles: "CC(=O)O", formula: "C2H4O2", expectedHeavyAtoms: 4, expectedTotalAtoms: 8, expectedC_or_N: 2, expectedNotHydrogens: 4, expectedOrganic: 8, expectedHBD: 1, expectedHBA: 1 },
   { id: "t2_14", name: "Acetamide", smiles: "CC(=O)N", formula: "C2H5NO", expectedHeavyAtoms: 4, expectedTotalAtoms: 9, expectedC_or_N: 3, expectedNotHydrogens: 4, expectedOrganic: 9, expectedHBD: 1, expectedHBA: 1 },
   { id: "t2_15", name: "Acetonitrile", smiles: "CC#N", formula: "C2H3N", expectedHeavyAtoms: 3, expectedTotalAtoms: 6, expectedC_or_N: 3, expectedNotHydrogens: 3, expectedOrganic: 6, expectedHBD: 0, expectedHBA: 1 },
   { id: "t2_16", name: "Fluorobenzene", smiles: "Fc1ccccc1", formula: "C6H5F", expectedHeavyAtoms: 7, expectedTotalAtoms: 12, expectedC_or_N: 6, expectedNotHydrogens: 7, expectedOrganic: 12, expectedHBD: 0, expectedHBA: 0 },
   { id: "t2_17", name: "Glycerol", smiles: "OCC(O)CO", formula: "C3H8O3", expectedHeavyAtoms: 6, expectedTotalAtoms: 14, expectedC_or_N: 3, expectedNotHydrogens: 6, expectedOrganic: 14, expectedHBD: 3, expectedHBA: 3 },
-  { id: "t2_18", name: "Lactic acid", smiles: "CC(O)C(=O)O", formula: "C3H6O3", expectedHeavyAtoms: 6, expectedTotalAtoms: 12, expectedC_or_N: 3, expectedNotHydrogens: 6, expectedOrganic: 12, expectedHBD: 2, expectedHBA: 3 },
+  { id: "t2_18", name: "Lactic acid", smiles: "CC(O)C(=O)O", formula: "C3H6O3", expectedHeavyAtoms: 6, expectedTotalAtoms: 12, expectedC_or_N: 3, expectedNotHydrogens: 6, expectedOrganic: 12, expectedHBD: 2, expectedHBA: 2 },
   { id: "t2_19", name: "Urea", smiles: "NC(=O)N", formula: "CH4N2O", expectedHeavyAtoms: 4, expectedTotalAtoms: 8, expectedC_or_N: 3, expectedNotHydrogens: 4, expectedOrganic: 8, expectedHBD: 2, expectedHBA: 1 },
-  { id: "t2_20", name: "Oxalic acid", smiles: "O=C(O)C(=O)O", formula: "C2H2O4", expectedHeavyAtoms: 6, expectedTotalAtoms: 8, expectedC_or_N: 2, expectedNotHydrogens: 6, expectedOrganic: 8, expectedHBD: 2, expectedHBA: 4 }
+  { id: "t2_20", name: "Oxalic acid", smiles: "O=C(O)C(=O)O", formula: "C2H2O4", expectedHeavyAtoms: 6, expectedTotalAtoms: 8, expectedC_or_N: 2, expectedNotHydrogens: 6, expectedOrganic: 8, expectedHBD: 2, expectedHBA: 2 }
 ];
+
+function molblockToPDB(molblock: string): string {
+  const lines = molblock.split('\n');
+  let headerIndex = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].includes('V2000')) {
+      headerIndex = i;
+      break;
+    }
+  }
+  if (headerIndex === -1) return '';
+
+  const countsLine = lines[headerIndex];
+  const numAtoms = parseInt(countsLine.substring(0, 3).trim(), 10);
+  const pdbLines: string[] = [];
+
+  for (let i = 1; i <= numAtoms; i++) {
+    const line = lines[headerIndex + i];
+    if (!line) continue;
+    const x = parseFloat(line.substring(0, 10).trim());
+    const y = parseFloat(line.substring(10, 20).trim());
+    const z = parseFloat(line.substring(20, 30).trim());
+    const elem = line.substring(31, 34).trim();
+    
+    const serialStr = i.toString().padStart(5, ' ');
+    const elemStr = elem.padStart(2, ' ').substring(0, 2);
+    const atomName = `${elem}${i}`.padEnd(4, ' ').substring(0, 4);
+    const xStr = x.toFixed(3).padStart(8, ' ');
+    const yStr = y.toFixed(3).padStart(8, ' ');
+    const zStr = z.toFixed(3).padStart(8, ' ');
+    
+    pdbLines.push(`HETATM${serialStr} ${atomName} LIG A   1    ${xStr}${yStr}${zStr}  1.00  0.00          ${elemStr}`);
+  }
+  return pdbLines.join('\n');
+}
 
 async function runTier2TestSuite() {
   console.log("========================================================================");
@@ -74,7 +109,6 @@ async function runTier2TestSuite() {
     let check1Pass = false;
     let exported2DSmiles = '';
     let exported3DSmiles = '';
-    let molBlock2D = '';
 
     try {
       const rdMol = rdkit.get_mol(molDef.smiles);
@@ -83,7 +117,7 @@ async function runTier2TestSuite() {
       }
 
       // Generate 2D MolBlock (Ketcher 2D equivalent)
-      molBlock2D = rdMol.get_molblock();
+      const molBlock2D = rdMol.get_molblock();
       exported2DSmiles = rdMol.get_smiles();
 
       // Test 2D Ketcher roundtrip: parse exported 2D MolBlock back to RDKit & export SMILES
@@ -94,7 +128,6 @@ async function runTier2TestSuite() {
       const roundtrip2DSmiles = roundtrip2DMol.get_smiles();
       roundtrip2DMol.delete();
 
-      // Check SMILES equivalence (canonicalization check)
       const is2DRoundtripValid = (exported2DSmiles === roundtrip2DSmiles);
 
       // Simulate 3D coordinate generation & 3D SMILES export
@@ -154,7 +187,6 @@ async function runTier2TestSuite() {
 
       rdMol.delete();
 
-      // Validate descriptor sanity
       const mwValid = descriptors.mw > 0 && typeof descriptors.mw === 'number';
       const logpValid = typeof descriptors.logp === 'number';
       const tpsaValid = descriptors.tpsa >= 0 && typeof descriptors.tpsa === 'number';
@@ -193,34 +225,13 @@ async function runTier2TestSuite() {
     let atomsForSelection: Atom[] = [];
     try {
       const rdMol = rdkit.get_mol(molDef.smiles);
-      const molBlock = rdMol.get_molblock();
+      rdMol.add_hs_in_place();
+      const molblockWithH = rdMol.get_molblock();
+      const pdbData = molblockToPDB(molblockWithH);
       rdMol.delete();
 
-      const processor = new MolProcessor(molBlock, 'sdf');
+      const processor = new MolProcessor(pdbData, 'pdb');
       atomsForSelection = (processor.atoms as Atom[]) || [];
-
-      const heavyAtomCount = atomsForSelection.length;
-      if (heavyAtomCount < molDef.expectedTotalAtoms) {
-        const missingH = molDef.expectedTotalAtoms - heavyAtomCount;
-        for (let i = 0; i < missingH; i++) {
-          const serial = atomsForSelection.length + 1;
-          atomsForSelection.push({
-            serial,
-            name: `H${i+1}`,
-            resName: "LIG",
-            chainID: "A",
-            resSeq: 1,
-            x: (Math.random() - 0.5) * 2,
-            y: (Math.random() - 0.5) * 2,
-            z: (Math.random() - 0.5) * 2,
-            elem: "H",
-            altLoc: " ",
-            isHetero: false,
-            bonds: [1],
-            isModeledH: true
-          });
-        }
-      }
     } catch (err: any) {
       console.warn(`[Warning] Could not parse 3D atoms via MolProcessor: ${err.message}`);
     }
@@ -242,18 +253,19 @@ async function runTier2TestSuite() {
       const spaceFillingValid = totalAtomCount > 0 && typeof spaceFillingSpec.sphere.scale === 'number';
       const ballAndStickValid = totalAtomCount > 0 && typeof ballAndStickSpec.sphere.scale === 'number';
 
-      check3Pass = stickValid && spaceFillingValid && ballAndStickValid;
+      check3Pass = stickValid && spaceFillingValid && ballAndStickValid && totalAtomCount === molDef.expectedTotalAtoms;
 
       molTelemetry.checks.rendering = {
         status: check3Pass ? "PASS" : "FAIL",
         timeMs: performance.now() - check3Start,
         atomCountRendered: totalAtomCount,
+        expectedAtomCount: molDef.expectedTotalAtoms,
         representationsTested: ["Stick", "Space-Filling", "Ball-and-Stick"],
         specs: { stickSpec, spaceFillingSpec, ballAndStickSpec }
       };
 
       if (!check3Pass) {
-        const issue = `${molDef.name}: Rendering specification validation failed`;
+        const issue = `${molDef.name}: Rendering specification validation failed (atom count got ${totalAtomCount}, expected ${molDef.expectedTotalAtoms})`;
         molTelemetry.issues.push(issue);
         issuesFound.push(issue);
       }

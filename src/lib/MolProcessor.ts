@@ -88,16 +88,17 @@ export function formatAtomLine(a: Atom): string {
   const record = a.isHetero ? "HETATM" : "ATOM  ";
   const serial = a.serial.toString().padStart(5, ' ');
   const name = a.name.padEnd(4, ' ').substring(0, 4);
-  const altLoc = a.altLoc;
+  const altLoc = a.altLoc || ' ';
   const resName = a.resName.padStart(3, ' ').substring(0, 3);
-  const chain = a.chainID;
+  const chain = (a.chainID || ' ').substring(0, 1);
   const resSeq = a.resSeq.toString().padStart(4, ' ');
   const x = a.x.toFixed(3).padStart(8, ' ');
   const y = a.y.toFixed(3).padStart(8, ' ');
   const z = a.z.toFixed(3).padStart(8, ' ');
   const elem = a.elem.padStart(2, ' ').substring(0, 2);
-  const bFactor = a.isModeledH ? " 99.90" : "  0.00";
-  return `${record}${serial} ${name}${altLoc}${resName} ${chain}${resSeq}    ${x}${y}${z}  1.00${bFactor}          ${elem}`;
+  const bFactor = a.bFactor !== undefined ? a.bFactor.toFixed(2).padStart(6, ' ') : (a.isModeledH ? " 99.90" : "  0.00");
+  const occ = a.occupancy !== undefined ? a.occupancy.toFixed(2).padStart(6, ' ') : "  1.00";
+  return `${record}${serial} ${name}${altLoc}${resName} ${chain}${resSeq}    ${x}${y}${z}${occ}${bFactor}          ${elem}  `;
 }
 
 export class MolProcessor {
@@ -484,11 +485,12 @@ export class MolProcessor {
       
       const key = `${a.chainID}:${a.resSeq}`;
       if (!residuesMap.has(key)) {
-        const res = { chainID: a.chainID, resSeq: a.resSeq, resName: a.resName, N: null, CA: null, C: null, O: null, key };
-        residuesMap.set(key, res);
-        residuesList.push(res);
+        const newRes = { chainID: a.chainID, resSeq: a.resSeq, resName: a.resName, N: null, CA: null, C: null, O: null, key };
+        residuesMap.set(key, newRes);
+        residuesList.push(newRes);
       }
       
+      const res = residuesMap.get(key);
       const nameClean = a.name.trim().toUpperCase();
       if (nameClean === 'N') res.N = a;
       else if (nameClean === 'CA') res.CA = a;

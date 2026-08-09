@@ -1,0 +1,326 @@
+{
+  "results": [
+    {
+      "pdbId": "1ATN",
+      "atomCount": 2943,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": false,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1ATP",
+      "atomCount": 3070,
+      "chains": [
+        "E",
+        "I"
+      ],
+      "is3000Plus": true,
+      "isMultiChain": true,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1DGF",
+      "atomCount": 3450,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": true,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1DGK",
+      "atomCount": 3400,
+      "chains": [
+        "N"
+      ],
+      "is3000Plus": true,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1F88",
+      "atomCount": 2679,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": false,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1F8A",
+      "atomCount": 1446,
+      "chains": [
+        "B",
+        "C"
+      ],
+      "is3000Plus": false,
+      "isMultiChain": true,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1HAK",
+      "atomCount": 2593,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": false,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1HCO",
+      "atomCount": 2282,
+      "chains": [
+        "A",
+        "B"
+      ],
+      "is3000Plus": false,
+      "isMultiChain": true,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1HLA",
+      "atomCount": 367,
+      "chains": [
+        "A",
+        "M"
+      ],
+      "is3000Plus": false,
+      "isMultiChain": true,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1HLD",
+      "atomCount": 3071,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": true,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1HVR",
+      "atomCount": 1890,
+      "chains": [
+        "A",
+        "B"
+      ],
+      "is3000Plus": false,
+      "isMultiChain": true,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1LDM",
+      "atomCount": 2843,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": false,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1NIK",
+      "atomCount": 3200,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": true,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1SMD",
+      "atomCount": 3480,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": true,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1TAQ",
+      "atomCount": 3200,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": true,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1TCR",
+      "atomCount": 3474,
+      "chains": [
+        "A",
+        "B"
+      ],
+      "is3000Plus": true,
+      "isMultiChain": true,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "1TUB",
+      "atomCount": 3462,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": true,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "2D1S",
+      "atomCount": 3400,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": true,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "2POR",
+      "atomCount": 2589,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": false,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "3V03",
+      "atomCount": 3300,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": true,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    },
+    {
+      "pdbId": "4UN3",
+      "atomCount": 1882,
+      "chains": [
+        "A"
+      ],
+      "is3000Plus": false,
+      "isMultiChain": false,
+      "pdbExportValid": true,
+      "sdfExportValid": true,
+      "xyzExportValid": true,
+      "jsonExportValid": true,
+      "pdbStrict80ColPass": true,
+      "coordPreservationPass": true
+    }
+  ],
+  "issues": []
+}

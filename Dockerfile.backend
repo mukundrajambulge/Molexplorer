@@ -1,22 +1,55 @@
-# Stage 1: Build
-FROM python:3.12-slim AS builder
-WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-COPY backend/requirements.txt .
-RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
+# Multi-stage C++ Drogon build
+FROM ubuntu:24.04 AS builder
 
-# Stage 2: Runtime
-FROM python:3.12-slim AS runner
-WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 \
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    libjsoncpp-dev \
+    libssl-dev \
+    libsqlite3-dev \
+    zlib1g-dev \
+    uuid-dev \
+    libbrotli-dev \
     && rm -rf /var/lib/apt/lists/*
-COPY --from=builder /app/wheels /wheels
-COPY --from=builder /app/requirements.txt .
-RUN pip install --no-cache /wheels/*
+
+# Install Drogon
+WORKDIR /tmp
+RUN git clone --depth 1 --branch v1.9.8 https://github.com/drogonframework/drogon.git && \
+    cd drogon && \
+    git submodule update --init && \
+    mkdir build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release && \
+    make -j$(nproc) && \
+    make install && \
+    ldconfig
+
+# Build application
+WORKDIR /app
 COPY backend/ /app/
-EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+RUN mkdir build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release && \
+    make -j$(nproc)
+
+# Minimal Runtime image
+FROM ubuntu:24.04 AS runner
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+    libjsoncpp25 \
+    libssl3 \
+    libsqlite3-0 \
+    zlib1g \
+    libuuid1 \
+    libbrotli1 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY --from=builder /app/build/molexplorer_backend /app/molexplorer_backend
+COPY backend/config.json /app/config.json
+RUN mkdir -p /app/uploads
+
+EXPOSE 8080
+CMD ["/app/molexplorer_backend"]

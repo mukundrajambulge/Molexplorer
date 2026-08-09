@@ -80,7 +80,12 @@ export default function MolExplorer() {
           const mol = (typeof m.rawContent === "string" && m.format !== "mmtf") ? rdkit.get_mol(m.rawContent || m.smiles) : null;
           if (mol) {
             if (!m.smiles) m.smiles = mol.get_smiles();
-            m.properties = JSON.parse(mol.get_descriptors());
+            const rawProps = JSON.parse(mol.get_descriptors());
+            m.properties = {
+              ...rawProps,
+              NumHDonors: rawProps.NumHDonors ?? rawProps.NumHBD ?? rawProps.lipinskiHBD ?? 0,
+              NumHAcceptors: rawProps.NumHAcceptors ?? rawProps.NumHBA ?? rawProps.lipinskiHBA ?? 0,
+            };
             
             try {
               const fpStr = mol.get_morgan_fp();

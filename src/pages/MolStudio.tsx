@@ -457,6 +457,43 @@ export default function MolStudio() {
     alert(`Saved selection: ${name}`);
   };
 
+  // Expose automated browser test API
+  useEffect(() => {
+    (window as any).__molStudioTestApi = {
+      loadMolecule: (name: string, data: string, format = 'pdb') => {
+        setMolData({ name, data, format: format as any });
+      },
+      setRenderStyle: (style: RenderStyle) => setRenderStyle(style),
+      setColorScheme: (scheme: string) => setColorScheme(scheme),
+      setSurfaceOpacity: (val: number) => setSurfaceOpacity(val),
+      setBackgroundColor: (val: string) => setBackgroundColor(val),
+      runQuery: (query: string) => handleRunQuery(query),
+      clearSelection: () => handleClearSelection(),
+      addHydrogens: () => handleAddHydrogens(),
+      removeHydrogens: () => handleRemoveHydrogens(),
+      cycleValence: () => handleCycleValence(),
+      deleteSelectedAtoms: () => handleDeleteSelectedAtoms(),
+      toggleSculpting: () => setIsSculptingActive(prev => !prev),
+      toggleOrthographic: () => setOrthographic(prev => !prev),
+      setStereoMode: (mode: 'none' | 'cross-eye' | 'anaglyph') => setStereoMode(mode),
+      toggleSequenceViewer: () => setShowSequenceViewer(prev => !prev),
+      setShowDipoleArrow: (val: boolean) => setShowDipoleArrow(val),
+      getState: () => ({
+        molName: molData?.name || null,
+        atomsCount: atoms.length,
+        selectedCount: selectedAtomSerials.size,
+        renderStyle,
+        colorScheme,
+        measurementsCount: measurements.length,
+        dipoleMagnitude: dipoleMoment?.magnitude || 0,
+        ramachandranCount: ramachandranData.length,
+        orthographic,
+        stereoMode
+      })
+    };
+  }, [molData, atoms, selectedAtomSerials, renderStyle, colorScheme, measurements, dipoleMoment, ramachandranData, orthographic, stereoMode]);
+
+
   // Re-process whenever molData or cleaningState changes
   useEffect(() => {
     if (!molData) {

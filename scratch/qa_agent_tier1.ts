@@ -12,6 +12,7 @@ export interface MoleculeTestDef {
   expectedHydrogens: number;
   elements: Record<string, number>;
   pdb: string;
+  centralAtomIndex?: number; // 0-indexed index of central atom for angle measurement
 }
 
 const TIER1_MOLECULES: MoleculeTestDef[] = [
@@ -112,6 +113,7 @@ const TIER1_MOLECULES: MoleculeTestDef[] = [
     atomCount: 3,
     expectedHydrogens: 2,
     elements: { O: 1, H: 2 },
+    centralAtomIndex: 0, // Central Oxygen at index 0
     pdb: `HETATM    1  O1 H2O  A   1       0.000   0.000   0.117  1.00  0.00           O\nHETATM    2  H2 H2O  A   1       0.000   0.757  -0.469  1.00  0.00           H\nHETATM    3  H3 H2O  A   1       0.000  -0.757  -0.469  1.00  0.00           H\nEND`
   },
   {
@@ -121,6 +123,7 @@ const TIER1_MOLECULES: MoleculeTestDef[] = [
     atomCount: 3,
     expectedHydrogens: 0,
     elements: { C: 1, O: 2 },
+    centralAtomIndex: 0, // Central Carbon at index 0
     pdb: `HETATM    1  C1 CO2  A   1       0.000   0.000   0.000  1.00  0.00           C\nHETATM    2  O2 CO2  A   1       0.000   0.000   1.160  1.00  0.00           O\nHETATM    3  O3 CO2  A   1       0.000   0.000  -1.160  1.00  0.00           O\nEND`
   },
   {
@@ -130,6 +133,7 @@ const TIER1_MOLECULES: MoleculeTestDef[] = [
     atomCount: 3,
     expectedHydrogens: 1,
     elements: { H: 1, C: 1, N: 1 },
+    centralAtomIndex: 1, // Central Carbon at index 1
     pdb: `HETATM    1  H1 HCN  A   1       0.000   0.000  -1.064  1.00  0.00           H\nHETATM    2  C2 HCN  A   1       0.000   0.000   0.000  1.00  0.00           C\nHETATM    3  N3 HCN  A   1       0.000   0.000   1.153  1.00  0.00           N\nEND`
   },
   {
@@ -139,6 +143,7 @@ const TIER1_MOLECULES: MoleculeTestDef[] = [
     atomCount: 3,
     expectedHydrogens: 0,
     elements: { N: 2, O: 1 },
+    centralAtomIndex: 1, // Central Nitrogen at index 1
     pdb: `HETATM    1  N1 N2O  A   1       0.000   0.000  -1.126  1.00  0.00           N\nHETATM    2  N2 N2O  A   1       0.000   0.000   0.000  1.00  0.00           N\nHETATM    3  O3 N2O  A   1       0.000   0.000   1.186  1.00  0.00           O\nEND`
   },
   {
@@ -148,6 +153,7 @@ const TIER1_MOLECULES: MoleculeTestDef[] = [
     atomCount: 3,
     expectedHydrogens: 0,
     elements: { O: 3 },
+    centralAtomIndex: 0, // Central Oxygen at index 0
     pdb: `HETATM    1  O1  O3  A   1       0.000   0.000   0.380  1.00  0.00           O\nHETATM    2  O2  O3  A   1       0.000   1.090  -0.190  1.00  0.00           O\nHETATM    3  O3  O3  A   1       0.000  -1.090  -0.190  1.00  0.00           O\nEND`
   },
   {
@@ -157,6 +163,7 @@ const TIER1_MOLECULES: MoleculeTestDef[] = [
     atomCount: 3,
     expectedHydrogens: 0,
     elements: { S: 1, O: 2 },
+    centralAtomIndex: 0, // Central Sulfur at index 0
     pdb: `HETATM    1  S1 SO2  A   1       0.000   0.000   0.360  1.00  0.00           S\nHETATM    2  O2 SO2  A   1       0.000   1.250  -0.360  1.00  0.00           O\nHETATM    3  O3 SO2  A   1       0.000  -1.250  -0.360  1.00  0.00           O\nEND`
   },
   {
@@ -166,6 +173,7 @@ const TIER1_MOLECULES: MoleculeTestDef[] = [
     atomCount: 3,
     expectedHydrogens: 2,
     elements: { S: 1, H: 2 },
+    centralAtomIndex: 0, // Central Sulfur at index 0
     pdb: `HETATM    1  S1 H2S  A   1       0.000   0.000   0.100  1.00  0.00           S\nHETATM    2  H2 H2S  A   1       0.000   0.960  -0.800  1.00  0.00           H\nHETATM    3  H3 H2S  A   1       0.000  -0.960  -0.800  1.00  0.00           H\nEND`
   },
   {
@@ -175,6 +183,7 @@ const TIER1_MOLECULES: MoleculeTestDef[] = [
     atomCount: 4,
     expectedHydrogens: 3,
     elements: { N: 1, H: 3 },
+    centralAtomIndex: 0,
     pdb: `HETATM    1  N1 NH3  A   1       0.000   0.000   0.116  1.00  0.00           N\nHETATM    2  H2 NH3  A   1       0.000   0.938  -0.271  1.00  0.00           H\nHETATM    3  H3 NH3  A   1       0.812  -0.469  -0.271  1.00  0.00           H\nHETATM    4  H4 NH3  A   1      -0.812  -0.469  -0.271  1.00  0.00           H\nEND`
   },
   {
@@ -184,6 +193,7 @@ const TIER1_MOLECULES: MoleculeTestDef[] = [
     atomCount: 4,
     expectedHydrogens: 2,
     elements: { C: 1, O: 1, H: 2 },
+    centralAtomIndex: 0,
     pdb: `HETATM    1  C1 FMO  A   1       0.000   0.000   0.000  1.00  0.00           C\nHETATM    2  O2 FMO  A   1       0.000   1.210   0.000  1.00  0.00           O\nHETATM    3  H3 FMO  A   1       0.940  -0.580   0.000  1.00  0.00           H\nHETATM    4  H4 FMO  A   1      -0.940  -0.580   0.000  1.00  0.00           H\nEND`
   },
   {
@@ -193,6 +203,7 @@ const TIER1_MOLECULES: MoleculeTestDef[] = [
     atomCount: 5,
     expectedHydrogens: 4,
     elements: { C: 1, H: 4 },
+    centralAtomIndex: 0,
     pdb: `HETATM    1  C1 MET  A   1       0.000   0.000   0.000  1.00  0.00           C\nHETATM    2  H2 MET  A   1       0.629   0.629   0.629  1.00  0.00           H\nHETATM    3  H3 MET  A   1      -0.629  -0.629   0.629  1.00  0.00           H\nHETATM    4  H4 MET  A   1      -0.629   0.629  -0.629  1.00  0.00           H\nHETATM    5  H5 MET  A   1       0.629  -0.629  -0.629  1.00  0.00           H\nEND`
   }
 ];
@@ -205,6 +216,7 @@ function dist(a: Atom, b: Atom): number {
   return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }
 
+// Angle at central atom p2: p1 - p2 - p3
 function angle(p1: Atom, p2: Atom, p3: Atom): number {
   const v1 = { x: p1.x - p2.x, y: p1.y - p2.y, z: p1.z - p2.z };
   const v2 = { x: p3.x - p2.x, y: p3.y - p2.y, z: p3.z - p2.z };
@@ -469,29 +481,35 @@ async function runTier1TestSuite() {
         }
       } else if (atoms.length >= 3) {
         // 3-atom pairwise distance & angle test
-        const d12 = dist(atoms[0], atoms[1]);
-        const d23 = dist(atoms[1], atoms[2]);
-        const d13 = dist(atoms[0], atoms[2]);
-        const ang123 = angle(atoms[0], atoms[1], atoms[2]);
+        const cIdx = molDef.centralAtomIndex ?? 0;
+        const otherIndices = [0, 1, 2].filter(i => i !== cIdx);
+        const p1 = atoms[otherIndices[0]];
+        const pCentral = atoms[cIdx];
+        const p2 = atoms[otherIndices[1]];
 
-        measurements.distance_1_2 = parseFloat(d12.toFixed(5));
-        measurements.distance_2_3 = parseFloat(d23.toFixed(5));
-        measurements.distance_1_3 = parseFloat(d13.toFixed(5));
-        measurements.angle_1_2_3 = parseFloat(ang123.toFixed(5));
+        const d1_c = dist(p1, pCentral);
+        const d2_c = dist(p2, pCentral);
+        const d1_2 = dist(p1, p2);
+        const angVal = angle(p1, pCentral, p2);
+
+        measurements.distance_arm1 = parseFloat(d1_c.toFixed(5));
+        measurements.distance_arm2 = parseFloat(d2_c.toFixed(5));
+        measurements.distance_ends = parseFloat(d1_2.toFixed(5));
+        measurements.angle_degrees = parseFloat(angVal.toFixed(5));
 
         // Check for NaN or infinity in angle
-        if (isNaN(ang123) || !isFinite(ang123)) {
+        if (isNaN(angVal) || !isFinite(angVal)) {
           check3Pass = false;
           telemetry.issuesFound.push(`${molDef.id} (${molDef.name}): Angle measurement returned NaN/Infinity`);
         }
 
         // Singularity test for collinear molecules (CO2, HCN, N2O)
         if (["CO2", "HCN", "N2O"].includes(molDef.formula)) {
-          const isLinear = Math.abs(ang123 - 180.0) < 1.0;
+          const isLinear = Math.abs(angVal - 180.0) < 1.0;
           measurements.isLinearVerified = isLinear;
           if (!isLinear) {
             check3Pass = false;
-            telemetry.issuesFound.push(`${molDef.id} (${molDef.name}): Expected linear angle ~180 deg, got ${ang123}`);
+            telemetry.issuesFound.push(`${molDef.id} (${molDef.name}): Expected linear angle ~180 deg, got ${angVal}`);
           }
         }
       }
@@ -591,7 +609,7 @@ async function runTier1TestSuite() {
   }
   console.log("=========================================================================\n");
 
-  const reportPath = path.join(__dirname, 'qa_tier1_report.json');
+  const reportPath = path.join(process.cwd(), 'scratch', 'qa_tier1_report.json');
   fs.writeFileSync(reportPath, JSON.stringify({ telemetry, results }, null, 2));
   console.log(`Detailed report saved to: ${reportPath}`);
 }

@@ -1,0 +1,1132 @@
+{
+  "telemetry": {
+    "totalMolecules": 20,
+    "singleAtomMolecules": 3,
+    "twoAtomMolecules": 7,
+    "threeAtomMolecules": 7,
+    "fourAtomMolecules": 2,
+    "fiveAtomMolecules": 1,
+    "check1Passed": 20,
+    "check2Passed": 20,
+    "check3Passed": 20,
+    "check4Passed": 20,
+    "issuesFound": []
+  },
+  "results": [
+    {
+      "id": "MOL_01",
+      "name": "Helium",
+      "formula": "He",
+      "atomCount": 1,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": true,
+        "totalBonds": 0,
+        "isZeroSpan": true,
+        "zoomRadiusFallback": 1.5,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 1,
+        "noneSize": 0,
+        "elemResults": {
+          "HE": 1
+        },
+        "hydrogensSize": 0,
+        "expectedHydrogens": 0
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "selfDistance": 0
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 1,
+          "conectLinesCount": 0
+        },
+        "sdf": {
+          "headerAtomCount": 1,
+          "bondCount": 0,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 1,
+          "dataLinesCount": 1
+        }
+      }
+    },
+    {
+      "id": "MOL_02",
+      "name": "Neon",
+      "formula": "Ne",
+      "atomCount": 1,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": true,
+        "totalBonds": 0,
+        "isZeroSpan": true,
+        "zoomRadiusFallback": 1.5,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 1,
+        "noneSize": 0,
+        "elemResults": {
+          "NE": 1
+        },
+        "hydrogensSize": 0,
+        "expectedHydrogens": 0
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "selfDistance": 0
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 1,
+          "conectLinesCount": 0
+        },
+        "sdf": {
+          "headerAtomCount": 1,
+          "bondCount": 0,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 1,
+          "dataLinesCount": 1
+        }
+      }
+    },
+    {
+      "id": "MOL_03",
+      "name": "Argon",
+      "formula": "Ar",
+      "atomCount": 1,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": true,
+        "totalBonds": 0,
+        "isZeroSpan": true,
+        "zoomRadiusFallback": 1.5,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 1,
+        "noneSize": 0,
+        "elemResults": {
+          "AR": 1
+        },
+        "hydrogensSize": 0,
+        "expectedHydrogens": 0
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "selfDistance": 0
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 1,
+          "conectLinesCount": 0
+        },
+        "sdf": {
+          "headerAtomCount": 1,
+          "bondCount": 0,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 1,
+          "dataLinesCount": 1
+        }
+      }
+    },
+    {
+      "id": "MOL_04",
+      "name": "Hydrogen Gas",
+      "formula": "H2",
+      "atomCount": 2,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 0,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 0.37,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 2,
+        "noneSize": 0,
+        "elemResults": {
+          "H": 2
+        },
+        "hydrogensSize": 2,
+        "expectedHydrogens": 2
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_1_2": 0.74,
+          "error": 0
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 2,
+          "conectLinesCount": 0
+        },
+        "sdf": {
+          "headerAtomCount": 2,
+          "bondCount": 0,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 2,
+          "dataLinesCount": 2
+        }
+      }
+    },
+    {
+      "id": "MOL_05",
+      "name": "Nitrogen Gas",
+      "formula": "N2",
+      "atomCount": 2,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 2,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 0.55,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 2,
+        "noneSize": 0,
+        "elemResults": {
+          "N": 2
+        },
+        "hydrogensSize": 0,
+        "expectedHydrogens": 0
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_1_2": 1.1,
+          "error": 0
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 2,
+          "conectLinesCount": 2
+        },
+        "sdf": {
+          "headerAtomCount": 2,
+          "bondCount": 1,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 2,
+          "dataLinesCount": 2
+        }
+      }
+    },
+    {
+      "id": "MOL_06",
+      "name": "Oxygen Gas",
+      "formula": "O2",
+      "atomCount": 2,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 2,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 0.605,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 2,
+        "noneSize": 0,
+        "elemResults": {
+          "O": 2
+        },
+        "hydrogensSize": 0,
+        "expectedHydrogens": 0
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_1_2": 1.21,
+          "error": 0
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 2,
+          "conectLinesCount": 2
+        },
+        "sdf": {
+          "headerAtomCount": 2,
+          "bondCount": 1,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 2,
+          "dataLinesCount": 2
+        }
+      }
+    },
+    {
+      "id": "MOL_07",
+      "name": "Carbon Monoxide",
+      "formula": "CO",
+      "atomCount": 2,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 2,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 0.564,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 2,
+        "noneSize": 0,
+        "elemResults": {
+          "C": 1,
+          "O": 1
+        },
+        "hydrogensSize": 0,
+        "expectedHydrogens": 0
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_1_2": 1.128,
+          "error": 0
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 2,
+          "conectLinesCount": 2
+        },
+        "sdf": {
+          "headerAtomCount": 2,
+          "bondCount": 1,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 2,
+          "dataLinesCount": 2
+        }
+      }
+    },
+    {
+      "id": "MOL_08",
+      "name": "Nitric Oxide",
+      "formula": "NO",
+      "atomCount": 2,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 2,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 0.575,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 2,
+        "noneSize": 0,
+        "elemResults": {
+          "N": 1,
+          "O": 1
+        },
+        "hydrogensSize": 0,
+        "expectedHydrogens": 0
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_1_2": 1.15,
+          "error": 0
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 2,
+          "conectLinesCount": 2
+        },
+        "sdf": {
+          "headerAtomCount": 2,
+          "bondCount": 1,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 2,
+          "dataLinesCount": 2
+        }
+      }
+    },
+    {
+      "id": "MOL_09",
+      "name": "Hydrogen Chloride",
+      "formula": "HCl",
+      "atomCount": 2,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 2,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 0.6375,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 2,
+        "noneSize": 0,
+        "elemResults": {
+          "H": 1,
+          "CL": 1
+        },
+        "hydrogensSize": 1,
+        "expectedHydrogens": 1
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_1_2": 1.275,
+          "error": 0
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 2,
+          "conectLinesCount": 2
+        },
+        "sdf": {
+          "headerAtomCount": 2,
+          "bondCount": 1,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 2,
+          "dataLinesCount": 2
+        }
+      }
+    },
+    {
+      "id": "MOL_10",
+      "name": "Hydrogen Fluoride",
+      "formula": "HF",
+      "atomCount": 2,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 2,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 0.4585,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 2,
+        "noneSize": 0,
+        "elemResults": {
+          "H": 1,
+          "F": 1
+        },
+        "hydrogensSize": 1,
+        "expectedHydrogens": 1
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_1_2": 0.917,
+          "error": 0
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 2,
+          "conectLinesCount": 2
+        },
+        "sdf": {
+          "headerAtomCount": 2,
+          "bondCount": 1,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 2,
+          "dataLinesCount": 2
+        }
+      }
+    },
+    {
+      "id": "MOL_11",
+      "name": "Water",
+      "formula": "H2O",
+      "atomCount": 3,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 4,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 0.757,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 3,
+        "noneSize": 0,
+        "elemResults": {
+          "O": 1,
+          "H": 2
+        },
+        "hydrogensSize": 2,
+        "expectedHydrogens": 2
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_arm1": 0.95731,
+          "distance_arm2": 0.95731,
+          "distance_ends": 1.514,
+          "angle_degrees": 104.5125
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 3,
+          "conectLinesCount": 3
+        },
+        "sdf": {
+          "headerAtomCount": 3,
+          "bondCount": 2,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 3,
+          "dataLinesCount": 3
+        }
+      }
+    },
+    {
+      "id": "MOL_12",
+      "name": "Carbon Dioxide",
+      "formula": "CO2",
+      "atomCount": 3,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 4,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 1.16,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 3,
+        "noneSize": 0,
+        "elemResults": {
+          "C": 1,
+          "O": 2
+        },
+        "hydrogensSize": 0,
+        "expectedHydrogens": 0
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_arm1": 1.16,
+          "distance_arm2": 1.16,
+          "distance_ends": 2.32,
+          "angle_degrees": 180,
+          "isLinearVerified": true
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 3,
+          "conectLinesCount": 3
+        },
+        "sdf": {
+          "headerAtomCount": 3,
+          "bondCount": 2,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 3,
+          "dataLinesCount": 3
+        }
+      }
+    },
+    {
+      "id": "MOL_13",
+      "name": "Hydrogen Cyanide",
+      "formula": "HCN",
+      "atomCount": 3,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 4,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 1.1085,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 3,
+        "noneSize": 0,
+        "elemResults": {
+          "H": 1,
+          "C": 1,
+          "N": 1
+        },
+        "hydrogensSize": 1,
+        "expectedHydrogens": 1
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_arm1": 1.064,
+          "distance_arm2": 1.153,
+          "distance_ends": 2.217,
+          "angle_degrees": 180,
+          "isLinearVerified": true
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 3,
+          "conectLinesCount": 3
+        },
+        "sdf": {
+          "headerAtomCount": 3,
+          "bondCount": 2,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 3,
+          "dataLinesCount": 3
+        }
+      }
+    },
+    {
+      "id": "MOL_14",
+      "name": "Nitrous Oxide",
+      "formula": "N2O",
+      "atomCount": 3,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 4,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 1.156,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 3,
+        "noneSize": 0,
+        "elemResults": {
+          "N": 2,
+          "O": 1
+        },
+        "hydrogensSize": 0,
+        "expectedHydrogens": 0
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_arm1": 1.126,
+          "distance_arm2": 1.186,
+          "distance_ends": 2.312,
+          "angle_degrees": 180,
+          "isLinearVerified": true
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 3,
+          "conectLinesCount": 3
+        },
+        "sdf": {
+          "headerAtomCount": 3,
+          "bondCount": 2,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 3,
+          "dataLinesCount": 3
+        }
+      }
+    },
+    {
+      "id": "MOL_15",
+      "name": "Ozone",
+      "formula": "O3",
+      "atomCount": 3,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 4,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 1.09,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 3,
+        "noneSize": 0,
+        "elemResults": {
+          "O": 3
+        },
+        "hydrogensSize": 0,
+        "expectedHydrogens": 0
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_arm1": 1.23004,
+          "distance_arm2": 1.23004,
+          "distance_ends": 2.18,
+          "angle_degrees": 124.78664
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 3,
+          "conectLinesCount": 3
+        },
+        "sdf": {
+          "headerAtomCount": 3,
+          "bondCount": 2,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 3,
+          "dataLinesCount": 3
+        }
+      }
+    },
+    {
+      "id": "MOL_16",
+      "name": "Sulfur Dioxide",
+      "formula": "SO2",
+      "atomCount": 3,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 4,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 1.25,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 3,
+        "noneSize": 0,
+        "elemResults": {
+          "S": 1,
+          "O": 2
+        },
+        "hydrogensSize": 0,
+        "expectedHydrogens": 0
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_arm1": 1.44253,
+          "distance_arm2": 1.44253,
+          "distance_ends": 2.5,
+          "angle_degrees": 120.11611
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 3,
+          "conectLinesCount": 3
+        },
+        "sdf": {
+          "headerAtomCount": 3,
+          "bondCount": 2,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 3,
+          "dataLinesCount": 3
+        }
+      }
+    },
+    {
+      "id": "MOL_17",
+      "name": "Hydrogen Sulfide",
+      "formula": "H2S",
+      "atomCount": 3,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 4,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 0.96,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 3,
+        "noneSize": 0,
+        "elemResults": {
+          "S": 1,
+          "H": 2
+        },
+        "hydrogensSize": 2,
+        "expectedHydrogens": 2
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_arm1": 1.3159,
+          "distance_arm2": 1.3159,
+          "distance_ends": 1.92,
+          "angle_degrees": 93.69522
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 3,
+          "conectLinesCount": 3
+        },
+        "sdf": {
+          "headerAtomCount": 3,
+          "bondCount": 2,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 3,
+          "dataLinesCount": 3
+        }
+      }
+    },
+    {
+      "id": "MOL_18",
+      "name": "Ammonia",
+      "formula": "NH3",
+      "atomCount": 4,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 6,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 0.812,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 4,
+        "noneSize": 0,
+        "elemResults": {
+          "N": 1,
+          "H": 3
+        },
+        "hydrogensSize": 3,
+        "expectedHydrogens": 3
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_arm1": 1.0147,
+          "distance_arm2": 1.01443,
+          "distance_ends": 1.6245,
+          "angle_degrees": 106.37254
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 4,
+          "conectLinesCount": 4
+        },
+        "sdf": {
+          "headerAtomCount": 4,
+          "bondCount": 3,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 4,
+          "dataLinesCount": 4
+        }
+      }
+    },
+    {
+      "id": "MOL_19",
+      "name": "Formaldehyde",
+      "formula": "CH2O",
+      "atomCount": 4,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 6,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 0.94,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 4,
+        "noneSize": 0,
+        "elemResults": {
+          "C": 1,
+          "O": 1,
+          "H": 2
+        },
+        "hydrogensSize": 2,
+        "expectedHydrogens": 2
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_arm1": 1.21,
+          "distance_arm2": 1.10454,
+          "distance_ends": 2.02181,
+          "angle_degrees": 121.67547
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 4,
+          "conectLinesCount": 4
+        },
+        "sdf": {
+          "headerAtomCount": 4,
+          "bondCount": 3,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 4,
+          "dataLinesCount": 4
+        }
+      }
+    },
+    {
+      "id": "MOL_20",
+      "name": "Methane",
+      "formula": "CH4",
+      "atomCount": 5,
+      "check1_singleAtomRendering": {
+        "passed": true,
+        "isSingleAtom": false,
+        "totalBonds": 8,
+        "isZeroSpan": false,
+        "zoomRadiusFallback": 0.629,
+        "styleOutputsKeys": [
+          "Stick",
+          "Space-Filling",
+          "Ball-and-Stick",
+          "Line",
+          "Cartoon",
+          "Dots"
+        ]
+      },
+      "check2_selectionQuery": {
+        "passed": true,
+        "allSize": 5,
+        "noneSize": 0,
+        "elemResults": {
+          "C": 1,
+          "H": 4
+        },
+        "hydrogensSize": 4,
+        "expectedHydrogens": 4
+      },
+      "check3_distanceMeasurement": {
+        "passed": true,
+        "measurements": {
+          "distance_arm1": 1.08946,
+          "distance_arm2": 1.08946,
+          "distance_ends": 1.77908,
+          "angle_degrees": 109.47122
+        }
+      },
+      "check4_exportFormats": {
+        "passed": true,
+        "pdb": {
+          "atomLinesCount": 5,
+          "conectLinesCount": 5
+        },
+        "sdf": {
+          "headerAtomCount": 5,
+          "bondCount": 4,
+          "hasEnd": true
+        },
+        "xyz": {
+          "headerAtomCount": 5,
+          "dataLinesCount": 5
+        }
+      }
+    }
+  ]
+}

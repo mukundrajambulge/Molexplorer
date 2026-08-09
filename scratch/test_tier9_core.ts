@@ -94,6 +94,7 @@ async function runTier9CoreTests() {
 
     const parseStart = performance.now();
     const processor = new MolProcessor(rawPdb, 'pdb');
+    processor.calculateSecondaryStructure('pdb');
     const parseTime = performance.now() - parseStart;
 
     const atoms = processor.atoms;

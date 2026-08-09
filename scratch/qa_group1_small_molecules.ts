@@ -29,7 +29,7 @@ export const SMALL_MOLECULE_SET: MoleculeTestTarget[] = [
   { id: 10, name: 'Serotonin',     formula: 'C10H12N2O',   smiles: 'NCCc1c[nH]c2ccc(O)cc12',                                                     expectedHeavyAtoms: 13, expectedTotalAtoms: 25, expectedCharge: 0 },
   { id: 11, name: 'Penicillin',    formula: 'C16H18N2O4S', smiles: 'CC1(C(N2C(S1)C(C2=O)NC(=O)Cc3ccccc3)C(=O)O)C',                                expectedHeavyAtoms: 23, expectedTotalAtoms: 41, expectedCharge: 0 },
   { id: 12, name: 'Acetaminophen', formula: 'C8H9NO2',     smiles: 'CC(=O)Nc1ccc(O)cc1',                                                         expectedHeavyAtoms: 11, expectedTotalAtoms: 20, expectedCharge: 0 },
-  { id: 13, name: 'Morphine',      formula: 'C17H19NO3',   smiles: 'CN1CCC23c4c5ccc(c4O2)C1CC3C=CC5O',                                           expectedHeavyAtoms: 21, expectedTotalAtoms: 40, expectedCharge: 0 },
+  { id: 13, name: 'Morphine',      formula: 'C17H19NO3',   smiles: 'CN1CCC23C4C1CC5=C2C(=C(C=C5)O)OC3C(C=C4)O',                                  expectedHeavyAtoms: 21, expectedTotalAtoms: 40, expectedCharge: 0 },
   { id: 14, name: 'Cholesterol',   formula: 'C27H46O',     smiles: 'CC(C)CCCC(C)C1CCC2C1(CCC3C2CC=C4C3(CCC(C4)O)C)C',                             expectedHeavyAtoms: 28, expectedTotalAtoms: 74, expectedCharge: 0 },
   { id: 15, name: 'Nicotine',      formula: 'C10H14N2',    smiles: 'CN1CCCC1c2cccnc2',                                                           expectedHeavyAtoms: 12, expectedTotalAtoms: 26, expectedCharge: 0 },
   { id: 16, name: 'Menthol',       formula: 'C10H20O',     smiles: 'CC1CCC(C(C1)O)C(C)C',                                                         expectedHeavyAtoms: 11, expectedTotalAtoms: 31, expectedCharge: 0 },

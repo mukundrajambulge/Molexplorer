@@ -1,15 +1,15 @@
 {
-  "timestamp": "2026-08-09T18:59:31.159Z",
-  "totalExecutionTimeMs": 31362.83,
+  "timestamp": "2026-08-09T19:00:35.044Z",
+  "totalExecutionTimeMs": 25862.5,
   "summary": {
     "totalMolecules": 20,
     "passedCount": 1,
     "failedCount": 19,
     "passPercentage": "5.0%",
     "totalAtomsTested": 269658,
-    "avgParseTimeMs": 34.04,
-    "avgQueryTimeMs": 58.095,
-    "avgPdbExportTimeMs": 33.516,
+    "avgParseTimeMs": 31.261,
+    "avgQueryTimeMs": 47.624,
+    "avgPdbExportTimeMs": 28.632,
     "avgVertexReductionPct": "84.17%"
   },
   "detailedTelemetry": [
@@ -18,7 +18,7 @@
       "molName": "B-DNA Dodecamer (1BNA - 24 nucleotides)",
       "tier": 10,
       "atomCount": 758,
-      "parseTimeMs": 6.112,
+      "parseTimeMs": 4.722,
       "webgl": {
         "sphereVerticesFull": 218304,
         "sphereVboBytesFullMB": 8.328,
@@ -48,163 +48,163 @@
         {
           "query": "all",
           "matchCount": 758,
-          "timeMs": 9.3,
-          "atomsPerMs": 82
+          "timeMs": 5.328,
+          "atomsPerMs": 142
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 5.961,
-          "atomsPerMs": 127
+          "timeMs": 2.639,
+          "atomsPerMs": 287
         },
         {
           "query": "elem C",
           "matchCount": 380,
-          "timeMs": 7.303,
-          "atomsPerMs": 104
+          "timeMs": 3.346,
+          "atomsPerMs": 227
         },
         {
           "query": "elem N",
           "matchCount": 151,
-          "timeMs": 5.041,
-          "atomsPerMs": 150
+          "timeMs": 4.56,
+          "atomsPerMs": 166
         },
         {
           "query": "elem O",
           "matchCount": 152,
-          "timeMs": 5.773,
-          "atomsPerMs": 131
+          "timeMs": 3.248,
+          "atomsPerMs": 233
         },
         {
           "query": "elem H",
           "matchCount": 75,
-          "timeMs": 4.609,
-          "atomsPerMs": 164
+          "timeMs": 2.843,
+          "atomsPerMs": 267
         },
         {
           "query": "resn ALA",
           "matchCount": 39,
-          "timeMs": 4.642,
-          "atomsPerMs": 163
+          "timeMs": 3.308,
+          "atomsPerMs": 229
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 8.321,
-          "atomsPerMs": 91
+          "timeMs": 2.281,
+          "atomsPerMs": 332
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 6.842,
-          "atomsPerMs": 111
+          "timeMs": 5.051,
+          "atomsPerMs": 150
         },
         {
           "query": "chain A",
           "matchCount": 758,
-          "timeMs": 7.51,
-          "atomsPerMs": 101
+          "timeMs": 2.645,
+          "atomsPerMs": 287
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 3.894,
-          "atomsPerMs": 195
+          "timeMs": 2.49,
+          "atomsPerMs": 304
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 3.136,
-          "atomsPerMs": 242
+          "timeMs": 2.325,
+          "atomsPerMs": 326
         },
         {
           "query": "hydrogens",
           "matchCount": 75,
-          "timeMs": 6.664,
-          "atomsPerMs": 114
+          "timeMs": 2.758,
+          "atomsPerMs": 275
         },
         {
           "query": "backbone",
           "matchCount": 378,
-          "timeMs": 5.15,
-          "atomsPerMs": 147
+          "timeMs": 5.514,
+          "atomsPerMs": 137
         },
         {
           "query": "sidechain",
           "matchCount": 380,
-          "timeMs": 3.945,
-          "atomsPerMs": 192
+          "timeMs": 6.76,
+          "atomsPerMs": 112
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 5.178,
-          "atomsPerMs": 146
+          "timeMs": 3.33,
+          "atomsPerMs": 228
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 3.847,
-          "atomsPerMs": 197
+          "timeMs": 3.097,
+          "atomsPerMs": 245
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.184,
-          "atomsPerMs": 4113
+          "timeMs": 5.023,
+          "atomsPerMs": 151
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 39,
-          "timeMs": 7.029,
-          "atomsPerMs": 108
+          "timeMs": 3.74,
+          "atomsPerMs": 203
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 6.86,
-          "atomsPerMs": 111
+          "timeMs": 3.357,
+          "atomsPerMs": 226
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.139,
-          "atomsPerMs": 5453
+          "timeMs": 0.141,
+          "atomsPerMs": 5372
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 151,
-          "timeMs": 6.703,
-          "atomsPerMs": 113
+          "timeMs": 7.78,
+          "atomsPerMs": 97
         },
         {
           "query": "elem C or elem N",
           "matchCount": 531,
-          "timeMs": 3.436,
-          "atomsPerMs": 221
+          "timeMs": 4.341,
+          "atomsPerMs": 175
         },
         {
           "query": "not hydrogens",
           "matchCount": 683,
-          "timeMs": 2.042,
-          "atomsPerMs": 371
+          "timeMs": 4.282,
+          "atomsPerMs": 177
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 1.73,
-          "atomsPerMs": 438
+          "timeMs": 4.448,
+          "atomsPerMs": 170
         }
       ],
-      "avgQueryTimeMs": 5.01,
-      "maxQueryTimeMs": 9.3,
-      "slowestQuery": "all",
-      "totalQueryTimeMs": 125.24,
+      "avgQueryTimeMs": 3.785,
+      "maxQueryTimeMs": 7.78,
+      "slowestQuery": "within 4 of elem N",
+      "totalQueryTimeMs": 94.633,
       "exportPipeline": {
-        "pdbFormatTimeMs": 1.643,
+        "pdbFormatTimeMs": 2.711,
         "pdbOutputSizeBytes": 59937,
-        "pdbFormattingRateAtomsPerSec": 461351,
-        "sessionExportTimeMs": 0.323,
+        "pdbFormattingRateAtomsPerSec": 279602,
+        "sessionExportTimeMs": 0.376,
         "sessionJsonSizeBytes": 3933,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -219,7 +219,7 @@
       "molName": "Nucleosome Core Particle Histone Octamer fragment",
       "tier": 10,
       "atomCount": 4200,
-      "parseTimeMs": 7.231,
+      "parseTimeMs": 16.518,
       "webgl": {
         "sphereVerticesFull": 1209600,
         "sphereVboBytesFullMB": 46.143,
@@ -249,163 +249,163 @@
         {
           "query": "all",
           "matchCount": 4200,
-          "timeMs": 10.355,
-          "atomsPerMs": 406
+          "timeMs": 25.193,
+          "atomsPerMs": 167
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 8.169,
-          "atomsPerMs": 514
+          "timeMs": 20.022,
+          "atomsPerMs": 210
         },
         {
           "query": "elem C",
           "matchCount": 2100,
-          "timeMs": 10.534,
-          "atomsPerMs": 399
+          "timeMs": 9.146,
+          "atomsPerMs": 459
         },
         {
           "query": "elem N",
           "matchCount": 840,
-          "timeMs": 9.842,
-          "atomsPerMs": 427
+          "timeMs": 13.905,
+          "atomsPerMs": 302
         },
         {
           "query": "elem O",
           "matchCount": 840,
-          "timeMs": 13.342,
-          "atomsPerMs": 315
+          "timeMs": 12.971,
+          "atomsPerMs": 324
         },
         {
           "query": "elem H",
           "matchCount": 420,
-          "timeMs": 18.657,
-          "atomsPerMs": 225
+          "timeMs": 15.688,
+          "atomsPerMs": 268
         },
         {
           "query": "resn ALA",
           "matchCount": 210,
-          "timeMs": 15.327,
-          "atomsPerMs": 274
+          "timeMs": 9.452,
+          "atomsPerMs": 444
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 8.924,
-          "atomsPerMs": 471
+          "timeMs": 10.091,
+          "atomsPerMs": 416
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 7.205,
-          "atomsPerMs": 583
+          "timeMs": 10.041,
+          "atomsPerMs": 418
         },
         {
           "query": "chain A",
           "matchCount": 4200,
-          "timeMs": 31.56,
-          "atomsPerMs": 133
+          "timeMs": 14.329,
+          "atomsPerMs": 293
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 4.277,
-          "atomsPerMs": 982
+          "timeMs": 10.218,
+          "atomsPerMs": 411
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 5.194,
-          "atomsPerMs": 809
+          "timeMs": 7.523,
+          "atomsPerMs": 558
         },
         {
           "query": "hydrogens",
           "matchCount": 420,
-          "timeMs": 7.557,
-          "atomsPerMs": 556
+          "timeMs": 12.215,
+          "atomsPerMs": 344
         },
         {
           "query": "backbone",
           "matchCount": 2100,
-          "timeMs": 9.818,
-          "atomsPerMs": 428
+          "timeMs": 16.55,
+          "atomsPerMs": 254
         },
         {
           "query": "sidechain",
           "matchCount": 2100,
-          "timeMs": 9.661,
-          "atomsPerMs": 435
+          "timeMs": 15.807,
+          "atomsPerMs": 266
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 8.066,
-          "atomsPerMs": 521
+          "timeMs": 14.425,
+          "atomsPerMs": 291
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 7.077,
-          "atomsPerMs": 594
+          "timeMs": 12.824,
+          "atomsPerMs": 328
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.075,
-          "atomsPerMs": 55851
+          "timeMs": 17.669,
+          "atomsPerMs": 238
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 210,
-          "timeMs": 18.485,
-          "atomsPerMs": 227
+          "timeMs": 26.084,
+          "atomsPerMs": 161
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 12.902,
-          "atomsPerMs": 326
+          "timeMs": 30.139,
+          "atomsPerMs": 139
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.062,
-          "atomsPerMs": 68182
+          "timeMs": 0.097,
+          "atomsPerMs": 43344
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 840,
-          "timeMs": 21.689,
-          "atomsPerMs": 194
+          "timeMs": 22.024,
+          "atomsPerMs": 191
         },
         {
           "query": "elem C or elem N",
           "matchCount": 2940,
-          "timeMs": 15.438,
-          "atomsPerMs": 272
+          "timeMs": 20.156,
+          "atomsPerMs": 208
         },
         {
           "query": "not hydrogens",
           "matchCount": 3780,
-          "timeMs": 10.684,
-          "atomsPerMs": 393
+          "timeMs": 12.822,
+          "atomsPerMs": 328
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 7.144,
-          "atomsPerMs": 588
+          "timeMs": 14.023,
+          "atomsPerMs": 300
         }
       ],
-      "avgQueryTimeMs": 10.882,
-      "maxQueryTimeMs": 31.56,
-      "slowestQuery": "chain A",
-      "totalQueryTimeMs": 272.044,
+      "avgQueryTimeMs": 14.937,
+      "maxQueryTimeMs": 30.139,
+      "slowestQuery": "ss h and not resn HOH",
+      "totalQueryTimeMs": 373.417,
       "exportPipeline": {
-        "pdbFormatTimeMs": 4.58,
+        "pdbFormatTimeMs": 8.793,
         "pdbOutputSizeBytes": 331856,
-        "pdbFormattingRateAtomsPerSec": 917031,
-        "sessionExportTimeMs": 0.074,
+        "pdbFormattingRateAtomsPerSec": 477653,
+        "sessionExportTimeMs": 0.112,
         "sessionJsonSizeBytes": 3943,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -414,7 +414,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (10.882 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (14.937 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -422,7 +422,7 @@
       "molName": "Spike Protein RBD bound to ACE2 receptor",
       "tier": 10,
       "atomCount": 5800,
-      "parseTimeMs": 7.363,
+      "parseTimeMs": 11.896,
       "webgl": {
         "sphereVerticesFull": 1670400,
         "sphereVboBytesFullMB": 63.721,
@@ -452,163 +452,163 @@
         {
           "query": "all",
           "matchCount": 5800,
-          "timeMs": 20.024,
-          "atomsPerMs": 290
+          "timeMs": 27.789,
+          "atomsPerMs": 209
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 15.911,
-          "atomsPerMs": 365
+          "timeMs": 31,
+          "atomsPerMs": 187
         },
         {
           "query": "elem C",
           "matchCount": 2900,
-          "timeMs": 17.726,
-          "atomsPerMs": 327
+          "timeMs": 19.111,
+          "atomsPerMs": 303
         },
         {
           "query": "elem N",
           "matchCount": 1160,
-          "timeMs": 25.28,
-          "atomsPerMs": 229
+          "timeMs": 14.945,
+          "atomsPerMs": 388
         },
         {
           "query": "elem O",
           "matchCount": 1160,
-          "timeMs": 31.532,
-          "atomsPerMs": 184
+          "timeMs": 20.209,
+          "atomsPerMs": 287
         },
         {
           "query": "elem H",
           "matchCount": 580,
-          "timeMs": 27.564,
-          "atomsPerMs": 210
+          "timeMs": 12.862,
+          "atomsPerMs": 451
         },
         {
           "query": "resn ALA",
           "matchCount": 290,
-          "timeMs": 16.577,
-          "atomsPerMs": 350
+          "timeMs": 16.858,
+          "atomsPerMs": 344
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 14.144,
-          "atomsPerMs": 410
+          "timeMs": 18.788,
+          "atomsPerMs": 309
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 22.99,
-          "atomsPerMs": 252
+          "timeMs": 27.057,
+          "atomsPerMs": 214
         },
         {
           "query": "chain A",
           "matchCount": 5800,
-          "timeMs": 28.509,
-          "atomsPerMs": 203
+          "timeMs": 20.859,
+          "atomsPerMs": 278
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 15.249,
-          "atomsPerMs": 380
+          "timeMs": 17.49,
+          "atomsPerMs": 332
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 15.89,
-          "atomsPerMs": 365
+          "timeMs": 16.87,
+          "atomsPerMs": 344
         },
         {
           "query": "hydrogens",
           "matchCount": 580,
-          "timeMs": 28.304,
-          "atomsPerMs": 205
+          "timeMs": 22.484,
+          "atomsPerMs": 258
         },
         {
           "query": "backbone",
           "matchCount": 2900,
-          "timeMs": 19.718,
-          "atomsPerMs": 294
+          "timeMs": 24.73,
+          "atomsPerMs": 235
         },
         {
           "query": "sidechain",
           "matchCount": 2900,
-          "timeMs": 30.887,
-          "atomsPerMs": 188
+          "timeMs": 22.876,
+          "atomsPerMs": 254
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 13.251,
-          "atomsPerMs": 438
+          "timeMs": 25.066,
+          "atomsPerMs": 231
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 17.512,
-          "atomsPerMs": 331
+          "timeMs": 31.496,
+          "atomsPerMs": 184
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.109,
-          "atomsPerMs": 53358
+          "timeMs": 51.399,
+          "atomsPerMs": 113
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 290,
-          "timeMs": 21.911,
-          "atomsPerMs": 265
+          "timeMs": 47.669,
+          "atomsPerMs": 122
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 33.746,
-          "atomsPerMs": 172
+          "timeMs": 40.143,
+          "atomsPerMs": 144
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.084,
-          "atomsPerMs": 69130
+          "timeMs": 0.112,
+          "atomsPerMs": 51647
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 1160,
-          "timeMs": 52.22,
-          "atomsPerMs": 111
+          "timeMs": 40.058,
+          "atomsPerMs": 145
         },
         {
           "query": "elem C or elem N",
           "matchCount": 4060,
-          "timeMs": 45.801,
+          "timeMs": 45.604,
           "atomsPerMs": 127
         },
         {
           "query": "not hydrogens",
           "matchCount": 5220,
-          "timeMs": 18.047,
-          "atomsPerMs": 321
+          "timeMs": 53.603,
+          "atomsPerMs": 108
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 19.721,
-          "atomsPerMs": 294
+          "timeMs": 27.264,
+          "atomsPerMs": 213
         }
       ],
-      "avgQueryTimeMs": 22.108,
-      "maxQueryTimeMs": 52.22,
-      "slowestQuery": "within 4 of elem N",
-      "totalQueryTimeMs": 552.707,
+      "avgQueryTimeMs": 27.054,
+      "maxQueryTimeMs": 53.603,
+      "slowestQuery": "not hydrogens",
+      "totalQueryTimeMs": 676.343,
       "exportPipeline": {
-        "pdbFormatTimeMs": 14.556,
+        "pdbFormatTimeMs": 35.94,
         "pdbOutputSizeBytes": 458256,
-        "pdbFormattingRateAtomsPerSec": 398461,
-        "sessionExportTimeMs": 0.086,
+        "pdbFormattingRateAtomsPerSec": 161380,
+        "sessionExportTimeMs": 0.215,
         "sessionJsonSizeBytes": 3934,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -617,7 +617,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (22.108 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (27.054 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -625,7 +625,7 @@
       "molName": "Ribosome Subunit 30S Decoding Center fragment",
       "tier": 10,
       "atomCount": 6500,
-      "parseTimeMs": 22.065,
+      "parseTimeMs": 28.202,
       "webgl": {
         "sphereVerticesFull": 1872000,
         "sphereVboBytesFullMB": 71.411,
@@ -655,163 +655,163 @@
         {
           "query": "all",
           "matchCount": 6500,
-          "timeMs": 31.021,
-          "atomsPerMs": 210
+          "timeMs": 43.249,
+          "atomsPerMs": 150
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 13.999,
-          "atomsPerMs": 464
+          "timeMs": 28.405,
+          "atomsPerMs": 229
         },
         {
           "query": "elem C",
           "matchCount": 3250,
-          "timeMs": 13.443,
-          "atomsPerMs": 484
+          "timeMs": 21.553,
+          "atomsPerMs": 302
         },
         {
           "query": "elem N",
           "matchCount": 1300,
-          "timeMs": 19.805,
-          "atomsPerMs": 328
+          "timeMs": 29.955,
+          "atomsPerMs": 217
         },
         {
           "query": "elem O",
           "matchCount": 1300,
-          "timeMs": 26.842,
-          "atomsPerMs": 242
+          "timeMs": 18.738,
+          "atomsPerMs": 347
         },
         {
           "query": "elem H",
           "matchCount": 650,
-          "timeMs": 48.605,
-          "atomsPerMs": 134
+          "timeMs": 20.767,
+          "atomsPerMs": 313
         },
         {
           "query": "resn ALA",
           "matchCount": 329,
-          "timeMs": 24.105,
-          "atomsPerMs": 270
+          "timeMs": 22.298,
+          "atomsPerMs": 292
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 22.791,
-          "atomsPerMs": 285
+          "timeMs": 23.686,
+          "atomsPerMs": 274
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 21.071,
-          "atomsPerMs": 308
+          "timeMs": 32.483,
+          "atomsPerMs": 200
         },
         {
           "query": "chain A",
           "matchCount": 6500,
-          "timeMs": 16.406,
-          "atomsPerMs": 396
+          "timeMs": 26.635,
+          "atomsPerMs": 244
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 14.701,
-          "atomsPerMs": 442
+          "timeMs": 25.548,
+          "atomsPerMs": 254
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 11.984,
-          "atomsPerMs": 542
+          "timeMs": 22.578,
+          "atomsPerMs": 288
         },
         {
           "query": "hydrogens",
           "matchCount": 650,
-          "timeMs": 19.478,
-          "atomsPerMs": 334
+          "timeMs": 30.627,
+          "atomsPerMs": 212
         },
         {
           "query": "backbone",
           "matchCount": 3250,
-          "timeMs": 30.938,
-          "atomsPerMs": 210
+          "timeMs": 31.374,
+          "atomsPerMs": 207
         },
         {
           "query": "sidechain",
           "matchCount": 3250,
-          "timeMs": 28.985,
-          "atomsPerMs": 224
+          "timeMs": 55.071,
+          "atomsPerMs": 118
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 26.82,
-          "atomsPerMs": 242
+          "timeMs": 42.265,
+          "atomsPerMs": 154
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 25.947,
-          "atomsPerMs": 251
+          "timeMs": 39.201,
+          "atomsPerMs": 166
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.126,
-          "atomsPerMs": 51752
+          "timeMs": 28.153,
+          "atomsPerMs": 231
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 329,
-          "timeMs": 35.88,
-          "atomsPerMs": 181
+          "timeMs": 39.441,
+          "atomsPerMs": 165
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 26.082,
-          "atomsPerMs": 249
+          "timeMs": 58.076,
+          "atomsPerMs": 112
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.083,
-          "atomsPerMs": 78597
+          "timeMs": 0.171,
+          "atomsPerMs": 37901
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 1300,
-          "timeMs": 45.565,
-          "atomsPerMs": 143
+          "timeMs": 58.664,
+          "atomsPerMs": 111
         },
         {
           "query": "elem C or elem N",
           "matchCount": 4550,
-          "timeMs": 78.61,
-          "atomsPerMs": 83
+          "timeMs": 69.093,
+          "atomsPerMs": 94
         },
         {
           "query": "not hydrogens",
           "matchCount": 5850,
-          "timeMs": 42.327,
-          "atomsPerMs": 154
+          "timeMs": 61.662,
+          "atomsPerMs": 105
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 27.71,
-          "atomsPerMs": 235
+          "timeMs": 51.834,
+          "atomsPerMs": 125
         }
       ],
-      "avgQueryTimeMs": 26.133,
-      "maxQueryTimeMs": 78.61,
+      "avgQueryTimeMs": 35.261,
+      "maxQueryTimeMs": 69.093,
       "slowestQuery": "elem C or elem N",
-      "totalQueryTimeMs": 653.323,
+      "totalQueryTimeMs": 881.529,
       "exportPipeline": {
-        "pdbFormatTimeMs": 26.089,
+        "pdbFormatTimeMs": 37.449,
         "pdbOutputSizeBytes": 513556,
-        "pdbFormattingRateAtomsPerSec": 249147,
-        "sessionExportTimeMs": 0.074,
+        "pdbFormattingRateAtomsPerSec": 173569,
+        "sessionExportTimeMs": 0.149,
         "sessionJsonSizeBytes": 3939,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -820,7 +820,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (26.133 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (35.261 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -828,7 +828,7 @@
       "molName": "Intact IgG1 Antibody Fab2+Fc Assembly",
       "tier": 10,
       "atomCount": 10500,
-      "parseTimeMs": 28.715,
+      "parseTimeMs": 63.97,
       "webgl": {
         "sphereVerticesFull": 3024000,
         "sphereVboBytesFullMB": 115.356,
@@ -858,163 +858,163 @@
         {
           "query": "all",
           "matchCount": 10500,
-          "timeMs": 43.027,
-          "atomsPerMs": 244
+          "timeMs": 89.058,
+          "atomsPerMs": 118
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 46.7,
-          "atomsPerMs": 225
+          "timeMs": 77.583,
+          "atomsPerMs": 135
         },
         {
           "query": "elem C",
           "matchCount": 5250,
-          "timeMs": 43.333,
-          "atomsPerMs": 242
+          "timeMs": 40.352,
+          "atomsPerMs": 260
         },
         {
           "query": "elem N",
           "matchCount": 2100,
-          "timeMs": 35.202,
-          "atomsPerMs": 298
+          "timeMs": 50.553,
+          "atomsPerMs": 208
         },
         {
           "query": "elem O",
           "matchCount": 2100,
-          "timeMs": 27.239,
-          "atomsPerMs": 385
+          "timeMs": 53.779,
+          "atomsPerMs": 195
         },
         {
           "query": "elem H",
           "matchCount": 1050,
-          "timeMs": 30.036,
-          "atomsPerMs": 350
+          "timeMs": 59.15,
+          "atomsPerMs": 178
         },
         {
           "query": "resn ALA",
           "matchCount": 529,
-          "timeMs": 170.537,
-          "atomsPerMs": 62
+          "timeMs": 49.269,
+          "atomsPerMs": 213
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 41.701,
-          "atomsPerMs": 252
+          "timeMs": 35.648,
+          "atomsPerMs": 295
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 44.093,
-          "atomsPerMs": 238
+          "timeMs": 37.109,
+          "atomsPerMs": 283
         },
         {
           "query": "chain A",
           "matchCount": 10500,
-          "timeMs": 49,
-          "atomsPerMs": 214
+          "timeMs": 33.813,
+          "atomsPerMs": 311
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 26.825,
-          "atomsPerMs": 391
+          "timeMs": 34.232,
+          "atomsPerMs": 307
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 20.176,
-          "atomsPerMs": 520
+          "timeMs": 31.016,
+          "atomsPerMs": 339
         },
         {
           "query": "hydrogens",
           "matchCount": 1050,
-          "timeMs": 31.732,
-          "atomsPerMs": 331
+          "timeMs": 35.499,
+          "atomsPerMs": 296
         },
         {
           "query": "backbone",
           "matchCount": 5250,
-          "timeMs": 55.057,
-          "atomsPerMs": 191
+          "timeMs": 39.602,
+          "atomsPerMs": 265
         },
         {
           "query": "sidechain",
           "matchCount": 5250,
-          "timeMs": 36.981,
-          "atomsPerMs": 284
+          "timeMs": 38.746,
+          "atomsPerMs": 271
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 33.959,
-          "atomsPerMs": 309
+          "timeMs": 44.382,
+          "atomsPerMs": 237
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 46.7,
-          "atomsPerMs": 225
+          "timeMs": 37.99,
+          "atomsPerMs": 276
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.375,
-          "atomsPerMs": 27978
+          "timeMs": 28.981,
+          "atomsPerMs": 362
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 529,
-          "timeMs": 107.441,
-          "atomsPerMs": 98
+          "timeMs": 58.709,
+          "atomsPerMs": 179
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 46.19,
-          "atomsPerMs": 227
+          "timeMs": 61.823,
+          "atomsPerMs": 170
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.093,
-          "atomsPerMs": 112420
+          "timeMs": 0.146,
+          "atomsPerMs": 72165
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 2100,
-          "timeMs": 54.456,
-          "atomsPerMs": 193
+          "timeMs": 47.717,
+          "atomsPerMs": 220
         },
         {
           "query": "elem C or elem N",
           "matchCount": 7350,
-          "timeMs": 47.886,
-          "atomsPerMs": 219
+          "timeMs": 68.858,
+          "atomsPerMs": 152
         },
         {
           "query": "not hydrogens",
           "matchCount": 9450,
-          "timeMs": 27.557,
-          "atomsPerMs": 381
+          "timeMs": 51.533,
+          "atomsPerMs": 204
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 18.311,
-          "atomsPerMs": 573
+          "timeMs": 42.319,
+          "atomsPerMs": 248
         }
       ],
-      "avgQueryTimeMs": 43.384,
-      "maxQueryTimeMs": 170.537,
-      "slowestQuery": "resn ALA",
-      "totalQueryTimeMs": 1084.608,
+      "avgQueryTimeMs": 45.915,
+      "maxQueryTimeMs": 89.058,
+      "slowestQuery": "all",
+      "totalQueryTimeMs": 1147.868,
       "exportPipeline": {
-        "pdbFormatTimeMs": 9.755,
+        "pdbFormatTimeMs": 26.746,
         "pdbOutputSizeBytes": 829553,
-        "pdbFormattingRateAtomsPerSec": 1076371,
-        "sessionExportTimeMs": 0.043,
+        "pdbFormattingRateAtomsPerSec": 392582,
+        "sessionExportTimeMs": 0.257,
         "sessionJsonSizeBytes": 3931,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -1023,7 +1023,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (43.384 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (45.915 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -1031,7 +1031,7 @@
       "molName": "Viral Capsid Hexamer Protomer Assembly",
       "tier": 10,
       "atomCount": 12000,
-      "parseTimeMs": 16.66,
+      "parseTimeMs": 35.15,
       "webgl": {
         "sphereVerticesFull": 3456000,
         "sphereVboBytesFullMB": 131.836,
@@ -1061,163 +1061,163 @@
         {
           "query": "all",
           "matchCount": 12000,
-          "timeMs": 52.126,
-          "atomsPerMs": 230
+          "timeMs": 56.569,
+          "atomsPerMs": 212
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 63.709,
-          "atomsPerMs": 188
+          "timeMs": 43.32,
+          "atomsPerMs": 277
         },
         {
           "query": "elem C",
           "matchCount": 6000,
-          "timeMs": 34.255,
-          "atomsPerMs": 350
+          "timeMs": 38.685,
+          "atomsPerMs": 310
         },
         {
           "query": "elem N",
           "matchCount": 2400,
-          "timeMs": 30.235,
-          "atomsPerMs": 397
+          "timeMs": 35.057,
+          "atomsPerMs": 342
         },
         {
           "query": "elem O",
           "matchCount": 2400,
-          "timeMs": 33.199,
-          "atomsPerMs": 361
+          "timeMs": 36.639,
+          "atomsPerMs": 328
         },
         {
           "query": "elem H",
           "matchCount": 1200,
-          "timeMs": 44.628,
-          "atomsPerMs": 269
+          "timeMs": 35.106,
+          "atomsPerMs": 342
         },
         {
           "query": "resn ALA",
           "matchCount": 600,
-          "timeMs": 35.209,
-          "atomsPerMs": 341
+          "timeMs": 40.895,
+          "atomsPerMs": 293
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 50.291,
-          "atomsPerMs": 239
+          "timeMs": 41.338,
+          "atomsPerMs": 290
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 31.056,
-          "atomsPerMs": 386
+          "timeMs": 46.223,
+          "atomsPerMs": 260
         },
         {
           "query": "chain A",
           "matchCount": 12000,
-          "timeMs": 48.938,
-          "atomsPerMs": 245
+          "timeMs": 44.5,
+          "atomsPerMs": 270
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 25.23,
-          "atomsPerMs": 476
+          "timeMs": 34.713,
+          "atomsPerMs": 346
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 71.726,
-          "atomsPerMs": 167
+          "timeMs": 41.59,
+          "atomsPerMs": 289
         },
         {
           "query": "hydrogens",
           "matchCount": 1200,
-          "timeMs": 42.549,
-          "atomsPerMs": 282
+          "timeMs": 61.23,
+          "atomsPerMs": 196
         },
         {
           "query": "backbone",
           "matchCount": 6000,
-          "timeMs": 40.357,
-          "atomsPerMs": 297
+          "timeMs": 70.453,
+          "atomsPerMs": 170
         },
         {
           "query": "sidechain",
           "matchCount": 6000,
-          "timeMs": 38.279,
-          "atomsPerMs": 313
+          "timeMs": 75.802,
+          "atomsPerMs": 158
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 52.054,
-          "atomsPerMs": 231
+          "timeMs": 65.482,
+          "atomsPerMs": 183
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 95.988,
-          "atomsPerMs": 125
+          "timeMs": 74.909,
+          "atomsPerMs": 160
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.221,
-          "atomsPerMs": 54323
+          "timeMs": 48.102,
+          "atomsPerMs": 249
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 600,
-          "timeMs": 67.441,
-          "atomsPerMs": 178
+          "timeMs": 101.154,
+          "atomsPerMs": 119
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 62.583,
-          "atomsPerMs": 192
+          "timeMs": 101.547,
+          "atomsPerMs": 118
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.056,
-          "atomsPerMs": 212389
+          "timeMs": 0.141,
+          "atomsPerMs": 84926
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 2400,
-          "timeMs": 122.407,
-          "atomsPerMs": 98
+          "timeMs": 77.914,
+          "atomsPerMs": 154
         },
         {
           "query": "elem C or elem N",
           "matchCount": 8400,
-          "timeMs": 79.635,
-          "atomsPerMs": 151
+          "timeMs": 109.072,
+          "atomsPerMs": 110
         },
         {
           "query": "not hydrogens",
           "matchCount": 10800,
-          "timeMs": 51.503,
-          "atomsPerMs": 233
+          "timeMs": 71.983,
+          "atomsPerMs": 167
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 42.664,
-          "atomsPerMs": 281
+          "timeMs": 98.621,
+          "atomsPerMs": 122
         }
       ],
-      "avgQueryTimeMs": 48.654,
-      "maxQueryTimeMs": 122.407,
-      "slowestQuery": "within 4 of elem N",
-      "totalQueryTimeMs": 1216.34,
+      "avgQueryTimeMs": 58.042,
+      "maxQueryTimeMs": 109.072,
+      "slowestQuery": "elem C or elem N",
+      "totalQueryTimeMs": 1451.044,
       "exportPipeline": {
-        "pdbFormatTimeMs": 20.064,
+        "pdbFormatTimeMs": 42.645,
         "pdbOutputSizeBytes": 948054,
-        "pdbFormattingRateAtomsPerSec": 598086,
-        "sessionExportTimeMs": 0.091,
+        "pdbFormattingRateAtomsPerSec": 281393,
+        "sessionExportTimeMs": 0.122,
         "sessionJsonSizeBytes": 3932,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -1226,7 +1226,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (48.654 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (58.042 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -1234,7 +1234,7 @@
       "molName": "GroEL Chaperonin Heptameric Ring Subunit",
       "tier": 10,
       "atomCount": 8500,
-      "parseTimeMs": 12.779,
+      "parseTimeMs": 34.528,
       "webgl": {
         "sphereVerticesFull": 2448000,
         "sphereVboBytesFullMB": 93.384,
@@ -1264,163 +1264,163 @@
         {
           "query": "all",
           "matchCount": 8500,
-          "timeMs": 25.305,
-          "atomsPerMs": 336
+          "timeMs": 64.005,
+          "atomsPerMs": 133
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 23.908,
-          "atomsPerMs": 356
+          "timeMs": 53.533,
+          "atomsPerMs": 159
         },
         {
           "query": "elem C",
           "matchCount": 4250,
-          "timeMs": 19.768,
-          "atomsPerMs": 430
+          "timeMs": 38.045,
+          "atomsPerMs": 223
         },
         {
           "query": "elem N",
           "matchCount": 1700,
-          "timeMs": 27.435,
-          "atomsPerMs": 310
+          "timeMs": 40.475,
+          "atomsPerMs": 210
         },
         {
           "query": "elem O",
           "matchCount": 1700,
-          "timeMs": 35.107,
-          "atomsPerMs": 242
+          "timeMs": 31.041,
+          "atomsPerMs": 274
         },
         {
           "query": "elem H",
           "matchCount": 850,
-          "timeMs": 17.362,
-          "atomsPerMs": 490
+          "timeMs": 38.532,
+          "atomsPerMs": 221
         },
         {
           "query": "resn ALA",
           "matchCount": 429,
-          "timeMs": 18.572,
-          "atomsPerMs": 458
+          "timeMs": 39.778,
+          "atomsPerMs": 214
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 15.99,
-          "atomsPerMs": 532
+          "timeMs": 36.082,
+          "atomsPerMs": 236
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 18.744,
-          "atomsPerMs": 453
+          "timeMs": 46.145,
+          "atomsPerMs": 184
         },
         {
           "query": "chain A",
           "matchCount": 8500,
-          "timeMs": 37.214,
-          "atomsPerMs": 228
+          "timeMs": 48.899,
+          "atomsPerMs": 174
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 63.459,
-          "atomsPerMs": 134
+          "timeMs": 30.896,
+          "atomsPerMs": 275
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 18.757,
-          "atomsPerMs": 453
+          "timeMs": 37.844,
+          "atomsPerMs": 225
         },
         {
           "query": "hydrogens",
           "matchCount": 850,
-          "timeMs": 24.325,
-          "atomsPerMs": 349
+          "timeMs": 49.672,
+          "atomsPerMs": 171
         },
         {
           "query": "backbone",
           "matchCount": 4250,
-          "timeMs": 33.416,
-          "atomsPerMs": 254
+          "timeMs": 63.98,
+          "atomsPerMs": 133
         },
         {
           "query": "sidechain",
           "matchCount": 4250,
-          "timeMs": 32.129,
-          "atomsPerMs": 265
+          "timeMs": 91.774,
+          "atomsPerMs": 93
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 34.257,
-          "atomsPerMs": 248
+          "timeMs": 69.322,
+          "atomsPerMs": 123
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 37.974,
-          "atomsPerMs": 224
+          "timeMs": 135.443,
+          "atomsPerMs": 63
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.093,
-          "atomsPerMs": 91202
+          "timeMs": 40.313,
+          "atomsPerMs": 211
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 429,
-          "timeMs": 75.854,
-          "atomsPerMs": 112
+          "timeMs": 82.197,
+          "atomsPerMs": 103
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 46.693,
-          "atomsPerMs": 182
+          "timeMs": 90.32,
+          "atomsPerMs": 94
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.098,
-          "atomsPerMs": 86646
+          "timeMs": 0.258,
+          "atomsPerMs": 32946
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 1700,
-          "timeMs": 71.918,
-          "atomsPerMs": 118
+          "timeMs": 73.953,
+          "atomsPerMs": 115
         },
         {
           "query": "elem C or elem N",
           "matchCount": 5950,
-          "timeMs": 40.057,
-          "atomsPerMs": 212
+          "timeMs": 61.615,
+          "atomsPerMs": 138
         },
         {
           "query": "not hydrogens",
           "matchCount": 7650,
-          "timeMs": 24.836,
-          "atomsPerMs": 342
+          "timeMs": 50.899,
+          "atomsPerMs": 167
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 24.701,
-          "atomsPerMs": 344
+          "timeMs": 38.596,
+          "atomsPerMs": 220
         }
       ],
-      "avgQueryTimeMs": 30.719,
-      "maxQueryTimeMs": 75.854,
-      "slowestQuery": "chain A and resn ALA",
-      "totalQueryTimeMs": 767.972,
+      "avgQueryTimeMs": 54.145,
+      "maxQueryTimeMs": 135.443,
+      "slowestQuery": "hetatm",
+      "totalQueryTimeMs": 1353.618,
       "exportPipeline": {
-        "pdbFormatTimeMs": 15.61,
+        "pdbFormatTimeMs": 17.368,
         "pdbOutputSizeBytes": 671556,
-        "pdbFormattingRateAtomsPerSec": 544523,
-        "sessionExportTimeMs": 0.101,
+        "pdbFormattingRateAtomsPerSec": 489406,
+        "sessionExportTimeMs": 0.078,
         "sessionJsonSizeBytes": 3934,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -1429,7 +1429,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (30.719 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (54.145 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -1437,7 +1437,7 @@
       "molName": "ATP Synthase F1 Catalytic Head Hexamer",
       "tier": 10,
       "atomCount": 16500,
-      "parseTimeMs": 38.153,
+      "parseTimeMs": 46.006,
       "webgl": {
         "sphereVerticesFull": 4752000,
         "sphereVboBytesFullMB": 181.274,
@@ -1467,163 +1467,163 @@
         {
           "query": "all",
           "matchCount": 16500,
-          "timeMs": 67.041,
-          "atomsPerMs": 246
+          "timeMs": 118.851,
+          "atomsPerMs": 139
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 57.828,
-          "atomsPerMs": 285
+          "timeMs": 113.307,
+          "atomsPerMs": 146
         },
         {
           "query": "elem C",
           "matchCount": 8250,
-          "timeMs": 44.984,
-          "atomsPerMs": 367
+          "timeMs": 78.298,
+          "atomsPerMs": 211
         },
         {
           "query": "elem N",
           "matchCount": 3300,
-          "timeMs": 45.361,
-          "atomsPerMs": 364
+          "timeMs": 189.175,
+          "atomsPerMs": 87
         },
         {
           "query": "elem O",
           "matchCount": 3300,
-          "timeMs": 51.85,
-          "atomsPerMs": 318
+          "timeMs": 98.733,
+          "atomsPerMs": 167
         },
         {
           "query": "elem H",
           "matchCount": 1650,
-          "timeMs": 33.366,
-          "atomsPerMs": 495
+          "timeMs": 98.791,
+          "atomsPerMs": 167
         },
         {
           "query": "resn ALA",
           "matchCount": 829,
-          "timeMs": 59.113,
-          "atomsPerMs": 279
+          "timeMs": 56.692,
+          "atomsPerMs": 291
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 45.453,
-          "atomsPerMs": 363
+          "timeMs": 55.212,
+          "atomsPerMs": 299
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 62.736,
-          "atomsPerMs": 263
+          "timeMs": 115.853,
+          "atomsPerMs": 142
         },
         {
           "query": "chain A",
           "matchCount": 15999,
-          "timeMs": 85.175,
-          "atomsPerMs": 194
+          "timeMs": 85.569,
+          "atomsPerMs": 193
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 38.78,
-          "atomsPerMs": 425
+          "timeMs": 49.344,
+          "atomsPerMs": 334
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 37.825,
-          "atomsPerMs": 436
+          "timeMs": 48.331,
+          "atomsPerMs": 341
         },
         {
           "query": "hydrogens",
           "matchCount": 1650,
-          "timeMs": 67.363,
-          "atomsPerMs": 245
+          "timeMs": 94.368,
+          "atomsPerMs": 175
         },
         {
           "query": "backbone",
           "matchCount": 8250,
-          "timeMs": 70.129,
-          "atomsPerMs": 235
+          "timeMs": 86.146,
+          "atomsPerMs": 192
         },
         {
           "query": "sidechain",
           "matchCount": 8250,
-          "timeMs": 66.33,
-          "atomsPerMs": 249
+          "timeMs": 99.359,
+          "atomsPerMs": 166
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 43.055,
-          "atomsPerMs": 383
+          "timeMs": 56.54,
+          "atomsPerMs": 292
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 36.838,
-          "atomsPerMs": 448
+          "timeMs": 46.315,
+          "atomsPerMs": 356
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.084,
-          "atomsPerMs": 196663
+          "timeMs": 36.981,
+          "atomsPerMs": 446
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 799,
-          "timeMs": 95.614,
-          "atomsPerMs": 173
+          "timeMs": 78.912,
+          "atomsPerMs": 209
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 99.151,
-          "atomsPerMs": 166
+          "timeMs": 82.559,
+          "atomsPerMs": 200
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.075,
-          "atomsPerMs": 218543
+          "timeMs": 0.108,
+          "atomsPerMs": 153203
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 3300,
-          "timeMs": 122.223,
-          "atomsPerMs": 135
+          "timeMs": 62.235,
+          "atomsPerMs": 265
         },
         {
           "query": "elem C or elem N",
           "matchCount": 11550,
-          "timeMs": 74.064,
-          "atomsPerMs": 223
+          "timeMs": 60.476,
+          "atomsPerMs": 273
         },
         {
           "query": "not hydrogens",
           "matchCount": 14850,
-          "timeMs": 44.945,
-          "atomsPerMs": 367
+          "timeMs": 61.747,
+          "atomsPerMs": 267
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 57.598,
-          "atomsPerMs": 286
+          "timeMs": 50.048,
+          "atomsPerMs": 330
         }
       ],
-      "avgQueryTimeMs": 56.279,
-      "maxQueryTimeMs": 122.223,
-      "slowestQuery": "within 4 of elem N",
-      "totalQueryTimeMs": 1406.98,
+      "avgQueryTimeMs": 76.958,
+      "maxQueryTimeMs": 189.175,
+      "slowestQuery": "elem N",
+      "totalQueryTimeMs": 1923.95,
       "exportPipeline": {
-        "pdbFormatTimeMs": 39.669,
+        "pdbFormatTimeMs": 20.693,
         "pdbOutputSizeBytes": 1303554,
-        "pdbFormattingRateAtomsPerSec": 415942,
-        "sessionExportTimeMs": 0.091,
+        "pdbFormattingRateAtomsPerSec": 797371,
+        "sessionExportTimeMs": 0.082,
         "sessionJsonSizeBytes": 3932,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -1632,7 +1632,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (56.279 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (76.958 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -1640,7 +1640,7 @@
       "molName": "RNA Polymerase II 12-subunit Holoenzyme Core",
       "tier": 10,
       "atomCount": 22000,
-      "parseTimeMs": 50.79,
+      "parseTimeMs": 30.614,
       "webgl": {
         "sphereVerticesFull": 6336000,
         "sphereVboBytesFullMB": 241.699,
@@ -1670,163 +1670,163 @@
         {
           "query": "all",
           "matchCount": 22000,
-          "timeMs": 96.821,
-          "atomsPerMs": 227
+          "timeMs": 97.362,
+          "atomsPerMs": 226
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 46.324,
-          "atomsPerMs": 475
+          "timeMs": 75.368,
+          "atomsPerMs": 292
         },
         {
           "query": "elem C",
           "matchCount": 11000,
-          "timeMs": 63.658,
-          "atomsPerMs": 346
+          "timeMs": 61.849,
+          "atomsPerMs": 356
         },
         {
           "query": "elem N",
           "matchCount": 4400,
-          "timeMs": 49.799,
-          "atomsPerMs": 442
+          "timeMs": 50.572,
+          "atomsPerMs": 435
         },
         {
           "query": "elem O",
           "matchCount": 4400,
-          "timeMs": 49.909,
-          "atomsPerMs": 441
+          "timeMs": 57.542,
+          "atomsPerMs": 382
         },
         {
           "query": "elem H",
           "matchCount": 2200,
-          "timeMs": 50.49,
-          "atomsPerMs": 436
+          "timeMs": 54.765,
+          "atomsPerMs": 402
         },
         {
           "query": "resn ALA",
           "matchCount": 1100,
-          "timeMs": 45.167,
-          "atomsPerMs": 487
+          "timeMs": 59.334,
+          "atomsPerMs": 371
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 57.228,
-          "atomsPerMs": 384
+          "timeMs": 53.61,
+          "atomsPerMs": 410
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 44.923,
-          "atomsPerMs": 490
+          "timeMs": 72.716,
+          "atomsPerMs": 303
         },
         {
           "query": "chain A",
           "matchCount": 15999,
-          "timeMs": 46.167,
-          "atomsPerMs": 477
+          "timeMs": 31.427,
+          "atomsPerMs": 700
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 32.609,
-          "atomsPerMs": 675
+          "timeMs": 40.565,
+          "atomsPerMs": 542
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 45.608,
-          "atomsPerMs": 482
+          "timeMs": 39.141,
+          "atomsPerMs": 562
         },
         {
           "query": "hydrogens",
           "matchCount": 2200,
-          "timeMs": 50.583,
-          "atomsPerMs": 435
+          "timeMs": 61.97,
+          "atomsPerMs": 355
         },
         {
           "query": "backbone",
           "matchCount": 11000,
-          "timeMs": 55.144,
-          "atomsPerMs": 399
+          "timeMs": 87.436,
+          "atomsPerMs": 252
         },
         {
           "query": "sidechain",
           "matchCount": 11000,
-          "timeMs": 103.586,
-          "atomsPerMs": 212
+          "timeMs": 102.74,
+          "atomsPerMs": 214
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 60.645,
-          "atomsPerMs": 363
+          "timeMs": 80.614,
+          "atomsPerMs": 273
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 74.92,
-          "atomsPerMs": 294
+          "timeMs": 66.681,
+          "atomsPerMs": 330
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.103,
-          "atomsPerMs": 213178
+          "timeMs": 72.364,
+          "atomsPerMs": 304
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 799,
-          "timeMs": 166.206,
-          "atomsPerMs": 132
+          "timeMs": 115.45,
+          "atomsPerMs": 191
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 132.467,
-          "atomsPerMs": 166
+          "timeMs": 97.507,
+          "atomsPerMs": 226
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.11,
-          "atomsPerMs": 199637
+          "timeMs": 0.177,
+          "atomsPerMs": 123944
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 4400,
-          "timeMs": 225.537,
-          "atomsPerMs": 98
+          "timeMs": 91.798,
+          "atomsPerMs": 240
         },
         {
           "query": "elem C or elem N",
           "matchCount": 15400,
-          "timeMs": 189.331,
-          "atomsPerMs": 116
+          "timeMs": 125.012,
+          "atomsPerMs": 176
         },
         {
           "query": "not hydrogens",
           "matchCount": 19800,
-          "timeMs": 109.769,
-          "atomsPerMs": 200
+          "timeMs": 77.879,
+          "atomsPerMs": 282
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 76.119,
-          "atomsPerMs": 289
+          "timeMs": 54.709,
+          "atomsPerMs": 402
         }
       ],
-      "avgQueryTimeMs": 74.929,
-      "maxQueryTimeMs": 225.537,
-      "slowestQuery": "within 4 of elem N",
-      "totalQueryTimeMs": 1873.223,
+      "avgQueryTimeMs": 69.143,
+      "maxQueryTimeMs": 125.012,
+      "slowestQuery": "elem C or elem N",
+      "totalQueryTimeMs": 1728.587,
       "exportPipeline": {
-        "pdbFormatTimeMs": 63.763,
+        "pdbFormatTimeMs": 42.785,
         "pdbOutputSizeBytes": 1738056,
-        "pdbFormattingRateAtomsPerSec": 345028,
-        "sessionExportTimeMs": 0.104,
+        "pdbFormattingRateAtomsPerSec": 514199,
+        "sessionExportTimeMs": 0.095,
         "sessionJsonSizeBytes": 3938,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -1835,7 +1835,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (74.929 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (69.143 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -1843,7 +1843,7 @@
       "molName": "Hemoglobin Tetramer Alpha2Beta2 + 4 Hemes",
       "tier": 10,
       "atomCount": 4400,
-      "parseTimeMs": 19.827,
+      "parseTimeMs": 11.729,
       "webgl": {
         "sphereVerticesFull": 1267200,
         "sphereVboBytesFullMB": 48.34,
@@ -1873,163 +1873,163 @@
         {
           "query": "all",
           "matchCount": 4400,
-          "timeMs": 25.948,
-          "atomsPerMs": 170
+          "timeMs": 16.873,
+          "atomsPerMs": 261
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 28.348,
-          "atomsPerMs": 155
+          "timeMs": 13.82,
+          "atomsPerMs": 318
         },
         {
           "query": "elem C",
           "matchCount": 2200,
-          "timeMs": 12.408,
-          "atomsPerMs": 355
+          "timeMs": 11.904,
+          "atomsPerMs": 370
         },
         {
           "query": "elem N",
           "matchCount": 880,
-          "timeMs": 15.029,
-          "atomsPerMs": 293
+          "timeMs": 9.462,
+          "atomsPerMs": 465
         },
         {
           "query": "elem O",
           "matchCount": 880,
-          "timeMs": 14.641,
-          "atomsPerMs": 301
+          "timeMs": 13.891,
+          "atomsPerMs": 317
         },
         {
           "query": "elem H",
           "matchCount": 440,
-          "timeMs": 17.651,
-          "atomsPerMs": 249
+          "timeMs": 16.559,
+          "atomsPerMs": 266
         },
         {
           "query": "resn ALA",
           "matchCount": 220,
-          "timeMs": 11.85,
-          "atomsPerMs": 371
+          "timeMs": 14.334,
+          "atomsPerMs": 307
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 11.612,
-          "atomsPerMs": 379
+          "timeMs": 14.038,
+          "atomsPerMs": 313
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 17.428,
-          "atomsPerMs": 252
+          "timeMs": 17.005,
+          "atomsPerMs": 259
         },
         {
           "query": "chain A",
           "matchCount": 4400,
-          "timeMs": 17.965,
-          "atomsPerMs": 245
+          "timeMs": 13.204,
+          "atomsPerMs": 333
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 11.759,
-          "atomsPerMs": 374
+          "timeMs": 9.397,
+          "atomsPerMs": 468
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 9.464,
-          "atomsPerMs": 465
+          "timeMs": 10.473,
+          "atomsPerMs": 420
         },
         {
           "query": "hydrogens",
           "matchCount": 440,
-          "timeMs": 18.882,
-          "atomsPerMs": 233
+          "timeMs": 17.433,
+          "atomsPerMs": 252
         },
         {
           "query": "backbone",
           "matchCount": 2200,
-          "timeMs": 11.753,
-          "atomsPerMs": 374
+          "timeMs": 9.023,
+          "atomsPerMs": 488
         },
         {
           "query": "sidechain",
           "matchCount": 2200,
-          "timeMs": 15.933,
-          "atomsPerMs": 276
+          "timeMs": 18.865,
+          "atomsPerMs": 233
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 20.701,
-          "atomsPerMs": 213
+          "timeMs": 16.843,
+          "atomsPerMs": 261
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 19.771,
-          "atomsPerMs": 223
+          "timeMs": 13.366,
+          "atomsPerMs": 329
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.11,
-          "atomsPerMs": 39927
+          "timeMs": 12.312,
+          "atomsPerMs": 357
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 220,
-          "timeMs": 41.141,
-          "atomsPerMs": 107
+          "timeMs": 23.656,
+          "atomsPerMs": 186
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 33.022,
-          "atomsPerMs": 133
+          "timeMs": 22.605,
+          "atomsPerMs": 195
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.149,
-          "atomsPerMs": 29610
+          "timeMs": 0.082,
+          "atomsPerMs": 53463
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 880,
-          "timeMs": 51.395,
-          "atomsPerMs": 86
+          "timeMs": 17.622,
+          "atomsPerMs": 250
         },
         {
           "query": "elem C or elem N",
           "matchCount": 3080,
-          "timeMs": 36.085,
-          "atomsPerMs": 122
+          "timeMs": 19.656,
+          "atomsPerMs": 224
         },
         {
           "query": "not hydrogens",
           "matchCount": 3960,
-          "timeMs": 16.058,
-          "atomsPerMs": 274
+          "timeMs": 19.631,
+          "atomsPerMs": 224
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 15.673,
-          "atomsPerMs": 281
+          "timeMs": 21.219,
+          "atomsPerMs": 207
         }
       ],
-      "avgQueryTimeMs": 18.991,
-      "maxQueryTimeMs": 51.395,
-      "slowestQuery": "within 4 of elem N",
-      "totalQueryTimeMs": 474.776,
+      "avgQueryTimeMs": 14.931,
+      "maxQueryTimeMs": 23.656,
+      "slowestQuery": "chain A and resn ALA",
+      "totalQueryTimeMs": 373.275,
       "exportPipeline": {
-        "pdbFormatTimeMs": 10.255,
+        "pdbFormatTimeMs": 10.049,
         "pdbOutputSizeBytes": 347656,
-        "pdbFormattingRateAtomsPerSec": 429059,
-        "sessionExportTimeMs": 0.066,
+        "pdbFormattingRateAtomsPerSec": 437855,
+        "sessionExportTimeMs": 0.129,
         "sessionJsonSizeBytes": 3935,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -2038,7 +2038,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (18.991 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (14.931 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -2046,7 +2046,7 @@
       "molName": "Photosystem II Reaction Center Core Complex",
       "tier": 10,
       "atomCount": 18500,
-      "parseTimeMs": 43.065,
+      "parseTimeMs": 40.158,
       "webgl": {
         "sphereVerticesFull": 5328000,
         "sphereVboBytesFullMB": 203.247,
@@ -2076,163 +2076,163 @@
         {
           "query": "all",
           "matchCount": 18500,
-          "timeMs": 95.308,
-          "atomsPerMs": 194
+          "timeMs": 81.845,
+          "atomsPerMs": 226
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 99.966,
-          "atomsPerMs": 185
+          "timeMs": 78.133,
+          "atomsPerMs": 237
         },
         {
           "query": "elem C",
           "matchCount": 9250,
-          "timeMs": 78.834,
-          "atomsPerMs": 235
+          "timeMs": 48.699,
+          "atomsPerMs": 380
         },
         {
           "query": "elem N",
           "matchCount": 3700,
-          "timeMs": 81.274,
-          "atomsPerMs": 228
+          "timeMs": 49.415,
+          "atomsPerMs": 374
         },
         {
           "query": "elem O",
           "matchCount": 3700,
-          "timeMs": 62.27,
-          "atomsPerMs": 297
+          "timeMs": 57.218,
+          "atomsPerMs": 323
         },
         {
           "query": "elem H",
           "matchCount": 1850,
-          "timeMs": 75.739,
-          "atomsPerMs": 244
+          "timeMs": 42.025,
+          "atomsPerMs": 440
         },
         {
           "query": "resn ALA",
           "matchCount": 929,
-          "timeMs": 103.027,
-          "atomsPerMs": 180
+          "timeMs": 33.32,
+          "atomsPerMs": 555
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 82.929,
-          "atomsPerMs": 223
+          "timeMs": 50.757,
+          "atomsPerMs": 364
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 47.024,
-          "atomsPerMs": 393
+          "timeMs": 42.975,
+          "atomsPerMs": 430
         },
         {
           "query": "chain A",
           "matchCount": 15999,
-          "timeMs": 53.809,
-          "atomsPerMs": 344
+          "timeMs": 32.37,
+          "atomsPerMs": 572
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 31.361,
-          "atomsPerMs": 590
+          "timeMs": 38.443,
+          "atomsPerMs": 481
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 26.966,
-          "atomsPerMs": 686
+          "timeMs": 44.227,
+          "atomsPerMs": 418
         },
         {
           "query": "hydrogens",
           "matchCount": 1850,
-          "timeMs": 44.51,
-          "atomsPerMs": 416
+          "timeMs": 101.633,
+          "atomsPerMs": 182
         },
         {
           "query": "backbone",
           "matchCount": 9250,
-          "timeMs": 80.374,
-          "atomsPerMs": 230
+          "timeMs": 107.534,
+          "atomsPerMs": 172
         },
         {
           "query": "sidechain",
           "matchCount": 9250,
-          "timeMs": 64.217,
-          "atomsPerMs": 288
+          "timeMs": 51.614,
+          "atomsPerMs": 358
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 71.039,
-          "atomsPerMs": 260
+          "timeMs": 90.577,
+          "atomsPerMs": 204
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 102.571,
-          "atomsPerMs": 180
+          "timeMs": 70.064,
+          "atomsPerMs": 264
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.138,
-          "atomsPerMs": 133574
+          "timeMs": 44.769,
+          "atomsPerMs": 413
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 799,
-          "timeMs": 198.439,
-          "atomsPerMs": 93
+          "timeMs": 74.622,
+          "atomsPerMs": 248
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 123.22,
-          "atomsPerMs": 150
+          "timeMs": 106.999,
+          "atomsPerMs": 173
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.109,
-          "atomsPerMs": 168950
+          "timeMs": 0.11,
+          "atomsPerMs": 167724
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 3700,
-          "timeMs": 278.4,
-          "atomsPerMs": 66
+          "timeMs": 86.059,
+          "atomsPerMs": 215
         },
         {
           "query": "elem C or elem N",
           "matchCount": 12950,
-          "timeMs": 169.986,
-          "atomsPerMs": 109
+          "timeMs": 76.54,
+          "atomsPerMs": 242
         },
         {
           "query": "not hydrogens",
           "matchCount": 16650,
-          "timeMs": 71.448,
-          "atomsPerMs": 259
+          "timeMs": 61.998,
+          "atomsPerMs": 298
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 81.598,
-          "atomsPerMs": 227
+          "timeMs": 66.795,
+          "atomsPerMs": 277
         }
       ],
-      "avgQueryTimeMs": 84.982,
-      "maxQueryTimeMs": 278.4,
-      "slowestQuery": "within 4 of elem N",
-      "totalQueryTimeMs": 2124.558,
+      "avgQueryTimeMs": 61.55,
+      "maxQueryTimeMs": 107.534,
+      "slowestQuery": "backbone",
+      "totalQueryTimeMs": 1538.741,
       "exportPipeline": {
-        "pdbFormatTimeMs": 44.804,
+        "pdbFormatTimeMs": 48.121,
         "pdbOutputSizeBytes": 1461556,
-        "pdbFormattingRateAtomsPerSec": 412910,
-        "sessionExportTimeMs": 0.086,
+        "pdbFormattingRateAtomsPerSec": 384448,
+        "sessionExportTimeMs": 0.081,
         "sessionJsonSizeBytes": 3937,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -2241,7 +2241,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (84.982 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (61.55 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -2249,7 +2249,7 @@
       "molName": "Proteasome 20S Core Alpha-Beta Ring Stack",
       "tier": 10,
       "atomCount": 24000,
-      "parseTimeMs": 64.393,
+      "parseTimeMs": 49.14,
       "webgl": {
         "sphereVerticesFull": 6912000,
         "sphereVboBytesFullMB": 263.672,
@@ -2279,163 +2279,163 @@
         {
           "query": "all",
           "matchCount": 24000,
-          "timeMs": 100.512,
-          "atomsPerMs": 239
+          "timeMs": 98.494,
+          "atomsPerMs": 244
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 92.238,
-          "atomsPerMs": 260
+          "timeMs": 92.687,
+          "atomsPerMs": 259
         },
         {
           "query": "elem C",
           "matchCount": 12000,
-          "timeMs": 86.693,
-          "atomsPerMs": 277
+          "timeMs": 53.983,
+          "atomsPerMs": 445
         },
         {
           "query": "elem N",
           "matchCount": 4800,
-          "timeMs": 131.129,
-          "atomsPerMs": 183
+          "timeMs": 58.389,
+          "atomsPerMs": 411
         },
         {
           "query": "elem O",
           "matchCount": 4800,
-          "timeMs": 93.422,
-          "atomsPerMs": 257
+          "timeMs": 50.468,
+          "atomsPerMs": 476
         },
         {
           "query": "elem H",
           "matchCount": 2400,
-          "timeMs": 70.268,
-          "atomsPerMs": 342
+          "timeMs": 42.443,
+          "atomsPerMs": 565
         },
         {
           "query": "resn ALA",
           "matchCount": 1200,
-          "timeMs": 61.404,
-          "atomsPerMs": 391
+          "timeMs": 67.131,
+          "atomsPerMs": 358
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 85.368,
-          "atomsPerMs": 281
+          "timeMs": 64.621,
+          "atomsPerMs": 371
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 90.06,
+          "timeMs": 90.065,
           "atomsPerMs": 266
         },
         {
           "query": "chain A",
           "matchCount": 15999,
-          "timeMs": 63.541,
-          "atomsPerMs": 378
+          "timeMs": 67.25,
+          "atomsPerMs": 357
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 49.827,
-          "atomsPerMs": 482
+          "timeMs": 51.458,
+          "atomsPerMs": 466
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 42.016,
-          "atomsPerMs": 571
+          "timeMs": 50.218,
+          "atomsPerMs": 478
         },
         {
           "query": "hydrogens",
           "matchCount": 2400,
-          "timeMs": 73.779,
-          "atomsPerMs": 325
+          "timeMs": 98.124,
+          "atomsPerMs": 245
         },
         {
           "query": "backbone",
           "matchCount": 12000,
-          "timeMs": 166.963,
-          "atomsPerMs": 144
+          "timeMs": 67.652,
+          "atomsPerMs": 355
         },
         {
           "query": "sidechain",
           "matchCount": 12000,
-          "timeMs": 128.764,
-          "atomsPerMs": 186
+          "timeMs": 106.581,
+          "atomsPerMs": 225
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 98.693,
-          "atomsPerMs": 243
+          "timeMs": 123.5,
+          "atomsPerMs": 194
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 72.494,
-          "atomsPerMs": 331
+          "timeMs": 103.478,
+          "atomsPerMs": 232
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.275,
-          "atomsPerMs": 87178
+          "timeMs": 57.997,
+          "atomsPerMs": 414
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 799,
-          "timeMs": 236.642,
-          "atomsPerMs": 101
+          "timeMs": 106.522,
+          "atomsPerMs": 225
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 300.037,
-          "atomsPerMs": 80
+          "timeMs": 109.374,
+          "atomsPerMs": 219
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.118,
-          "atomsPerMs": 204082
+          "timeMs": 0.197,
+          "atomsPerMs": 121951
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 4800,
-          "timeMs": 302.268,
-          "atomsPerMs": 79
+          "timeMs": 115.391,
+          "atomsPerMs": 208
         },
         {
           "query": "elem C or elem N",
           "matchCount": 16800,
-          "timeMs": 192.818,
-          "atomsPerMs": 124
+          "timeMs": 113.533,
+          "atomsPerMs": 211
         },
         {
           "query": "not hydrogens",
           "matchCount": 21600,
-          "timeMs": 101.803,
-          "atomsPerMs": 236
+          "timeMs": 92.691,
+          "atomsPerMs": 259
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 118.27,
-          "atomsPerMs": 203
+          "timeMs": 84.036,
+          "atomsPerMs": 286
         }
       ],
-      "avgQueryTimeMs": 110.376,
-      "maxQueryTimeMs": 302.268,
-      "slowestQuery": "within 4 of elem N",
-      "totalQueryTimeMs": 2759.403,
+      "avgQueryTimeMs": 78.651,
+      "maxQueryTimeMs": 123.5,
+      "slowestQuery": "organic",
+      "totalQueryTimeMs": 1966.281,
       "exportPipeline": {
-        "pdbFormatTimeMs": 48.017,
+        "pdbFormatTimeMs": 44.84,
         "pdbOutputSizeBytes": 1896056,
-        "pdbFormattingRateAtomsPerSec": 499823,
-        "sessionExportTimeMs": 0.156,
+        "pdbFormattingRateAtomsPerSec": 535236,
+        "sessionExportTimeMs": 0.253,
         "sessionJsonSizeBytes": 3935,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -2444,7 +2444,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (110.376 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (78.651 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -2452,7 +2452,7 @@
       "molName": "Potassium Channel KcsA Tetramer + Selectivity Filter",
       "tier": 10,
       "atomCount": 5200,
-      "parseTimeMs": 13.015,
+      "parseTimeMs": 7.594,
       "webgl": {
         "sphereVerticesFull": 1497600,
         "sphereVboBytesFullMB": 57.129,
@@ -2482,163 +2482,163 @@
         {
           "query": "all",
           "matchCount": 5200,
-          "timeMs": 37.606,
-          "atomsPerMs": 138
+          "timeMs": 23.47,
+          "atomsPerMs": 222
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 20.613,
-          "atomsPerMs": 252
+          "timeMs": 14.191,
+          "atomsPerMs": 366
         },
         {
           "query": "elem C",
           "matchCount": 2600,
-          "timeMs": 67.113,
-          "atomsPerMs": 77
+          "timeMs": 6.591,
+          "atomsPerMs": 789
         },
         {
           "query": "elem N",
           "matchCount": 1040,
-          "timeMs": 25.946,
-          "atomsPerMs": 200
+          "timeMs": 6.965,
+          "atomsPerMs": 747
         },
         {
           "query": "elem O",
           "matchCount": 1040,
-          "timeMs": 19.891,
-          "atomsPerMs": 261
+          "timeMs": 52.243,
+          "atomsPerMs": 100
         },
         {
           "query": "elem H",
           "matchCount": 520,
-          "timeMs": 24.832,
-          "atomsPerMs": 209
+          "timeMs": 8.492,
+          "atomsPerMs": 612
         },
         {
           "query": "resn ALA",
           "matchCount": 260,
-          "timeMs": 23.618,
-          "atomsPerMs": 220
+          "timeMs": 11.013,
+          "atomsPerMs": 472
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 14.268,
-          "atomsPerMs": 364
+          "timeMs": 10.572,
+          "atomsPerMs": 492
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 15.734,
-          "atomsPerMs": 330
+          "timeMs": 12.609,
+          "atomsPerMs": 412
         },
         {
           "query": "chain A",
           "matchCount": 5200,
-          "timeMs": 8.937,
-          "atomsPerMs": 582
+          "timeMs": 8.568,
+          "atomsPerMs": 607
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 6.941,
-          "atomsPerMs": 749
+          "timeMs": 7.707,
+          "atomsPerMs": 675
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 8.682,
-          "atomsPerMs": 599
+          "timeMs": 12.569,
+          "atomsPerMs": 414
         },
         {
           "query": "hydrogens",
           "matchCount": 520,
-          "timeMs": 20.653,
-          "atomsPerMs": 252
+          "timeMs": 16.651,
+          "atomsPerMs": 312
         },
         {
           "query": "backbone",
           "matchCount": 2600,
-          "timeMs": 15.99,
-          "atomsPerMs": 325
+          "timeMs": 11.554,
+          "atomsPerMs": 450
         },
         {
           "query": "sidechain",
           "matchCount": 2600,
-          "timeMs": 21.08,
-          "atomsPerMs": 247
+          "timeMs": 18.276,
+          "atomsPerMs": 285
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 17.4,
-          "atomsPerMs": 299
+          "timeMs": 9.222,
+          "atomsPerMs": 564
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 22.402,
-          "atomsPerMs": 232
+          "timeMs": 10.58,
+          "atomsPerMs": 491
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.111,
-          "atomsPerMs": 46974
+          "timeMs": 8.409,
+          "atomsPerMs": 618
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 260,
-          "timeMs": 45.965,
-          "atomsPerMs": 113
+          "timeMs": 17.494,
+          "atomsPerMs": 297
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 40.409,
-          "atomsPerMs": 129
+          "timeMs": 16.509,
+          "atomsPerMs": 315
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.079,
-          "atomsPerMs": 65657
+          "timeMs": 0.136,
+          "atomsPerMs": 38263
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 1040,
-          "timeMs": 47.817,
-          "atomsPerMs": 109
+          "timeMs": 14.224,
+          "atomsPerMs": 366
         },
         {
           "query": "elem C or elem N",
           "matchCount": 3640,
-          "timeMs": 40.313,
-          "atomsPerMs": 129
+          "timeMs": 22.797,
+          "atomsPerMs": 228
         },
         {
           "query": "not hydrogens",
           "matchCount": 4680,
-          "timeMs": 20.877,
-          "atomsPerMs": 249
+          "timeMs": 14.605,
+          "atomsPerMs": 356
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 17.31,
-          "atomsPerMs": 300
+          "timeMs": 9.671,
+          "atomsPerMs": 538
         }
       ],
-      "avgQueryTimeMs": 23.383,
-      "maxQueryTimeMs": 67.113,
-      "slowestQuery": "elem C",
-      "totalQueryTimeMs": 584.586,
+      "avgQueryTimeMs": 13.805,
+      "maxQueryTimeMs": 52.243,
+      "slowestQuery": "elem O",
+      "totalQueryTimeMs": 345.119,
       "exportPipeline": {
-        "pdbFormatTimeMs": 12.183,
+        "pdbFormatTimeMs": 5.109,
         "pdbOutputSizeBytes": 410856,
-        "pdbFormattingRateAtomsPerSec": 426824,
-        "sessionExportTimeMs": 0.377,
+        "pdbFormattingRateAtomsPerSec": 1017812,
+        "sessionExportTimeMs": 0.083,
         "sessionJsonSizeBytes": 3946,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -2647,7 +2647,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (23.383 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (13.805 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -2655,7 +2655,7 @@
       "molName": "Glutamine Synthetase Dodecamer Ring Assembly",
       "tier": 10,
       "atomCount": 24500,
-      "parseTimeMs": 62.699,
+      "parseTimeMs": 40.187,
       "webgl": {
         "sphereVerticesFull": 7056000,
         "sphereVboBytesFullMB": 269.165,
@@ -2685,163 +2685,163 @@
         {
           "query": "all",
           "matchCount": 24500,
-          "timeMs": 110.359,
-          "atomsPerMs": 222
+          "timeMs": 57.195,
+          "atomsPerMs": 428
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 95.333,
-          "atomsPerMs": 257
+          "timeMs": 57.941,
+          "atomsPerMs": 423
         },
         {
           "query": "elem C",
           "matchCount": 12250,
-          "timeMs": 101.07,
-          "atomsPerMs": 242
+          "timeMs": 33.929,
+          "atomsPerMs": 722
         },
         {
           "query": "elem N",
           "matchCount": 4900,
-          "timeMs": 97.824,
-          "atomsPerMs": 250
+          "timeMs": 32.556,
+          "atomsPerMs": 753
         },
         {
           "query": "elem O",
           "matchCount": 4900,
-          "timeMs": 95.656,
-          "atomsPerMs": 256
+          "timeMs": 47.225,
+          "atomsPerMs": 519
         },
         {
           "query": "elem H",
           "matchCount": 2450,
-          "timeMs": 99.002,
-          "atomsPerMs": 247
+          "timeMs": 36.104,
+          "atomsPerMs": 679
         },
         {
           "query": "resn ALA",
           "matchCount": 1229,
-          "timeMs": 118.364,
-          "atomsPerMs": 207
+          "timeMs": 43.522,
+          "atomsPerMs": 563
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 95.44,
-          "atomsPerMs": 257
+          "timeMs": 55.58,
+          "atomsPerMs": 441
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 79.339,
-          "atomsPerMs": 309
+          "timeMs": 60.977,
+          "atomsPerMs": 402
         },
         {
           "query": "chain A",
           "matchCount": 15999,
-          "timeMs": 69.686,
-          "atomsPerMs": 352
+          "timeMs": 46.129,
+          "atomsPerMs": 531
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 57.604,
-          "atomsPerMs": 425
+          "timeMs": 43.471,
+          "atomsPerMs": 564
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 53.734,
-          "atomsPerMs": 456
+          "timeMs": 39.757,
+          "atomsPerMs": 616
         },
         {
           "query": "hydrogens",
           "matchCount": 2450,
-          "timeMs": 70.325,
-          "atomsPerMs": 348
+          "timeMs": 55.976,
+          "atomsPerMs": 438
         },
         {
           "query": "backbone",
           "matchCount": 12250,
-          "timeMs": 60.804,
-          "atomsPerMs": 403
+          "timeMs": 72.802,
+          "atomsPerMs": 337
         },
         {
           "query": "sidechain",
           "matchCount": 12250,
-          "timeMs": 103.958,
-          "atomsPerMs": 236
+          "timeMs": 67.162,
+          "atomsPerMs": 365
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 100.277,
-          "atomsPerMs": 244
+          "timeMs": 55.394,
+          "atomsPerMs": 442
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 113.668,
-          "atomsPerMs": 216
+          "timeMs": 47.833,
+          "atomsPerMs": 512
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.213,
-          "atomsPerMs": 114969
+          "timeMs": 57.894,
+          "atomsPerMs": 423
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 799,
-          "timeMs": 156.67,
-          "atomsPerMs": 156
+          "timeMs": 110.698,
+          "atomsPerMs": 221
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 185.387,
-          "atomsPerMs": 132
+          "timeMs": 120.158,
+          "atomsPerMs": 204
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.161,
-          "atomsPerMs": 152363
+          "timeMs": 0.131,
+          "atomsPerMs": 186312
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 4900,
-          "timeMs": 392.922,
-          "atomsPerMs": 62
+          "timeMs": 91.129,
+          "atomsPerMs": 269
         },
         {
           "query": "elem C or elem N",
           "matchCount": 17150,
-          "timeMs": 231.668,
-          "atomsPerMs": 106
+          "timeMs": 85.707,
+          "atomsPerMs": 286
         },
         {
           "query": "not hydrogens",
           "matchCount": 22050,
-          "timeMs": 137.361,
-          "atomsPerMs": 178
+          "timeMs": 75.082,
+          "atomsPerMs": 326
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 124.564,
-          "atomsPerMs": 197
+          "timeMs": 52.537,
+          "atomsPerMs": 466
         }
       ],
-      "avgQueryTimeMs": 110.056,
-      "maxQueryTimeMs": 392.922,
-      "slowestQuery": "within 4 of elem N",
-      "totalQueryTimeMs": 2751.389,
+      "avgQueryTimeMs": 57.876,
+      "maxQueryTimeMs": 120.158,
+      "slowestQuery": "ss h and not resn HOH",
+      "totalQueryTimeMs": 1446.89,
       "exportPipeline": {
-        "pdbFormatTimeMs": 72.008,
+        "pdbFormatTimeMs": 28.91,
         "pdbOutputSizeBytes": 1935556,
-        "pdbFormattingRateAtomsPerSec": 340240,
-        "sessionExportTimeMs": 0.256,
+        "pdbFormattingRateAtomsPerSec": 847458,
+        "sessionExportTimeMs": 0.079,
         "sessionJsonSizeBytes": 3938,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -2850,7 +2850,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (110.056 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (57.876 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -2858,7 +2858,7 @@
       "molName": "Pyruvate Dehydrogenase E1 Alpha2Beta2 Tetramer",
       "tier": 10,
       "atomCount": 12800,
-      "parseTimeMs": 27.012,
+      "parseTimeMs": 16.345,
       "webgl": {
         "sphereVerticesFull": 3686400,
         "sphereVboBytesFullMB": 140.625,
@@ -2888,163 +2888,163 @@
         {
           "query": "all",
           "matchCount": 12800,
-          "timeMs": 80.116,
-          "atomsPerMs": 160
+          "timeMs": 39.159,
+          "atomsPerMs": 327
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 52.691,
+          "timeMs": 52.679,
           "atomsPerMs": 243
         },
         {
           "query": "elem C",
           "matchCount": 6400,
-          "timeMs": 62.536,
-          "atomsPerMs": 205
+          "timeMs": 23.05,
+          "atomsPerMs": 555
         },
         {
           "query": "elem N",
           "matchCount": 2560,
-          "timeMs": 54.987,
-          "atomsPerMs": 233
+          "timeMs": 22.178,
+          "atomsPerMs": 577
         },
         {
           "query": "elem O",
           "matchCount": 2560,
-          "timeMs": 66.392,
-          "atomsPerMs": 193
+          "timeMs": 23.966,
+          "atomsPerMs": 534
         },
         {
           "query": "elem H",
           "matchCount": 1280,
-          "timeMs": 36.294,
-          "atomsPerMs": 353
+          "timeMs": 27.605,
+          "atomsPerMs": 464
         },
         {
           "query": "resn ALA",
           "matchCount": 640,
-          "timeMs": 31.092,
-          "atomsPerMs": 412
+          "timeMs": 29.251,
+          "atomsPerMs": 438
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 42.912,
-          "atomsPerMs": 298
+          "timeMs": 29.231,
+          "atomsPerMs": 438
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 52.031,
-          "atomsPerMs": 246
+          "timeMs": 42.925,
+          "atomsPerMs": 298
         },
         {
           "query": "chain A",
           "matchCount": 12800,
-          "timeMs": 39.208,
-          "atomsPerMs": 326
+          "timeMs": 30.526,
+          "atomsPerMs": 419
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 30.113,
-          "atomsPerMs": 425
+          "timeMs": 28.629,
+          "atomsPerMs": 447
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 30.583,
-          "atomsPerMs": 419
+          "timeMs": 30.658,
+          "atomsPerMs": 418
         },
         {
           "query": "hydrogens",
           "matchCount": 1280,
-          "timeMs": 57.662,
-          "atomsPerMs": 222
+          "timeMs": 67.251,
+          "atomsPerMs": 190
         },
         {
           "query": "backbone",
           "matchCount": 6400,
-          "timeMs": 73.018,
-          "atomsPerMs": 175
+          "timeMs": 75.308,
+          "atomsPerMs": 170
         },
         {
           "query": "sidechain",
           "matchCount": 6400,
-          "timeMs": 60.171,
-          "atomsPerMs": 213
+          "timeMs": 57.196,
+          "atomsPerMs": 224
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 68.231,
-          "atomsPerMs": 188
+          "timeMs": 53.79,
+          "atomsPerMs": 238
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 74.251,
-          "atomsPerMs": 172
+          "timeMs": 56.864,
+          "atomsPerMs": 225
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.151,
-          "atomsPerMs": 84600
+          "timeMs": 34.877,
+          "atomsPerMs": 367
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 640,
-          "timeMs": 162.467,
-          "atomsPerMs": 79
+          "timeMs": 68.869,
+          "atomsPerMs": 186
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 176.236,
-          "atomsPerMs": 73
+          "timeMs": 63.077,
+          "atomsPerMs": 203
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.277,
-          "atomsPerMs": 46243
+          "timeMs": 0.108,
+          "atomsPerMs": 118738
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 2560,
-          "timeMs": 259.758,
-          "atomsPerMs": 49
+          "timeMs": 60.551,
+          "atomsPerMs": 211
         },
         {
           "query": "elem C or elem N",
           "matchCount": 8960,
-          "timeMs": 162.567,
-          "atomsPerMs": 79
+          "timeMs": 69.505,
+          "atomsPerMs": 184
         },
         {
           "query": "not hydrogens",
           "matchCount": 11520,
-          "timeMs": 143.178,
-          "atomsPerMs": 89
+          "timeMs": 57.089,
+          "atomsPerMs": 224
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 75.775,
-          "atomsPerMs": 169
+          "timeMs": 53.214,
+          "atomsPerMs": 241
         }
       ],
-      "avgQueryTimeMs": 75.708,
-      "maxQueryTimeMs": 259.758,
-      "slowestQuery": "within 4 of elem N",
-      "totalQueryTimeMs": 1892.697,
+      "avgQueryTimeMs": 43.902,
+      "maxQueryTimeMs": 75.308,
+      "slowestQuery": "backbone",
+      "totalQueryTimeMs": 1097.556,
       "exportPipeline": {
-        "pdbFormatTimeMs": 59.567,
+        "pdbFormatTimeMs": 25.057,
         "pdbOutputSizeBytes": 1011256,
-        "pdbFormattingRateAtomsPerSec": 214884,
-        "sessionExportTimeMs": 0.133,
+        "pdbFormattingRateAtomsPerSec": 510835,
+        "sessionExportTimeMs": 0.073,
         "sessionJsonSizeBytes": 3940,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -3053,7 +3053,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (75.708 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (43.902 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -3061,7 +3061,7 @@
       "molName": "Clathrin Heavy Chain Triskelion Hub Complex",
       "tier": 10,
       "atomCount": 14200,
-      "parseTimeMs": 41.119,
+      "parseTimeMs": 34.18,
       "webgl": {
         "sphereVerticesFull": 4089600,
         "sphereVboBytesFullMB": 156.006,
@@ -3091,163 +3091,163 @@
         {
           "query": "all",
           "matchCount": 14200,
-          "timeMs": 120.226,
-          "atomsPerMs": 118
+          "timeMs": 77.935,
+          "atomsPerMs": 182
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 79.664,
-          "atomsPerMs": 178
+          "timeMs": 60.551,
+          "atomsPerMs": 235
         },
         {
           "query": "elem C",
           "matchCount": 7100,
-          "timeMs": 74.469,
-          "atomsPerMs": 191
+          "timeMs": 35.188,
+          "atomsPerMs": 404
         },
         {
           "query": "elem N",
           "matchCount": 2840,
-          "timeMs": 113.854,
-          "atomsPerMs": 125
+          "timeMs": 43.253,
+          "atomsPerMs": 328
         },
         {
           "query": "elem O",
           "matchCount": 2840,
-          "timeMs": 55.124,
-          "atomsPerMs": 258
+          "timeMs": 36.675,
+          "atomsPerMs": 387
         },
         {
           "query": "elem H",
           "matchCount": 1420,
-          "timeMs": 52.181,
-          "atomsPerMs": 272
+          "timeMs": 38.424,
+          "atomsPerMs": 370
         },
         {
           "query": "resn ALA",
           "matchCount": 710,
-          "timeMs": 44.406,
-          "atomsPerMs": 320
+          "timeMs": 41.296,
+          "atomsPerMs": 344
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 45.923,
-          "atomsPerMs": 309
+          "timeMs": 42.127,
+          "atomsPerMs": 337
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 61.159,
-          "atomsPerMs": 232
+          "timeMs": 59.461,
+          "atomsPerMs": 239
         },
         {
           "query": "chain A",
           "matchCount": 14200,
-          "timeMs": 78.142,
-          "atomsPerMs": 182
+          "timeMs": 37.52,
+          "atomsPerMs": 378
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 42.122,
-          "atomsPerMs": 337
+          "timeMs": 29.904,
+          "atomsPerMs": 475
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 49.357,
-          "atomsPerMs": 288
+          "timeMs": 34.314,
+          "atomsPerMs": 414
         },
         {
           "query": "hydrogens",
           "matchCount": 1420,
-          "timeMs": 124.115,
-          "atomsPerMs": 114
+          "timeMs": 70.664,
+          "atomsPerMs": 201
         },
         {
           "query": "backbone",
           "matchCount": 7100,
-          "timeMs": 59.675,
-          "atomsPerMs": 238
+          "timeMs": 72.359,
+          "atomsPerMs": 196
         },
         {
           "query": "sidechain",
           "matchCount": 7100,
-          "timeMs": 78.845,
-          "atomsPerMs": 180
+          "timeMs": 63.64,
+          "atomsPerMs": 223
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 83.342,
-          "atomsPerMs": 170
+          "timeMs": 61.922,
+          "atomsPerMs": 229
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 58.741,
-          "atomsPerMs": 242
+          "timeMs": 65.723,
+          "atomsPerMs": 216
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.163,
-          "atomsPerMs": 87224
+          "timeMs": 44.919,
+          "atomsPerMs": 316
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 710,
-          "timeMs": 127.753,
-          "atomsPerMs": 111
+          "timeMs": 73.971,
+          "atomsPerMs": 192
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 91.816,
-          "atomsPerMs": 155
+          "timeMs": 70.955,
+          "atomsPerMs": 200
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.1,
-          "atomsPerMs": 142427
+          "timeMs": 0.097,
+          "atomsPerMs": 146998
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 2840,
-          "timeMs": 181.367,
-          "atomsPerMs": 78
+          "timeMs": 60.182,
+          "atomsPerMs": 236
         },
         {
           "query": "elem C or elem N",
           "matchCount": 9940,
-          "timeMs": 109.18,
-          "atomsPerMs": 130
+          "timeMs": 64.018,
+          "atomsPerMs": 222
         },
         {
           "query": "not hydrogens",
           "matchCount": 12780,
-          "timeMs": 57.926,
-          "atomsPerMs": 245
+          "timeMs": 70.872,
+          "atomsPerMs": 200
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 46.228,
-          "atomsPerMs": 307
+          "timeMs": 57.97,
+          "atomsPerMs": 245
         }
       ],
-      "avgQueryTimeMs": 73.435,
-      "maxQueryTimeMs": 181.367,
-      "slowestQuery": "within 4 of elem N",
-      "totalQueryTimeMs": 1835.878,
+      "avgQueryTimeMs": 52.558,
+      "maxQueryTimeMs": 77.935,
+      "slowestQuery": "all",
+      "totalQueryTimeMs": 1313.94,
       "exportPipeline": {
-        "pdbFormatTimeMs": 26.583,
+        "pdbFormatTimeMs": 28.608,
         "pdbOutputSizeBytes": 1121856,
-        "pdbFormattingRateAtomsPerSec": 534176,
-        "sessionExportTimeMs": 0.089,
+        "pdbFormattingRateAtomsPerSec": 496365,
+        "sessionExportTimeMs": 0.085,
         "sessionJsonSizeBytes": 3937,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -3256,7 +3256,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (73.435 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (52.558 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -3264,7 +3264,7 @@
       "molName": "Microtubule 13-protofilament Tubulin Ring",
       "tier": 10,
       "atomCount": 21000,
-      "parseTimeMs": 45.642,
+      "parseTimeMs": 42.551,
       "webgl": {
         "sphereVerticesFull": 6048000,
         "sphereVboBytesFullMB": 230.713,
@@ -3294,163 +3294,163 @@
         {
           "query": "all",
           "matchCount": 21000,
-          "timeMs": 74.509,
-          "atomsPerMs": 282
+          "timeMs": 89.981,
+          "atomsPerMs": 233
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 79.419,
-          "atomsPerMs": 264
+          "timeMs": 67.659,
+          "atomsPerMs": 310
         },
         {
           "query": "elem C",
           "matchCount": 10500,
-          "timeMs": 76.267,
-          "atomsPerMs": 275
+          "timeMs": 48.882,
+          "atomsPerMs": 430
         },
         {
           "query": "elem N",
           "matchCount": 4200,
-          "timeMs": 81.909,
-          "atomsPerMs": 256
+          "timeMs": 29.086,
+          "atomsPerMs": 722
         },
         {
           "query": "elem O",
           "matchCount": 4200,
-          "timeMs": 66.909,
-          "atomsPerMs": 314
+          "timeMs": 39.516,
+          "atomsPerMs": 531
         },
         {
           "query": "elem H",
           "matchCount": 2100,
-          "timeMs": 52.082,
-          "atomsPerMs": 403
+          "timeMs": 33.445,
+          "atomsPerMs": 628
         },
         {
           "query": "resn ALA",
           "matchCount": 1050,
-          "timeMs": 66.229,
-          "atomsPerMs": 317
+          "timeMs": 48.935,
+          "atomsPerMs": 429
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 69.137,
-          "atomsPerMs": 304
+          "timeMs": 42.141,
+          "atomsPerMs": 498
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 65.838,
-          "atomsPerMs": 319
+          "timeMs": 54.747,
+          "atomsPerMs": 384
         },
         {
           "query": "chain A",
           "matchCount": 15999,
-          "timeMs": 74.288,
-          "atomsPerMs": 283
+          "timeMs": 32.716,
+          "atomsPerMs": 642
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 39.832,
-          "atomsPerMs": 527
+          "timeMs": 25.818,
+          "atomsPerMs": 813
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 33.66,
-          "atomsPerMs": 624
+          "timeMs": 33.998,
+          "atomsPerMs": 618
         },
         {
           "query": "hydrogens",
           "matchCount": 2100,
-          "timeMs": 68.348,
-          "atomsPerMs": 307
+          "timeMs": 88.691,
+          "atomsPerMs": 237
         },
         {
           "query": "backbone",
           "matchCount": 10500,
-          "timeMs": 94.751,
-          "atomsPerMs": 222
+          "timeMs": 98.691,
+          "atomsPerMs": 213
         },
         {
           "query": "sidechain",
           "matchCount": 10500,
-          "timeMs": 111.268,
-          "atomsPerMs": 189
+          "timeMs": 92.102,
+          "atomsPerMs": 228
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 99.854,
-          "atomsPerMs": 210
+          "timeMs": 78.414,
+          "atomsPerMs": 268
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 99.026,
-          "atomsPerMs": 212
+          "timeMs": 102.941,
+          "atomsPerMs": 204
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.122,
-          "atomsPerMs": 171569
+          "timeMs": 62.904,
+          "atomsPerMs": 334
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 799,
-          "timeMs": 216.751,
-          "atomsPerMs": 97
+          "timeMs": 93.274,
+          "atomsPerMs": 225
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 139.613,
-          "atomsPerMs": 150
+          "timeMs": 115.364,
+          "atomsPerMs": 182
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.105,
-          "atomsPerMs": 199430
+          "timeMs": 0.08,
+          "atomsPerMs": 262500
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 4200,
-          "timeMs": 277.719,
-          "atomsPerMs": 76
+          "timeMs": 80.588,
+          "atomsPerMs": 261
         },
         {
           "query": "elem C or elem N",
           "matchCount": 14700,
-          "timeMs": 211.46,
-          "atomsPerMs": 99
+          "timeMs": 104.494,
+          "atomsPerMs": 201
         },
         {
           "query": "not hydrogens",
           "matchCount": 18900,
-          "timeMs": 136.815,
-          "atomsPerMs": 153
+          "timeMs": 113.094,
+          "atomsPerMs": 186
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 103.785,
-          "atomsPerMs": 202
+          "timeMs": 94.191,
+          "atomsPerMs": 223
         }
       ],
-      "avgQueryTimeMs": 93.588,
-      "maxQueryTimeMs": 277.719,
-      "slowestQuery": "within 4 of elem N",
-      "totalQueryTimeMs": 2339.697,
+      "avgQueryTimeMs": 66.87,
+      "maxQueryTimeMs": 115.364,
+      "slowestQuery": "ss h and not resn HOH",
+      "totalQueryTimeMs": 1671.754,
       "exportPipeline": {
-        "pdbFormatTimeMs": 70.507,
+        "pdbFormatTimeMs": 37.486,
         "pdbOutputSizeBytes": 1659056,
-        "pdbFormattingRateAtomsPerSec": 297843,
-        "sessionExportTimeMs": 0.084,
+        "pdbFormattingRateAtomsPerSec": 560209,
+        "sessionExportTimeMs": 0.05,
         "sessionJsonSizeBytes": 3935,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -3459,7 +3459,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (93.588 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (66.87 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -3467,7 +3467,7 @@
       "molName": "Membrane Protein Transporter in Lipid Nanodisc",
       "tier": 10,
       "atomCount": 19500,
-      "parseTimeMs": 86.732,
+      "parseTimeMs": 40.603,
       "webgl": {
         "sphereVerticesFull": 5616000,
         "sphereVboBytesFullMB": 214.233,
@@ -3497,163 +3497,163 @@
         {
           "query": "all",
           "matchCount": 19500,
-          "timeMs": 127.708,
-          "atomsPerMs": 153
+          "timeMs": 86.676,
+          "atomsPerMs": 225
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 91.633,
-          "atomsPerMs": 213
+          "timeMs": 69.642,
+          "atomsPerMs": 280
         },
         {
           "query": "elem C",
           "matchCount": 9750,
-          "timeMs": 92.751,
-          "atomsPerMs": 210
+          "timeMs": 44.563,
+          "atomsPerMs": 438
         },
         {
           "query": "elem N",
           "matchCount": 3900,
-          "timeMs": 87.487,
-          "atomsPerMs": 223
+          "timeMs": 42.737,
+          "atomsPerMs": 456
         },
         {
           "query": "elem O",
           "matchCount": 3900,
-          "timeMs": 101.732,
-          "atomsPerMs": 192
+          "timeMs": 54.913,
+          "atomsPerMs": 355
         },
         {
           "query": "elem H",
           "matchCount": 1950,
-          "timeMs": 85.804,
-          "atomsPerMs": 227
+          "timeMs": 50.918,
+          "atomsPerMs": 383
         },
         {
           "query": "resn ALA",
           "matchCount": 979,
-          "timeMs": 86.722,
-          "atomsPerMs": 225
+          "timeMs": 56.077,
+          "atomsPerMs": 348
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 80.414,
-          "atomsPerMs": 242
+          "timeMs": 46.566,
+          "atomsPerMs": 419
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 65.103,
-          "atomsPerMs": 300
+          "timeMs": 73.671,
+          "atomsPerMs": 265
         },
         {
           "query": "chain A",
           "matchCount": 15999,
-          "timeMs": 105.926,
-          "atomsPerMs": 184
+          "timeMs": 61.759,
+          "atomsPerMs": 316
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 41.973,
-          "atomsPerMs": 465
+          "timeMs": 45.663,
+          "atomsPerMs": 427
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 47.415,
-          "atomsPerMs": 411
+          "timeMs": 40.433,
+          "atomsPerMs": 482
         },
         {
           "query": "hydrogens",
           "matchCount": 1950,
-          "timeMs": 83.057,
-          "atomsPerMs": 235
+          "timeMs": 61.76,
+          "atomsPerMs": 316
         },
         {
           "query": "backbone",
           "matchCount": 9750,
-          "timeMs": 122.248,
-          "atomsPerMs": 160
+          "timeMs": 81.033,
+          "atomsPerMs": 241
         },
         {
           "query": "sidechain",
           "matchCount": 9750,
-          "timeMs": 148.47,
-          "atomsPerMs": 131
+          "timeMs": 94.708,
+          "atomsPerMs": 206
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 61.347,
-          "atomsPerMs": 318
+          "timeMs": 42.271,
+          "atomsPerMs": 461
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 74.031,
-          "atomsPerMs": 263
+          "timeMs": 43.86,
+          "atomsPerMs": 445
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.124,
-          "atomsPerMs": 157512
+          "timeMs": 34.889,
+          "atomsPerMs": 559
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 799,
-          "timeMs": 131.777,
-          "atomsPerMs": 148
+          "timeMs": 56.122,
+          "atomsPerMs": 347
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 135.162,
-          "atomsPerMs": 144
+          "timeMs": 98.458,
+          "atomsPerMs": 198
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.139,
-          "atomsPerMs": 140187
+          "timeMs": 0.103,
+          "atomsPerMs": 189504
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 3900,
-          "timeMs": 275.767,
-          "atomsPerMs": 71
+          "timeMs": 94.491,
+          "atomsPerMs": 206
         },
         {
           "query": "elem C or elem N",
           "matchCount": 13650,
-          "timeMs": 164.89,
-          "atomsPerMs": 118
+          "timeMs": 65.621,
+          "atomsPerMs": 297
         },
         {
           "query": "not hydrogens",
           "matchCount": 17550,
-          "timeMs": 99.743,
-          "atomsPerMs": 196
+          "timeMs": 62.84,
+          "atomsPerMs": 310
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 83.694,
-          "atomsPerMs": 233
+          "timeMs": 63.995,
+          "atomsPerMs": 305
         }
       ],
-      "avgQueryTimeMs": 95.805,
-      "maxQueryTimeMs": 275.767,
-      "slowestQuery": "within 4 of elem N",
-      "totalQueryTimeMs": 2395.114,
+      "avgQueryTimeMs": 58.951,
+      "maxQueryTimeMs": 98.458,
+      "slowestQuery": "ss h and not resn HOH",
+      "totalQueryTimeMs": 1473.768,
       "exportPipeline": {
-        "pdbFormatTimeMs": 56.026,
+        "pdbFormatTimeMs": 29.968,
         "pdbOutputSizeBytes": 1540556,
-        "pdbFormattingRateAtomsPerSec": 348053,
-        "sessionExportTimeMs": 0.089,
+        "pdbFormattingRateAtomsPerSec": 650694,
+        "sessionExportTimeMs": 0.075,
         "sessionJsonSizeBytes": 3940,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -3662,7 +3662,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (95.805 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (58.951 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -3670,7 +3670,7 @@
       "molName": "Phage T4 Baseplate Tail Fiber Assembly",
       "tier": 10,
       "atomCount": 23000,
-      "parseTimeMs": 56.536,
+      "parseTimeMs": 38.451,
       "webgl": {
         "sphereVerticesFull": 6624000,
         "sphereVboBytesFullMB": 252.686,
@@ -3700,163 +3700,163 @@
         {
           "query": "all",
           "matchCount": 23000,
-          "timeMs": 145.013,
-          "atomsPerMs": 159
+          "timeMs": 62.858,
+          "atomsPerMs": 366
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 76.906,
-          "atomsPerMs": 299
+          "timeMs": 48.364,
+          "atomsPerMs": 476
         },
         {
           "query": "elem C",
           "matchCount": 11500,
-          "timeMs": 88.593,
-          "atomsPerMs": 260
+          "timeMs": 36.514,
+          "atomsPerMs": 630
         },
         {
           "query": "elem N",
           "matchCount": 4600,
-          "timeMs": 128.519,
-          "atomsPerMs": 179
+          "timeMs": 58.694,
+          "atomsPerMs": 392
         },
         {
           "query": "elem O",
           "matchCount": 4600,
-          "timeMs": 97.201,
-          "atomsPerMs": 237
+          "timeMs": 56.901,
+          "atomsPerMs": 404
         },
         {
           "query": "elem H",
           "matchCount": 2300,
-          "timeMs": 68.582,
-          "atomsPerMs": 335
+          "timeMs": 65.812,
+          "atomsPerMs": 349
         },
         {
           "query": "resn ALA",
           "matchCount": 1150,
-          "timeMs": 89.846,
-          "atomsPerMs": 256
+          "timeMs": 40.759,
+          "atomsPerMs": 564
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 110.921,
-          "atomsPerMs": 207
+          "timeMs": 49.756,
+          "atomsPerMs": 462
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 135.173,
-          "atomsPerMs": 170
+          "timeMs": 97.423,
+          "atomsPerMs": 236
         },
         {
           "query": "chain A",
           "matchCount": 15999,
-          "timeMs": 138.589,
-          "atomsPerMs": 166
+          "timeMs": 53.669,
+          "atomsPerMs": 429
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 65.683,
-          "atomsPerMs": 350
+          "timeMs": 30.256,
+          "atomsPerMs": 760
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 67.725,
-          "atomsPerMs": 340
+          "timeMs": 29.78,
+          "atomsPerMs": 772
         },
         {
           "query": "hydrogens",
           "matchCount": 2300,
-          "timeMs": 100.562,
-          "atomsPerMs": 229
+          "timeMs": 81.994,
+          "atomsPerMs": 281
         },
         {
           "query": "backbone",
           "matchCount": 11500,
-          "timeMs": 103.073,
-          "atomsPerMs": 223
+          "timeMs": 108.588,
+          "atomsPerMs": 212
         },
         {
           "query": "sidechain",
           "matchCount": 11500,
-          "timeMs": 106.117,
-          "atomsPerMs": 217
+          "timeMs": 106.797,
+          "atomsPerMs": 215
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 145.654,
-          "atomsPerMs": 158
+          "timeMs": 79.038,
+          "atomsPerMs": 291
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 84.934,
-          "atomsPerMs": 271
+          "timeMs": 91.43,
+          "atomsPerMs": 252
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.461,
-          "atomsPerMs": 49946
+          "timeMs": 50.478,
+          "atomsPerMs": 456
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 799,
-          "timeMs": 174.465,
-          "atomsPerMs": 132
+          "timeMs": 111.908,
+          "atomsPerMs": 206
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 121.839,
-          "atomsPerMs": 189
+          "timeMs": 136.736,
+          "atomsPerMs": 168
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.068,
-          "atomsPerMs": 339734
+          "timeMs": 0.172,
+          "atomsPerMs": 134033
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 4600,
-          "timeMs": 156.466,
-          "atomsPerMs": 147
+          "timeMs": 114.101,
+          "atomsPerMs": 202
         },
         {
           "query": "elem C or elem N",
           "matchCount": 16100,
-          "timeMs": 126.788,
-          "atomsPerMs": 181
+          "timeMs": 104.643,
+          "atomsPerMs": 220
         },
         {
           "query": "not hydrogens",
           "matchCount": 20700,
-          "timeMs": 93.966,
-          "atomsPerMs": 245
+          "timeMs": 121.115,
+          "atomsPerMs": 190
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 71.511,
-          "atomsPerMs": 322
+          "timeMs": 90.246,
+          "atomsPerMs": 255
         }
       ],
-      "avgQueryTimeMs": 99.946,
-      "maxQueryTimeMs": 174.465,
-      "slowestQuery": "chain A and resn ALA",
-      "totalQueryTimeMs": 2498.655,
+      "avgQueryTimeMs": 73.121,
+      "maxQueryTimeMs": 136.736,
+      "slowestQuery": "ss h and not resn HOH",
+      "totalQueryTimeMs": 1828.034,
       "exportPipeline": {
-        "pdbFormatTimeMs": 35.308,
+        "pdbFormatTimeMs": 52.605,
         "pdbOutputSizeBytes": 1817054,
-        "pdbFormattingRateAtomsPerSec": 651410,
-        "sessionExportTimeMs": 0.095,
+        "pdbFormattingRateAtomsPerSec": 437221,
+        "sessionExportTimeMs": 0.072,
         "sessionJsonSizeBytes": 3932,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -3865,7 +3865,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (99.946 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (73.121 ms) exceeds 10 ms threshold"
       ]
     },
     {
@@ -3873,7 +3873,7 @@
       "molName": "Group II Intron Large Ribozyme Complex",
       "tier": 10,
       "atomCount": 15800,
-      "parseTimeMs": 30.9,
+      "parseTimeMs": 32.667,
       "webgl": {
         "sphereVerticesFull": 4550400,
         "sphereVboBytesFullMB": 173.584,
@@ -3903,163 +3903,163 @@
         {
           "query": "all",
           "matchCount": 15800,
-          "timeMs": 69.502,
-          "atomsPerMs": 227
+          "timeMs": 53.367,
+          "atomsPerMs": 296
         },
         {
           "query": "none",
           "matchCount": 0,
-          "timeMs": 58.26,
-          "atomsPerMs": 271
+          "timeMs": 30.838,
+          "atomsPerMs": 512
         },
         {
           "query": "elem C",
           "matchCount": 7900,
-          "timeMs": 63.425,
-          "atomsPerMs": 249
+          "timeMs": 35.287,
+          "atomsPerMs": 448
         },
         {
           "query": "elem N",
           "matchCount": 3160,
-          "timeMs": 61.007,
-          "atomsPerMs": 259
+          "timeMs": 27.211,
+          "atomsPerMs": 581
         },
         {
           "query": "elem O",
           "matchCount": 3160,
-          "timeMs": 55.802,
-          "atomsPerMs": 283
+          "timeMs": 19.357,
+          "atomsPerMs": 816
         },
         {
           "query": "elem H",
           "matchCount": 1580,
-          "timeMs": 58.259,
-          "atomsPerMs": 271
+          "timeMs": 20.639,
+          "atomsPerMs": 766
         },
         {
           "query": "resn ALA",
           "matchCount": 790,
-          "timeMs": 80.213,
-          "atomsPerMs": 197
+          "timeMs": 20.615,
+          "atomsPerMs": 766
         },
         {
           "query": "resn LIG",
           "matchCount": 0,
-          "timeMs": 58.685,
-          "atomsPerMs": 269
+          "timeMs": 55.621,
+          "atomsPerMs": 284
         },
         {
           "query": "resi 1-50",
           "matchCount": 399,
-          "timeMs": 82.464,
-          "atomsPerMs": 192
+          "timeMs": 63.922,
+          "atomsPerMs": 247
         },
         {
           "query": "chain A",
           "matchCount": 15800,
-          "timeMs": 68.913,
-          "atomsPerMs": 229
+          "timeMs": 23.192,
+          "atomsPerMs": 681
         },
         {
           "query": "ss h",
           "matchCount": 0,
-          "timeMs": 34.993,
-          "atomsPerMs": 452
+          "timeMs": 22.613,
+          "atomsPerMs": 699
         },
         {
           "query": "ss s",
           "matchCount": 0,
-          "timeMs": 31.465,
-          "atomsPerMs": 502
+          "timeMs": 24.843,
+          "atomsPerMs": 636
         },
         {
           "query": "hydrogens",
           "matchCount": 1580,
-          "timeMs": 40.819,
-          "atomsPerMs": 387
+          "timeMs": 30.185,
+          "atomsPerMs": 523
         },
         {
           "query": "backbone",
           "matchCount": 7900,
-          "timeMs": 50.051,
-          "atomsPerMs": 316
+          "timeMs": 71.659,
+          "atomsPerMs": 220
         },
         {
           "query": "sidechain",
           "matchCount": 7900,
-          "timeMs": 53.426,
-          "atomsPerMs": 296
+          "timeMs": 49.703,
+          "atomsPerMs": 318
         },
         {
           "query": "organic",
           "matchCount": 0,
-          "timeMs": 34.034,
-          "atomsPerMs": 464
+          "timeMs": 67.282,
+          "atomsPerMs": 235
         },
         {
           "query": "hetatm",
           "matchCount": 0,
-          "timeMs": 48.018,
-          "atomsPerMs": 329
+          "timeMs": 50.36,
+          "atomsPerMs": 314
         },
         {
           "query": "byres (resn LIG around 5)",
           "matchCount": 0,
-          "timeMs": 0.146,
-          "atomsPerMs": 108591
+          "timeMs": 27.687,
+          "atomsPerMs": 571
         },
         {
           "query": "chain A and resn ALA",
           "matchCount": 790,
-          "timeMs": 87.115,
-          "atomsPerMs": 181
+          "timeMs": 70.663,
+          "atomsPerMs": 224
         },
         {
           "query": "ss h and not resn HOH",
           "matchCount": 0,
-          "timeMs": 81.773,
-          "atomsPerMs": 193
+          "timeMs": 62.691,
+          "atomsPerMs": 252
         },
         {
           "query": "around 5",
           "matchCount": 0,
-          "timeMs": 0.121,
-          "atomsPerMs": 131012
+          "timeMs": 0.201,
+          "atomsPerMs": 78685
         },
         {
           "query": "within 4 of elem N",
           "matchCount": 3160,
-          "timeMs": 103.58,
-          "atomsPerMs": 153
+          "timeMs": 77.777,
+          "atomsPerMs": 203
         },
         {
           "query": "elem C or elem N",
           "matchCount": 11060,
-          "timeMs": 105.393,
-          "atomsPerMs": 150
+          "timeMs": 68.216,
+          "atomsPerMs": 232
         },
         {
           "query": "not hydrogens",
           "matchCount": 14220,
-          "timeMs": 74.375,
-          "atomsPerMs": 212
+          "timeMs": 90.166,
+          "atomsPerMs": 175
         },
         {
           "query": "byres (resi 1-10)",
           "matchCount": 79,
-          "timeMs": 36.702,
-          "atomsPerMs": 430
+          "timeMs": 61.607,
+          "atomsPerMs": 256
         }
       ],
-      "avgQueryTimeMs": 57.542,
-      "maxQueryTimeMs": 105.393,
-      "slowestQuery": "elem C or elem N",
-      "totalQueryTimeMs": 1438.539,
+      "avgQueryTimeMs": 45.028,
+      "maxQueryTimeMs": 90.166,
+      "slowestQuery": "not hydrogens",
+      "totalQueryTimeMs": 1125.702,
       "exportPipeline": {
-        "pdbFormatTimeMs": 39.337,
+        "pdbFormatTimeMs": 26.758,
         "pdbOutputSizeBytes": 1248254,
-        "pdbFormattingRateAtomsPerSec": 401657,
-        "sessionExportTimeMs": 0.096,
+        "pdbFormattingRateAtomsPerSec": 590478,
+        "sessionExportTimeMs": 0.078,
         "sessionJsonSizeBytes": 3932,
         "frameBuffer1080pMB": 7.91,
         "frameBuffer4KMB": 31.64,
@@ -4068,7 +4068,7 @@
       },
       "status": "FAIL",
       "issues": [
-        "Selection query average execution time (57.542 ms) exceeds 10 ms threshold"
+        "Selection query average execution time (45.028 ms) exceeds 10 ms threshold"
       ]
     }
   ]

@@ -19,35 +19,45 @@ export interface Atom {
 
 class SpatialHashGrid {
   cellSize: number;
-  grid: Map<string, { x: number; y: number; z: number }[]>;
+  grid: Map<number, { x: number; y: number; z: number }[]>;
 
   constructor(cellSize: number, atoms: Atom[], targetSerials: Set<number>) {
-    this.cellSize = cellSize;
+    this.cellSize = Math.max(cellSize, 0.1);
     this.grid = new Map();
 
-    atoms.forEach(atom => {
+    if (targetSerials.size === 0) return;
+
+    for (let i = 0; i < atoms.length; i++) {
+      const atom = atoms[i];
       if (targetSerials.has(atom.serial)) {
-        const cx = Math.floor(atom.x / cellSize);
-        const cy = Math.floor(atom.y / cellSize);
-        const cz = Math.floor(atom.z / cellSize);
-        const key = `${cx},${cy},${cz}`;
-        if (!this.grid.has(key)) this.grid.set(key, []);
-        this.grid.get(key)!.push({ x: atom.x, y: atom.y, z: atom.z });
+        const cx = Math.floor(atom.x / this.cellSize);
+        const cy = Math.floor(atom.y / this.cellSize);
+        const cz = Math.floor(atom.z / this.cellSize);
+        const hash = (((cx * 73856093) ^ (cy * 19349663) ^ (cz * 83492791)) & 0x7fffffff);
+        let list = this.grid.get(hash);
+        if (!list) {
+          list = [];
+          this.grid.set(hash, list);
+        }
+        list.push({ x: atom.x, y: atom.y, z: atom.z });
       }
-    });
+    }
   }
 
   isNear(x: number, y: number, z: number): boolean {
+    if (this.grid.size === 0) return false;
     const cx = Math.floor(x / this.cellSize);
     const cy = Math.floor(y / this.cellSize);
     const cz = Math.floor(z / this.cellSize);
     const r2 = this.cellSize * this.cellSize;
 
     for (let dx = -1; dx <= 1; dx++) {
+      const ncx = (cx + dx) * 73856093;
       for (let dy = -1; dy <= 1; dy++) {
+        const ncy = (cy + dy) * 19349663;
         for (let dz = -1; dz <= 1; dz++) {
-          const key = `${cx + dx},${cy + dy},${cz + dz}`;
-          const points = this.grid.get(key);
+          const hash = ((ncx ^ ncy ^ ((cz + dz) * 83492791)) & 0x7fffffff);
+          const points = this.grid.get(hash);
           if (points) {
             for (let i = 0; i < points.length; i++) {
               const p = points[i];
@@ -431,9 +441,13 @@ export class SelectionParser {
     const matchSinglePattern = (target: string, pattern: string): boolean => {
       const p = pattern.trim();
       if (!p) return false;
+      const t = target.trim();
+      if (!p.includes('*')) {
+        return t.toLowerCase() === p.toLowerCase();
+      }
       const regexStr = '^' + p.replace(/\*/g, '.*') + '$';
       const regex = new RegExp(regexStr, 'i');
-      return regex.test(target.trim());
+      return regex.test(t);
     };
 
     const matchSingleNumeric = (atomNum: number, item: string): boolean => {
