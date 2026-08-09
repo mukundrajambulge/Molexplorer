@@ -60,6 +60,7 @@ export default function MolStudio() {
   const { alignMol, setAlignMol, alignmentResult, setAlignmentResult, alignError, setAlignError, alignFetchId, setAlignFetchId, isAlignFetching, setIsAlignFetching, handleAlignFetch, handleAlignFileUpload, runAlignment } = useAlignment(molData);
 
   const viewerRef = useRef<CoreViewer3DRef>(null);
+  const processorRef = useRef<MolProcessor | null>(null);
   const [showTimeline, setShowTimeline] = useState(false);
   const [showRaytrace, setShowRaytrace] = useState(false);
   const [activeWizard, setActiveWizard] = useState<string | null>(null);
@@ -77,34 +78,42 @@ export default function MolStudio() {
   const [isSculptingActive, setIsSculptingActive] = useState(false);
 
   const handleAddHydrogens = () => {
-    if (processor) {
-      TopologyEditor.addHydrogens(processor);
+    if (processorRef.current) {
+      TopologyEditor.addHydrogens(processorRef.current);
+      setAtoms([...processorRef.current.atoms]);
+      setProcessedPDB(processorRef.current.toPDB());
       triggerFocus();
     }
   };
 
   const handleRemoveHydrogens = () => {
-    if (processor) {
-      TopologyEditor.removeHydrogens(processor);
+    if (processorRef.current) {
+      TopologyEditor.removeHydrogens(processorRef.current);
+      setAtoms([...processorRef.current.atoms]);
+      setProcessedPDB(processorRef.current.toPDB());
       triggerFocus();
     }
   };
 
   const handleDeleteSelectedAtoms = () => {
-    if (processor && selectedAtomSerials.size > 0) {
-      TopologyEditor.deleteAtoms(processor, selectedAtomSerials);
+    if (processorRef.current && selectedAtomSerials.size > 0) {
+      TopologyEditor.deleteAtoms(processorRef.current, selectedAtomSerials);
       setSelectedAtomSerials(new Set());
+      setAtoms([...processorRef.current.atoms]);
+      setProcessedPDB(processorRef.current.toPDB());
       triggerFocus();
     }
   };
 
   const handleCycleValence = () => {
-    if (processor && selectedAtomSerials.size >= 2) {
+    if (processorRef.current && selectedAtomSerials.size >= 2) {
       const serials = Array.from(selectedAtomSerials);
       const idx1 = atoms.findIndex(a => a.serial === serials[0]);
       const idx2 = atoms.findIndex(a => a.serial === serials[1]);
       if (idx1 >= 0 && idx2 >= 0) {
-        TopologyEditor.cycleBondOrder(processor, idx1, idx2);
+        TopologyEditor.cycleBondOrder(processorRef.current, idx1, idx2);
+        setAtoms([...processorRef.current.atoms]);
+        setProcessedPDB(processorRef.current.toPDB());
         triggerFocus();
       }
     }
@@ -114,13 +123,15 @@ export default function MolStudio() {
   useEffect(() => {
     if (!isSculptingActive || atoms.length === 0) return;
     const interval = setInterval(() => {
-      const { atoms: minimized } = SculptingEngine.minimize(atoms, 10, 0.01);
-      if (processor) {
-        processor.atoms = minimized;
+      const { atoms: minimized } = SculptingEngine.minimize(atoms, 10, 0.002);
+      setAtoms(minimized);
+      if (processorRef.current) {
+        processorRef.current.atoms = minimized;
+        setProcessedPDB(processorRef.current.toPDB());
       }
     }, 100);
     return () => clearInterval(interval);
-  }, [isSculptingActive, atoms, processor]);
+  }, [isSculptingActive, atoms]);
 
   const handleSaveSession = () => {
     const session: MolStudioSession = {
@@ -457,6 +468,7 @@ export default function MolStudio() {
     }
 
     const processor = new MolProcessor(molData.data, molData.format);
+    processorRef.current = processor;
     
     if (cleaningState.altloc_filtered) {
       processor.filterAltlocs();
