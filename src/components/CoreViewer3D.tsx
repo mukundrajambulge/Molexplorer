@@ -3,6 +3,7 @@ import * as $3Dmol from '3dmol';
 import { RenderStyle, MoleculeData, FilterState, ViewState } from '../types';
 import { SSInfo } from '../lib/MolProcessor';
 import { useStore } from '../store';
+import { RepresentationStrategyFactory } from '../rendering/RepresentationStrategy';
 
 export interface CoreViewer3DRef {
   getView: () => any;
@@ -213,26 +214,13 @@ function getStyleObj(
     }
   }
 
-  switch (style) {
-    case "Line":
-      return { line: base };
-    case "Stick":
-      return { stick: base };
-    case "Ball-and-Stick":
-      return { stick: { ...base, radius: 0.15 }, sphere: { ...base, radius: 0.4 } };
-    case "Space-Filling":
-      return { sphere: base };
-    case "Cartoon":
-      return { cartoon: { ...base, arrows: true, tubes: false } };
-    case "Putty":
-      return { cartoon: { ...base, tubes: true, thickness: 0.5 } };
-    case "Non-bonded (crosses)":
-      return { cross: { ...base, radius: 0.8, linewidth: 2 } };
-    case "Non-bonded (small spheres)":
-      return { sphere: { ...base, radius: 0.5 } };
-    default:
-      return { line: { hidden: true } };
-  }
+  const strategy = RepresentationStrategyFactory.getStrategy(style);
+  return strategy.getStyleObject({
+    colorScheme,
+    minResi,
+    maxResi,
+    chainMap
+  });
 }
 
 export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((props, ref) => {
@@ -461,78 +449,15 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
           });
         }
 
-        // Render Surfaces / Mesh / Dots
-        if (rStyle.includes("Surface") || rStyle === "Mesh") {
-           let surfType = $3Dmol.SurfaceType.VDW;
-           if (rStyle === "Solvent-Accessible Surface") surfType = $3Dmol.SurfaceType.SAS;
-           if (rStyle === "Solvent-Excluded Surface") surfType = $3Dmol.SurfaceType.SES;
-           const surfOpts: any = {
-             opacity: props.surfaceOpacity || 0.7,
-             wireframe: rStyle === "Mesh",
-             colorfunc: getColorFunction(cScheme, minResi, maxResi, chainMap)
-           };
-           viewer.addSurface(surfType, surfOpts);
-        } else if (rStyle === "Dots") {
-          const colorfunc = getColorFunction(cScheme, minResi, maxResi, chainMap);
-          const fibPoints = getFibonacciSpherePoints(16);
-          const atomData = atoms.map((a: any) => ({
-            x: a.x, y: a.y, z: a.z,
-            r: getAtomVdwRadius(a.elem),
-            color: colorfunc(a)
-          }));
-          const cellSize = 5.0;
-          const grid = new Map<string, typeof atomData>();
-          atomData.forEach((atom: any) => {
-            const gx = Math.floor(atom.x / cellSize);
-            const gy = Math.floor(atom.y / cellSize);
-            const gz = Math.floor(atom.z / cellSize);
-            const key = `${gx},${gy},${gz}`;
-            if (!grid.has(key)) grid.set(key, []);
-            grid.get(key)!.push(atom);
-          });
-          atomData.forEach((atom: any) => {
-            const gx = Math.floor(atom.x / cellSize);
-            const gy = Math.floor(atom.y / cellSize);
-            const gz = Math.floor(atom.z / cellSize);
-            const neighbors: typeof atomData = [];
-            for (let dx = -1; dx <= 1; dx++) {
-              for (let dy = -1; dy <= 1; dy++) {
-                for (let dz = -1; dz <= 1; dz++) {
-                  const bucket = grid.get(`${gx + dx},${gy + dy},${gz + dz}`);
-                  if (bucket) {
-                    for (let k = 0; k < bucket.length; k++) {
-                      neighbors.push(bucket[k]);
-                    }
-                  }
-                }
-              }
-            }
-            for (let p = 0; p < fibPoints.length; p++) {
-              const u = fibPoints[p];
-              const px = atom.x + u.x * atom.r;
-              const py = atom.y + u.y * atom.r;
-              const pz = atom.z + u.z * atom.r;
-              let isBuried = false;
-              for (let n = 0; n < neighbors.length; n++) {
-                const neighbor = neighbors[n];
-                if (neighbor === atom) continue;
-                const d2 = (px - neighbor.x) ** 2 + (py - neighbor.y) ** 2 + (pz - neighbor.z) ** 2;
-                if (d2 < (neighbor.r - 0.05) ** 2) {
-                  isBuried = true;
-                  break;
-                }
-              }
-              if (!isBuried) {
-                viewer.addSphere({
-                  center: { x: px, y: py, z: pz },
-                  radius: 0.10,
-                  color: atom.color,
-                  opacity: 1.0
-                });
-              }
-            }
-          });
-        }
+        // Render Surfaces / Mesh / Dots using Representation Strategy Pattern
+        const strategy = RepresentationStrategyFactory.getStrategy(rStyle);
+        strategy.applySurfacesOrShapes(viewer, {
+          colorScheme: cScheme,
+          minResi,
+          maxResi,
+          chainMap,
+          surfaceOpacity: props.surfaceOpacity
+        });
 
         // Assembly, Symmetry, Alignment & Ligand overlays
         if (props.assemblyPDB) {
