@@ -70,6 +70,14 @@ interface StudioRibbonBarProps {
   stereoMode?: 'none' | 'cross-eye' | 'anaglyph';
   setStereoMode?: (mode: 'none' | 'cross-eye' | 'anaglyph') => void;
   onOpenHotkeysModal?: () => void;
+
+  // Stage 8 Sculpting & Topology Editing Props
+  isSculptingActive?: boolean;
+  onToggleSculpting?: () => void;
+  onAddHydrogens?: () => void;
+  onRemoveHydrogens?: () => void;
+  onDeleteSelectedAtoms?: () => void;
+  onCycleValence?: () => void;
 }
 
 export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (wizard: string) => void }> = ({
@@ -110,9 +118,15 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
   onToggleOrthographic,
   stereoMode,
   setStereoMode,
-  onOpenHotkeysModal
+  onOpenHotkeysModal,
+  isSculptingActive,
+  onToggleSculpting,
+  onAddHydrogens,
+  onRemoveHydrogens,
+  onDeleteSelectedAtoms,
+  onCycleValence
 }) => {
-  const [activeTab, setActiveTab] = useState<"file" | "display" | "select" | "prep" | "align" | "analysis" | "wizards" | "movie" | "session">("display");
+  const [activeTab, setActiveTab] = useState<"file" | "display" | "select" | "prep" | "align" | "analysis" | "wizards" | "movie" | "session" | "sculpting">("display");
   const [pdbInput, setPdbInput] = useState("");
   const [alignInput, setAlignInput] = useState("");
 
@@ -181,7 +195,8 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
               { id: "analysis", label: "Structure Analysis" },
               { id: "wizards", label: "Wizards & Maps" },
               { id: "movie", label: "Movie & Animation" },
-              { id: "session", label: "Session & View" }
+              { id: "session", label: "Session & View" },
+              { id: "sculpting", label: "Sculpting & Editing" }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -699,6 +714,65 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
               <Command className="w-4 h-4 text-purple-400" />
               <span>Hotkeys Guide</span>
             </button>
+          </div>
+        )}
+
+        {/* SCULPTING & EDITING TAB */}
+        {activeTab === "sculpting" && (
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onToggleSculpting}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs transition-all cursor-pointer font-medium ${
+                  isSculptingActive
+                    ? "border-amber-500 bg-amber-500/20 text-amber-300 shadow-lg shadow-amber-500/20"
+                    : "border-white/10 bg-white/[0.03] text-white/70 hover:text-white"
+                }`}
+              >
+                <Flame className="w-4 h-4 text-amber-400" />
+                <span>Real-Time MMFF94 Sculpting ({isSculptingActive ? "ACTIVE" : "OFF"})</span>
+              </button>
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10"></div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onAddHydrogens}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs transition-all cursor-pointer font-medium"
+              >
+                <Plus className="w-4 h-4 text-blue-400" />
+                <span>Add Hydrogens (h_add)</span>
+              </button>
+
+              <button
+                onClick={onRemoveHydrogens}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-500/30 bg-gray-500/10 hover:bg-gray-500/20 text-gray-300 text-xs transition-all cursor-pointer font-medium"
+              >
+                <Scissors className="w-4 h-4 text-gray-400" />
+                <span>Remove Hydrogens (h_remove)</span>
+              </button>
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10"></div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onCycleValence}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs transition-all cursor-pointer font-medium"
+              >
+                <RefreshCw className="w-4 h-4 text-cyan-400" />
+                <span>Cycle Bond Valence</span>
+              </button>
+
+              <button
+                onClick={onDeleteSelectedAtoms}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs transition-all cursor-pointer font-medium"
+              >
+                <Scissors className="w-4 h-4 text-red-400" />
+                <span>Delete Selection</span>
+              </button>
+            </div>
           </div>
         )}
 

@@ -28,6 +28,8 @@ import { SessionManager } from "../session/SessionManager";
 import { MolStudioSession } from "../session/SessionSchema";
 import { SequenceViewer } from "../components/SequenceViewer";
 import { HotkeyManager } from "../input/HotkeyManager";
+import { TopologyEditor } from "../editor/TopologyEditor";
+import { SculptingEngine } from "../simulation/SculptingEngine";
 import { Command } from "lucide-react";
 
 export default function MolStudio() {
@@ -70,6 +72,55 @@ export default function MolStudio() {
   const [orthographic, setOrthographic] = useState(false);
   const [stereoMode, setStereoMode] = useState<'none' | 'cross-eye' | 'anaglyph'>('none');
   const [showHotkeysModal, setShowHotkeysModal] = useState(false);
+
+  // Stage 8 State Variables & Topology Handlers
+  const [isSculptingActive, setIsSculptingActive] = useState(false);
+
+  const handleAddHydrogens = () => {
+    if (processor) {
+      TopologyEditor.addHydrogens(processor);
+      triggerFocus();
+    }
+  };
+
+  const handleRemoveHydrogens = () => {
+    if (processor) {
+      TopologyEditor.removeHydrogens(processor);
+      triggerFocus();
+    }
+  };
+
+  const handleDeleteSelectedAtoms = () => {
+    if (processor && selectedAtomSerials.size > 0) {
+      TopologyEditor.deleteAtoms(processor, selectedAtomSerials);
+      setSelectedAtomSerials(new Set());
+      triggerFocus();
+    }
+  };
+
+  const handleCycleValence = () => {
+    if (processor && selectedAtomSerials.size >= 2) {
+      const serials = Array.from(selectedAtomSerials);
+      const idx1 = atoms.findIndex(a => a.serial === serials[0]);
+      const idx2 = atoms.findIndex(a => a.serial === serials[1]);
+      if (idx1 >= 0 && idx2 >= 0) {
+        TopologyEditor.cycleBondOrder(processor, idx1, idx2);
+        triggerFocus();
+      }
+    }
+  };
+
+  // Real-Time Sculpting Energy Minimization Loop
+  useEffect(() => {
+    if (!isSculptingActive || atoms.length === 0) return;
+    const interval = setInterval(() => {
+      const { atoms: minimized } = SculptingEngine.minimize(atoms, 10, 0.01);
+      if (processor) {
+        processor.atoms = minimized;
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [isSculptingActive, atoms, processor]);
 
   const handleSaveSession = () => {
     const session: MolStudioSession = {
@@ -590,6 +641,12 @@ useEffect(() => {
         stereoMode={stereoMode}
         setStereoMode={setStereoMode}
         onOpenHotkeysModal={() => setShowHotkeysModal(true)}
+        isSculptingActive={isSculptingActive}
+        onToggleSculpting={() => setIsSculptingActive(prev => !prev)}
+        onAddHydrogens={handleAddHydrogens}
+        onRemoveHydrogens={handleRemoveHydrogens}
+        onDeleteSelectedAtoms={handleDeleteSelectedAtoms}
+        onCycleValence={handleCycleValence}
       />
       {/* Main Viewer Area */}
       <div className="flex-1 relative w-full h-full overflow-hidden flex flex-col">
