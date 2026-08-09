@@ -26,11 +26,17 @@ function hslToHex(h: number, s: number, l: number): string {
   return `#${f(0)}${f(8)}${f(4)}`;
 }
 
+const CHAIN_PALETTE = [
+  '#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b',
+  '#14b8a6', '#ef4444', '#06b6d4', '#84cc16', '#6366f1', '#d97706'
+];
+
 export function getColorFunction(
   colorScheme: string,
   minResi: number,
   maxResi: number,
-  chainMap: Record<string, string>
+  chainMap: Record<string, string>,
+  isRibbonStyle: boolean = false
 ) {
   const resiRange = Math.max(maxResi - minResi, 1);
 
@@ -43,7 +49,18 @@ export function getColorFunction(
       return '#ffffff';
     }
 
-    if (csLower === 'element' || csLower === 'classic cpk') {
+    // Classic CPK or Element coloring
+    if (csLower === 'element' || csLower === 'classic cpk' || csLower === 'modern/jmol') {
+      if (isRibbonStyle) {
+        // Ribbon cartoons follow Secondary Structure / Chain for multi-colored visual excellence
+        const ss = (atom.ss || '').toLowerCase();
+        if (ss === 'h') return '#ef4444'; // Red Helices
+        if (ss === 's' || ss === 'e') return '#eab308'; // Yellow Sheets
+        const ch = atom.chain || 'A';
+        const idx = ch.charCodeAt(0) % CHAIN_PALETTE.length;
+        return CHAIN_PALETTE[idx];
+      }
+      
       const elem = (atom.elem || atom.element || '').toUpperCase();
       switch (elem) {
         case 'C': return '#909090'; // CPK Carbon Gray
@@ -61,38 +78,31 @@ export function getColorFunction(
       }
     }
 
-    if (csLower === 'modern/jmol') {
-      const elem = (atom.elem || atom.element || '').toUpperCase();
-      switch (elem) {
-        case 'C': return '#808080';
-        case 'N': return '#1f77b4';
-        case 'O': return '#d62728';
-        case 'S': return '#bcbd22';
-        case 'P': return '#ff7f0e';
-        case 'H': return '#ffffff';
-        default: return '#999999';
-      }
-    }
-
+    // By Chain
     if (csLower === 'chain' || csLower === 'by chain') {
       const ch = atom.chain || 'A';
-      return chainMap[ch] || chainMap[ch.toUpperCase()] || chainMap[''] || '#3b82f6';
+      if (chainMap[ch]) return chainMap[ch];
+      const idx = ch.charCodeAt(0) % CHAIN_PALETTE.length;
+      return CHAIN_PALETTE[idx];
     }
 
+    // Secondary Structure Jmol
     if (csLower === 'ssjmol') {
       const ss = (atom.ss || '').toLowerCase();
       if (ss === 'h') return '#ff0080';
       if (ss === 's' || ss === 'e') return '#ffc800';
-      return '#ffffff';
+      return '#3b82f6';
     }
 
+    // Secondary Structure PyMOL
     if (csLower === 'sspymol' || csLower === 'by ss') {
       const ss = (atom.ss || '').toLowerCase();
-      if (ss === 'h') return '#ff0000';
-      if (ss === 's' || ss === 'e') return '#ffff00';
+      if (ss === 'h') return '#ef4444';
+      if (ss === 's' || ss === 'e') return '#eab308';
       return '#22c55e';
     }
 
+    // Spectrum / Rainbow
     if (csLower === 'spectrum' || csLower === 'rainbow') {
       const resi = typeof atom.resi === 'number' ? atom.resi : minResi;
       const t = Math.max(0, Math.min(1, (resi - minResi) / resiRange));
@@ -100,6 +110,7 @@ export function getColorFunction(
       return hslToHex(hue, 100, 48);
     }
 
+    // By Formal Charge
     if (csLower === 'by formal charge') {
       const charge = atom.formalCharge || 0;
       if (charge < 0) return '#ef4444';
@@ -107,6 +118,7 @@ export function getColorFunction(
       return '#e5e7eb';
     }
 
+    // By Partial Charge / ESP
     if (csLower === 'by partial charge' || csLower === 'esp') {
       const elem = (atom.elem || atom.element || '').toUpperCase();
       if (elem === 'O' || elem === 'F' || elem === 'CL') return '#ef4444';
@@ -114,6 +126,7 @@ export function getColorFunction(
       return '#9ca3af';
     }
 
+    // Hydrophobicity
     if (csLower === 'hydrophobicity') {
       const resn = (atom.resname || atom.resn || '').toUpperCase();
       const hydrophobic = ['ALA', 'VAL', 'LEU', 'ILE', 'MET', 'PHE', 'TYR', 'TRP', 'PRO'];
@@ -121,6 +134,7 @@ export function getColorFunction(
       return '#3b82f6';
     }
 
+    // Colorblind-safe
     if (csLower === 'colourblind-safe' || csLower === 'colorblind safe') {
       const cbPalette = ['#0072B2', '#E69F00', '#009E73', '#F0E442', '#56B4E9', '#D55E00', '#CC79A7'];
       const ch = atom.chain || 'A';
@@ -141,31 +155,18 @@ export class DefaultRepresentationStrategy implements IRepresentationStrategy {
   }
 
   public getStyleObject(options: RenderContextOptions): any {
-    const csLower = (options.colorScheme || '').toLowerCase();
-    const base: any = {};
+    const isRibbon = this.style === "Cartoon" || this.style === "Putty";
+    const colorfunc = getColorFunction(
+      options.colorScheme,
+      options.minResi,
+      options.maxResi,
+      options.chainMap,
+      isRibbon
+    );
+
+    const base: any = { colorfunc };
     if (typeof options.opacity === 'number') {
       base.opacity = options.opacity;
-    }
-
-    if (csLower === 'white' || csLower === 'monochrome') {
-      base.color = '#ffffff';
-    } else if (csLower === 'classic cpk' || csLower === 'element') {
-      base.colorscheme = 'rasmol';
-    } else if (csLower === 'modern/jmol') {
-      base.colorscheme = 'Jmol';
-    } else if (csLower === 'chain' || csLower === 'by chain') {
-      base.colorscheme = 'chain';
-    } else if (csLower === 'ssjmol') {
-      base.colorscheme = 'ssJmol';
-    } else if (csLower === 'sspymol' || csLower === 'by ss') {
-      base.colorscheme = 'ssPyMOL';
-    } else if (csLower === 'spectrum' || csLower === 'rainbow') {
-      base.colorscheme = 'spectrum';
-    } else if (csLower === 'by molecule') {
-      base.color = options.chainMap[''] || '#4A90E2';
-    } else {
-      const colorfunc = getColorFunction(options.colorScheme, options.minResi, options.maxResi, options.chainMap);
-      base.colorfunc = colorfunc;
     }
 
     switch (this.style) {
@@ -200,7 +201,13 @@ export class DefaultRepresentationStrategy implements IRepresentationStrategy {
       if (this.style === "Solvent-Accessible Surface") surfType = 2; // SAS
       if (this.style === "Solvent-Excluded Surface") surfType = 3; // SES
 
-      const colorfunc = getColorFunction(options.colorScheme, options.minResi, options.maxResi, options.chainMap);
+      const colorfunc = getColorFunction(
+        options.colorScheme,
+        options.minResi,
+        options.maxResi,
+        options.chainMap,
+        false
+      );
 
       const surfOpts: any = {
         opacity: options.surfaceOpacity || 0.7,
