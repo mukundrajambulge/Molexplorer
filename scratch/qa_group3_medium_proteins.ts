@@ -383,12 +383,13 @@ async function analyzeProtein(target: ProteinTarget, log: (msg: string) => void)
 
   // 4. Selection Query Engine Verification
   const selectionResults: Record<string, number> = {};
-  const queries = ['backbone', 'resname LYS,ARG', 'elem C', 'name CA'];
+  const queries = ['backbone', 'resn LYS or resn ARG', 'elem C', 'name CA'];
+  const parser = new SelectionParser(processor.atoms);
   for (const q of queries) {
-    const selAtoms = SelectionParser.parse(q, processor.atoms);
-    selectionResults[q] = selAtoms.length;
+    const selSerials = parser.parse(q);
+    selectionResults[q] = selSerials.size;
   }
-  log(`  • Selection Algebra Verification: backbone=${selectionResults['backbone']}, LYS/ARG=${selectionResults['resname LYS,ARG']}, C=${selectionResults['elem C']}, CA=${selectionResults['name CA']}`);
+  log(`  • Selection Algebra Verification: backbone=${selectionResults['backbone']}, LYS/ARG=${selectionResults['resn LYS or resn ARG']}, C=${selectionResults['elem C']}, CA=${selectionResults['name CA']}`);
 
   const status: 'PASS' | 'FAIL' = errors.length === 0 ? 'PASS' : 'FAIL';
   log(`  • Target Status: [ ${status} ]\n`);
@@ -512,4 +513,10 @@ async function main() {
   const logDir = path.dirname(LOG_PATH);
   if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
   fs.writeFileSync(LOG_PATH, logLines.join('\n'), 'utf8');
-  console.log(`\nLog w
+  console.log(`\nLog written successfully to ${LOG_PATH}`);
+}
+
+main().catch(err => {
+  console.error("Fatal QA Suite Error:", err);
+  process.exit(1);
+});

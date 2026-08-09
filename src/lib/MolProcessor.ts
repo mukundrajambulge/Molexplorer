@@ -351,6 +351,29 @@ export class MolProcessor {
         });
       }
     }
+
+    const serialToIdx = new Map<number, number>();
+    this.atoms.forEach((a, i) => serialToIdx.set(a.serial, i));
+
+    for (const line of lines) {
+      const cleanLine = line.replace(/\r/g, '');
+      if (cleanLine.startsWith('CONECT')) {
+        const serial = parseInt(cleanLine.substring(6, 11).trim() || "0", 10);
+        const sourceIdx = serialToIdx.get(serial);
+        if (sourceIdx !== undefined) {
+          const sourceAtom = this.atoms[sourceIdx];
+          for (let col = 11; col + 5 <= cleanLine.length; col += 5) {
+            const targetSerial = parseInt(cleanLine.substring(col, col + 5).trim() || "0", 10);
+            if (targetSerial > 0) {
+              const targetIdx = serialToIdx.get(targetSerial);
+              if (targetIdx !== undefined && !sourceAtom.bonds.includes(targetIdx)) {
+                sourceAtom.bonds.push(targetIdx);
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   filterAltlocs() {
@@ -385,9 +408,10 @@ export class MolProcessor {
     return Array.from(ligands.values());
   }
 
-  assignBonds(tolerance: number) {
-    // Clear existing
-    this.atoms.forEach(a => a.bonds = []);
+  assignBonds(tolerance: number, keepExistingBonds: boolean = true) {
+    if (!keepExistingBonds) {
+      this.atoms.forEach(a => a.bonds = []);
+    }
     
     // Spatial hashing for O(N) performance
     const cellSize = 3.0;
@@ -441,8 +465,8 @@ export class MolProcessor {
         
         // Min distance to avoid 0-distance bugs
         if (distSq > 0.16 && distSq <= maxDistSq) {
-          a1.bonds.push(j);
-          a2.bonds.push(i);
+          if (!a1.bonds.includes(j)) a1.bonds.push(j);
+          if (!a2.bonds.includes(i)) a2.bonds.push(i);
         }
       }
     }
@@ -465,11 +489,11 @@ export class MolProcessor {
         residuesList.push(res);
       }
       
-      const res = residuesMap.get(key);
-      if (a.name === ' N  ') res.N = a;
-      else if (a.name === ' CA ') res.CA = a;
-      else if (a.name === ' C  ') res.C = a;
-      else if (a.name === ' O  ') res.O = a;
+      const nameClean = a.name.trim().toUpperCase();
+      if (nameClean === 'N') res.N = a;
+      else if (nameClean === 'CA') res.CA = a;
+      else if (nameClean === 'C') res.C = a;
+      else if (nameClean === 'O') res.O = a;
     }
     
     const dist = (p1: any, p2: any) => Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2) + Math.pow(p1.z - p2.z, 2));

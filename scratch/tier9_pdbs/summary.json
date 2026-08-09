@@ -1,0 +1,187 @@
+[
+  {
+    "name": "HIV-1 Protease 1HVR",
+    "pdbId": "1HVR",
+    "atomCount": 1890,
+    "chains": [
+      "A",
+      "B"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "Hemoglobin Dimer 1HCO",
+    "pdbId": "1HCO",
+    "atomCount": 2282,
+    "chains": [
+      "A",
+      "B"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "Alcohol Dehydrogenase 1HLD",
+    "pdbId": "1HLD",
+    "atomCount": 3071,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "Kinase Domain 1ATP",
+    "pdbId": "1ATP",
+    "atomCount": 3070,
+    "chains": [
+      "E",
+      "I"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "DNA Polymerase domain 1TAQ",
+    "pdbId": "1TAQ",
+    "atomCount": 3200,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "CRISPR-Cas9 REC fragment 4UN3",
+    "pdbId": "4UN3",
+    "atomCount": 1882,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "RNA Polymerase subunit 1NIK",
+    "pdbId": "1NIK",
+    "atomCount": 3200,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "BSA 3V03",
+    "pdbId": "3V03",
+    "atomCount": 3300,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "Actin 1ATN",
+    "pdbId": "1ATN",
+    "atomCount": 2943,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "Tubulin 1TUB",
+    "pdbId": "1TUB",
+    "atomCount": 3462,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "Fab Heavy Chain 1F8A",
+    "pdbId": "1F8A",
+    "atomCount": 1446,
+    "chains": [
+      "B",
+      "C"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "MHC Class I 1HAK",
+    "pdbId": "1HAK",
+    "atomCount": 2593,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "TCR 1TCR",
+    "pdbId": "1TCR",
+    "atomCount": 3474,
+    "chains": [
+      "A",
+      "B"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "GPCR Rhodopsin 1F88",
+    "pdbId": "1F88",
+    "atomCount": 2679,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "LDH 1LDM",
+    "pdbId": "1LDM",
+    "atomCount": 2843,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "Hexokinase 1DGK",
+    "pdbId": "1DGK",
+    "atomCount": 3400,
+    "chains": [
+      "N"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "Catalase monomer 1DGF",
+    "pdbId": "1DGF",
+    "atomCount": 3450,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "Luciferase 2D1S",
+    "pdbId": "2D1S",
+    "atomCount": 3400,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "Amylase 1SMD",
+    "pdbId": "1SMD",
+    "atomCount": 3480,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  },
+  {
+    "name": "Outer Membrane Porin 2POR",
+    "pdbId": "2POR",
+    "atomCount": 2589,
+    "chains": [
+      "A"
+    ],
+    "inRange": true
+  }
+]

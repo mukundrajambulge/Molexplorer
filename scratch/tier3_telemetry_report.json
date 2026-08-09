@@ -1,0 +1,668 @@
+{
+  "timestamp": "2026-08-09T18:59:35.484Z",
+  "telemetryData": [
+    {
+      "molId": "t3_1",
+      "molName": "Aspirin (C9H8O4)",
+      "atomCount": 21,
+      "smiles": "CC(=O)Oc1ccccc1C(=O)O",
+      "rdkit": {
+        "mw": 180.15899,
+        "logp": 1.3101,
+        "hbd": 1,
+        "hba": 3,
+        "tpsa": 63.6,
+        "rotatableBonds": 2,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 1,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 1,
+        "amineAmide": 0
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 21,
+        "none": 0,
+        "elemC": 4,
+        "elemH": 3
+      }
+    },
+    {
+      "molId": "t3_2",
+      "molName": "Caffeine (C8H10N4O2)",
+      "atomCount": 24,
+      "smiles": "Cn1cnc2c1c(=O)n(c(=O)n2C)C",
+      "rdkit": {
+        "mw": 194.194,
+        "logp": -1.0293,
+        "hbd": 0,
+        "hba": 6,
+        "tpsa": 61.82,
+        "rotatableBonds": 0,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 0,
+        "heteroaromatic": 4,
+        "heteroRingAtom": 4,
+        "carboxylicAcid": 0,
+        "amineAmide": 0
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 24,
+        "none": 0,
+        "elemC": 6,
+        "elemH": 3
+      }
+    },
+    {
+      "molId": "t3_3",
+      "molName": "Dopamine (C8H11NO2)",
+      "atomCount": 22,
+      "smiles": "NCCc1ccc(O)c(O)c1",
+      "rdkit": {
+        "mw": 153.18099,
+        "logp": 0.59899,
+        "hbd": 3,
+        "hba": 3,
+        "tpsa": 66.48,
+        "rotatableBonds": 2,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 1,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 0,
+        "amineAmide": 1
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 22,
+        "none": 0,
+        "elemC": 4,
+        "elemH": 3
+      }
+    },
+    {
+      "molId": "t3_4",
+      "molName": "Serotonin (C10H12N2O)",
+      "atomCount": 25,
+      "smiles": "NCCc1c[nH]c2ccc(O)cc12",
+      "rdkit": {
+        "mw": 176.21899,
+        "logp": 1.3747,
+        "hbd": 3,
+        "hba": 2,
+        "tpsa": 62.04,
+        "rotatableBonds": 2,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 1,
+        "heteroaromatic": 1,
+        "heteroRingAtom": 1,
+        "carboxylicAcid": 0,
+        "amineAmide": 1
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 25,
+        "none": 0,
+        "elemC": 6,
+        "elemH": 4
+      }
+    },
+    {
+      "molId": "t3_5",
+      "molName": "Paracetamol / Acetaminophen (C8H9NO2)",
+      "atomCount": 20,
+      "smiles": "CC(=O)Nc1ccc(O)cc1",
+      "rdkit": {
+        "mw": 151.165,
+        "logp": 1.35059,
+        "hbd": 2,
+        "hba": 2,
+        "tpsa": 49.33,
+        "rotatableBonds": 1,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 1,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 0,
+        "amineAmide": 1
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 20,
+        "none": 0,
+        "elemC": 4,
+        "elemH": 3
+      }
+    },
+    {
+      "molId": "t3_6",
+      "molName": "Ibuprofen (C13H18O2)",
+      "atomCount": 25,
+      "smiles": "CC(C)Cc1ccc(cc1)C(C)C(=O)O",
+      "rdkit": {
+        "mw": 206.28499,
+        "logp": 3.0732,
+        "hbd": 1,
+        "hba": 1,
+        "tpsa": 37.3,
+        "rotatableBonds": 4,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 1,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 1,
+        "amineAmide": 0
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 25,
+        "none": 0,
+        "elemC": 6,
+        "elemH": 4
+      }
+    },
+    {
+      "molId": "t3_7",
+      "molName": "Nicotine (C10H14N2)",
+      "atomCount": 24,
+      "smiles": "CN1CCCC1c2cnccn2",
+      "rdkit": {
+        "mw": 163.224,
+        "logp": 1.24329,
+        "hbd": 0,
+        "hba": 3,
+        "tpsa": 29.02,
+        "rotatableBonds": 1,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 0,
+        "heteroaromatic": 2,
+        "heteroRingAtom": 3,
+        "carboxylicAcid": 0,
+        "amineAmide": 1
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 24,
+        "none": 0,
+        "elemC": 6,
+        "elemH": 3
+      }
+    },
+    {
+      "molId": "t3_8",
+      "molName": "Histamine (C5H9N3)",
+      "atomCount": 17,
+      "smiles": "NCCc1c[nH]cn1",
+      "rdkit": {
+        "mw": 111.14799,
+        "logp": -0.0891,
+        "hbd": 2,
+        "hba": 2,
+        "tpsa": 54.7,
+        "rotatableBonds": 2,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 0,
+        "benzeneRing": 0,
+        "heteroaromatic": 2,
+        "heteroRingAtom": 2,
+        "carboxylicAcid": 0,
+        "amineAmide": 1
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 4,
+        "all": 17,
+        "none": 0,
+        "elemC": 4,
+        "elemH": 3
+      }
+    },
+    {
+      "molId": "t3_9",
+      "molName": "Adrenaline / Epinephrine (C9H13NO3)",
+      "atomCount": 24,
+      "smiles": "CNC[C@H](O)c1ccc(O)c(O)c1",
+      "rdkit": {
+        "mw": 183.207,
+        "logp": 0.3506,
+        "hbd": 4,
+        "hba": 4,
+        "tpsa": 72.72,
+        "rotatableBonds": 3,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 1,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 0,
+        "amineAmide": 1
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 24,
+        "none": 0,
+        "elemC": 6,
+        "elemH": 3
+      }
+    },
+    {
+      "molId": "t3_10",
+      "molName": "Melatonin (C13H16N2O2)",
+      "atomCount": 25,
+      "smiles": "CC(=O)NCCc1c[nH]c2ccc(OC)cc12",
+      "rdkit": {
+        "mw": 232.283,
+        "logp": 1.8551,
+        "hbd": 2,
+        "hba": 2,
+        "tpsa": 54.12,
+        "rotatableBonds": 4,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 1,
+        "heteroaromatic": 1,
+        "heteroRingAtom": 1,
+        "carboxylicAcid": 0,
+        "amineAmide": 1
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 25,
+        "none": 0,
+        "elemC": 6,
+        "elemH": 4
+      }
+    },
+    {
+      "molId": "t3_11",
+      "molName": "GABA (C4H9NO2)",
+      "atomCount": 16,
+      "smiles": "NCCCC(=O)O",
+      "rdkit": {
+        "mw": 103.12099,
+        "logp": -0.19009,
+        "hbd": 2,
+        "hba": 2,
+        "tpsa": 63.32,
+        "rotatableBonds": 3,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 0,
+        "benzeneRing": 0,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 1,
+        "amineAmide": 1
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 4,
+        "all": 16,
+        "none": 0,
+        "elemC": 4,
+        "elemH": 2
+      }
+    },
+    {
+      "molId": "t3_12",
+      "molName": "Benzoic Acid (C7H6O2)",
+      "atomCount": 15,
+      "smiles": "O=C(O)c1ccccc1",
+      "rdkit": {
+        "mw": 122.12299,
+        "logp": 1.3848,
+        "hbd": 1,
+        "hba": 1,
+        "tpsa": 37.3,
+        "rotatableBonds": 1,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 1,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 1,
+        "amineAmide": 0
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 4,
+        "all": 15,
+        "none": 0,
+        "elemC": 3,
+        "elemH": 2
+      }
+    },
+    {
+      "molId": "t3_13",
+      "molName": "Salicylic Acid (C7H6O3)",
+      "atomCount": 16,
+      "smiles": "O=C(O)c1ccccc1O",
+      "rdkit": {
+        "mw": 138.12199,
+        "logp": 1.09039,
+        "hbd": 2,
+        "hba": 2,
+        "tpsa": 57.53,
+        "rotatableBonds": 1,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 1,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 1,
+        "amineAmide": 0
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 4,
+        "all": 16,
+        "none": 0,
+        "elemC": 4,
+        "elemH": 2
+      }
+    },
+    {
+      "molId": "t3_14",
+      "molName": "Menthol (C10H20O)",
+      "atomCount": 25,
+      "smiles": "CC1CCC(C(C1)O)C(C)C",
+      "rdkit": {
+        "mw": 156.26899,
+        "logp": 2.4395,
+        "hbd": 1,
+        "hba": 1,
+        "tpsa": 20.23,
+        "rotatableBonds": 1,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 0,
+        "benzeneRing": 0,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 0,
+        "amineAmide": 0
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 25,
+        "none": 0,
+        "elemC": 6,
+        "elemH": 4
+      }
+    },
+    {
+      "molId": "t3_15",
+      "molName": "Camphor (C10H16O)",
+      "atomCount": 25,
+      "smiles": "CC1(C)C2CCC1(C)C(=O)C2",
+      "rdkit": {
+        "mw": 152.237,
+        "logp": 2.4017,
+        "hbd": 0,
+        "hba": 1,
+        "tpsa": 17.07,
+        "rotatableBonds": 0,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 0,
+        "benzeneRing": 0,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 0,
+        "amineAmide": 0
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 25,
+        "none": 0,
+        "elemC": 6,
+        "elemH": 4
+      }
+    },
+    {
+      "molId": "t3_16",
+      "molName": "Metformin (C4H11N5)",
+      "atomCount": 20,
+      "smiles": "CN(C)C(=N)NC(=N)N",
+      "rdkit": {
+        "mw": 129.167,
+        "logp": -1.03415,
+        "hbd": 4,
+        "hba": 2,
+        "tpsa": 88.99,
+        "rotatableBonds": 0,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 0,
+        "benzeneRing": 0,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 0,
+        "amineAmide": 3
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 20,
+        "none": 0,
+        "elemC": 4,
+        "elemH": 3
+      }
+    },
+    {
+      "molId": "t3_17",
+      "molName": "Amphetamine (C9H13N)",
+      "atomCount": 23,
+      "smiles": "CC(N)Cc1ccccc1",
+      "rdkit": {
+        "mw": 135.20999,
+        "logp": 1.5763,
+        "hbd": 1,
+        "hba": 1,
+        "tpsa": 26.02,
+        "rotatableBonds": 2,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 1,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 0,
+        "amineAmide": 1
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 23,
+        "none": 0,
+        "elemC": 5,
+        "elemH": 3
+      }
+    },
+    {
+      "molId": "t3_18",
+      "molName": "Mescaline (C11H17NO3)",
+      "atomCount": 25,
+      "smiles": "NCCc1cc(OC)c(OC)c(OC)c1",
+      "rdkit": {
+        "mw": 211.26099,
+        "logp": 1.21359,
+        "hbd": 1,
+        "hba": 4,
+        "tpsa": 53.71,
+        "rotatableBonds": 5,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 1,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 0,
+        "amineAmide": 1
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 25,
+        "none": 0,
+        "elemC": 6,
+        "elemH": 4
+      }
+    },
+    {
+      "molId": "t3_19",
+      "molName": "Ephedrine (C10H15NO)",
+      "atomCount": 25,
+      "smiles": "CC(NC)C(O)c1ccccc1",
+      "rdkit": {
+        "mw": 165.236,
+        "logp": 1.3279,
+        "hbd": 2,
+        "hba": 2,
+        "tpsa": 32.26,
+        "rotatableBonds": 3,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 1,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 0,
+        "amineAmide": 1
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 6,
+        "all": 25,
+        "none": 0,
+        "elemC": 6,
+        "elemH": 4
+      }
+    },
+    {
+      "molId": "t3_20",
+      "molName": "Toluene (C7H8)",
+      "atomCount": 15,
+      "smiles": "Cc1ccccc1",
+      "rdkit": {
+        "mw": 92.14099,
+        "logp": 1.99502,
+        "hbd": 0,
+        "hba": 0,
+        "tpsa": 0,
+        "rotatableBonds": 0,
+        "ro5Violations": 0,
+        "isRo5Compliant": true
+      },
+      "smartsMatches": {
+        "aromaticRing": 1,
+        "benzeneRing": 1,
+        "heteroaromatic": 0,
+        "heteroRingAtom": 0,
+        "carboxylicAcid": 0,
+        "amineAmide": 0
+      },
+      "selectionQueries": {
+        "resnLIG": 0,
+        "resi1to50": 0,
+        "elemOorN": 4,
+        "all": 15,
+        "none": 0,
+        "elemC": 3,
+        "elemH": 2
+      }
+    }
+  ],
+  "issuesFound": [
+    "RDKit get_descriptors() outputs 'NumHBD' and 'NumHBA' instead of 'NumHDonors' and 'NumHAcceptors', causing undefined checks in UI"
+  ]
+}

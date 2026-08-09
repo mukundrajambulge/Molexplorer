@@ -1,0 +1,1944 @@
+{
+  "timestamp": "2026-08-09T18:59:06.087Z",
+  "agentTier": 2,
+  "totalMoleculesTested": 20,
+  "passedCount": 0,
+  "failedCount": 20,
+  "passPercentage": "0.00%",
+  "telemetryAvgMs": {
+    "roundtrip2D3D": "12.482",
+    "descriptorCalculation": "4.197",
+    "renderingSetup": "0.012",
+    "selectionQueryEvaluation": "0.596"
+  },
+  "issuesFound": [
+    "Benzene: Selection query [elem C or elem N] failed (got 0, expected 6)",
+    "Benzene: Selection query [not hydrogens] failed (got 0, expected 6)",
+    "Benzene: Selection query [organic] failed (got 0, expected 12)",
+    "Ethanol: Selection query [elem C or elem N] failed (got 0, expected 2)",
+    "Ethanol: Selection query [not hydrogens] failed (got 0, expected 3)",
+    "Ethanol: Selection query [organic] failed (got 0, expected 9)",
+    "Acetone: Selection query [elem C or elem N] failed (got 0, expected 3)",
+    "Acetone: Selection query [not hydrogens] failed (got 0, expected 4)",
+    "Acetone: Selection query [organic] failed (got 0, expected 10)",
+    "Pyridine: Selection query [elem C or elem N] failed (got 0, expected 6)",
+    "Pyridine: Selection query [not hydrogens] failed (got 0, expected 6)",
+    "Pyridine: Selection query [organic] failed (got 0, expected 11)",
+    "Phenol: Selection query [elem C or elem N] failed (got 0, expected 6)",
+    "Phenol: Selection query [not hydrogens] failed (got 0, expected 7)",
+    "Phenol: Selection query [organic] failed (got 0, expected 13)",
+    "Toluene: Selection query [elem C or elem N] failed (got 0, expected 7)",
+    "Toluene: Selection query [not hydrogens] failed (got 0, expected 7)",
+    "Toluene: Selection query [organic] failed (got 0, expected 15)",
+    "Aniline: Selection query [elem C or elem N] failed (got 0, expected 7)",
+    "Aniline: Selection query [not hydrogens] failed (got 0, expected 7)",
+    "Aniline: Selection query [organic] failed (got 0, expected 14)",
+    "Furan: Selection query [elem C or elem N] failed (got 0, expected 4)",
+    "Furan: Selection query [not hydrogens] failed (got 0, expected 5)",
+    "Furan: Selection query [organic] failed (got 0, expected 9)",
+    "Thiophene: Selection query [elem C or elem N] failed (got 0, expected 4)",
+    "Thiophene: Selection query [not hydrogens] failed (got 0, expected 5)",
+    "Thiophene: Selection query [organic] failed (got 0, expected 9)",
+    "Pyrrole: Selection query [elem C or elem N] failed (got 0, expected 5)",
+    "Pyrrole: Selection query [not hydrogens] failed (got 0, expected 5)",
+    "Pyrrole: Selection query [organic] failed (got 0, expected 10)",
+    "Cyclohexane: Selection query [elem C or elem N] failed (got 0, expected 6)",
+    "Cyclohexane: Selection query [not hydrogens] failed (got 0, expected 6)",
+    "Cyclohexane: Selection query [organic] failed (got 0, expected 18)",
+    "Ethylene glycol: Selection query [elem C or elem N] failed (got 0, expected 2)",
+    "Ethylene glycol: Selection query [not hydrogens] failed (got 0, expected 4)",
+    "Ethylene glycol: Selection query [organic] failed (got 0, expected 10)",
+    "Acetic acid: Descriptor mismatch (HBD: got 1 vs exp 1, HBA: got 1 vs exp 2)",
+    "Acetic acid: Selection query [elem C or elem N] failed (got 0, expected 2)",
+    "Acetic acid: Selection query [not hydrogens] failed (got 0, expected 4)",
+    "Acetic acid: Selection query [organic] failed (got 0, expected 8)",
+    "Acetamide: Selection query [elem C or elem N] failed (got 0, expected 3)",
+    "Acetamide: Selection query [not hydrogens] failed (got 0, expected 4)",
+    "Acetamide: Selection query [organic] failed (got 0, expected 9)",
+    "Acetonitrile: Selection query [elem C or elem N] failed (got 0, expected 3)",
+    "Acetonitrile: Selection query [not hydrogens] failed (got 0, expected 3)",
+    "Acetonitrile: Selection query [organic] failed (got 0, expected 6)",
+    "Fluorobenzene: Selection query [elem C or elem N] failed (got 0, expected 6)",
+    "Fluorobenzene: Selection query [not hydrogens] failed (got 0, expected 7)",
+    "Fluorobenzene: Selection query [organic] failed (got 0, expected 12)",
+    "Glycerol: Selection query [elem C or elem N] failed (got 0, expected 3)",
+    "Glycerol: Selection query [not hydrogens] failed (got 0, expected 6)",
+    "Glycerol: Selection query [organic] failed (got 0, expected 14)",
+    "Lactic acid: Descriptor mismatch (HBD: got 2 vs exp 2, HBA: got 2 vs exp 3)",
+    "Lactic acid: Selection query [elem C or elem N] failed (got 0, expected 3)",
+    "Lactic acid: Selection query [not hydrogens] failed (got 0, expected 6)",
+    "Lactic acid: Selection query [organic] failed (got 0, expected 12)",
+    "Urea: Selection query [elem C or elem N] failed (got 0, expected 3)",
+    "Urea: Selection query [not hydrogens] failed (got 0, expected 4)",
+    "Urea: Selection query [organic] failed (got 0, expected 8)",
+    "Oxalic acid: Descriptor mismatch (HBD: got 2 vs exp 2, HBA: got 2 vs exp 4)",
+    "Oxalic acid: Selection query [elem C or elem N] failed (got 0, expected 2)",
+    "Oxalic acid: Selection query [not hydrogens] failed (got 0, expected 6)",
+    "Oxalic acid: Selection query [organic] failed (got 0, expected 8)"
+  ],
+  "detailedMoleculeResults": [
+    {
+      "id": "t2_01",
+      "name": "Benzene",
+      "smilesInput": "c1ccccc1",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 191.34300000000007,
+          "exported2DSmiles": "c1ccccc1",
+          "exported3DSmiles": "c1ccccc1",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 35.146600000000035,
+          "descriptors": {
+            "mw": 78.11399,
+            "exactmw": 78.04695,
+            "logp": 1.6866,
+            "tpsa": 0,
+            "hbd": 0,
+            "hba": 0,
+            "heavyAtoms": 6,
+            "totalAtoms": 12
+          },
+          "expectedHBD": 0,
+          "expectedHBA": 0
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.04379999999991924,
+          "atomCountRendered": 12,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 3.9973999999999705,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 6,
+              "timeMs": 3.0579999999999927,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 6,
+              "timeMs": 0.6721999999999753,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 12,
+              "timeMs": 0.10180000000013933,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Benzene: Selection query [elem C or elem N] failed (got 0, expected 6)",
+        "Benzene: Selection query [not hydrogens] failed (got 0, expected 6)",
+        "Benzene: Selection query [organic] failed (got 0, expected 12)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_02",
+      "name": "Ethanol",
+      "smilesInput": "CCO",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 5.141399999999976,
+          "exported2DSmiles": "CCO",
+          "exported3DSmiles": "CCO",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 3.9437000000000353,
+          "descriptors": {
+            "mw": 46.069,
+            "exactmw": 46.04186,
+            "logp": -0.0014,
+            "tpsa": 20.23,
+            "hbd": 1,
+            "hba": 1,
+            "heavyAtoms": 3,
+            "totalAtoms": 9
+          },
+          "expectedHBD": 1,
+          "expectedHBA": 1
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.020399999999881402,
+          "atomCountRendered": 9,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.2887000000000626,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 2,
+              "timeMs": 0.15030000000001564,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 3,
+              "timeMs": 0.06600000000003092,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 9,
+              "timeMs": 0.047000000000025466,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Ethanol: Selection query [elem C or elem N] failed (got 0, expected 2)",
+        "Ethanol: Selection query [not hydrogens] failed (got 0, expected 3)",
+        "Ethanol: Selection query [organic] failed (got 0, expected 9)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_03",
+      "name": "Acetone",
+      "smilesInput": "CC(=O)C",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 3.599899999999934,
+          "exported2DSmiles": "CC(C)=O",
+          "exported3DSmiles": "CC(C)=O",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 2.425999999999931,
+          "descriptors": {
+            "mw": 58.08,
+            "exactmw": 58.04186,
+            "logp": 0.59529,
+            "tpsa": 17.07,
+            "hbd": 0,
+            "hba": 1,
+            "heavyAtoms": 4,
+            "totalAtoms": 10
+          },
+          "expectedHBD": 0,
+          "expectedHBA": 1
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.017800000000079308,
+          "atomCountRendered": 10,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.38210000000003674,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 3,
+              "timeMs": 0.23430000000007567,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 4,
+              "timeMs": 0.08169999999995525,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 10,
+              "timeMs": 0.04539999999997235,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Acetone: Selection query [elem C or elem N] failed (got 0, expected 3)",
+        "Acetone: Selection query [not hydrogens] failed (got 0, expected 4)",
+        "Acetone: Selection query [organic] failed (got 0, expected 10)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_04",
+      "name": "Pyridine",
+      "smilesInput": "c1ccncc1",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 3.3665000000000873,
+          "exported2DSmiles": "c1ccncc1",
+          "exported3DSmiles": "c1ccncc1",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 2.3083999999998923,
+          "descriptors": {
+            "mw": 79.10199,
+            "exactmw": 79.04219,
+            "logp": 1.0816,
+            "tpsa": 12.89,
+            "hbd": 0,
+            "hba": 1,
+            "heavyAtoms": 6,
+            "totalAtoms": 11
+          },
+          "expectedHBD": 0,
+          "expectedHBA": 1
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.016400000000203363,
+          "atomCountRendered": 11,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.34389999999984866,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 6,
+              "timeMs": 0.19399999999995998,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 6,
+              "timeMs": 0.07899999999995089,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 11,
+              "timeMs": 0.047100000000000364,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Pyridine: Selection query [elem C or elem N] failed (got 0, expected 6)",
+        "Pyridine: Selection query [not hydrogens] failed (got 0, expected 6)",
+        "Pyridine: Selection query [organic] failed (got 0, expected 11)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_05",
+      "name": "Phenol",
+      "smilesInput": "Oc1ccccc1",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 3.509800000000041,
+          "exported2DSmiles": "Oc1ccccc1",
+          "exported3DSmiles": "Oc1ccccc1",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 4.112899999999854,
+          "descriptors": {
+            "mw": 94.11299,
+            "exactmw": 94.04186,
+            "logp": 1.39219,
+            "tpsa": 20.23,
+            "hbd": 1,
+            "hba": 1,
+            "heavyAtoms": 7,
+            "totalAtoms": 13
+          },
+          "expectedHBD": 1,
+          "expectedHBA": 1
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.02060000000005857,
+          "atomCountRendered": 13,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.44640000000003965,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 6,
+              "timeMs": 0.23859999999990578,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 7,
+              "timeMs": 0.09789999999998145,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 13,
+              "timeMs": 0.07359999999994216,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Phenol: Selection query [elem C or elem N] failed (got 0, expected 6)",
+        "Phenol: Selection query [not hydrogens] failed (got 0, expected 7)",
+        "Phenol: Selection query [organic] failed (got 0, expected 13)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_06",
+      "name": "Toluene",
+      "smilesInput": "Cc1ccccc1",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 4.613699999999881,
+          "exported2DSmiles": "Cc1ccccc1",
+          "exported3DSmiles": "Cc1ccccc1",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 3.0897999999999683,
+          "descriptors": {
+            "mw": 92.14099,
+            "exactmw": 92.0626,
+            "logp": 1.99502,
+            "tpsa": 0,
+            "hbd": 0,
+            "hba": 0,
+            "heavyAtoms": 7,
+            "totalAtoms": 15
+          },
+          "expectedHBD": 0,
+          "expectedHBA": 0
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.017600000000129512,
+          "atomCountRendered": 15,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.48709999999982756,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 7,
+              "timeMs": 0.27589999999986503,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 7,
+              "timeMs": 0.10060000000021319,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 15,
+              "timeMs": 0.07469999999989341,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Toluene: Selection query [elem C or elem N] failed (got 0, expected 7)",
+        "Toluene: Selection query [not hydrogens] failed (got 0, expected 7)",
+        "Toluene: Selection query [organic] failed (got 0, expected 15)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_07",
+      "name": "Aniline",
+      "smilesInput": "Nc1ccccc1",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 4.390599999999949,
+          "exported2DSmiles": "Nc1ccccc1",
+          "exported3DSmiles": "Nc1ccccc1",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 2.7983999999999014,
+          "descriptors": {
+            "mw": 93.12899,
+            "exactmw": 93.05784,
+            "logp": 1.2688,
+            "tpsa": 26.02,
+            "hbd": 1,
+            "hba": 1,
+            "heavyAtoms": 7,
+            "totalAtoms": 14
+          },
+          "expectedHBD": 1,
+          "expectedHBA": 1
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.018499999999903594,
+          "atomCountRendered": 14,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.6005999999999858,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 7,
+              "timeMs": 0.33320000000003347,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 7,
+              "timeMs": 0.1092999999998483,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 14,
+              "timeMs": 0.07420000000001892,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Aniline: Selection query [elem C or elem N] failed (got 0, expected 7)",
+        "Aniline: Selection query [not hydrogens] failed (got 0, expected 7)",
+        "Aniline: Selection query [organic] failed (got 0, expected 14)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_08",
+      "name": "Furan",
+      "smilesInput": "c1ccoc1",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 3.955099999999902,
+          "exported2DSmiles": "c1ccoc1",
+          "exported3DSmiles": "c1ccoc1",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 2.7445999999999913,
+          "descriptors": {
+            "mw": 68.07499,
+            "exactmw": 68.02621,
+            "logp": 1.27959,
+            "tpsa": 13.14,
+            "hbd": 0,
+            "hba": 1,
+            "heavyAtoms": 5,
+            "totalAtoms": 9
+          },
+          "expectedHBD": 0,
+          "expectedHBA": 1
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.020599999999831198,
+          "atomCountRendered": 9,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 1.5283999999999196,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 4,
+              "timeMs": 0.1957999999999629,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 5,
+              "timeMs": 0.07410000000004402,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 9,
+              "timeMs": 1.1869000000001506,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Furan: Selection query [elem C or elem N] failed (got 0, expected 4)",
+        "Furan: Selection query [not hydrogens] failed (got 0, expected 5)",
+        "Furan: Selection query [organic] failed (got 0, expected 9)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_09",
+      "name": "Thiophene",
+      "smilesInput": "c1ccsc1",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 2.6503000000000156,
+          "exported2DSmiles": "c1ccsc1",
+          "exported3DSmiles": "c1ccsc1",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 2.390899999999874,
+          "descriptors": {
+            "mw": 84.14299,
+            "exactmw": 84.00337,
+            "logp": 1.74809,
+            "tpsa": 0,
+            "hbd": 0,
+            "hba": 1,
+            "heavyAtoms": 5,
+            "totalAtoms": 9
+          },
+          "expectedHBD": 0,
+          "expectedHBA": 1
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.028099999999994907,
+          "atomCountRendered": 9,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.3210999999998876,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 4,
+              "timeMs": 0.18419999999991887,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 5,
+              "timeMs": 0.07099999999991269,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 9,
+              "timeMs": 0.04580000000009932,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Thiophene: Selection query [elem C or elem N] failed (got 0, expected 4)",
+        "Thiophene: Selection query [not hydrogens] failed (got 0, expected 5)",
+        "Thiophene: Selection query [organic] failed (got 0, expected 9)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_10",
+      "name": "Pyrrole",
+      "smilesInput": "c1cc[nH]c1",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 2.7804000000000997,
+          "exported2DSmiles": "c1cc[nH]c1",
+          "exported3DSmiles": "c1cc[nH]c1",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 2.737100000000055,
+          "descriptors": {
+            "mw": 67.091,
+            "exactmw": 67.04219,
+            "logp": 1.0147,
+            "tpsa": 15.79,
+            "hbd": 1,
+            "hba": 0,
+            "heavyAtoms": 5,
+            "totalAtoms": 10
+          },
+          "expectedHBD": 1,
+          "expectedHBA": 0
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.0048000000001593435,
+          "atomCountRendered": 10,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.4860000000001037,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 5,
+              "timeMs": 0.35140000000001237,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 5,
+              "timeMs": 0.07649999999989632,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 10,
+              "timeMs": 0.04600000000004911,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Pyrrole: Selection query [elem C or elem N] failed (got 0, expected 5)",
+        "Pyrrole: Selection query [not hydrogens] failed (got 0, expected 5)",
+        "Pyrrole: Selection query [organic] failed (got 0, expected 10)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_11",
+      "name": "Cyclohexane",
+      "smilesInput": "C1CCCCC1",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 3.0403000000001157,
+          "exported2DSmiles": "C1CCCCC1",
+          "exported3DSmiles": "C1CCCCC1",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 2.1860999999998967,
+          "descriptors": {
+            "mw": 84.162,
+            "exactmw": 84.0939,
+            "logp": 2.3406,
+            "tpsa": 0,
+            "hbd": 0,
+            "hba": 0,
+            "heavyAtoms": 6,
+            "totalAtoms": 18
+          },
+          "expectedHBD": 0,
+          "expectedHBA": 0
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.004299999999830106,
+          "atomCountRendered": 18,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.4579999999998563,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 6,
+              "timeMs": 0.2560000000000855,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 6,
+              "timeMs": 0.10940000000005057,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 18,
+              "timeMs": 0.08379999999988286,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Cyclohexane: Selection query [elem C or elem N] failed (got 0, expected 6)",
+        "Cyclohexane: Selection query [not hydrogens] failed (got 0, expected 6)",
+        "Cyclohexane: Selection query [organic] failed (got 0, expected 18)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_12",
+      "name": "Ethylene glycol",
+      "smilesInput": "OCCO",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 2.979899999999816,
+          "exported2DSmiles": "OCCO",
+          "exported3DSmiles": "OCCO",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 2.0648000000001048,
+          "descriptors": {
+            "mw": 62.068,
+            "exactmw": 62.03677,
+            "logp": -1.029,
+            "tpsa": 40.46,
+            "hbd": 2,
+            "hba": 2,
+            "heavyAtoms": 4,
+            "totalAtoms": 10
+          },
+          "expectedHBD": 2,
+          "expectedHBA": 2
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.0039999999999054126,
+          "atomCountRendered": 10,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.29920000000015534,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 2,
+              "timeMs": 0.1630999999999858,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 4,
+              "timeMs": 0.07500000000004547,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 10,
+              "timeMs": 0.0524000000000342,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Ethylene glycol: Selection query [elem C or elem N] failed (got 0, expected 2)",
+        "Ethylene glycol: Selection query [not hydrogens] failed (got 0, expected 4)",
+        "Ethylene glycol: Selection query [organic] failed (got 0, expected 10)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_13",
+      "name": "Acetic acid",
+      "smilesInput": "CC(=O)O",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 3.766399999999976,
+          "exported2DSmiles": "CC(=O)O",
+          "exported3DSmiles": "CC(=O)O",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "FAIL",
+          "timeMs": 2.7937999999999192,
+          "descriptors": {
+            "mw": 60.052,
+            "exactmw": 60.02112,
+            "logp": 0.09089,
+            "tpsa": 37.3,
+            "hbd": 1,
+            "hba": 1,
+            "heavyAtoms": 4,
+            "totalAtoms": 8
+          },
+          "expectedHBD": 1,
+          "expectedHBA": 2
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.005100000000084037,
+          "atomCountRendered": 8,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.2643999999997959,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 2,
+              "timeMs": 0.1433999999999287,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 4,
+              "timeMs": 0.059700000000020736,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 8,
+              "timeMs": 0.05410000000006221,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Acetic acid: Descriptor mismatch (HBD: got 1 vs exp 1, HBA: got 1 vs exp 2)",
+        "Acetic acid: Selection query [elem C or elem N] failed (got 0, expected 2)",
+        "Acetic acid: Selection query [not hydrogens] failed (got 0, expected 4)",
+        "Acetic acid: Selection query [organic] failed (got 0, expected 8)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_14",
+      "name": "Acetamide",
+      "smilesInput": "CC(=O)N",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 1.9634000000000924,
+          "exported2DSmiles": "CC(N)=O",
+          "exported3DSmiles": "CC(N)=O",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 1.5325000000000273,
+          "descriptors": {
+            "mw": 59.068,
+            "exactmw": 59.03711,
+            "logp": -0.5084,
+            "tpsa": 43.09,
+            "hbd": 1,
+            "hba": 1,
+            "heavyAtoms": 4,
+            "totalAtoms": 9
+          },
+          "expectedHBD": 1,
+          "expectedHBA": 1
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.003100000000131331,
+          "atomCountRendered": 9,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.33130000000005566,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 3,
+              "timeMs": 0.20849999999995816,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 4,
+              "timeMs": 0.07010000000013861,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 9,
+              "timeMs": 0.044599999999945794,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Acetamide: Selection query [elem C or elem N] failed (got 0, expected 3)",
+        "Acetamide: Selection query [not hydrogens] failed (got 0, expected 4)",
+        "Acetamide: Selection query [organic] failed (got 0, expected 9)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_15",
+      "name": "Acetonitrile",
+      "smilesInput": "CC#N",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 1.5499999999999545,
+          "exported2DSmiles": "CC#N",
+          "exported3DSmiles": "CC#N",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 3.3707999999999174,
+          "descriptors": {
+            "mw": 41.053,
+            "exactmw": 41.02654,
+            "logp": 0.52988,
+            "tpsa": 23.79,
+            "hbd": 0,
+            "hba": 1,
+            "heavyAtoms": 3,
+            "totalAtoms": 6
+          },
+          "expectedHBD": 0,
+          "expectedHBA": 1
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.0037999999999556167,
+          "atomCountRendered": 6,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.22169999999982792,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 3,
+              "timeMs": 0.13580000000001746,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 3,
+              "timeMs": 0.05009999999992942,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 6,
+              "timeMs": 0.028900000000021464,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Acetonitrile: Selection query [elem C or elem N] failed (got 0, expected 3)",
+        "Acetonitrile: Selection query [not hydrogens] failed (got 0, expected 3)",
+        "Acetonitrile: Selection query [organic] failed (got 0, expected 6)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_16",
+      "name": "Fluorobenzene",
+      "smilesInput": "Fc1ccccc1",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 3.2626000000000204,
+          "exported2DSmiles": "Fc1ccccc1",
+          "exported3DSmiles": "Fc1ccccc1",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 2.0548999999998614,
+          "descriptors": {
+            "mw": 96.10399,
+            "exactmw": 96.03752,
+            "logp": 1.82569,
+            "tpsa": 0,
+            "hbd": 0,
+            "hba": 0,
+            "heavyAtoms": 7,
+            "totalAtoms": 12
+          },
+          "expectedHBD": 0,
+          "expectedHBA": 0
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.004299999999830106,
+          "atomCountRendered": 12,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.29179999999996653,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 6,
+              "timeMs": 0.16669999999999163,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 7,
+              "timeMs": 0.06490000000007967,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 12,
+              "timeMs": 0.05129999999985557,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Fluorobenzene: Selection query [elem C or elem N] failed (got 0, expected 6)",
+        "Fluorobenzene: Selection query [not hydrogens] failed (got 0, expected 7)",
+        "Fluorobenzene: Selection query [organic] failed (got 0, expected 12)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_17",
+      "name": "Glycerol",
+      "smilesInput": "OCC(O)CO",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 1.5872000000001663,
+          "exported2DSmiles": "OCC(O)CO",
+          "exported3DSmiles": "OCC(O)CO",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 1.4536999999997988,
+          "descriptors": {
+            "mw": 92.094,
+            "exactmw": 92.04734,
+            "logp": -1.6681,
+            "tpsa": 60.69,
+            "hbd": 3,
+            "hba": 3,
+            "heavyAtoms": 6,
+            "totalAtoms": 14
+          },
+          "expectedHBD": 3,
+          "expectedHBA": 3
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.003100000000131331,
+          "atomCountRendered": 14,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.2140999999999167,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 3,
+              "timeMs": 0.11290000000008149,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 6,
+              "timeMs": 0.05859999999984211,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 14,
+              "timeMs": 0.035399999999981446,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Glycerol: Selection query [elem C or elem N] failed (got 0, expected 3)",
+        "Glycerol: Selection query [not hydrogens] failed (got 0, expected 6)",
+        "Glycerol: Selection query [organic] failed (got 0, expected 14)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_18",
+      "name": "Lactic acid",
+      "smilesInput": "CC(O)C(=O)O",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 1.3833999999999378,
+          "exported2DSmiles": "CC(O)C(=O)O",
+          "exported3DSmiles": "CC(O)C(=O)O",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "FAIL",
+          "timeMs": 2.65300000000002,
+          "descriptors": {
+            "mw": 90.07799,
+            "exactmw": 90.03169,
+            "logp": -0.5482,
+            "tpsa": 57.53,
+            "hbd": 2,
+            "hba": 2,
+            "heavyAtoms": 6,
+            "totalAtoms": 12
+          },
+          "expectedHBD": 2,
+          "expectedHBA": 3
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.0040999999998803105,
+          "atomCountRendered": 12,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.4411000000000058,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 3,
+              "timeMs": 0.3086000000000695,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 6,
+              "timeMs": 0.07569999999986976,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 12,
+              "timeMs": 0.04829999999992651,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Lactic acid: Descriptor mismatch (HBD: got 2 vs exp 2, HBA: got 2 vs exp 3)",
+        "Lactic acid: Selection query [elem C or elem N] failed (got 0, expected 3)",
+        "Lactic acid: Selection query [not hydrogens] failed (got 0, expected 6)",
+        "Lactic acid: Selection query [organic] failed (got 0, expected 12)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_19",
+      "name": "Urea",
+      "smilesInput": "NC(=O)N",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 2.4588000000001102,
+          "exported2DSmiles": "NC(N)=O",
+          "exported3DSmiles": "NC(N)=O",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "PASS",
+          "timeMs": 1.6098000000001775,
+          "descriptors": {
+            "mw": 60.056,
+            "exactmw": 60.03236,
+            "logp": -0.9762,
+            "tpsa": 69.11,
+            "hbd": 2,
+            "hba": 1,
+            "heavyAtoms": 4,
+            "totalAtoms": 8
+          },
+          "expectedHBD": 2,
+          "expectedHBA": 1
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.0029999999999290594,
+          "atomCountRendered": 8,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.22460000000000946,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 3,
+              "timeMs": 0.11799999999993815,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 4,
+              "timeMs": 0.05819999999994252,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 8,
+              "timeMs": 0.041399999999839565,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Urea: Selection query [elem C or elem N] failed (got 0, expected 3)",
+        "Urea: Selection query [not hydrogens] failed (got 0, expected 4)",
+        "Urea: Selection query [organic] failed (got 0, expected 8)"
+      ],
+      "overallStatus": "FAIL"
+    },
+    {
+      "id": "t2_20",
+      "name": "Oxalic acid",
+      "smilesInput": "O=C(O)C(=O)O",
+      "checks": {
+        "roundtrip": {
+          "status": "PASS",
+          "timeMs": 2.287399999999934,
+          "exported2DSmiles": "O=C(O)C(=O)O",
+          "exported3DSmiles": "O=C(O)C(=O)O",
+          "isCanonicalMatch": true
+        },
+        "descriptors": {
+          "status": "FAIL",
+          "timeMs": 2.5137999999999465,
+          "descriptors": {
+            "mw": 90.03399,
+            "exactmw": 89.9953,
+            "logp": -0.84439,
+            "tpsa": 74.6,
+            "hbd": 2,
+            "hba": 2,
+            "heavyAtoms": 6,
+            "totalAtoms": 8
+          },
+          "expectedHBD": 2,
+          "expectedHBA": 4
+        },
+        "rendering": {
+          "status": "PASS",
+          "timeMs": 0.0030999999999039574,
+          "atomCountRendered": 8,
+          "representationsTested": [
+            "Stick",
+            "Space-Filling",
+            "Ball-and-Stick"
+          ],
+          "specs": {
+            "stickSpec": {
+              "stick": {
+                "radius": 0.15,
+                "colorscheme": "Jmol"
+              }
+            },
+            "spaceFillingSpec": {
+              "sphere": {
+                "scale": 1,
+                "colorscheme": "Jmol"
+              }
+            },
+            "ballAndStickSpec": {
+              "stick": {
+                "radius": 0.15
+              },
+              "sphere": {
+                "scale": 0.25,
+                "colorscheme": "Jmol"
+              }
+            }
+          }
+        },
+        "selectionQueries": {
+          "status": "FAIL",
+          "totalTimeMs": 0.287900000000036,
+          "queries": {
+            "elem C or elem N": {
+              "count": 0,
+              "expected": 2,
+              "timeMs": 0.14709999999990941,
+              "status": "FAIL"
+            },
+            "not hydrogens": {
+              "count": 0,
+              "expected": 6,
+              "timeMs": 0.07979999999997744,
+              "status": "FAIL"
+            },
+            "organic": {
+              "count": 0,
+              "expected": 8,
+              "timeMs": 0.05089999999995598,
+              "status": "FAIL"
+            }
+          }
+        }
+      },
+      "issues": [
+        "Oxalic acid: Descriptor mismatch (HBD: got 2 vs exp 2, HBA: got 2 vs exp 4)",
+        "Oxalic acid: Selection query [elem C or elem N] failed (got 0, expected 2)",
+        "Oxalic acid: Selection query [not hydrogens] failed (got 0, expected 6)",
+        "Oxalic acid: Selection query [organic] failed (got 0, expected 8)"
+      ],
+      "overallStatus": "FAIL"
+    }
+  ]
+}

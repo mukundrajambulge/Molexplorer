@@ -82,7 +82,12 @@ export class DensityMap {
         if (x < 0 || x >= grid.dimensions.x || y < 0 || y >= grid.dimensions.y || z < 0 || z >= grid.dimensions.z) return 0;
         const idx = x + y * grid.dimensions.x + z * grid.dimensions.x * grid.dimensions.y;
         return grid.data[idx] || 0;
-      }
+      },
+      gridToCartesian: (i: number, j: number, k: number) => ({
+        x: grid.origin.x + i * grid.stepSize,
+        y: grid.origin.y + j * grid.stepSize,
+        z: grid.origin.z + k * grid.stepSize
+      })
     };
     return generateIsosurfaceMesh(fakeParser, isovalue);
   }

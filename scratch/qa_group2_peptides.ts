@@ -66,6 +66,36 @@ function isSolvent(atom: Atom): boolean {
   return ['HOH', 'WAT', 'DOD', 'SOL', 'TIP3', 'TIP', 'TIP4', 'NH4', 'CL', 'NA'].includes(name);
 }
 
+function extractModel1(rawPdbText: string): string {
+  const lines = rawPdbText.split(/\r?\n/);
+  const m1Lines: string[] = [];
+  let insideModel1 = false;
+  let hasModels = false;
+
+  for (const line of lines) {
+    if (line.startsWith('MODEL ')) {
+      hasModels = true;
+      const modelNum = parseInt(line.substring(6).trim(), 10);
+      if (modelNum === 1) {
+        insideModel1 = true;
+        m1Lines.push(line);
+      } else {
+        insideModel1 = false;
+        break; // stop reading once Model 2 starts
+      }
+    } else if (line.startsWith('ENDMDL')) {
+      m1Lines.push(line);
+      if (insideModel1) break;
+    } else {
+      if (!hasModels || insideModel1) {
+        m1Lines.push(line);
+      }
+    }
+  }
+
+  return m1Lines.length > 0 ? m1Lines.join('\n') : rawPdbText;
+}
+
 async function runGroup2PeptideQA() {
   const logLines: string[] = [];
   function log(msg: string = '') {
@@ -132,14 +162,9 @@ async function runGroup2PeptideQA() {
       }
     }
 
-    // Extract Representative Model 1 if NMR ensemble
-    let modelText = pdbText;
-    if (pdbText.includes('ENDMDL')) {
-      modelText = pdbText.split('ENDMDL')[0] + 'ENDMDL\n';
-      log(`  Conformation: NMR Ensemble detected -> Extracted Representative Model 1`);
-    } else {
-      log(`  Conformation: Single X-Ray / Cryo-EM Model`);
-    }
+    // Extract Model 1 for single-conformation biophysical QA
+    const modelText = extractModel1(pdbText);
+    log(`  Conformation: Model 1 extracted (${modelText.length} bytes)`);
 
     // Initialize MolProcessor
     const processor = new MolProcessor(modelText, 'pdb');

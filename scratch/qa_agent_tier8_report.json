@@ -1,0 +1,829 @@
+{
+  "timestamp": "2026-08-09T18:59:17.205Z",
+  "totalExecutionTimeMs": 2492.3796999999995,
+  "summary": {
+    "totalMolecules": 20,
+    "passedMolecules": 0,
+    "failedMolecules": 20,
+    "passPercentage": "0.0%",
+    "totalAtomsEvaluated": 18395,
+    "avgSurfaceGenMs": 87.76507499999998,
+    "avgTrianglesGenerated": 920,
+    "estimatedFPS": {
+      "min": 60,
+      "max": 60,
+      "avg": 60
+    },
+    "avgQueryTimeMs": {
+      "query1": 8.328224999999929,
+      "query2": 8.289430000000129
+    },
+    "avgSSAssignmentTimeMs": {
+      "quick": 0.23884500000003756,
+      "dssp": 0.04058999999999742
+    },
+    "avgRaytraceTimeMs": 3.1120700000000623
+  },
+  "molecules": [
+    {
+      "id": "t8_1",
+      "name": "Cytochrome C (104 res)",
+      "atomCount": 820,
+      "parseTimeMs": 28.454099999999926,
+      "surfaceGenTimeMs": 169.98149999999987,
+      "surfaceGridDim": {
+        "x": 37,
+        "y": 37,
+        "z": 246
+      },
+      "surfaceTriangleCount": 820,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 8.58680000000004
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 266,
+        "timeMs": 10.485099999999875
+      },
+      "ssQuickTimeMs": 1.6192000000000917,
+      "ssDsspTimeMs": 0.04379999999991924,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 8.213400000000092,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 820,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_2",
+      "name": "Myoglobin Sperm Whale (153 res)",
+      "atomCount": 980,
+      "parseTimeMs": 17.265599999999722,
+      "surfaceGenTimeMs": 194.14170000000013,
+      "surfaceGridDim": {
+        "x": 40,
+        "y": 40,
+        "z": 293
+      },
+      "surfaceTriangleCount": 980,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 9.766599999999926
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 298,
+        "timeMs": 11.534599999999955
+      },
+      "ssQuickTimeMs": 0.10100000000011278,
+      "ssDsspTimeMs": 0.016200000000026193,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 4.308700000000044,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 980,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_3",
+      "name": "Lysozyme Hen Egg White (1HEL - 129 res)",
+      "atomCount": 995,
+      "parseTimeMs": 16.84770000000026,
+      "surfaceGenTimeMs": 110.11879999999974,
+      "surfaceGridDim": {
+        "x": 40,
+        "y": 40,
+        "z": 297
+      },
+      "surfaceTriangleCount": 995,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 11.723500000000058
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 301,
+        "timeMs": 7.433600000000297
+      },
+      "ssQuickTimeMs": 0.10970000000043001,
+      "ssDsspTimeMs": 0.014599999999973079,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 2.3878999999997177,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 995,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_4",
+      "name": "Ribonuclease A (1RFA - 124 res)",
+      "atomCount": 950,
+      "parseTimeMs": 14.817000000000007,
+      "surfaceGenTimeMs": 79.61270000000013,
+      "surfaceGridDim": {
+        "x": 39,
+        "y": 39,
+        "z": 284
+      },
+      "surfaceTriangleCount": 950,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 7.216899999999896
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 292,
+        "timeMs": 9.271500000000287
+      },
+      "ssQuickTimeMs": 0.1770000000001346,
+      "ssDsspTimeMs": 0.09979999999995925,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 2.4645000000000437,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 950,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_5",
+      "name": "Triosephosphate Isomerase TIM monomer",
+      "atomCount": 990,
+      "parseTimeMs": 12.963799999999992,
+      "surfaceGenTimeMs": 90.81979999999976,
+      "surfaceGridDim": {
+        "x": 40,
+        "y": 40,
+        "z": 296
+      },
+      "surfaceTriangleCount": 990,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 8.621799999999894
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 300,
+        "timeMs": 7.69380000000001
+      },
+      "ssQuickTimeMs": 0.08989999999994325,
+      "ssDsspTimeMs": 0.015099999999620195,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 3.7537999999999556,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 990,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_6",
+      "name": "Green Fluorescent Protein GFP chromophore core (1EMA)",
+      "atomCount": 920,
+      "parseTimeMs": 12.880499999999756,
+      "surfaceGenTimeMs": 87.70500000000038,
+      "surfaceGridDim": {
+        "x": 39,
+        "y": 39,
+        "z": 275
+      },
+      "surfaceTriangleCount": 920,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 7.39659999999958
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 286,
+        "timeMs": 9.51909999999998
+      },
+      "ssQuickTimeMs": 0.15439999999989595,
+      "ssDsspTimeMs": 0.018100000000231375,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 2.6096999999999753,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 920,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_7",
+      "name": "Protease Inhibitor IA3",
+      "atomCount": 520,
+      "parseTimeMs": 6.348299999999654,
+      "surfaceGenTimeMs": 36.82040000000006,
+      "surfaceGridDim": {
+        "x": 32,
+        "y": 32,
+        "z": 159
+      },
+      "surfaceTriangleCount": 520,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 7.121299999999792
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 206,
+        "timeMs": 5.321000000000367
+      },
+      "ssQuickTimeMs": 0.08379999999988286,
+      "ssDsspTimeMs": 0.025799999999890133,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 1.805699999999888,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 520,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_8",
+      "name": "Carbonic Anhydrase II active site domain",
+      "atomCount": 950,
+      "parseTimeMs": 10.911099999999806,
+      "surfaceGenTimeMs": 73.5297999999998,
+      "surfaceGridDim": {
+        "x": 39,
+        "y": 39,
+        "z": 284
+      },
+      "surfaceTriangleCount": 950,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 6.426199999999881
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 292,
+        "timeMs": 5.785200000000259
+      },
+      "ssQuickTimeMs": 0.33510000000023865,
+      "ssDsspTimeMs": 0.041600000000016735,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 2.7815999999997985,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 950,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_9",
+      "name": "Superoxide Dismutase SOD1 monomer",
+      "atomCount": 890,
+      "parseTimeMs": 12.090299999999843,
+      "surfaceGenTimeMs": 86.08379999999988,
+      "surfaceGridDim": {
+        "x": 38,
+        "y": 38,
+        "z": 266
+      },
+      "surfaceTriangleCount": 890,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 10.095499999999902
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 280,
+        "timeMs": 10.460900000000038
+      },
+      "ssQuickTimeMs": 0.3635999999996784,
+      "ssDsspTimeMs": 0.03629999999975553,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 3.5084999999999127,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 890,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_10",
+      "name": "Calmodulin Ca2+-bound domain (138 res)",
+      "atomCount": 980,
+      "parseTimeMs": 15.875900000000001,
+      "surfaceGenTimeMs": 102.8738000000003,
+      "surfaceGridDim": {
+        "x": 40,
+        "y": 40,
+        "z": 293
+      },
+      "surfaceTriangleCount": 980,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 7.427499999999782
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 298,
+        "timeMs": 7.481999999999971
+      },
+      "ssQuickTimeMs": 0.18580000000019936,
+      "ssDsspTimeMs": 0.04960000000028231,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 3.9739000000004125,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 980,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_11",
+      "name": "Barnase Ribonuclease (110 res)",
+      "atomCount": 860,
+      "parseTimeMs": 16.234800000000178,
+      "surfaceGenTimeMs": 106.89400000000023,
+      "surfaceGridDim": {
+        "x": 38,
+        "y": 38,
+        "z": 258
+      },
+      "surfaceTriangleCount": 860,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 3.698899999999867
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 274,
+        "timeMs": 6.401800000000094
+      },
+      "ssQuickTimeMs": 0.13089999999965585,
+      "ssDsspTimeMs": 0.046600000000125874,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 2.0108000000000175,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 860,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_12",
+      "name": "Barstar Barnase Inhibitor (89 res)",
+      "atomCount": 710,
+      "parseTimeMs": 9.228599999999915,
+      "surfaceGenTimeMs": 58.85680000000002,
+      "surfaceGridDim": {
+        "x": 35,
+        "y": 36,
+        "z": 214
+      },
+      "surfaceTriangleCount": 710,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 3.3110999999998967
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 244,
+        "timeMs": 3.489900000000489
+      },
+      "ssQuickTimeMs": 0.27269999999953143,
+      "ssDsspTimeMs": 0.061599999999998545,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 2.2229999999999563,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 710,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_13",
+      "name": "Streptavidin monomer (159 res)",
+      "atomCount": 980,
+      "parseTimeMs": 6.903699999999844,
+      "surfaceGenTimeMs": 57.78409999999985,
+      "surfaceGridDim": {
+        "x": 40,
+        "y": 40,
+        "z": 293
+      },
+      "surfaceTriangleCount": 980,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 6.202400000000125
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 298,
+        "timeMs": 5.453300000000127
+      },
+      "ssQuickTimeMs": 0.07430000000022119,
+      "ssDsspTimeMs": 0.018200000000433647,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 1.753700000000208,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 980,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_14",
+      "name": "Thermolysin catalytic domain",
+      "atomCount": 995,
+      "parseTimeMs": 12.736100000000079,
+      "surfaceGenTimeMs": 53.15769999999975,
+      "surfaceGridDim": {
+        "x": 40,
+        "y": 40,
+        "z": 297
+      },
+      "surfaceTriangleCount": 995,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 10.34900000000016
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 301,
+        "timeMs": 10.3079000000007
+      },
+      "ssQuickTimeMs": 0.15390000000024884,
+      "ssDsspTimeMs": 0.04730000000017753,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 2.177500000000691,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 995,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_15",
+      "name": "Papain Cysteine Protease (212 res)",
+      "atomCount": 990,
+      "parseTimeMs": 13.118099999999686,
+      "surfaceGenTimeMs": 54.22829999999976,
+      "surfaceGridDim": {
+        "x": 40,
+        "y": 40,
+        "z": 296
+      },
+      "surfaceTriangleCount": 990,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 7.172899999999572
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 300,
+        "timeMs": 5.10740000000078
+      },
+      "ssQuickTimeMs": 0.1598999999996522,
+      "ssDsspTimeMs": 0.04629999999997381,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 3.0471000000006825,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 990,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_16",
+      "name": "Subtilisin Carlsberg (274 res)",
+      "atomCount": 990,
+      "parseTimeMs": 14.96770000000015,
+      "surfaceGenTimeMs": 81.16740000000027,
+      "surfaceGridDim": {
+        "x": 40,
+        "y": 40,
+        "z": 296
+      },
+      "surfaceTriangleCount": 990,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 10.499800000000505
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 300,
+        "timeMs": 10.775399999999536
+      },
+      "ssQuickTimeMs": 0.11920000000009168,
+      "ssDsspTimeMs": 0.043500000000676664,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 2.1823999999996886,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 990,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_17",
+      "name": "Phospholypase A2 (124 res)",
+      "atomCount": 960,
+      "parseTimeMs": 15.172700000000077,
+      "surfaceGenTimeMs": 80.6938999999993,
+      "surfaceGridDim": {
+        "x": 39,
+        "y": 40,
+        "z": 287
+      },
+      "surfaceTriangleCount": 960,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 9.112600000000384
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 294,
+        "timeMs": 6.974199999999655
+      },
+      "ssQuickTimeMs": 0.14570000000003347,
+      "ssDsspTimeMs": 0.025599999999940337,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 2.1204999999999927,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 960,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_18",
+      "name": "Cytochrome P450 heme binding domain",
+      "atomCount": 980,
+      "parseTimeMs": 11.777799999999843,
+      "surfaceGenTimeMs": 77.73139999999967,
+      "surfaceGridDim": {
+        "x": 40,
+        "y": 40,
+        "z": 293
+      },
+      "surfaceTriangleCount": 980,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 8.586699999999837
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 298,
+        "timeMs": 7.026600000000144
+      },
+      "ssQuickTimeMs": 0.12200000000029831,
+      "ssDsspTimeMs": 0.026099999999132706,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 2.2466000000003987,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 980,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_19",
+      "name": "Dihydrofolate Reductase DHFR (159 res)",
+      "atomCount": 985,
+      "parseTimeMs": 11.1916999999994,
+      "surfaceGenTimeMs": 58.08020000000033,
+      "surfaceGridDim": {
+        "x": 40,
+        "y": 40,
+        "z": 294
+      },
+      "surfaceTriangleCount": 985,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 10.516300000000228
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 299,
+        "timeMs": 13.016300000000228
+      },
+      "ssQuickTimeMs": 0.2440999999998894,
+      "ssDsspTimeMs": 0.09319999999934225,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 2.310699999999997,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 985,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    },
+    {
+      "id": "t8_20",
+      "name": "Galectin-1 carbohydrate binding domain",
+      "atomCount": 950,
+      "parseTimeMs": 14.572599999999511,
+      "surfaceGenTimeMs": 95.02040000000034,
+      "surfaceGridDim": {
+        "x": 39,
+        "y": 39,
+        "z": 284
+      },
+      "surfaceTriangleCount": 950,
+      "estimatedSurfaceFPS": 60,
+      "query1": {
+        "query": "byres (resn LIG around 5)",
+        "count": 0,
+        "timeMs": 12.732099999999264
+      },
+      "query2": {
+        "query": "within 5 of elem O",
+        "count": 292,
+        "timeMs": 12.248999999999796
+      },
+      "ssQuickTimeMs": 0.13470000000052096,
+      "ssDsspTimeMs": 0.04250000000047294,
+      "ssBreakdown": {
+        "helix": 0,
+        "sheet": 0,
+        "loop": 0,
+        "undetermined": 0
+      },
+      "raytraceTimeMs": 6.361399999999776,
+      "raytraceResolution": "1024x768",
+      "raytraceSpheresProcessed": 950,
+      "status": "FAIL",
+      "errors": [
+        "SS quick error: res is not defined",
+        "SS dssp error: res is not defined"
+      ]
+    }
+  ]
+}

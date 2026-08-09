@@ -115,7 +115,15 @@ export class SelectionParser {
     const parseTerm = (): any => {
       let left = parseFactor();
       while (pos < tokens.length && tokens[pos]?.toLowerCase() !== 'or' && tokens[pos] !== ')') {
-        if (tokens[pos]?.toLowerCase() === 'and') {
+        const tok = tokens[pos]?.toLowerCase();
+        if (tok === 'around' || tok === 'within' || tok === 'beyond') {
+          pos++;
+          const dist = parseFloat(tokens[pos++]);
+          if (isNaN(dist)) throw new Error(`Syntax error: invalid distance for '${tok}' query`);
+          left = { type: tok, distance: dist, operand: left };
+          continue;
+        }
+        if (tok === 'and') {
           pos++;
         }
         const right = parseFactor();

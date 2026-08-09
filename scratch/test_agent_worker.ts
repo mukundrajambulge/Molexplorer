@@ -44,10 +44,10 @@ export function runAgentTierTest(tierNumber: number): { results: TestResult[]; s
     "sidechain",
     "organic",
     "hetatm",
-    "byres (resn LIG around 5)",
+    "byres (around 5 of resn LIG)",
     "chain A and resn ALA",
     "ss h and not resn HOH",
-    "around 5",
+    "around 5 of (elem N or elem O)",
     "within 4 of elem N",
     "elem C or elem N",
     "not hydrogens",
@@ -161,4 +161,5 @@ export function runAgentTierTest(tierNumber: number): { results: TestResult[]; s
     avgQueryTimeMs: results.reduce((acc, r) => acc + (r.queryTimesMs.reduce((qAcc, item) => qAcc + item.timeMs, 0) / r.queryTimesMs.length), 0) / results.length
   };
 
-  return { results, summary
+  return { results, summary };
+}
