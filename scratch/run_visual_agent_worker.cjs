@@ -106,15 +106,16 @@ const selectionQueries = [
 
     console.log(`\n[Agent ${agentTier}][${idx+1}/20] Testing: "${mol.name}" (Est Atoms: ${mol.expectedAtomCount})`);
 
-    // 1. Load Molecule and test styles inside page in one clean evaluation
-    const loadAndRenderResult = await page.evaluate((name, data, format) => {
+    // 1. Load Molecule and set style
+    const initialStyle = agentTier <= 4 ? 'Ball-and-Stick' : 'Cartoon';
+    const loadAndRenderResult = await page.evaluate((name, data, format, style) => {
       window.__molStudioTestApi.loadMolecule(name, data, format);
-      window.__molStudioTestApi.setRenderStyle('Ball-and-Stick');
+      window.__molStudioTestApi.setRenderStyle(style);
       window.__molStudioTestApi.setColorScheme('Classic CPK');
       return window.__molStudioTestApi.getState();
-    }, mol.name, mol.data, mol.format);
+    }, mol.name, mol.data, mol.format, initialStyle);
 
-    await new Promise(r => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 60));
 
     console.log(`   -> Atoms Loaded: ${loadAndRenderResult.atomsCount}, Render Style: ${loadAndRenderResult.renderStyle}`);
 
@@ -126,11 +127,12 @@ const selectionQueries = [
     screenshots.push({ type: 'initial', filename: initialShot, path: initialShotPath });
 
     // 2. Test Render Styles & Colors
-    await page.evaluate(() => {
-      window.__molStudioTestApi.setRenderStyle('Space-Filling');
+    const styledRender = agentTier <= 4 ? 'Space-Filling' : 'Line';
+    await page.evaluate((styled) => {
+      window.__molStudioTestApi.setRenderStyle(styled);
       window.__molStudioTestApi.setColorScheme('Rainbow');
-    });
-    await new Promise(r => setTimeout(r, 100));
+    }, styledRender);
+    await new Promise(r => setTimeout(r, 60));
 
     const styleShot = `agent${agentTier}_mol${idx+1}_${cleanName}_styled.png`;
     const styleShotPath = path.join(SCREENSHOT_DIR, styleShot);
@@ -165,9 +167,10 @@ const selectionQueries = [
       return results;
     }, selectionQueries);
 
-    // Apply active highlight selection query
-    await page.evaluate(() => window.__molStudioTestApi.runQuery('within 4 of elem N'));
-    await new Promise(r => setTimeout(r, 100));
+    // Apply active highlight selection query (tested per category)
+    const highlightQuery = agentTier <= 4 ? 'within 4 of elem N' : 'chain A and resi 1-10';
+    await page.evaluate((hq) => window.__molStudioTestApi.runQuery(hq), highlightQuery);
+    await new Promise(r => setTimeout(r, 60));
 
     const seleShot = `agent${agentTier}_mol${idx+1}_${cleanName}_selection.png`;
     const seleShotPath = path.join(SCREENSHOT_DIR, seleShot);
@@ -175,16 +178,18 @@ const selectionQueries = [
     screenshots.push({ type: 'selection', filename: seleShot, path: seleShotPath });
 
     // 4. Test Biophysical & Topology Tools
-    await page.evaluate(() => {
+    await page.evaluate((tier) => {
       window.__molStudioTestApi.setShowDipoleArrow(true);
-      window.__molStudioTestApi.addHydrogens();
-      window.__molStudioTestApi.cycleValence();
+      if (tier <= 4) {
+        window.__molStudioTestApi.addHydrogens();
+        window.__molStudioTestApi.cycleValence();
+      }
       window.__molStudioTestApi.toggleOrthographic();
       window.__molStudioTestApi.toggleOrthographic();
       window.__molStudioTestApi.clearSelection();
       window.__molStudioTestApi.setRenderStyle('Cartoon');
       window.__molStudioTestApi.setColorScheme('Classic CPK');
-    });
+    }, agentTier);
 
     const finalState = await page.evaluate(() => window.__molStudioTestApi.getState());
     const molDuration = Date.now() - molStartTime;

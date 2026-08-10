@@ -1,0 +1,4337 @@
+{
+  "summary": {
+    "agentTier": 4,
+    "totalMolecules": 20,
+    "passedCount": 20,
+    "warnCount": 0,
+    "failedCount": 0,
+    "totalAtoms": 1063,
+    "totalQueriesExecuted": 600,
+    "totalScreenshotsCaptured": 60,
+    "totalExecutionTimeMs": 317248,
+    "avgMoleculeTimeMs": 15862.4,
+    "pageErrors": []
+  },
+  "results": [
+    {
+      "molId": "t4_1",
+      "molName": "Vitamin C (C6H8O6)",
+      "tier": 4,
+      "expectedAtoms": 20,
+      "actualAtoms": 43,
+      "renderDurationMs": 9669,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 20,
+          "timeMs": 0.8700000047683716,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.17000001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 4,
+          "timeMs": 0.5600000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 3,
+          "timeMs": 0.15999996662139893,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 3,
+          "timeMs": 0.10999995470046997,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 3,
+          "timeMs": 0.08500003814697266,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.1850000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.10500001907348633,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.3349999785423279,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.18000000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.19999998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.125,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 3,
+          "timeMs": 0.13499999046325684,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 13,
+          "timeMs": 0.1899999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.15500003099441528,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.3199999928474426,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 20,
+          "timeMs": 0.11500000953674316,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.5149999856948853,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.17500001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.1499999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 14,
+          "timeMs": 0.30000001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 12,
+          "timeMs": 0.21500003337860107,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 7,
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 17,
+          "timeMs": 0.12999999523162842,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.13999998569488525,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 20,
+          "textOutput": "count_atoms: 20 atoms in selection \"all\".",
+          "timeMs": 0.15000003576278687,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 20,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.1850000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 20,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.2149999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 3,
+          "textOutput": "Label: custom label applied to 3 atoms matching \"elem N\".",
+          "timeMs": 1.0250000357627869,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 20,
+          "textOutput": "Unlabel: removed labels from 20 atoms matching \"all\".",
+          "timeMs": 0.1899999976158142,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol1_vitamin_c__c6h8o6__initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol1_vitamin_c__c6h8o6__initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol1_vitamin_c__c6h8o6__styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol1_vitamin_c__c6h8o6__styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol1_vitamin_c__c6h8o6__selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol1_vitamin_c__c6h8o6__selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_2",
+      "molName": "Penicillin G (C16H18N2O4S)",
+      "tier": 4,
+      "expectedAtoms": 35,
+      "actualAtoms": 52,
+      "renderDurationMs": 14539,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 35,
+          "timeMs": 0.4950000047683716,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.20999997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 8,
+          "timeMs": 0.09000003337860107,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.125,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.12000000476837158,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.22499996423721313,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.12000000476837158,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.13999998569488525,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.12000000476837158,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.08500003814697266,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.08499997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.07499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.2900000214576721,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 23,
+          "timeMs": 0.3050000071525574,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.21999996900558472,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.4650000333786011,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 35,
+          "timeMs": 0.18000000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 1.2350000143051147,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.1549999713897705,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.2200000286102295,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 25,
+          "timeMs": 2.375,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 35,
+          "timeMs": 0.3999999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 13,
+          "timeMs": 0.3349999785423279,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 30,
+          "timeMs": 0.3100000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.14500004053115845,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 35,
+          "textOutput": "count_atoms: 35 atoms in selection \"all\".",
+          "timeMs": 0.3050000071525574,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 35,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.3399999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 35,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.2800000309944153,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 1.1449999809265137,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 35,
+          "textOutput": "Unlabel: removed labels from 35 atoms matching \"all\".",
+          "timeMs": 0.5350000262260437,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol2_penicillin_g__c16h18n2o4s_initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol2_penicillin_g__c16h18n2o4s_initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol2_penicillin_g__c16h18n2o4s_styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol2_penicillin_g__c16h18n2o4s_styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol2_penicillin_g__c16h18n2o4s_selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol2_penicillin_g__c16h18n2o4s_selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_3",
+      "molName": "Amoxicillin (C16H19N3O5S)",
+      "tier": 4,
+      "expectedAtoms": 38,
+      "actualAtoms": 54,
+      "renderDurationMs": 15982,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 38,
+          "timeMs": 0.4649999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.24000000953674316,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 8,
+          "timeMs": 0.13999998569488525,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.11000001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.09500002861022949,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.12999999523162842,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.07999998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.07999998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.125,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.07500004768371582,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.09499996900558472,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.06499999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.2549999952316284,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 24,
+          "timeMs": 0.2900000214576721,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.17500001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.38499999046325684,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 38,
+          "timeMs": 0.20999997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.21000003814697266,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.11000001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 28,
+          "timeMs": 0.18000000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 38,
+          "timeMs": 0.20499998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 13,
+          "timeMs": 0.11000001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 33,
+          "timeMs": 0.24500000476837158,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.12999999523162842,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 38,
+          "textOutput": "count_atoms: 38 atoms in selection \"all\".",
+          "timeMs": 0.1899999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 38,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.19499999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 38,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.20999997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.9450000524520874,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 38,
+          "textOutput": "Unlabel: removed labels from 38 atoms matching \"all\".",
+          "timeMs": 0.3700000047683716,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol3_amoxicillin__c16h19n3o5s__initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol3_amoxicillin__c16h19n3o5s__initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol3_amoxicillin__c16h19n3o5s__styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol3_amoxicillin__c16h19n3o5s__styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol3_amoxicillin__c16h19n3o5s__selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol3_amoxicillin__c16h19n3o5s__selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_4",
+      "molName": "Morphine (C17H19NO3)",
+      "tier": 4,
+      "expectedAtoms": 40,
+      "actualAtoms": 54,
+      "renderDurationMs": 16236,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 40,
+          "timeMs": 0.4350000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.1850000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 10,
+          "timeMs": 0.09499996900558472,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.14000004529953003,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.07499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.06999999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.06499999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.06499999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.08499997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.0700000524520874,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.08499997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.06000000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.15999996662139893,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 25,
+          "timeMs": 0.18000000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.23000001907348633,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.30000001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 40,
+          "timeMs": 0.17000001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.11499994993209839,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.1600000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.17500001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 30,
+          "timeMs": 0.20999997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 40,
+          "timeMs": 0.11500000953674316,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 15,
+          "timeMs": 0.125,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 35,
+          "timeMs": 0.17500001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.10500001907348633,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 40,
+          "textOutput": "count_atoms: 40 atoms in selection \"all\".",
+          "timeMs": 0.22999995946884155,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 40,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.18000000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 40,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.21000003814697266,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.6200000047683716,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 40,
+          "textOutput": "Unlabel: removed labels from 40 atoms matching \"all\".",
+          "timeMs": 0.3199999928474426,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol4_morphine__c17h19no3__initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol4_morphine__c17h19no3__initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol4_morphine__c17h19no3__styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol4_morphine__c17h19no3__styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol4_morphine__c17h19no3__selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol4_morphine__c17h19no3__selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_5",
+      "molName": "Codeine (C18H21NO3)",
+      "tier": 4,
+      "expectedAtoms": 40,
+      "actualAtoms": 54,
+      "renderDurationMs": 16768,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 40,
+          "timeMs": 0.5100000500679016,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.29500001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 10,
+          "timeMs": 0.09000003337860107,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.07499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.06499999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.06999999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.06999999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.06999999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.14500004053115845,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.06999999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.05500000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.17500001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.26499998569488525,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 25,
+          "timeMs": 0.2549999952316284,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.3149999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.3100000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 40,
+          "timeMs": 0.25999999046325684,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.125,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.11500000953674316,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.10500001907348633,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 30,
+          "timeMs": 0.17500001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 40,
+          "timeMs": 0.12000000476837158,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 15,
+          "timeMs": 0.10499995946884155,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 35,
+          "timeMs": 0.23500001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.09500002861022949,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 40,
+          "textOutput": "count_atoms: 40 atoms in selection \"all\".",
+          "timeMs": 0.8949999809265137,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 40,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.1850000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 40,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.20500004291534424,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.39499998092651367,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 40,
+          "textOutput": "Unlabel: removed labels from 40 atoms matching \"all\".",
+          "timeMs": 0.45499998331069946,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol5_codeine__c18h21no3__initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol5_codeine__c18h21no3__initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol5_codeine__c18h21no3__styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol5_codeine__c18h21no3__styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol5_codeine__c18h21no3__selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol5_codeine__c18h21no3__selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_6",
+      "molName": "Diazepam (C16H13ClN2O)",
+      "tier": 4,
+      "expectedAtoms": 33,
+      "actualAtoms": 51,
+      "renderDurationMs": 15683,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 33,
+          "timeMs": 0.3149999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.09000003337860107,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 8,
+          "timeMs": 0.034999966621398926,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 4,
+          "timeMs": 0.030000030994415283,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 4,
+          "timeMs": 0.02499997615814209,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.025000035762786865,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.029999971389770508,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.019999980926513672,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.0350000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.029999971389770508,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.025000035762786865,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.019999980926513672,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.06999999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 21,
+          "timeMs": 0.07500004768371582,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.09499996900558472,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.10000002384185791,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 33,
+          "timeMs": 0.10499995946884155,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.07500004768371582,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.039999961853027344,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.0350000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 25,
+          "timeMs": 0.06999999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 27,
+          "timeMs": 0.039999961853027344,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 12,
+          "timeMs": 0.04000002145767212,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 28,
+          "timeMs": 0.07499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.050000011920928955,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 33,
+          "textOutput": "count_atoms: 33 atoms in selection \"all\".",
+          "timeMs": 0.07499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 33,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.07500004768371582,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 33,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 4,
+          "textOutput": "Label: custom label applied to 4 atoms matching \"elem N\".",
+          "timeMs": 0.13999998569488525,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 33,
+          "textOutput": "Unlabel: removed labels from 33 atoms matching \"all\".",
+          "timeMs": 0.13499999046325684,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol6_diazepam__c16h13cln2o__initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol6_diazepam__c16h13cln2o__initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol6_diazepam__c16h13cln2o__styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol6_diazepam__c16h13cln2o__styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol6_diazepam__c16h13cln2o__selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol6_diazepam__c16h13cln2o__selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_7",
+      "molName": "Alprazolam (C17H13ClN4)",
+      "tier": 4,
+      "expectedAtoms": 35,
+      "actualAtoms": 52,
+      "renderDurationMs": 16127,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 35,
+          "timeMs": 0.28999996185302734,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.13499999046325684,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 8,
+          "timeMs": 0.0700000524520874,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.04999995231628418,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.050000011920928955,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.050000011920928955,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.050000011920928955,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.050000011920928955,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.13999998569488525,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.050000011920928955,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.04499995708465576,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.04500001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.13499999046325684,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 23,
+          "timeMs": 0.17000001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.1850000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.19999998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 35,
+          "timeMs": 0.1899999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.11500000953674316,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.06999999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.10000002384185791,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 25,
+          "timeMs": 0.13499999046325684,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 35,
+          "timeMs": 0.14499998092651367,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 13,
+          "timeMs": 0.08000004291534424,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 30,
+          "timeMs": 0.15999996662139893,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.07999998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 35,
+          "textOutput": "count_atoms: 35 atoms in selection \"all\".",
+          "timeMs": 0.1850000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 35,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.15500003099441528,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 35,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.20499998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.42000001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 35,
+          "textOutput": "Unlabel: removed labels from 35 atoms matching \"all\".",
+          "timeMs": 0.38499999046325684,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol7_alprazolam__c17h13cln4__initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol7_alprazolam__c17h13cln4__initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol7_alprazolam__c17h13cln4__styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol7_alprazolam__c17h13cln4__styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol7_alprazolam__c17h13cln4__selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol7_alprazolam__c17h13cln4__selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_8",
+      "molName": "Omeprazole (C17H19N3O3S)",
+      "tier": 4,
+      "expectedAtoms": 38,
+      "actualAtoms": 54,
+      "renderDurationMs": 16096,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 38,
+          "timeMs": 0.17500001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.08500003814697266,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 8,
+          "timeMs": 0.034999966621398926,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.030000030994415283,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.02499997615814209,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.025000035762786865,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.02499997615814209,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.025000035762786865,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.039999961853027344,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.030000030994415283,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.019999980926513672,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.02499997615814209,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.07500004768371582,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 24,
+          "timeMs": 0.12999999523162842,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.07999998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.11500000953674316,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 38,
+          "timeMs": 0.06999999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.04500001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.05500000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 28,
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 38,
+          "timeMs": 0.050000011920928955,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 13,
+          "timeMs": 0.04000002145767212,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 33,
+          "timeMs": 1.4200000166893005,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.125,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 38,
+          "textOutput": "count_atoms: 38 atoms in selection \"all\".",
+          "timeMs": 0.25,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 38,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.3199999928474426,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 38,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.29500001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.6899999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 38,
+          "textOutput": "Unlabel: removed labels from 38 atoms matching \"all\".",
+          "timeMs": 0.6649999618530273,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol8_omeprazole__c17h19n3o3s__initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol8_omeprazole__c17h19n3o3s__initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol8_omeprazole__c17h19n3o3s__styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol8_omeprazole__c17h19n3o3s__styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol8_omeprazole__c17h19n3o3s__selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol8_omeprazole__c17h19n3o3s__selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_9",
+      "molName": "Metoprolol (C15H25NO3)",
+      "tier": 4,
+      "expectedAtoms": 38,
+      "actualAtoms": 54,
+      "renderDurationMs": 16059,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 38,
+          "timeMs": 0.4150000214576721,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.26499998569488525,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 8,
+          "timeMs": 0.13999998569488525,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.09000003337860107,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.08499997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.08500003814697266,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.3149999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.20499998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.10500001907348633,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.08499997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.16500002145767212,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.23000001907348633,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 24,
+          "timeMs": 0.19499999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.16499996185302734,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.3100000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 38,
+          "timeMs": 4.39000004529953,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.32499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.24000000953674316,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.3050000071525574,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 28,
+          "timeMs": 0.2799999713897705,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 38,
+          "timeMs": 0.18000000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 13,
+          "timeMs": 0.23500001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 33,
+          "timeMs": 0.6200000047683716,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.1850000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 38,
+          "textOutput": "count_atoms: 38 atoms in selection \"all\".",
+          "timeMs": 0.5149999856948853,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 38,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.4350000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 38,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.6600000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.9350000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 38,
+          "textOutput": "Unlabel: removed labels from 38 atoms matching \"all\".",
+          "timeMs": 0.8600000143051147,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol9_metoprolol__c15h25no3__initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol9_metoprolol__c15h25no3__initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol9_metoprolol__c15h25no3__styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol9_metoprolol__c15h25no3__styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol9_metoprolol__c15h25no3__selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol9_metoprolol__c15h25no3__selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_10",
+      "molName": "Propranolol (C16H21NO2)",
+      "tier": 4,
+      "expectedAtoms": 40,
+      "actualAtoms": 54,
+      "renderDurationMs": 19959,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 40,
+          "timeMs": 0.5549999475479126,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.1899999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 10,
+          "timeMs": 0.07499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.06000000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.05500000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.05500000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.05500000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.05500000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.09999996423721313,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.08500003814697266,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.039999961853027344,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.04000002145767212,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.17500001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 25,
+          "timeMs": 0.14499998092651367,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.15500003099441528,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.23499995470046997,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 40,
+          "timeMs": 0.14000004529953003,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.07499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.125,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 30,
+          "timeMs": 0.13499999046325684,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 40,
+          "timeMs": 0.2250000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 15,
+          "timeMs": 0.12999999523162842,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 35,
+          "timeMs": 0.1899999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.10000002384185791,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 40,
+          "textOutput": "count_atoms: 40 atoms in selection \"all\".",
+          "timeMs": 1.100000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 40,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.1850000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 40,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.2799999713897705,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.4050000309944153,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 40,
+          "textOutput": "Unlabel: removed labels from 40 atoms matching \"all\".",
+          "timeMs": 0.30000001192092896,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol10_propranolol__c16h21no2__initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol10_propranolol__c16h21no2__initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol10_propranolol__c16h21no2__styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol10_propranolol__c16h21no2__styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol10_propranolol__c16h21no2__selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol10_propranolol__c16h21no2__selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_11",
+      "molName": "Warfarin (C19H16O4)",
+      "tier": 4,
+      "expectedAtoms": 39,
+      "actualAtoms": 55,
+      "renderDurationMs": 16249,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 39,
+          "timeMs": 0.39500004053115845,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.42000001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 9,
+          "timeMs": 0.1199999451637268,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.12000000476837158,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.10500001907348633,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.125,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.13999998569488525,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.15500003099441528,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.11000001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.09500002861022949,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.07499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.25,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 24,
+          "timeMs": 0.23500001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 2.4799999594688416,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 5.10999995470047,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 39,
+          "timeMs": 0.9200000166893005,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.27000004053115845,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.375,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.25,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 29,
+          "timeMs": 0.7649999856948853,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 39,
+          "timeMs": 0.2250000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 14,
+          "timeMs": 0.24000000953674316,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 34,
+          "timeMs": 0.824999988079071,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.26499998569488525,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 39,
+          "textOutput": "count_atoms: 39 atoms in selection \"all\".",
+          "timeMs": 0.5550000071525574,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 39,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.800000011920929,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 39,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.7799999713897705,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.9699999690055847,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 39,
+          "textOutput": "Unlabel: removed labels from 39 atoms matching \"all\".",
+          "timeMs": 1.550000011920929,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol11_warfarin__c19h16o4__initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol11_warfarin__c19h16o4__initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol11_warfarin__c19h16o4__styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol11_warfarin__c19h16o4__styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol11_warfarin__c19h16o4__selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol11_warfarin__c19h16o4__selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_12",
+      "molName": "Ciprofloxacin (C17H18FN3O3)",
+      "tier": 4,
+      "expectedAtoms": 38,
+      "actualAtoms": 54,
+      "renderDurationMs": 16237,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 38,
+          "timeMs": 0.3049999475479126,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 8,
+          "timeMs": 0.04000002145767212,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.030000030994415283,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.029999971389770508,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.019999980926513672,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.025000035762786865,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.02499997615814209,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.04500001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.019999980926513672,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.025000035762786865,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.02499997615814209,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.07499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 24,
+          "timeMs": 0.10500001907348633,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.06999999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.11000001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 38,
+          "timeMs": 0.07499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.04500001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.0350000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.04499995708465576,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 28,
+          "timeMs": 0.06000000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 38,
+          "timeMs": 0.04500001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 13,
+          "timeMs": 0.0350000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 33,
+          "timeMs": 0.07999998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.1549999713897705,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 38,
+          "textOutput": "count_atoms: 38 atoms in selection \"all\".",
+          "timeMs": 0.1899999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 38,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.17500001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 38,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.27000004053115845,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.38999998569488525,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 38,
+          "textOutput": "Unlabel: removed labels from 38 atoms matching \"all\".",
+          "timeMs": 0.35500001907348633,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol12_ciprofloxacin__c17h18fn3o_initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol12_ciprofloxacin__c17h18fn3o_initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol12_ciprofloxacin__c17h18fn3o_styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol12_ciprofloxacin__c17h18fn3o_styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol12_ciprofloxacin__c17h18fn3o_selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol12_ciprofloxacin__c17h18fn3o_selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_13",
+      "molName": "Sildenafil Core",
+      "tier": 4,
+      "expectedAtoms": 40,
+      "actualAtoms": 54,
+      "renderDurationMs": 16235,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 40,
+          "timeMs": 0.48500001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.1850000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 10,
+          "timeMs": 0.15999996662139893,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.07500004768371582,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.06999999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.06499999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.06999999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.06499999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.07999998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.09000003337860107,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.06000000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.05500000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.15999996662139893,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 25,
+          "timeMs": 0.20999997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.16500002145767212,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.32499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 40,
+          "timeMs": 0.15500003099441528,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.11000001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.19999998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.13499999046325684,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 30,
+          "timeMs": 0.1499999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 40,
+          "timeMs": 0.125,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 15,
+          "timeMs": 0.09500002861022949,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 35,
+          "timeMs": 0.1899999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.09499996900558472,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 40,
+          "textOutput": "count_atoms: 40 atoms in selection \"all\".",
+          "timeMs": 0.21500003337860107,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 40,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.17500001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 40,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.1899999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.375,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 40,
+          "textOutput": "Unlabel: removed labels from 40 atoms matching \"all\".",
+          "timeMs": 0.4350000023841858,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol13_sildenafil_core_initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol13_sildenafil_core_initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol13_sildenafil_core_styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol13_sildenafil_core_styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol13_sildenafil_core_selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol13_sildenafil_core_selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_14",
+      "molName": "Tadalafil (C22H19N3O4)",
+      "tier": 4,
+      "expectedAtoms": 38,
+      "actualAtoms": 54,
+      "renderDurationMs": 18496,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 38,
+          "timeMs": 0.6450000405311584,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.2799999713897705,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 8,
+          "timeMs": 0.08499997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.06000000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.05500000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.05500000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.06000000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.1549999713897705,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.08499997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.06000000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.0700000524520874,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.04499995708465576,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.15000003576278687,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 24,
+          "timeMs": 0.19499999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.15999996662139893,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.3399999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 38,
+          "timeMs": 0.1600000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.10499995946884155,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.10500001907348633,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.10000002384185791,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 28,
+          "timeMs": 0.13499999046325684,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 38,
+          "timeMs": 0.10999995470046997,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 13,
+          "timeMs": 0.08500003814697266,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 33,
+          "timeMs": 0.23000001907348633,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.07999998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 38,
+          "textOutput": "count_atoms: 38 atoms in selection \"all\".",
+          "timeMs": 1.1100000143051147,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 38,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.17500001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 38,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.22999995946884155,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.8450000286102295,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 38,
+          "textOutput": "Unlabel: removed labels from 38 atoms matching \"all\".",
+          "timeMs": 0.5799999833106995,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol14_tadalafil__c22h19n3o4__initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol14_tadalafil__c22h19n3o4__initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol14_tadalafil__c22h19n3o4__styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol14_tadalafil__c22h19n3o4__styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol14_tadalafil__c22h19n3o4__selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol14_tadalafil__c22h19n3o4__selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_15",
+      "molName": "Quinine (C20H24N2O2)",
+      "tier": 4,
+      "expectedAtoms": 40,
+      "actualAtoms": 54,
+      "renderDurationMs": 16532,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 40,
+          "timeMs": 0.8799999952316284,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.2399999499320984,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 10,
+          "timeMs": 1.3399999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.14000004529953003,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.1850000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.10999995470046997,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.2849999666213989,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.16500002145767212,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.12999999523162842,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.09500002861022949,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.08499997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.07499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.36000001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 25,
+          "timeMs": 0.24500000476837158,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.25999999046325684,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.48500001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 40,
+          "timeMs": 0.574999988079071,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.27500003576278687,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.16499996185302734,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.15000003576278687,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 30,
+          "timeMs": 0.21999996900558472,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 40,
+          "timeMs": 0.35500001907348633,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 15,
+          "timeMs": 0.27500003576278687,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 35,
+          "timeMs": 0.22499996423721313,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.125,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 40,
+          "textOutput": "count_atoms: 40 atoms in selection \"all\".",
+          "timeMs": 1.4050000309944153,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 40,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.36000001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 40,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.28999996185302734,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.42500001192092896,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 40,
+          "textOutput": "Unlabel: removed labels from 40 atoms matching \"all\".",
+          "timeMs": 0.375,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol15_quinine__c20h24n2o2__initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol15_quinine__c20h24n2o2__initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol15_quinine__c20h24n2o2__styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol15_quinine__c20h24n2o2__styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol15_quinine__c20h24n2o2__selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol15_quinine__c20h24n2o2__selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_16",
+      "molName": "Cholesterol Core",
+      "tier": 4,
+      "expectedAtoms": 40,
+      "actualAtoms": 54,
+      "renderDurationMs": 16323,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 40,
+          "timeMs": 0.45499998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.1799999475479126,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 10,
+          "timeMs": 0.07999998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.06000000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.05500000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.05500000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.06000000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.04999995231628418,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.08000004291534424,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.050000011920928955,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.0549999475479126,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.14000004529953003,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.19499999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 25,
+          "timeMs": 0.1850000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.22999995946884155,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.26500004529953003,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 40,
+          "timeMs": 0.24500000476837158,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.09999996423721313,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.12999999523162842,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.09500002861022949,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 30,
+          "timeMs": 0.1549999713897705,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 40,
+          "timeMs": 0.12000000476837158,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 15,
+          "timeMs": 0.08500003814697266,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 35,
+          "timeMs": 0.22499996423721313,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.08000004291534424,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 40,
+          "textOutput": "count_atoms: 40 atoms in selection \"all\".",
+          "timeMs": 0.1549999713897705,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 40,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.1600000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 40,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.1850000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.375,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 40,
+          "textOutput": "Unlabel: removed labels from 40 atoms matching \"all\".",
+          "timeMs": 0.29500001668930054,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol16_cholesterol_core_initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol16_cholesterol_core_initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol16_cholesterol_core_styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol16_cholesterol_core_styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol16_cholesterol_core_selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol16_cholesterol_core_selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_17",
+      "molName": "Vitamin D3 Fragment",
+      "tier": 4,
+      "expectedAtoms": 40,
+      "actualAtoms": 54,
+      "renderDurationMs": 16047,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 40,
+          "timeMs": 0.1600000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.08000004291534424,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 10,
+          "timeMs": 0.034999966621398926,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.0350000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.05500000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.02499997615814209,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.030000030994415283,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.019999980926513672,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.04000002145767212,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.02499997615814209,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.019999980926513672,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.025000035762786865,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.125,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 25,
+          "timeMs": 0.07999998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.06999999284744263,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.12000000476837158,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 40,
+          "timeMs": 0.07499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.04500001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.0350000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.04500001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 30,
+          "timeMs": 0.07499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 40,
+          "timeMs": 0.06000000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 15,
+          "timeMs": 0.039999961853027344,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 35,
+          "timeMs": 0.09000003337860107,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.039999961853027344,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 40,
+          "textOutput": "count_atoms: 40 atoms in selection \"all\".",
+          "timeMs": 0.08000004291534424,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 40,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.11500000953674316,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 40,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.1600000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 40,
+          "textOutput": "Unlabel: removed labels from 40 atoms matching \"all\".",
+          "timeMs": 0.12999999523162842,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol17_vitamin_d3_fragment_initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol17_vitamin_d3_fragment_initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol17_vitamin_d3_fragment_styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol17_vitamin_d3_fragment_styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol17_vitamin_d3_fragment_selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol17_vitamin_d3_fragment_selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_18",
+      "molName": "Atorvastatin Fragment",
+      "tier": 4,
+      "expectedAtoms": 40,
+      "actualAtoms": 54,
+      "renderDurationMs": 14865,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 40,
+          "timeMs": 0.3999999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.2250000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 10,
+          "timeMs": 0.2200000286102295,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.08500003814697266,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.08499997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.07999998331069946,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.08000004291534424,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.09999996423721313,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.25,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.125,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.06499999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.1899999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 25,
+          "timeMs": 0.21000003814697266,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.1899999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.39499998092651367,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 40,
+          "timeMs": 0.1899999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.125,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.12000000476837158,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.11500000953674316,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 30,
+          "timeMs": 0.17000001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 40,
+          "timeMs": 0.16999995708465576,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 15,
+          "timeMs": 0.10999995470046997,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 35,
+          "timeMs": 0.20500004291534424,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.10499995946884155,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 40,
+          "textOutput": "count_atoms: 40 atoms in selection \"all\".",
+          "timeMs": 0.1950000524520874,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 40,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.20999997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 40,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.29500001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.44999998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 40,
+          "textOutput": "Unlabel: removed labels from 40 atoms matching \"all\".",
+          "timeMs": 0.4099999666213989,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol18_atorvastatin_fragment_initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol18_atorvastatin_fragment_initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol18_atorvastatin_fragment_styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol18_atorvastatin_fragment_styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol18_atorvastatin_fragment_selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol18_atorvastatin_fragment_selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_19",
+      "molName": "Methotrexate Fragment",
+      "tier": 4,
+      "expectedAtoms": 40,
+      "actualAtoms": 54,
+      "renderDurationMs": 14700,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 40,
+          "timeMs": 1.050000011920929,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.3050000071525574,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 10,
+          "timeMs": 0.16500002145767212,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.3199999928474426,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.11500000953674316,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.09999996423721313,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.10000002384185791,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.1499999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.1300000548362732,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.09999996423721313,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.16500002145767212,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.23500001430511475,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 25,
+          "timeMs": 0.29500001668930054,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.32499998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.36500000953674316,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 40,
+          "timeMs": 0.24000000953674316,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.16499996185302734,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.19999998807907104,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.13999998569488525,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 30,
+          "timeMs": 0.1899999976158142,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 40,
+          "timeMs": 0.14499998092651367,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 15,
+          "timeMs": 0.12000000476837158,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 35,
+          "timeMs": 0.23000001907348633,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.1850000023841858,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 40,
+          "textOutput": "count_atoms: 40 atoms in selection \"all\".",
+          "timeMs": 0.2149999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 40,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.2549999952316284,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 40,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.26500004529953003,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 0.5799999833106995,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 40,
+          "textOutput": "Unlabel: removed labels from 40 atoms matching \"all\".",
+          "timeMs": 0.39499998092651367,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol19_methotrexate_fragment_initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol19_methotrexate_fragment_initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol19_methotrexate_fragment_styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol19_methotrexate_fragment_styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol19_methotrexate_fragment_selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol19_methotrexate_fragment_selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "molId": "t4_20",
+      "molName": "Chlorophyll Core",
+      "tier": 4,
+      "expectedAtoms": 40,
+      "actualAtoms": 54,
+      "renderDurationMs": 13803,
+      "queriesTested": 30,
+      "queriesPassed": 30,
+      "queryDetails": [
+        {
+          "query": "all",
+          "matchCount": 40,
+          "timeMs": 0.25999999046325684,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "none",
+          "matchCount": 0,
+          "timeMs": 0.08499997854232788,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C",
+          "matchCount": 10,
+          "timeMs": 0.06000000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem N",
+          "matchCount": 5,
+          "timeMs": 0.06499999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem O",
+          "matchCount": 5,
+          "timeMs": 0.030000030994415283,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem H",
+          "matchCount": 5,
+          "timeMs": 0.029999971389770508,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.050000011920928955,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resn LIG",
+          "matchCount": 0,
+          "timeMs": 0.0350000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "resi 1-50",
+          "matchCount": 0,
+          "timeMs": 0.04499995708465576,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A",
+          "matchCount": 0,
+          "timeMs": 0.0350000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h",
+          "matchCount": 0,
+          "timeMs": 0.06499999761581421,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss s",
+          "matchCount": 0,
+          "timeMs": 0.0350000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hydrogens",
+          "matchCount": 5,
+          "timeMs": 0.09999996423721313,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "backbone",
+          "matchCount": 25,
+          "timeMs": 0.1600000262260437,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "sidechain",
+          "matchCount": 0,
+          "timeMs": 0.12000000476837158,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "organic",
+          "matchCount": 0,
+          "timeMs": 0.14499998092651367,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "hetatm",
+          "matchCount": 40,
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (around 5 of resn LIG)",
+          "matchCount": 0,
+          "timeMs": 0.050000011920928955,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "chain A and resn ALA",
+          "matchCount": 0,
+          "timeMs": 0.0700000524520874,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "ss h and not resn HOH",
+          "matchCount": 0,
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "around 5 of (elem N or elem O)",
+          "matchCount": 30,
+          "timeMs": 0.0899999737739563,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "within 4 of elem N",
+          "matchCount": 40,
+          "timeMs": 0.05500000715255737,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "elem C or elem N",
+          "matchCount": 15,
+          "timeMs": 0.04000002145767212,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "not hydrogens",
+          "matchCount": 35,
+          "timeMs": 0.13999998569488525,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "byres (resi 1-10)",
+          "matchCount": 0,
+          "timeMs": 0.06000000238418579,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "count_atoms of all",
+          "matchCount": 40,
+          "textOutput": "count_atoms: 40 atoms in selection \"all\".",
+          "timeMs": 0.10000002384185791,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_chains all",
+          "matchCount": 40,
+          "textOutput": "Chains in \"all\":\n[\" \"]",
+          "timeMs": 0.09999996423721313,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "get_residues all",
+          "matchCount": 40,
+          "textOutput": "Residues in \"all\":\n/ /NaN/ LI",
+          "timeMs": 0.10500001907348633,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "label elem N, name",
+          "matchCount": 5,
+          "textOutput": "Label: custom label applied to 5 atoms matching \"elem N\".",
+          "timeMs": 5.9700000286102295,
+          "status": "SUCCESS"
+        },
+        {
+          "query": "unlabel all",
+          "matchCount": 40,
+          "textOutput": "Unlabel: removed labels from 40 atoms matching \"all\".",
+          "timeMs": 1.35999995470047,
+          "status": "SUCCESS"
+        }
+      ],
+      "screenshots": [
+        {
+          "type": "initial",
+          "filename": "agent4_mol20_chlorophyll_core_initial.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol20_chlorophyll_core_initial.png"
+        },
+        {
+          "type": "styled",
+          "filename": "agent4_mol20_chlorophyll_core_styled.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol20_chlorophyll_core_styled.png"
+        },
+        {
+          "type": "selection",
+          "filename": "agent4_mol20_chlorophyll_core_selection.png",
+          "path": "C:\\Users\\mukun\\.gemini\\antigravity\\brain\\0b8b47ee-267f-4b4d-9585-c37163612717\\screenshots\\agent4_mol20_chlorophyll_core_selection.png"
+        }
+      ],
+      "status": "PASS",
+      "errors": []
+    }
+  ]
+}
