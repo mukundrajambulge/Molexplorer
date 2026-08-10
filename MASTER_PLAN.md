@@ -9,8 +9,9 @@
 **Standard applied throughout:** every scientific claim, equation, and design decision in this document is written to the standard a computational biophysicist/bioinformatician would hold it to — correct units, correct physical reasoning, and no hand-waved approximation presented as more rigorous than it is. Where a simplification is made for engineering-pragmatic reasons (e.g., an empirical scoring function instead of full quantum mechanics), that trade-off is stated explicitly rather than hidden.
 
 ## Changelog
-- **v1.1 (this revision):** Oracle Cloud + Cloudflare Pages is the current leading candidate (~99% likely per the project owner) but is **not yet a final, locked decision**. Section 12 is now explicitly a provider-agnostic abstraction, with Oracle/Cloudflare as the current reference implementation rather than a hard dependency. Added Sections 23–31 (provider-agnostic infrastructure, provider comparison, testing strategy, monitoring, disaster recovery, API versioning, onboarding, licensing/attribution, and open questions for the project owner). Appendix renumbered to Section 32.
-- **v1.0:** Initial master plan, reconciling the two prior architectural audits.
+- **v1.2 (Current revision):** Integrated Phase 3 scientific docking engine benchmarks and UI/UX biophysics enhancements: CPK pure-white hydrogen rendering, 3D atom labeling, illustrative/computed electron cloud density shells, universal 7-format export modal (`.pdb`, `.pdbqt`, `.sdf`, `.xyz`, `.pse.json`, `.png`, `.csv`), AltLoc conformer filtering, dynamic covalent bond tolerance, and mobile touch navigation.
+- **v1.1:** Oracle Cloud + Cloudflare Pages provider-agnostic infrastructure abstraction.
+- **v1.0:** Initial master plan, reconciling architectural audits.
 
 ---
 

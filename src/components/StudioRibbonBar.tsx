@@ -187,7 +187,34 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
             <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-white/10 text-white/70">PyMOL Web</span>
           </div>
 
-          <div className="flex items-center gap-0.5 ml-2">
+          {/* Mobile Tab Selector Dropdown */}
+          <div className="block md:hidden ml-2">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value as any)}
+              className="bg-[#121218] border border-[#4A90E2]/40 text-[#4A90E2] text-xs font-semibold rounded-md px-2 py-1 outline-none cursor-pointer"
+            >
+              {[
+                { id: "file", label: "📁 File & I/O" },
+                { id: "display", label: "🎨 Display & Render" },
+                { id: "select", label: "🔍 Selection & Query" },
+                { id: "prep", label: "🧪 Protein Prep" },
+                { id: "align", label: "📐 Structural Alignment" },
+                { id: "analysis", label: "📏 Structure Analysis" },
+                { id: "wizards", label: "✨ Wizards & Maps" },
+                { id: "movie", label: "🎬 Movie & Animation" },
+                { id: "session", label: "💾 Session & View" },
+                { id: "sculpting", label: "⚡ Sculpting & Editing" }
+              ].map(tab => (
+                <option key={tab.id} value={tab.id} className="bg-[#0E0E12] text-white">
+                  {tab.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Desktop Tab Bar */}
+          <div className="hidden md:flex items-center gap-0.5 ml-2 overflow-x-auto custom-scrollbar">
             {[
               { id: "file", label: "File & I/O" },
               { id: "display", label: "Display & Render" },
@@ -203,7 +230,7 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3 py-1.5 rounded-t-lg text-xs font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-t-lg text-xs font-medium transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? "bg-[#0E0E12] text-white border-t-2 border-[#4A90E2] shadow-sm"
                     : "text-white/50 hover:text-white hover:bg-white/[0.03]"

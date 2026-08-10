@@ -158,29 +158,33 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
           m2.setStyle({}, { stick: { colorscheme: 'greenCarbon', radius: 0.15 }, sphere: { hidden: true } });
         }
 
-        // Apply Explorer Styles with full Opacity support
+        // Apply Explorer Styles with full Opacity, Hydrogen, Label, and Electron Cloud support
         const vs = props.viewState;
         if (vs) {
-          const opacity = typeof vs.surfaceOpacity === 'number' ? vs.surfaceOpacity : 0.8;
+          const rawOpacity = typeof vs.surfaceOpacity === 'number' ? vs.surfaceOpacity : 0.8;
+          // Enhanced bright opacity scale (80% default is luminous; 100% is fully saturated)
+          const opacity = vs.performanceMode ? Math.min(rawOpacity, 0.9) : rawOpacity;
+          const isStickRadius = vs.performanceMode ? 0.12 : 0.20;
+          const isSphereScale = vs.performanceMode ? 0.22 : 0.30;
           let baseStyle: any = {};
 
           if (vs.renderStyle === "Line") {
             baseStyle.line = { opacity };
           } else if (vs.renderStyle === "Stick") {
-            baseStyle.stick = { opacity, radius: 0.2 };
+            baseStyle.stick = { opacity, radius: isStickRadius };
           } else if (vs.renderStyle === "Ball-and-Stick") {
-            baseStyle.stick = { opacity, radius: 0.15 };
-            baseStyle.sphere = { scale: 0.3, opacity };
+            baseStyle.stick = { opacity, radius: isStickRadius * 0.8 };
+            baseStyle.sphere = { scale: isSphereScale, opacity };
           } else if (vs.renderStyle === "Space-Filling") {
             baseStyle.sphere = { opacity };
           } else if (vs.renderStyle.includes("Surface")) {
-            baseStyle.stick = { opacity: Math.min(opacity, 0.4), radius: 0.15 };
+            baseStyle.stick = { opacity: Math.min(opacity, 0.4), radius: isStickRadius * 0.7 };
             baseStyle.sphere = { hidden: true };
             try {
               viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity, color: 'spectrum' });
             } catch (e) {}
           } else {
-            baseStyle.stick = { opacity, radius: 0.2 };
+            baseStyle.stick = { opacity, radius: isStickRadius };
           }
 
           let colorscheme = 'Jmol';
@@ -190,9 +194,56 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
 
           viewer.setStyle({}, baseStyle);
           
-          if (!vs.showHydrogens) viewer.setStyle({ elem: 'H' }, { hidden: true });
+          // 1. Hydrogen Styling (Standard pure white CPK convention)
+          if (vs.showHydrogens) {
+            const hStyle: any = {};
+            if (baseStyle.line) hStyle.line = { color: '#FFFFFF', opacity };
+            if (baseStyle.stick) hStyle.stick = { color: '#FFFFFF', radius: isStickRadius * 0.75, opacity };
+            if (baseStyle.sphere) hStyle.sphere = { color: '#FFFFFF', scale: isSphereScale * 0.75, opacity };
+            viewer.setStyle({ elem: 'H' }, hStyle);
+          } else {
+            viewer.setStyle({ elem: 'H' }, { hidden: true });
+          }
 
-          // Auto-Spin 3D rotation
+          // 2. Electron Cloud Rendering Mode
+          if (vs.electronCloudMode === "Illustrative Approximation") {
+            try {
+              viewer.addSurface($3Dmol.SurfaceType.VDW, {
+                opacity: 0.32 * opacity,
+                color: '#38bdf8'
+              });
+            } catch (e) {}
+          } else if (vs.electronCloudMode === "Computed Density (Demo)") {
+            try {
+              viewer.addSurface($3Dmol.SurfaceType.SAS, {
+                opacity: 0.42 * opacity,
+                color: '#c084fc'
+              });
+            } catch (e) {}
+          }
+
+          // 3. Atom Labels Display
+          if (vs.showLabels) {
+            const model = viewer.getModel();
+            const atoms = model ? model.selectedAtoms({}) : [];
+            atoms.forEach((a: any) => {
+              if (!vs.showHydrogens && (a.elem === 'H' || a.element === 'H')) return;
+              const sym = a.elem || a.element || (a.atom || '').replace(/[0-9]/g, '').trim() || 'C';
+              const num = a.serial !== undefined ? a.serial : (a.index !== undefined ? a.index + 1 : '');
+              const labelText = `${sym}${num}`;
+              viewer.addLabel(labelText, {
+                position: { x: a.x, y: a.y + 0.35, z: a.z },
+                backgroundColor: 'rgba(10, 10, 14, 0.85)',
+                borderColor: '#F27D26',
+                fontColor: '#FFFFFF',
+                font: 'monospace',
+                fontSize: 10,
+                backgroundOpacity: 0.90
+              });
+            });
+          }
+
+          // 4. Auto-Spin 3D rotation
           if (typeof viewer.spin === 'function') {
             viewer.spin(vs.isSpinning ? 'y' : false, 1.0);
           }
