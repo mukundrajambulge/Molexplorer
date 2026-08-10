@@ -29,6 +29,7 @@ interface CoreViewer3DProps {
   assemblyPDB?: string | null;
   symmetryPDB?: string | null;
   alignmentPDB?: string | null;
+  assemblyState?: any;
   ligandData?: { data: string, format: string } | null;
   interactions?: any[];
   renderStyle?: RenderStyle;
@@ -36,6 +37,11 @@ interface CoreViewer3DProps {
   surfaceOpacity?: number;
   backgroundColor?: string;
   selectedAtomSerials?: Set<number>;
+  hiddenObjectIds?: Set<string>;
+  onAtomClick?: (atom: any) => void;
+  activeMeasurementMode?: string | null;
+  showDipoleArrow?: boolean;
+  dipoleMoment?: any;
   focusTrigger?: number;
   orthographic?: boolean;
   stereoMode?: 'none' | 'cross-eye' | 'anaglyph';
@@ -45,27 +51,6 @@ const CHAIN_PALETTE = [
   '#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b',
   '#14b8a6', '#ef4444', '#06b6d4', '#84cc16', '#6366f1', '#d97706'
 ];
-
-const VDW_RADII: Record<string, number> = {
-  H: 1.20, C: 1.70, N: 1.55, O: 1.52, F: 1.47, P: 1.80, S: 1.80, CL: 1.75, BR: 1.85, I: 1.98
-};
-
-function getAtomVdwRadius(elem: string): number {
-  const e = (elem || '').toUpperCase().trim();
-  return VDW_RADII[e] || 1.70;
-}
-
-function getFibonacciSpherePoints(samples: number = 16) {
-  const pts: { x: number; y: number; z: number }[] = [];
-  const phi = Math.PI * (3 - Math.sqrt(5));
-  for (let i = 0; i < samples; i++) {
-    const y = 1 - (i / (samples - 1)) * 2;
-    const radius = Math.sqrt(1 - y * y);
-    const theta = phi * i;
-    pts.push({ x: Math.cos(theta) * radius, y, z: Math.sin(theta) * radius });
-  }
-  return pts;
-}
 
 function getStyleObj(
   style: string,
@@ -97,6 +82,7 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
   const {
     measurements,
     activeMeasurementMode,
+    clickedAtomBuffer,
     addClickedAtom,
     setSelectedAtomSerials,
     showDipoleArrow,
@@ -161,7 +147,7 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
       if (mode === 'explorer' && props.molecule?.rawContent) {
         // EXPLORER MODE RENDERING
         const format = props.molecule.format.toLowerCase();
-        let molContent = props.molecule.rawContent;
+        const molContent = props.molecule.rawContent;
 
         // Add main molecule
         viewer.addModel(molContent, format);
@@ -172,15 +158,30 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
           m2.setStyle({}, { stick: { colorscheme: 'greenCarbon', radius: 0.15 }, sphere: { hidden: true } });
         }
 
-        // Apply Explorer Styles (simplified for unification)
+        // Apply Explorer Styles with full Opacity support
         const vs = props.viewState;
         if (vs) {
+          const opacity = typeof vs.surfaceOpacity === 'number' ? vs.surfaceOpacity : 0.8;
           let baseStyle: any = {};
-          if (vs.renderStyle === "Line") baseStyle.line = {};
-          else if (vs.renderStyle === "Stick") baseStyle.stick = {};
-          else if (vs.renderStyle === "Ball-and-Stick") { baseStyle.stick = {}; baseStyle.sphere = { scale: 0.3 }; }
-          else if (vs.renderStyle === "Space-Filling") baseStyle.sphere = {};
-          else baseStyle.stick = {};
+
+          if (vs.renderStyle === "Line") {
+            baseStyle.line = { opacity };
+          } else if (vs.renderStyle === "Stick") {
+            baseStyle.stick = { opacity, radius: 0.2 };
+          } else if (vs.renderStyle === "Ball-and-Stick") {
+            baseStyle.stick = { opacity, radius: 0.15 };
+            baseStyle.sphere = { scale: 0.3, opacity };
+          } else if (vs.renderStyle === "Space-Filling") {
+            baseStyle.sphere = { opacity };
+          } else if (vs.renderStyle.includes("Surface")) {
+            baseStyle.stick = { opacity: Math.min(opacity, 0.4), radius: 0.15 };
+            baseStyle.sphere = { hidden: true };
+            try {
+              viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity, color: 'spectrum' });
+            } catch (e) {}
+          } else {
+            baseStyle.stick = { opacity, radius: 0.2 };
+          }
 
           let colorscheme = 'Jmol';
           if (vs.colorTheme === "Classic CPK") colorscheme = 'rasmol';
@@ -189,7 +190,12 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
 
           viewer.setStyle({}, baseStyle);
           
-          if (!vs.showHydrogens) viewer.setStyle({elem: 'H'}, {hidden: true});
+          if (!vs.showHydrogens) viewer.setStyle({ elem: 'H' }, { hidden: true });
+
+          // Auto-Spin 3D rotation
+          if (typeof viewer.spin === 'function') {
+            viewer.spin(vs.isSpinning ? 'y' : false, 1.0);
+          }
         }
 
         viewer.zoomTo();
@@ -261,38 +267,52 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         chainMap[''] = CHAIN_PALETTE[0];
         chainMap[' '] = CHAIN_PALETTE[0];
 
-        // 1. Style Click Handlers & State Updates
+        // 1. Interactive Picking & Measurement Click Handlers
+        const handleAtomPicked = (atom: any) => {
+          if (!atom) return;
+          if (activeMeasurementMode) {
+            addClickedAtom({
+              serial: atom.serial,
+              x: atom.x,
+              y: atom.y,
+              z: atom.z,
+              name: atom.atom || atom.name,
+              resName: atom.resn || atom.resName,
+              resSeq: atom.resi || atom.resSeq,
+              chainID: atom.chain || atom.chainID
+            });
+          } else if (props.onAtomClick) {
+            props.onAtomClick(atom);
+          } else {
+            const next = new Set(props.selectedAtomSerials);
+            if (next.has(atom.serial)) {
+              next.delete(atom.serial);
+            } else {
+              next.add(atom.serial);
+            }
+            setSelectedAtomSerials(next);
+          }
+        };
+
         const setClickStyle = (sel: any, style: any) => {
           viewer.setStyle(sel, {
             ...style,
             clickable: true,
-            callback: (atom: any) => {
-              if (!atom) return;
-              if (activeMeasurementMode) {
-                addClickedAtom({ serial: atom.serial, x: atom.x, y: atom.y, z: atom.z });
-              } else {
-                const next = new Set(props.selectedAtomSerials);
-                if (next.has(atom.serial)) {
-                  next.delete(atom.serial);
-                } else {
-                  next.add(atom.serial);
-                }
-                setSelectedAtomSerials(next);
-              }
-            }
+            callback: handleAtomPicked
           });
         };
 
         const rStyle = props.renderStyle || "Cartoon";
         const cScheme = props.colorScheme || "spectrum";
+        const currentOpacity = typeof props.surfaceOpacity === 'number' ? props.surfaceOpacity : 0.8;
 
         // Base style for protein/nucleic polymers (non-HETATMs)
-        setClickStyle({ hetflag: false }, getStyleObj(rStyle, cScheme, minResi, maxResi, chainMap, 1.0));
+        setClickStyle({ hetflag: false }, getStyleObj(rStyle, cScheme, minResi, maxResi, chainMap, currentOpacity));
 
         // Base style for organic ligands/inhibitors (non-water HETATMs) - Render as STICKS for high visibility
         setClickStyle({ hetflag: true, not: { resn: ['HOH', 'WAT', 'DOD', 'SOL'] } }, {
-          stick: { colorscheme: 'default', radius: 0.22 },
-          sphere: { colorscheme: 'default', radius: 0.45 }
+          stick: { colorscheme: 'default', radius: 0.22, opacity: currentOpacity },
+          sphere: { colorscheme: 'default', radius: 0.45, opacity: currentOpacity }
         });
 
         // Base style for solvent waters - Red Crosses
@@ -302,23 +322,22 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
 
         // Apply Selection Highlighting
         if (props.selectedAtomSerials && props.selectedAtomSerials.size > 0) {
-          // Dim the unselected protein atoms to make selection stand out
-          setClickStyle({ hetflag: false }, getStyleObj(rStyle, 'white', minResi, maxResi, chainMap, 0.25));
           const selArray = Array.from(props.selectedAtomSerials);
           setClickStyle({ serial: selArray }, { 
             ...getStyleObj(rStyle, '#ec4899', minResi, maxResi, chainMap, 1.0),
-            stick: { radius: 0.22, color: '#ec4899' }
+            stick: { radius: 0.25, color: '#ec4899' },
+            sphere: { radius: 0.5, color: '#ec4899' }
           });
         }
 
-        // Render Surfaces / Mesh / Dots using Representation Strategy Pattern
+        // Render Surfaces / Mesh / Dots using Representation Strategy Pattern with true opacity
         const strategy = RepresentationStrategyFactory.getStrategy(rStyle);
         strategy.applySurfacesOrShapes(viewer, {
           colorScheme: cScheme,
           minResi,
           maxResi,
           chainMap,
-          surfaceOpacity: props.surfaceOpacity
+          surfaceOpacity: currentOpacity
         });
 
         // Assembly, Symmetry, Alignment & Ligand overlays
@@ -391,7 +410,30 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
           });
         }
 
-        // Render Measurements
+        // 2. Render Active Measurement Picking Highlights (Glowing Spheres & Labels)
+        if (clickedAtomBuffer && clickedAtomBuffer.length > 0) {
+          clickedAtomBuffer.forEach((cAtom, idx) => {
+            viewer.addSphere({
+              center: { x: cAtom.x, y: cAtom.y, z: cAtom.z },
+              radius: 0.60,
+              color: '#38bdf8',
+              opacity: 0.85
+            });
+
+            const labelTxt = `Point ${idx + 1}: ${(cAtom.name || '').trim()} #${cAtom.serial}`;
+            viewer.addLabel(labelTxt, {
+              position: { x: cAtom.x, y: cAtom.y + 0.8, z: cAtom.z },
+              backgroundColor: 'rgba(14, 165, 233, 0.95)',
+              borderColor: '#38bdf8',
+              fontColor: '#ffffff',
+              font: 'monospace',
+              fontSize: 10,
+              backgroundOpacity: 0.95
+            });
+          });
+        }
+
+        // 3. Render Committed Measurements (Distance, Angle, Dihedral, Labels)
         measurements.forEach((m) => {
           const isHighB = m.coordinates.some((coord, idx) => {
             const s = m.atomSerials[idx];
@@ -402,10 +444,9 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
 
           if (m.type === 'distance' && m.coordinates.length === 2) {
             const [p1, p2] = m.coordinates;
-            const steps = 15;
+            const steps = 16;
             const dashColor = '#F2CD5C';
-            const isHBond = m.label.includes('kcal/mol');
-            const radius = isHBond ? 0.06 : 0.04;
+            const radius = 0.05;
 
             for (let i = 0; i < steps; i += 2) {
               const tStart = i / steps;
@@ -436,69 +477,35 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
             };
             viewer.addLabel(m.label, {
               position: mid,
-              backgroundColor: 'rgba(10, 10, 12, 0.85)',
+              backgroundColor: 'rgba(10, 10, 12, 0.90)',
               borderColor: labelColor,
               fontColor: labelColor,
               font: 'monospace',
               fontSize: 10,
-              backgroundOpacity: 0.9
+              backgroundOpacity: 0.95
             });
           }
 
           if (m.type === 'angle' && m.coordinates.length === 3) {
             const [p1, p2, p3] = m.coordinates;
-            viewer.addCylinder({ start: p1, end: p2, radius: 0.03, color: '#ffffff' });
-            viewer.addCylinder({ start: p3, end: p2, radius: 0.03, color: '#ffffff' });
-            const v1 = { x: p1.x - p2.x, y: p1.y - p2.y, z: p1.z - p2.z };
-            const v2 = { x: p3.x - p2.x, y: p3.y - p2.y, z: p3.z - p2.z };
-            const len1 = Math.sqrt(v1.x*v1.x + v1.y*v1.y + v1.z*v1.z);
-            const len2 = Math.sqrt(v2.x*v2.x + v2.y*v2.y + v2.z*v2.z);
-            if (len1 > 0 && len2 > 0) {
-              const u1 = { x: v1.x / len1, y: v1.y / len1, z: v1.z / len1 };
-              const u2 = { x: v2.x / len2, y: v2.y / len2, z: v2.z / len2 };
-              const bisector = { x: u1.x + u2.x, y: u1.y + u2.y, z: u1.z + u2.z };
-              const lenB = Math.sqrt(bisector.x*bisector.x + bisector.y*bisector.y + bisector.z*bisector.z);
-              const labelPos = {
-                x: p2.x + (lenB > 0 ? (bisector.x / lenB) * 1.2 : 0),
-                y: p2.y + (lenB > 0 ? (bisector.y / lenB) * 1.2 : 0),
-                z: p2.z + (lenB > 0 ? (bisector.z / lenB) * 1.2 : 0)
-              };
-              viewer.addLabel(m.label, {
-                position: labelPos,
-                backgroundColor: 'rgba(10, 10, 12, 0.85)',
-                borderColor: labelColor,
-                fontColor: labelColor,
-                font: 'monospace',
-                fontSize: 10,
-                backgroundOpacity: 0.9
-              });
-              const arcSteps = 10;
-              const arcRadius = 0.5;
-              let prevPt = { x: p2.x + u1.x * arcRadius, y: p2.y + u1.y * arcRadius, z: p2.z + u1.z * arcRadius };
-              for (let i = 1; i <= arcSteps; i++) {
-                const t = i / arcSteps;
-                const interp = {
-                  x: u1.x * (1 - t) + u2.x * t,
-                  y: u1.y * (1 - t) + u2.y * t,
-                  z: u1.z * (1 - t) + u2.z * t
-                };
-                const lenI = Math.sqrt(interp.x*interp.x + interp.y*interp.y + interp.z*interp.z);
-                const nextPt = {
-                  x: p2.x + (lenI > 0 ? (interp.x / lenI) * arcRadius : 0),
-                  y: p2.y + (lenI > 0 ? (interp.y / lenI) * arcRadius : 0),
-                  z: p2.z + (lenI > 0 ? (interp.z / lenI) * arcRadius : 0)
-                };
-                viewer.addCylinder({ start: prevPt, end: nextPt, radius: 0.02, color: '#F2CD5C' });
-                prevPt = nextPt;
-              }
-            }
+            viewer.addCylinder({ start: p1, end: p2, radius: 0.04, color: '#38bdf8' });
+            viewer.addCylinder({ start: p2, end: p3, radius: 0.04, color: '#38bdf8' });
+            viewer.addLabel(m.label, {
+              position: p2,
+              backgroundColor: 'rgba(10, 10, 12, 0.90)',
+              borderColor: '#38bdf8',
+              fontColor: '#38bdf8',
+              font: 'monospace',
+              fontSize: 10,
+              backgroundOpacity: 0.95
+            });
           }
 
           if (m.type === 'dihedral' && m.coordinates.length === 4) {
             const [p1, p2, p3, p4] = m.coordinates;
-            viewer.addCylinder({ start: p1, end: p2, radius: 0.03, color: '#ffffff' });
-            viewer.addCylinder({ start: p2, end: p3, radius: 0.04, color: '#ffffff' });
-            viewer.addCylinder({ start: p3, end: p4, radius: 0.03, color: '#ffffff' });
+            viewer.addCylinder({ start: p1, end: p2, radius: 0.04, color: '#a855f7' });
+            viewer.addCylinder({ start: p2, end: p3, radius: 0.05, color: '#a855f7' });
+            viewer.addCylinder({ start: p3, end: p4, radius: 0.04, color: '#a855f7' });
             const midCentral = {
               x: (p2.x + p3.x) / 2,
               y: (p2.y + p3.y) / 2,
@@ -506,12 +513,12 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
             };
             viewer.addLabel(m.label, {
               position: midCentral,
-              backgroundColor: 'rgba(10, 10, 12, 0.85)',
-              borderColor: labelColor,
-              fontColor: labelColor,
+              backgroundColor: 'rgba(10, 10, 12, 0.90)',
+              borderColor: '#a855f7',
+              fontColor: '#c084fc',
               font: 'monospace',
               fontSize: 10,
-              backgroundOpacity: 0.9
+              backgroundOpacity: 0.95
             });
           }
 
@@ -571,7 +578,7 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
   }, [
     mode, props.molecule, props.compareMolecule, props.viewState, props.filters,
     props.pdbData, props.renderStyle, props.colorScheme, props.selectedAtomSerials, props.ligandData,
-    props.focusTrigger, showDipoleArrow, dipoleMoment, activeMeasurementMode,
+    props.focusTrigger, showDipoleArrow, dipoleMoment, activeMeasurementMode, clickedAtomBuffer,
     props.backgroundColor, props.surfaceOpacity, props.ssData, props.ssMode,
     props.assemblyPDB, props.symmetryPDB, props.alignmentPDB, props.interactions, measurements
   ]);

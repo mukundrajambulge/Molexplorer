@@ -184,7 +184,7 @@ export function calculateInteractions(receptorPDB: string, ligandPDB: string): I
     const resn = (atom.resName || '').toUpperCase();
     const name = atom.name.trim().toUpperCase();
     const elem = (atom.elem || '').toUpperCase();
-    if (atom.formalCharge && atom.formalCharge < 0) return true;
+    if ((atom as any).formalCharge && (atom as any).formalCharge < 0) return true;
     if (elem === 'O') {
       if (acidicResidues.includes(resn) && acidicAtoms.includes(name)) return true;
       if (['O', 'O1', 'O2', 'O3', 'O4', 'OP1', 'OP2', 'OP3'].includes(name)) return true;
@@ -199,7 +199,7 @@ export function calculateInteractions(receptorPDB: string, ligandPDB: string): I
     const resn = (atom.resName || '').toUpperCase();
     const name = atom.name.trim().toUpperCase();
     const elem = (atom.elem || '').toUpperCase();
-    if (atom.formalCharge && atom.formalCharge > 0) return true;
+    if ((atom as any).formalCharge && (atom as any).formalCharge > 0) return true;
     if (elem === 'N') {
       if (basicResidues.includes(resn) && basicAtoms.includes(name)) return true;
       if (!['ALA', 'CYS', 'ASP', 'GLU', 'PHE', 'GLY', 'HIS', 'ILE', 'LYS', 'LEU', 'MET', 'ASN', 'PRO', 'GLN', 'ARG', 'SER', 'THR', 'VAL', 'TRP', 'TYR', 'HOH', 'WAT'].includes(resn)) {

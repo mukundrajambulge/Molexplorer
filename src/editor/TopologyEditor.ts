@@ -75,7 +75,9 @@ export class TopologyEditor {
             y: atom.y + dy,
             z: atom.z + dz,
             occupancy: 1.0,
-            tempFactor: 20.0,
+            bFactor: 20.0,
+            altLoc: ' ',
+            isHetero: false,
             elem: 'H',
             bonds: [idx]
           };

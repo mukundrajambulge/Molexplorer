@@ -7,9 +7,10 @@ export interface TimelineEngineProps {
   keyframeManager: KeyframeManager;
   getView: () => any;
   setView: (view: any) => void;
+  onClose?: () => void;
 }
 
-export function TimelineEngine({ keyframeManager, getView, setView }: TimelineEngineProps) {
+export function TimelineEngine({ keyframeManager, getView, setView, onClose }: TimelineEngineProps) {
   const [isRecordingMp4, setIsRecordingMp4] = useState(false);
   const [recordingProgress, setRecordingProgress] = useState(0);
 
@@ -91,6 +92,7 @@ export function TimelineEngine({ keyframeManager, getView, setView }: TimelineEn
         onApplyView={setView}
         onGetCurrentView={getView}
         onRenderMp4={() => document.dispatchEvent(new CustomEvent("export-mp4"))}
+        onClose={onClose}
       />
 
       {isRecordingMp4 && (

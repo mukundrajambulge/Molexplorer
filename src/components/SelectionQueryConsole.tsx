@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Terminal, Send, Trash2, CheckCircle2, AlertCircle, HelpCircle, ChevronRight, CornerDownLeft, Minus, X } from "lucide-react";
+import { useStore } from "../store";
 
 interface QueryConsoleProps {
   onRunQuery: (query: string) => { count: number; textOutput?: string } | string | undefined;
@@ -36,8 +37,22 @@ export const SelectionQueryConsole: React.FC<QueryConsoleProps> = ({
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
     }
   ]);
-
+  const { lastMeasurementLog } = useStore();
   const logEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (lastMeasurementLog) {
+      const newLog: QueryLog = {
+        id: crypto.randomUUID(),
+        query: "3D Pick / Measurement",
+        count: selectedAtomCount,
+        status: "success",
+        textOutput: lastMeasurementLog,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      };
+      setLogs(prev => [...prev, newLog]);
+    }
+  }, [lastMeasurementLog]);
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: "smooth" });

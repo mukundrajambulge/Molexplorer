@@ -28,15 +28,17 @@ import { SessionManager } from "../session/SessionManager";
 import { MolStudioSession } from "../session/SessionSchema";
 import { SequenceViewer } from "../components/SequenceViewer";
 import { HotkeyManager } from "../input/HotkeyManager";
-import { TopologyEditor } from "../editor/TopologyEditor";
 import { SculptingEngine } from "../simulation/SculptingEngine";
+import { TopologyEditor } from "../editor/TopologyEditor";
 import { MeasurementWizard } from "../components/MeasurementWizard";
-import { Command } from "lucide-react";
+import { StudioExportModal } from "../components/StudioExportModal";
+import { Command, Ruler, CheckCircle2 } from "lucide-react";
 
 export default function MolStudio() {
   const [isConsoleOpen, setIsConsoleOpen] = useState(false);
   const [isValidationOpen, setIsValidationOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const {
     molData, setMolData,
     processedPDB, setProcessedPDB,
@@ -352,15 +354,13 @@ export default function MolStudio() {
 
   const handleAtomClick = (atom: any) => {
     if (!atom || !atom.serial) return;
-    setSelectedAtomSerials((prev) => {
-      const next = new Set(prev);
-      if (next.has(atom.serial)) {
-        next.delete(atom.serial);
-      } else {
-        next.add(atom.serial);
-      }
-      return next;
-    });
+    const next = new Set(selectedAtomSerials);
+    if (next.has(atom.serial)) {
+      next.delete(atom.serial);
+    } else {
+      next.add(atom.serial);
+    }
+    setSelectedAtomSerials(next);
   };
 
   const handleRunQuery = (query: string): { count: number; textOutput?: string } => {
@@ -669,6 +669,7 @@ useEffect(() => {
         totalAtomCount={atoms.length}
         onAlignFetch={(id) => { setAlignFetchId(id); }}
         onSaveSession={handleSaveSession}
+        onOpenExport={() => setIsExportOpen(true)}
         onToggleHelp={() => setIsHelpOpen(!isHelpOpen)}
         cleaningState={cleaningState}
         setCleaningState={setCleaningState}
@@ -700,6 +701,37 @@ useEffect(() => {
       />
       {/* Main Viewer Area */}
       <div className="flex-1 relative w-full h-full overflow-hidden flex flex-col">
+        {/* Active 3D Measurement Mode & Telemetry Floating HUD Banner */}
+        {activeMeasurementMode && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex items-center gap-3 px-4 py-2 bg-[#0E0E12]/95 border border-cyan-500/40 rounded-xl shadow-2xl backdrop-blur-xl animate-fadeIn">
+            <div className="flex items-center gap-2">
+              <Ruler className="w-4 h-4 text-cyan-400 animate-pulse" />
+              <span className="text-xs font-semibold text-white uppercase tracking-wider">
+                {activeMeasurementMode === 'distance' ? 'Distance (Pick 2 Atoms)' :
+                 activeMeasurementMode === 'angle' ? 'Angle (Pick 3 Atoms)' :
+                 activeMeasurementMode === 'dihedral' ? 'Dihedral Torsion (Pick 4 Atoms)' : '3D Atom Label'}
+              </span>
+            </div>
+            
+            <div className="h-4 w-px bg-white/20" />
+
+            <div className="text-[11px] font-mono text-cyan-300">
+              {clickedAtomBuffer.length === 0 
+                ? 'Click atom in 3D viewport...' 
+                : clickedAtomBuffer.map((a, i) => `[P${i+1}: ${(a.name || '').trim()} #${a.serial}]`).join(' → ')
+              }
+            </div>
+
+            <button
+              onClick={() => setMeasurementMode(null)}
+              className="p-1 rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors text-xs font-bold"
+              title="Cancel measurement mode"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         <div className="flex-1 relative w-full h-full min-h-0">
           <div className="absolute inset-0 z-0">
             <CoreViewer3D 
@@ -736,11 +768,9 @@ useEffect(() => {
                 ssData={ssData}
                 selectedAtomSerials={selectedAtomSerials}
                 onSelectResidue={(serials, isToggle) => {
-                  setSelectedAtomSerials(prev => {
-                    const next = isToggle ? new Set(prev) : new Set();
-                    serials.forEach(s => next.add(s));
-                    return next;
-                  });
+                  const next = isToggle ? new Set(selectedAtomSerials) : new Set<number>();
+                  serials.forEach(s => next.add(s));
+                  setSelectedAtomSerials(next);
                 }}
                 onClose={() => setShowSequenceViewer(false)}
               />
@@ -860,8 +890,16 @@ useEffect(() => {
             keyframeManager={keyframeManager} 
             setView={(view) => viewerRef.current?.setView(view)}
             getView={() => viewerRef.current?.getView()}
+            onClose={() => setShowTimeline(false)}
           />
         )}
+
+        {/* Universal Structure & Media Export Modal */}
+        <StudioExportModal 
+          isOpen={isExportOpen} 
+          onClose={() => setIsExportOpen(false)} 
+          viewerRef={viewerRef}
+        />
 
         {/* WebGPU Raytrace Viewer Overlay */}
         {showRaytrace && molData && (

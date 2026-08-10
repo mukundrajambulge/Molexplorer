@@ -13,7 +13,7 @@ interface AtomPair {
 }
 
 export const PairFitWizard: React.FC<PairFitWizardProps> = ({ onClose }) => {
-  const { currentMolecule } = useStore();
+  const { molData, atoms } = useStore();
   const [pairs, setPairs] = useState<AtomPair[]>([
     { id: 1, refAtom: 'Chain A: CA 10', targetAtom: 'Chain B: CA 10', distance: 0.12 },
     { id: 2, refAtom: 'Chain A: CA 50', targetAtom: 'Chain B: CA 50', distance: 0.08 },

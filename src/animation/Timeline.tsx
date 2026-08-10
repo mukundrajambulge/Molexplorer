@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Square, Plus, Trash2, Camera, Download } from 'lucide-react';
+import { Play, Pause, Square, Plus, Trash2, Camera, Download, X } from 'lucide-react';
 import { KeyframeManager, Keyframe } from './KeyframeManager';
 
 interface TimelineProps {
@@ -7,9 +7,10 @@ interface TimelineProps {
   onApplyView: (view: number[]) => void;
   onGetCurrentView: () => number[];
   onRenderMp4: () => void;
+  onClose?: () => void;
 }
 
-export default function Timeline({ keyframeManager, onApplyView, onGetCurrentView, onRenderMp4 }: TimelineProps) {
+export default function Timeline({ keyframeManager, onApplyView, onGetCurrentView, onRenderMp4, onClose }: TimelineProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(10); // Default 10s timeline
@@ -88,10 +89,10 @@ export default function Timeline({ keyframeManager, onApplyView, onGetCurrentVie
       {/* Top Toolbar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-white/5">
         <div className="flex items-center gap-2">
-          <button onClick={isPlaying ? pause : play} className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#4A90E2] text-white hover:bg-[#357abd] transition-colors cursor-pointer">
+          <button onClick={isPlaying ? pause : play} className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#4A90E2] text-white hover:bg-[#357abd] transition-colors cursor-pointer" title={isPlaying ? "Pause" : "Play"}>
             {isPlaying ? <Pause size={16} /> : <Play size={16} />}
           </button>
-          <button onClick={stop} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-colors cursor-pointer">
+          <button onClick={stop} className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-colors cursor-pointer" title="Stop">
             <Square size={14} />
           </button>
 
@@ -117,6 +118,16 @@ export default function Timeline({ keyframeManager, onApplyView, onGetCurrentVie
             <Download size={14} />
             <span>Export MP4</span>
           </button>
+
+          {onClose && (
+            <button 
+              onClick={onClose} 
+              className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 text-white/60 hover:text-white transition-colors cursor-pointer ml-1"
+              title="Close Timeline"
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -142,6 +153,7 @@ export default function Timeline({ keyframeManager, onApplyView, onGetCurrentVie
               setCurrentTime(kf.time);
               onApplyView(kf.view);
             }}
+            title={`Keyframe at ${kf.time.toFixed(1)}s`}
           >
           </div>
         ))}

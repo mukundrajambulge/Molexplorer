@@ -138,4 +138,6 @@ export interface ViewState {
   canvasBackground: "black" | "white" | "#f5f5f5";
   electronCloudMode: ElectronCloudMode;
   performanceMode: boolean;
+  isSpinning?: boolean;
 }
+

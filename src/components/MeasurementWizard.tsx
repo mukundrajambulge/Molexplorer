@@ -66,7 +66,7 @@ export const MeasurementWizard: React.FC<MeasurementWizardProps> = ({ modal, onC
 
     const grid = DensityMap.generateSyntheticMap(atoms, 1.0);
     const surface = DensityMap.marchingCubes(grid, contourLevel);
-    setStatusMsg(`Generated CCP4 electron density map isosurface at ${contourLevel.toFixed(1)}σ (${surface.triangles.length / 3} triangles).`);
+    setStatusMsg(`Generated CCP4 electron density map isosurface at ${contourLevel.toFixed(1)}σ (${surface.triangleCount} triangles).`);
   };
 
   const handleApplyFragment = () => {

@@ -12,12 +12,12 @@ const AMINO_ACIDS = [
 ];
 
 export const MutagenesisWizard: React.FC<MutagenesisWizardProps> = ({ onClose }) => {
-  const { currentMolecule, setMolecule, selectedAtomSerials } = useStore();
+  const { molData, atoms, setAtoms, selectedAtomSerials } = useStore();
   const [targetResidue, setTargetResidue] = useState<string>('Residue 1 (Chain A)');
   const [selectedMutant, setSelectedMutant] = useState<string>('PHE');
   const [rotamerIdx, setRotamerIdx] = useState<number>(0);
 
-  if (!currentMolecule || currentMolecule.atoms.length === 0) {
+  if (!molData || atoms.length === 0) {
     return (
       <div className="bg-slate-900 border border-slate-700 text-white p-4 rounded-xl shadow-2xl w-96 backdrop-blur-md">
         <h3 className="text-lg font-bold text-amber-400 mb-2">Mutagenesis Wizard</h3>
@@ -31,8 +31,8 @@ export const MutagenesisWizard: React.FC<MutagenesisWizardProps> = ({ onClose })
   const currentRotamer = rotamers[rotamerIdx] || rotamers[0];
 
   // Dummy clash detection calculation for UI demonstration
-  const dummyMutatedAtoms = currentMolecule.atoms.slice(0, 5);
-  const dummySurrounding = currentMolecule.atoms.slice(5, 50);
+  const dummyMutatedAtoms = atoms.slice(0, 5);
+  const dummySurrounding = atoms.slice(5, 50);
   const clashReport: StericClashReport = detectStericClashes(dummyMutatedAtoms, dummySurrounding);
 
   const handleApplyMutation = () => {
