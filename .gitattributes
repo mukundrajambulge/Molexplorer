@@ -1,0 +1,7 @@
+# GitHub Linguist Language Detection Configuration
+*.cpp linguist-language=C++
+*.hpp linguist-language=C++
+backend/** linguist-language=C++
+
+# Exclude scratch test telemetry files from language statistics
+scratch/** linguist-documentation
