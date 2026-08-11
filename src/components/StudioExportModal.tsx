@@ -127,7 +127,7 @@ export const StudioExportModal: React.FC<StudioExportModalProps> = ({ isOpen, on
     { id: 'pdbqt', name: 'AutoDock PDBQT (.PDBQT)', desc: 'Docking ready with Gasteiger atomic charges and atom typing', icon: ShieldCheck, tag: 'Docking' },
     { id: 'sdf', name: 'Structure Data File (.SDF)', desc: 'Small molecule 3D molfile with covalent bond tables', icon: FileText, tag: 'Chemistry' },
     { id: 'xyz', name: 'Cartesian XYZ (.XYZ)', desc: 'Standard quantum chemistry coordinate format', icon: FileText, tag: 'Quantum' },
-    { id: 'pse', name: 'PyMOL / MolStudio Session (.PSE.JSON)', desc: 'Full session snapshot with cameras, measurements, and styles', icon: FileText, tag: 'Session' },
+    { id: 'pse', name: 'Studio Session Snapshot (.PSE.JSON)', desc: 'Full workspace snapshot with cameras, measurements, and styles', icon: FileText, tag: 'Session' },
     { id: 'png', name: 'High-Res 3D Snapshot (.PNG)', desc: 'Ultra high-definition transparent canvas screenshot', icon: Camera, tag: 'Graphics' },
     { id: 'csv', name: 'Bioinformatics Data Table (.CSV)', desc: 'Secondary structure & Ramachandran angles report', icon: Table, tag: 'Data' }
   ];

@@ -104,7 +104,7 @@ export const SelectionQueryConsole: React.FC<QueryConsoleProps> = ({
         className="fixed bottom-4 right-4 z-40 bg-[#0E0E12]/90 border border-white/10 hover:border-[#4A90E2] backdrop-blur-md px-3 py-2 rounded-xl text-xs font-mono flex items-center gap-2 shadow-xl hover:shadow-2xl transition-all"
       >
         <Terminal className="w-4 h-4 text-[#4A90E2]" />
-        <span>PyMOL Query Console</span>
+        <span>Selection Query Console</span>
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
       </button>
     );
@@ -117,7 +117,7 @@ export const SelectionQueryConsole: React.FC<QueryConsoleProps> = ({
       <div className="flex items-center justify-between px-4 py-2.5 bg-[#070709] border-b border-white/10 select-none">
         <div className="flex items-center gap-2">
           <Terminal className="w-4 h-4 text-[#4A90E2]" />
-          <span className="font-semibold text-white tracking-wide">PyMOL Selection Algebra Console</span>
+          <span className="font-semibold text-white tracking-wide">Selection Algebra Console</span>
         </div>
         <div className="flex items-center gap-1.5">
           <button
@@ -192,7 +192,7 @@ export const SelectionQueryConsole: React.FC<QueryConsoleProps> = ({
               handleExecute();
             }
           }}
-          placeholder="Type PyMOL query (e.g. byres (resn LIG around 5))..."
+          placeholder="Type selection query (e.g. byres (resn LIG around 5))..."
           className="flex-1 bg-transparent text-white focus:outline-none resize-none text-xs placeholder:text-white/30"
         />
         <button
@@ -205,7 +205,7 @@ export const SelectionQueryConsole: React.FC<QueryConsoleProps> = ({
       </div>
 
       {/* Quick Presets Bar at Bottom */}
-      <div className="px-3 py-1.5 bg-[#070709] border-t border-white/[0.06] flex items-center gap-1 overflow-x-auto text-[10px] custom-scrollbar">
+      <div className="px-3 py-1.5 bg-[#070709] border-t border-white/[0.06] flex items-center gap-1 overflow-x-auto text-[10px] no-scrollbar">
         <span className="text-white/40 mr-1 shrink-0">Examples:</span>
         {[
           "byres (resn LIG around 5)",

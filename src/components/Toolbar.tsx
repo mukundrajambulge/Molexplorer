@@ -30,7 +30,7 @@ export default function Toolbar({ viewState, onViewStateChange }: ToolbarProps) 
   };
 
   return (
-    <div className="min-h-[3.5rem] border-b border-white/10 bg-[#0A0A0A]/90 backdrop-blur-md flex items-center px-3 sm:px-6 py-2 gap-2 sm:gap-5 text-[10px] font-mono tracking-[0.08em] uppercase z-10 flex-wrap overflow-x-auto custom-scrollbar whitespace-nowrap">
+    <div className="min-h-[3.5rem] border-b border-white/10 bg-[#0A0A0A]/90 backdrop-blur-md flex items-center px-3 sm:px-6 py-2 gap-2 sm:gap-5 text-[10px] font-mono tracking-[0.08em] uppercase z-10 flex-wrap overflow-x-auto no-scrollbar whitespace-nowrap">
       
       {/* 3D Spin Toggle Button */}
       <button

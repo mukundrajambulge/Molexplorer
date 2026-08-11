@@ -72,7 +72,7 @@ export const Header: React.FC = () => {
               <Github className="w-4 h-4" />
             </a>
             <Link
-              to="/molexplorer"
+              to="/"
               className="relative group inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-xs font-medium tracking-wide text-white bg-gradient-to-r from-[#F27D26] to-[#E85D04] hover:from-[#f3883a] hover:to-[#f06813] transition-all shadow-lg shadow-[#F27D26]/20 hover:shadow-[#F27D26]/35"
             >
               <span>Explore Platform</span>
@@ -116,7 +116,7 @@ export const Header: React.FC = () => {
           ))}
           <div className="pt-2 flex flex-col gap-2">
             <Link
-              to="/molexplorer"
+              to="/"
               onClick={() => setMobileMenuOpen(false)}
               className="w-full text-center py-3 rounded-xl text-xs font-medium text-white bg-gradient-to-r from-[#F27D26] to-[#E85D04]"
             >

@@ -101,7 +101,7 @@ export const ObjectControlPanel: React.FC<ObjectControlPanelProps> = ({
                     <span className="text-[10px] text-white/30 font-mono">({obj.atomCount})</span>
                   </div>
 
-                  {/* PyMOL ASHLC Control Buttons */}
+                  {/* Action Control Buttons */}
                   <div className="flex items-center gap-0.5 shrink-0 font-mono text-[10px]">
                     {/* A - Action */}
                     <button

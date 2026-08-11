@@ -651,7 +651,7 @@ useEffect(() => {
 
   return (
     <div className="h-screen w-screen flex flex-col font-sans bg-[#0A0A0A] text-[#F0F0F0] overflow-hidden relative">
-      {/* Top Ribbon Control Panel (PyMOL / MS Office Ribbon Style) */}
+      {/* Top Ribbon Control Panel (Studio Ribbon Style) */}
       <StudioRibbonBar
         onFileUpload={handleFileUpload}
         onFetchPdb={handleFetch}
@@ -778,7 +778,7 @@ useEffect(() => {
           )}
         </div>
         
-        {/* Per-Object Control Panel (PyMOL ASHLC Panel) */}
+        {/* Per-Object Control Panel (Action Control Panel) */}
         {molData && (
           <div className="absolute top-4 right-4 z-10 pointer-events-auto">
             <ObjectControlPanel
@@ -876,7 +876,7 @@ useEffect(() => {
           </div>
         )}
 
-        {/* PyMOL Interactive Selection Query Console */}
+        {/* Interactive Selection Query Console */}
         <SelectionQueryConsole
           onRunQuery={handleRunQuery}
           selectedAtomCount={selectedAtomSerials.size}

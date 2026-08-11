@@ -37,7 +37,7 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="mt-8 pt-6 border-t border-white/[0.05] text-center text-white/30 font-mono text-[11px]">
-          © {new Date().getFullYear()} Mukund Rajambulge. Open Source Cheminformatics Tools.
+          © {new Date().getFullYear()} Mukundraj Ambulge. Open Source Cheminformatics Tools.
         </div>
       </div>
     </footer>

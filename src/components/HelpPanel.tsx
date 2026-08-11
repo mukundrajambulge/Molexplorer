@@ -20,7 +20,7 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
       equation: "E = 0.084 * 332 * (1/r_ON + 1/r_CH - 1/r_OH - 1/r_CN) kcal/mol",
       explanation: "A hydrogen bond is assigned if the electrostatic interaction energy (E) between the C=O of residue i and the N-H of residue j is less than -0.5 kcal/mol. The constants correspond to partial charges on N, H (q1 = +0.20e) and C, O (q2 = -0.42e).",
       example: "Helix: i → i+4 hydrogen bonds; Sheet: parallel or antiparallel adjacent strand patterns.",
-      expected: "Helices appear red (PyMOL) or magenta (Jmol); sheets appear yellow; loops appear green or white.",
+      expected: "Helices appear red (Standard) or magenta (Jmol); sheets appear yellow; loops appear green or white.",
       citation: "Kabsch, W., & Sander, C. (1983). Dictionary of protein secondary structure: pattern recognition of hydrogen-bonded and geometrical features. Biopolymers, 22(12), 2577-2637.",
       doi: "10.1002/bip.360221211"
     },
@@ -81,7 +81,7 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ isOpen, onClose }) => {
       explanation: "Evaluates tokenized strings into Abstract Syntax Tree (AST) selectors matched against atom variables in linear time.",
       example: "Query: `chain A and resn ALA and (resi 1-50 or name CA)`",
       expected: "Highlights target atoms in pink and reports matching atom count.",
-      citation: "PyMOL Selection Algebra standard syntax.",
+      citation: "Standard Selection Algebra syntax.",
       doi: ""
     }
   ];

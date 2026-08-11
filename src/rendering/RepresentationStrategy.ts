@@ -94,8 +94,8 @@ export function getColorFunction(
       return '#3b82f6';
     }
 
-    // Secondary Structure PyMOL
-    if (csLower === 'sspymol' || csLower === 'by ss') {
+    // Secondary Structure Standard
+    if (csLower === 'sspymol' || csLower === 'ssstandard' || csLower === 'by ss') {
       const ss = (atom.ss || '').toLowerCase();
       if (ss === 'h') return '#ef4444';
       if (ss === 's' || ss === 'e') return '#eab308';

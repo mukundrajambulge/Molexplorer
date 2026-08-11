@@ -312,7 +312,7 @@ export default function MolExplorer() {
                   <ul className="list-disc pl-5 space-y-1">
                      <li><strong>Enterprise Tier</strong> (e.g. Schrödinger Maestro, BIOVIA Discovery Studio): Licensed per-seat, costly, requiring dedicated IT. This creates a barrier for quick, universal access.</li>
                      <li><strong>Mid-market Tier</strong> (e.g. MOE): Popular with smaller biotechs, fully scriptable, but still bundled and priced.</li>
-                     <li><strong>Zero-licence-cost Tier</strong> (e.g. PyMOL, Avogadro, GROMACS): Scientifically validated pipeline with no licensing cost. MolExplorer aims for this spirit.</li>
+                     <li><strong>Zero-licence-cost Tier</strong> (e.g. Open-source CADD and Molecular Modeling tools): Scientifically validated pipeline with no licensing cost. MolExplorer aims for this spirit.</li>
                      <li><strong>Free Web Tools</strong> (e.g. SwissADME, PubChem Viewer): Instantly accessible. MolExplorer seeks to provide a similar frictionless experience.</li>
                      <li><strong>Built as an educational tool</strong> for bioinformatics and cheminformatics students.</li>
                   </ul>

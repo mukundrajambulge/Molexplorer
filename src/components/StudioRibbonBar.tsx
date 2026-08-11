@@ -160,7 +160,7 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
     { id: "Rainbow", label: "Rainbow" },
     { id: "Monochrome", label: "Monochrome" },
     { id: "Colourblind-safe", label: "Colourblind-safe" },
-    { id: "ssPyMol", label: "Secondary Structure (PyMOL)" },
+    { id: "ssStandard", label: "Secondary Structure (Standard)" },
     { id: "ssJmol", label: "Secondary Structure (Jmol)" },
     { id: "chain", label: "By Chain" },
     { id: "element", label: "By Element (CPK)" },
@@ -178,105 +178,78 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
 
   return (
     <div className="w-full bg-[#0E0E12] border-b border-white/10 select-none flex flex-col shrink-0 text-white z-30">
-      {/* Top Menu Bar Tabs (Word / PyMOL Ribbon style) */}
-      <div className="flex items-center justify-between px-3 border-b border-white/[0.06] bg-[#070709] h-9 text-xs">
-        <div className="flex items-center gap-1">
-          <div className="flex items-center gap-2 pr-4 border-r border-white/10 font-bold tracking-tight text-[#4A90E2] text-sm">
-            <Activity className="w-4 h-4 text-[#F27D26]" />
-            <span>MolStudio</span>
-            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-white/10 text-white/70">PyMOL Web</span>
-          </div>
-
-          {/* Mobile Tab Selector Dropdown */}
-          <div className="block md:hidden ml-2">
-            <select
-              value={activeTab}
-              onChange={(e) => setActiveTab(e.target.value as any)}
-              className="bg-[#121218] border border-[#4A90E2]/40 text-[#4A90E2] text-xs font-semibold rounded-md px-2 py-1 outline-none cursor-pointer"
-            >
-              {[
-                { id: "file", label: "📁 File & I/O" },
-                { id: "display", label: "🎨 Display & Render" },
-                { id: "select", label: "🔍 Selection & Query" },
-                { id: "prep", label: "🧪 Protein Prep" },
-                { id: "align", label: "📐 Structural Alignment" },
-                { id: "analysis", label: "📏 Structure Analysis" },
-                { id: "wizards", label: "✨ Wizards & Maps" },
-                { id: "movie", label: "🎬 Movie & Animation" },
-                { id: "session", label: "💾 Session & View" },
-                { id: "sculpting", label: "⚡ Sculpting & Editing" }
-              ].map(tab => (
-                <option key={tab.id} value={tab.id} className="bg-[#0E0E12] text-white">
-                  {tab.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Desktop Tab Bar */}
-          <div className="hidden md:flex items-center gap-0.5 ml-2 overflow-x-auto custom-scrollbar">
-            {[
-              { id: "file", label: "File & I/O" },
-              { id: "display", label: "Display & Render" },
-              { id: "select", label: "Selection & Query" },
-              { id: "prep", label: "Protein Prep" },
-              { id: "align", label: "Structural Alignment" },
-              { id: "analysis", label: "Structure Analysis" },
-              { id: "wizards", label: "Wizards & Maps" },
-              { id: "movie", label: "Movie & Animation" },
-              { id: "session", label: "Session & View" },
-              { id: "sculpting", label: "Sculpting & Editing" }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3 py-1.5 rounded-t-lg text-xs font-medium transition-all whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? "bg-[#0E0E12] text-white border-t-2 border-[#4A90E2] shadow-sm"
-                    : "text-white/50 hover:text-white hover:bg-white/[0.03]"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+      {/* Row 1: Brand Title & Global Quick Actions */}
+      <div className="flex items-center justify-between px-4 bg-[#070709] h-10 border-b border-white/[0.05] text-xs">
+        <div className="flex items-center gap-2 font-bold tracking-tight text-[#4A90E2] text-sm shrink-0">
+          <Activity className="w-4.5 h-4.5 text-[#F27D26]" />
+          <span>MolStudio</span>
+          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/70">Studio</span>
         </div>
 
-        {/* Global Quick Action Stats */}
-        <div className="flex items-center gap-3 text-[11px] font-mono text-white/50 shrink-0 pr-2">
+        <div className="flex items-center gap-3 text-[11px] font-mono text-white/50 shrink-0">
+          <div className="flex items-center gap-1.5 whitespace-nowrap">
+            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>Atoms: <strong className="text-white">{totalAtomCount}</strong></span>
+          </div>
+
+          {selectedAtomCount > 0 && (
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[#F27D26]/20 text-[#F27D26] border border-[#F27D26]/30 whitespace-nowrap">
+              <span>Sel: <strong className="text-white">{selectedAtomCount}</strong></span>
+              <button onClick={onClearSelection} className="hover:text-white ml-1 font-bold" title="Clear selection">✕</button>
+            </div>
+          )}
+
+          <button 
+            onClick={onToggleHelp}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F27D26]/10 hover:bg-[#F27D26]/20 text-[#F27D26] border border-[#F27D26]/20 transition-all font-sans cursor-pointer btn-luminous"
+          >
+            <HelpCircle className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Science & FAQ</span>
+          </button>
+
           {onOpenExport && (
             <button
               onClick={onOpenExport}
-              className="flex items-center gap-1.5 px-3 py-1 rounded bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-all font-sans font-semibold cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-all font-sans font-semibold cursor-pointer shadow-sm btn-luminous"
               title="Export structure to .PDB, .PDBQT, .SDF, .XYZ, .PSE, .PNG"
             >
               <Download className="w-3.5 h-3.5 text-emerald-400" />
               <span>Export All</span>
             </button>
           )}
-
-          <button 
-            onClick={onToggleHelp}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#F27D26]/10 hover:bg-[#F27D26]/20 text-[#F27D26] border border-[#F27D26]/20 transition-all font-sans cursor-pointer"
-          >
-            <HelpCircle className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Science & FAQ</span>
-          </button>
-          <div className="flex items-center gap-1.5 whitespace-nowrap">
-            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-            <span>Atoms: <strong className="text-white">{totalAtomCount}</strong></span>
-          </div>
-          {selectedAtomCount > 0 && (
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#F27D26]/20 text-[#F27D26] border border-[#F27D26]/30 whitespace-nowrap">
-              <span>Selected: <strong>{selectedAtomCount}</strong></span>
-              <button onClick={onClearSelection} className="hover:text-white ml-1">×</button>
-            </div>
-          )}
         </div>
       </div>
 
+      {/* Row 2: Smooth Touch-Scrollable Tabs (Completely Scrollbar-Free) */}
+      <div className="flex items-center px-4 bg-[#0A0A0E] h-9 border-b border-white/[0.04] overflow-x-auto no-scrollbar gap-1.5">
+        {[
+          { id: "file", label: "📁 File" },
+          { id: "display", label: "🎨 Display" },
+          { id: "select", label: "🔍 Select" },
+          { id: "prep", label: "🧪 Protein" },
+          { id: "align", label: "📐 Align" },
+          { id: "analysis", label: "📏 Analyze" },
+          { id: "wizards", label: "✨ Wizards" },
+          { id: "movie", label: "🎬 Movie" },
+          { id: "session", label: "💾 Session" },
+          { id: "sculpting", label: "⚡ Edit" }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`px-3 py-1 rounded-md text-[11px] font-semibold transition-all whitespace-nowrap ${
+              activeTab === tab.id
+                ? "bg-[#4A90E2]/25 text-[#4A90E2] border border-[#4A90E2]/40 shadow-sm"
+                : "text-white/60 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Action Toolbar Ribbon Area (Dynamically changes based on Active Tab) */}
-      <div className="h-16 px-4 py-2 flex items-center gap-6 overflow-x-auto custom-scrollbar">
+      <div className="h-16 px-4 py-2 flex items-center gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         
         {/* FILE TAB */}
         {activeTab === "file" && (
@@ -391,7 +364,7 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
         {activeTab === "select" && (
           <div className="flex items-center gap-4 w-full">
             <div className="flex flex-col gap-1 flex-1 max-w-md">
-              <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider">PyMOL Selection Query</span>
+              <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider">Selection Query</span>
               <div className="flex items-center gap-2">
                 <input
                   type="text"
