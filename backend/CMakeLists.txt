@@ -47,6 +47,8 @@ if(Drogon_FOUND)
     file(GLOB_RECURSE APP_SRC 
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
     )
+    # Exclude engine files from APP_SRC to avoid duplicate symbols
+    list(REMOVE_ITEM APP_SRC ${ENGINE_SRC})
     add_executable(molexplorer_backend ${APP_SRC})
     target_link_libraries(molexplorer_backend PRIVATE
         molexplorer_engine
