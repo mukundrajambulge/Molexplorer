@@ -3,6 +3,7 @@
 #include "../include/PoseClustering.hpp"
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 namespace molexplorer::engine {
 

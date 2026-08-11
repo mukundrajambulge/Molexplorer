@@ -27,17 +27,4 @@ public:
 
     virtual EnergyBreakdown evaluateBreakdown(const std::vector<Atom>& ligandAtoms, int numRotatableBonds) const = 0;
 };
-
-class ISearchAlgorithm {
-public:
-    virtual ~ISearchAlgorithm() = default;
-
-    virtual std::vector<DockingPose> search(
-        const Molecule& receptor,
-        const Molecule& ligand,
-        const IScoringFunction& scoringFunction,
-        const DockingParameters& params
-    ) = 0;
-};
-
 } // namespace molexplorer::engine
