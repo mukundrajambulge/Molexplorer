@@ -180,7 +180,11 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
           props.onAtomClick(pickedAtom);
         }
 
-        // 3. Selection expansion & toggle
+        // 3. Selection expansion & toggle (Disabled if selectionLevel is 'none')
+        if (selectionLevel === 'none') {
+          return;
+        }
+
         const allAtoms = MolecularPicker.extractAllAtoms(viewer, structureId);
         const isMulti = Boolean(event?.shiftKey || event?.ctrlKey || event?.metaKey);
         const nextSelection = SelectionManager.toggle(
@@ -530,63 +534,70 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         measurements.forEach((m: any) => {
           if (m.type === 'distance' && m.coordinates.length >= 2) {
             const [p1, p2] = m.coordinates;
+            // High-visibility measurement cylinder
             viewer.addCylinder({
               start: p1,
               end: p2,
-              radius: 0.08,
+              radius: 0.10,
               color: '#00f2ff',
-              dashed: true,
               fromCap: 1,
               toCap: 1
             });
+            // Marker spheres at endpoints
+            viewer.addSphere({ center: p1, radius: 0.35, color: '#00f2ff', opacity: 0.95 });
+            viewer.addSphere({ center: p2, radius: 0.35, color: '#00f2ff', opacity: 0.95 });
+
             const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2, z: (p1.z + p2.z) / 2 };
             viewer.addLabel(m.label, {
               position: mid,
-              backgroundColor: 'rgba(15, 23, 42, 0.90)',
+              backgroundColor: 'rgba(15, 23, 42, 0.95)',
               borderColor: '#00f2ff',
               fontColor: '#ffffff',
               font: 'monospace',
-              fontSize: 10,
-              backgroundOpacity: 0.90
+              fontSize: 11,
+              backgroundOpacity: 0.95
             });
           } else if (m.type === 'angle' && m.coordinates.length >= 3) {
             const [p1, p2, p3] = m.coordinates;
-            viewer.addCylinder({ start: p1, end: p2, radius: 0.06, color: '#f59e0b', dashed: true });
-            viewer.addCylinder({ start: p2, end: p3, radius: 0.06, color: '#f59e0b', dashed: true });
+            viewer.addCylinder({ start: p1, end: p2, radius: 0.08, color: '#f59e0b', fromCap: 1, toCap: 1 });
+            viewer.addCylinder({ start: p2, end: p3, radius: 0.08, color: '#f59e0b', fromCap: 1, toCap: 1 });
+            viewer.addSphere({ center: p1, radius: 0.30, color: '#f59e0b', opacity: 0.95 });
+            viewer.addSphere({ center: p2, radius: 0.35, color: '#f59e0b', opacity: 0.95 });
+            viewer.addSphere({ center: p3, radius: 0.30, color: '#f59e0b', opacity: 0.95 });
             viewer.addLabel(m.label, {
               position: p2,
-              backgroundColor: 'rgba(15, 23, 42, 0.90)',
+              backgroundColor: 'rgba(15, 23, 42, 0.95)',
               borderColor: '#f59e0b',
               fontColor: '#ffffff',
               font: 'monospace',
-              fontSize: 10,
-              backgroundOpacity: 0.90
+              fontSize: 11,
+              backgroundOpacity: 0.95
             });
           } else if (m.type === 'dihedral' && m.coordinates.length >= 4) {
             const [p1, p2, p3, p4] = m.coordinates;
-            viewer.addCylinder({ start: p1, end: p2, radius: 0.05, color: '#a855f7', dashed: true });
-            viewer.addCylinder({ start: p2, end: p3, radius: 0.08, color: '#a855f7', dashed: false });
-            viewer.addCylinder({ start: p3, end: p4, radius: 0.05, color: '#a855f7', dashed: true });
+            viewer.addCylinder({ start: p1, end: p2, radius: 0.06, color: '#a855f7', fromCap: 1, toCap: 1 });
+            viewer.addCylinder({ start: p2, end: p3, radius: 0.10, color: '#a855f7', fromCap: 1, toCap: 1 });
+            viewer.addCylinder({ start: p3, end: p4, radius: 0.06, color: '#a855f7', fromCap: 1, toCap: 1 });
             const mid = { x: (p2.x + p3.x) / 2, y: (p2.y + p3.y) / 2, z: (p2.z + p3.z) / 2 };
             viewer.addLabel(m.label, {
               position: mid,
-              backgroundColor: 'rgba(15, 23, 42, 0.90)',
+              backgroundColor: 'rgba(15, 23, 42, 0.95)',
               borderColor: '#a855f7',
               fontColor: '#ffffff',
               font: 'monospace',
-              fontSize: 10,
-              backgroundOpacity: 0.90
+              fontSize: 11,
+              backgroundOpacity: 0.95
             });
           } else if (m.type === 'label' && m.coordinates.length >= 1) {
-            const p = m.coordinates[0];
+            const [p1] = m.coordinates;
             viewer.addLabel(m.label, {
-              position: { x: p.x, y: p.y + 0.3, z: p.z },
-              backgroundColor: 'rgba(15, 23, 42, 0.90)',
-              borderColor: '#60a5fa',
+              position: p1,
+              backgroundColor: 'rgba(15, 23, 42, 0.95)',
+              borderColor: '#10b981',
               fontColor: '#ffffff',
               font: 'monospace',
-              fontSize: 9,
-              backgroundOpacity: 0.90
+              fontSize: 11,
+              backgroundOpacity: 0.95
             });
           }
         });
@@ -650,6 +661,7 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
   ]);
 
   const granularityLevels: { id: SelectionLevel; label: string }[] = [
+    { id: 'none', label: 'None' },
     { id: 'atom', label: 'Atom' },
     { id: 'residue', label: 'Residue' },
     { id: 'ligand', label: 'Ligand' },
@@ -669,7 +681,7 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
           {granularityLevels.map((lvl) => (
             <button
               key={lvl.id}
-              onClick={() => setSelectionLevel(lvl.id)}
+              onClick={() => setSelectionLevel(selectionLevel === lvl.id ? 'none' : lvl.id)}
               className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all ${
                 selectionLevel === lvl.id
                   ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 shadow-[0_0_10px_rgba(0,242,255,0.2)]'

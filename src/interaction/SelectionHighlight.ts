@@ -58,7 +58,7 @@ export class SelectionHighlight {
           center: { x: atom.x, y: atom.y, z: atom.z },
           radius: 0.38,
           color: highlightColor,
-          opacity: 0.85
+          opacity: 0.90
         });
       }
     });
@@ -81,33 +81,38 @@ export class SelectionHighlight {
       // Marker sphere
       viewer.addSphere({
         center: { x: pt.x, y: pt.y, z: pt.z },
-        radius: 0.50,
+        radius: 0.52,
         color: markerColor,
-        opacity: 0.90
+        opacity: 0.95
       });
 
       // Point label
       const ptLabel = `P${idx + 1}: ${(pt.name || '').trim() || `#${pt.serial}`}`;
       viewer.addLabel(ptLabel, {
         position: { x: pt.x, y: pt.y + 0.45, z: pt.z },
-        backgroundColor: 'rgba(15, 23, 42, 0.90)',
+        backgroundColor: 'rgba(15, 23, 42, 0.95)',
         borderColor: markerColor,
         fontColor: '#ffffff',
         font: 'monospace',
-        fontSize: 10,
-        backgroundOpacity: 0.90
+        fontSize: 11,
+        backgroundOpacity: 0.95
       });
     });
 
-    // Draw temporary connection line if 1 point already clicked for distance
-    if (mode === 'distance' && clickedBuffer.length === 1) {
-      const p1 = clickedBuffer[0];
-      viewer.addSphere({
-        center: { x: p1.x, y: p1.y, z: p1.z },
-        radius: 0.55,
-        color: '#00f2ff',
-        opacity: 0.95
-      });
+    // Draw active connecting lines between collected points
+    if (clickedBuffer.length >= 2) {
+      for (let i = 0; i < clickedBuffer.length - 1; i++) {
+        const p1 = clickedBuffer[i];
+        const p2 = clickedBuffer[i + 1];
+        viewer.addCylinder({
+          start: { x: p1.x, y: p1.y, z: p1.z },
+          end: { x: p2.x, y: p2.y, z: p2.z },
+          radius: 0.12,
+          color: '#00f2ff',
+          fromCap: 1,
+          toCap: 1
+        });
+      }
     }
   }
 

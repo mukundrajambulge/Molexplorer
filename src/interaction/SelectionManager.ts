@@ -12,6 +12,9 @@ export class SelectionManager {
     if (!atom) return [];
 
     switch (level) {
+      case 'none':
+        return [];
+
       case 'atom':
         return [atom];
 

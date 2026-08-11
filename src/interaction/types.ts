@@ -1,4 +1,4 @@
-export type SelectionLevel = 'atom' | 'residue' | 'ligand' | 'chain' | 'molecule';
+export type SelectionLevel = 'none' | 'atom' | 'residue' | 'ligand' | 'chain' | 'molecule';
 
 export interface AtomSelectionKey {
   structureId: string;

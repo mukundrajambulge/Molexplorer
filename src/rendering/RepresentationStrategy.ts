@@ -26,10 +26,47 @@ function hslToHex(h: number, s: number, l: number): string {
   return `#${f(0)}${f(8)}${f(4)}`;
 }
 
+// 12 High-Contrast Chain Colors
 const CHAIN_PALETTE = [
-  '#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b',
-  '#14b8a6', '#ef4444', '#06b6d4', '#84cc16', '#6366f1', '#d97706'
+  '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4',
+  '#f97316', '#14b8a6', '#ef4444', '#84cc16', '#6366f1', '#d97706'
 ];
+
+// Shapely Amino Acid Palette (Standard Biochemical Residue Colors)
+const SHAPELY_AMINO_COLORS: Record<string, string> = {
+  // Acidic (Negatively charged) - Red
+  'ASP': '#dc2626', 'GLU': '#dc2626',
+  // Basic (Positively charged) - Blue
+  'LYS': '#2563eb', 'ARG': '#1d4ed8', 'HIS': '#3b82f6',
+  // Polar uncharged - Orange & Cyan
+  'SER': '#f97316', 'THR': '#ea580c', 'ASN': '#06b6d4', 'GLN': '#0891b2',
+  // Aromatic - Purple & Indigo
+  'PHE': '#8b5cf6', 'TYR': '#a855f7', 'TRP': '#7c3aed',
+  // Hydrophobic / Aliphatic - Emerald Green & Amber
+  'ALA': '#10b981', 'VAL': '#059669', 'LEU': '#047857', 'ILE': '#065f46',
+  'MET': '#eab308', 'PRO': '#d97706',
+  // Special - Cysteine Yellow, Glycine Silver
+  'CYS': '#facc15', 'GLY': '#e2e8f0',
+  // Nucleic Acids
+  'A': '#3b82f6', 'DA': '#3b82f6',
+  'C': '#ef4444', 'DC': '#ef4444',
+  'G': '#10b981', 'DG': '#10b981',
+  'T': '#f59e0b', 'DT': '#f59e0b',
+  'U': '#8b5cf6'
+};
+
+// Kyte-Doolittle Hydrophobicity Palette
+const HYDROPHOBICITY_COLORS: Record<string, string> = {
+  // Most Hydrophobic (> 1.8) - Warm Amber & Orange
+  'ILE': '#f59e0b', 'VAL': '#f97316', 'LEU': '#f59e0b', 'PHE': '#ea580c',
+  'CYS': '#eab308', 'MET': '#facc15', 'ALA': '#fbbf24',
+  // Amphipathic / Neutral (-0.4 to -1.6) - Emerald to Light Sage
+  'GLY': '#10b981', 'THR': '#14b8a6', 'SER': '#06b6d4', 'TRP': '#34d399',
+  'TYR': '#6ee7b7', 'PRO': '#a7f3d0',
+  // Most Hydrophilic (-3.2 to -4.5) - Royal & Electric Blue
+  'HIS': '#60a5fa', 'GLN': '#3b82f6', 'ASP': '#2563eb', 'GLU': '#1d4ed8',
+  'ASN': '#2563eb', 'LYS': '#1e40af', 'ARG': '#1e3a8a'
+};
 
 export function getColorFunction(
   colorScheme: string,
@@ -43,22 +80,26 @@ export function getColorFunction(
   return (atom: any): string => {
     if (!atom) return '#ffffff';
 
-    const csLower = (colorScheme || '').toLowerCase();
+    const csLower = (colorScheme || '').toLowerCase().trim();
 
-    if (csLower === 'white' || csLower === 'monochrome') {
+    if (csLower === 'white') {
       return '#ffffff';
     }
 
-    // Classic CPK or Element coloring
-    if (csLower === 'element' || csLower === 'classic cpk' || csLower === 'modern/jmol') {
+    if (csLower === 'monochrome') {
+      return '#94a3b8';
+    }
+
+    // 1. Classic CPK
+    if (csLower === 'classic cpk' || csLower === 'element' || csLower === 'by element') {
       if (isRibbonStyle) {
-        // Ribbon cartoons follow Secondary Structure / Chain for multi-colored visual excellence
+        // In cartoon ribbons, show Secondary Structure with CPK color accents
         const ss = (atom.ss || '').toLowerCase();
-        if (ss === 'h') return '#ef4444'; // Red Helices
-        if (ss === 's' || ss === 'e') return '#eab308'; // Yellow Sheets
+        if (ss === 'h') return '#e11d48'; // Red Alpha-Helices
+        if (ss === 's' || ss === 'e') return '#eab308'; // Golden Beta-Sheets
         const ch = atom.chain || 'A';
         const idx = ch.charCodeAt(0) % CHAIN_PALETTE.length;
-        return CHAIN_PALETTE[idx];
+        return CHAIN_PALETTE[idx]; // Chain-specific loop accents
       }
       
       const elem = (atom.elem || atom.element || '').toUpperCase();
@@ -70,6 +111,8 @@ export function getColorFunction(
         case 'P': return '#ff8000'; // CPK Phosphorus Orange
         case 'H': return '#ffffff'; // CPK Hydrogen White
         case 'F': case 'CL': return '#1ff01f'; // Halogen Green
+        case 'BR': return '#991b1b'; // Bromine Dark Red
+        case 'I': return '#7e22ce'; // Iodine Dark Violet
         case 'FE': return '#e06633'; // Iron Rust Orange
         case 'ZN': return '#7d80b0'; // Zinc Purple
         case 'CA': return '#3dff00'; // Calcium Lime Green
@@ -78,7 +121,20 @@ export function getColorFunction(
       }
     }
 
-    // By Chain
+    // 2. Modern/Jmol (Shapely Amino Acid Standard)
+    if (csLower === 'modern/jmol' || csLower === 'amino' || csLower === 'shapely') {
+      const resn = (atom.resname || atom.resn || '').toUpperCase();
+      if (SHAPELY_AMINO_COLORS[resn]) {
+        return SHAPELY_AMINO_COLORS[resn];
+      }
+      const elem = (atom.elem || atom.element || '').toUpperCase();
+      if (elem === 'N') return '#3050f8';
+      if (elem === 'O') return '#ff0d0d';
+      if (elem === 'S') return '#ffff30';
+      return '#909090';
+    }
+
+    // 3. By Chain
     if (csLower === 'chain' || csLower === 'by chain') {
       const ch = atom.chain || 'A';
       if (chainMap[ch]) return chainMap[ch];
@@ -86,71 +142,80 @@ export function getColorFunction(
       return CHAIN_PALETTE[idx];
     }
 
-    // By Molecule (maps to chain palette for multi-model structures)
-    if (csLower === 'by molecule') {
-      const ch = atom.chain || 'A';
-      if (chainMap[ch]) return chainMap[ch];
-      const idx = ch.charCodeAt(0) % CHAIN_PALETTE.length;
-      return CHAIN_PALETTE[idx];
+    // 4. By Molecule / Model
+    if (csLower === 'by molecule' || csLower === 'molecule') {
+      const mId = atom.modelId !== undefined ? atom.modelId : (atom.chain ? atom.chain.charCodeAt(0) : 0);
+      return CHAIN_PALETTE[Math.abs(mId) % CHAIN_PALETTE.length];
     }
 
-    // Secondary Structure Jmol
-    if (csLower === 'ssjmol') {
+    // 5. Secondary Structure Standard (PyMOL Convention)
+    if (csLower === 'sspymol' || csLower === 'ssstandard' || csLower === 'by ss' || csLower === 'secondary structure (standard)') {
       const ss = (atom.ss || '').toLowerCase();
-      if (ss === 'h') return '#ff0080';
-      if (ss === 's' || ss === 'e') return '#ffc800';
-      return '#3b82f6';
+      if (ss === 'h') return '#ef4444'; // Red Helices
+      if (ss === 's' || ss === 'e') return '#f59e0b'; // Amber Sheets
+      return '#10b981'; // Emerald Green Turns/Loops
     }
 
-    // Secondary Structure Standard
-    if (csLower === 'sspymol' || csLower === 'ssstandard' || csLower === 'by ss') {
+    // 6. Secondary Structure Jmol
+    if (csLower === 'ssjmol' || csLower === 'secondary structure (jmol)') {
       const ss = (atom.ss || '').toLowerCase();
-      if (ss === 'h') return '#ef4444';
-      if (ss === 's' || ss === 'e') return '#eab308';
-      return '#22c55e';
+      if (ss === 'h') return '#ff0080'; // Magenta Helices
+      if (ss === 's' || ss === 'e') return '#ffc800'; // Golden Sheets
+      return '#3b82f6'; // Cornflower Blue Turns/Loops
     }
 
-    // Spectrum / Rainbow
+    // 7. Spectrum / Rainbow (N-to-C Terminal Gradient)
     if (csLower === 'spectrum' || csLower === 'rainbow') {
       const resi = typeof atom.resi === 'number' ? atom.resi : minResi;
       const t = Math.max(0, Math.min(1, (resi - minResi) / resiRange));
-      const hue = (1 - t) * 240;
+      const hue = (1 - t) * 240; // 240 (Blue) -> 120 (Green) -> 60 (Yellow) -> 0 (Red)
       return hslToHex(hue, 100, 48);
     }
 
-    // By Formal Charge
-    if (csLower === 'by formal charge') {
+    // 8. By Formal Charge (Acidic Red, Basic Blue, Neutral Slate)
+    if (csLower === 'by formal charge' || csLower === 'formal charge') {
       const charge = atom.formalCharge || 0;
-      if (charge < 0) return '#ef4444';
-      if (charge > 0) return '#3b82f6';
-      return '#e5e7eb';
+      if (charge > 0) return '#2563eb'; // Positive Blue
+      if (charge < 0) return '#dc2626'; // Negative Red
+      
+      const resn = (atom.resname || atom.resn || '').toUpperCase();
+      if (resn === 'ARG' || resn === 'LYS' || resn === 'HIS') return '#2563eb';
+      if (resn === 'ASP' || resn === 'GLU') return '#dc2626';
+      return '#94a3b8';
     }
 
-    // By Partial Charge / ESP
-    if (csLower === 'by partial charge' || csLower === 'esp') {
+    // 9. By Partial Charge / Electrostatic Potential (ESP)
+    if (csLower === 'by partial charge' || csLower === 'esp' || csLower === 'electrostatic') {
+      const resn = (atom.resname || atom.resn || '').toUpperCase();
+      if (resn === 'ARG' || resn === 'LYS' || resn === 'HIS') return '#2563eb'; // Basic Electropositive Blue
+      if (resn === 'ASP' || resn === 'GLU') return '#dc2626'; // Acidic Electronegative Red
+      if (['SER', 'THR', 'ASN', 'GLN'].includes(resn)) return '#38bdf8'; // Polar Light Blue
+      if (['PHE', 'TYR', 'TRP'].includes(resn)) return '#a855f7'; // Aromatic Soft Violet
+      
       const elem = (atom.elem || atom.element || '').toUpperCase();
       if (elem === 'O' || elem === 'F' || elem === 'CL') return '#ef4444';
-      if (elem === 'N' || elem === 'H') return '#3b82f6';
-      return '#9ca3af';
+      if (elem === 'N') return '#3b82f6';
+      return '#cbd5e1'; // Clean Neutral Backbone
     }
 
-    // Hydrophobicity
+    // 10. Hydrophobicity (Kyte-Doolittle)
     if (csLower === 'hydrophobicity') {
       const resn = (atom.resname || atom.resn || '').toUpperCase();
-      const hydrophobic = ['ALA', 'VAL', 'LEU', 'ILE', 'MET', 'PHE', 'TYR', 'TRP', 'PRO'];
-      if (hydrophobic.includes(resn)) return '#eab308';
-      return '#3b82f6';
+      if (HYDROPHOBICITY_COLORS[resn]) {
+        return HYDROPHOBICITY_COLORS[resn];
+      }
+      return '#10b981';
     }
 
-    // Colorblind-safe
-    if (csLower === 'colourblind-safe' || csLower === 'colorblind safe') {
+    // 11. Colourblind-safe (Okabe-Ito / Wong Palette)
+    if (csLower === 'colourblind-safe' || csLower === 'colorblind-safe' || csLower === 'colorblind safe') {
       const cbPalette = ['#0072B2', '#E69F00', '#009E73', '#F0E442', '#56B4E9', '#D55E00', '#CC79A7'];
       const ch = atom.chain || 'A';
       const idx = ch.charCodeAt(0) % cbPalette.length;
       return cbPalette[idx];
     }
 
-    // SMARTS (default to element coloring)
+    // 12. SMARTS (Default Element Colors)
     if (csLower === 'smarts') {
       const elem = (atom.elem || atom.element || '').toUpperCase();
       switch (elem) {
@@ -164,8 +229,9 @@ export function getColorFunction(
       }
     }
 
+    // Custom Hex String Fallback or Neutral Slate
     const isHex = /^#[0-9A-F]{6}$/i.test(colorScheme);
-    return isHex ? colorScheme : '#b0b0b0';
+    return isHex ? colorScheme : '#94a3b8';
   };
 }
 
@@ -195,7 +261,7 @@ export class DefaultRepresentationStrategy implements IRepresentationStrategy {
       case "Line":
         return { line: base };
       case "Stick":
-        return { stick: base };
+        return { stick: { ...base, radius: 0.18 } };
       case "Ball-and-Stick":
         return { stick: { ...base, radius: 0.15 }, sphere: { ...base, radius: 0.35 } };
       case "Space-Filling":
@@ -206,7 +272,6 @@ export class DefaultRepresentationStrategy implements IRepresentationStrategy {
         return { cartoon: { ...base, tubes: true, thickness: 0.5 } };
       case "Dots":
       case "Dot Surface":
-        // Hardware-accelerated WebGL point cloud with rich multi-color scheme
         return { dot: { ...base, radius: 0.35 } };
       case "Non-bonded (crosses)":
         return { cross: { ...base, radius: 0.8, linewidth: 2 } };
@@ -232,7 +297,7 @@ export class DefaultRepresentationStrategy implements IRepresentationStrategy {
       );
 
       const surfOpts: any = {
-        opacity: options.surfaceOpacity || 0.7,
+        opacity: typeof options.surfaceOpacity === 'number' ? options.surfaceOpacity : 0.7,
         wireframe: this.style === "Mesh",
         colorfunc
       };
