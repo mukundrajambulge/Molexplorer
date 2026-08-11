@@ -619,6 +619,15 @@ export class SelectionParser {
     selectedSerials: Set<number>; 
     textOutput?: string; 
     saveSelection?: { name: string; query: string };
+    deleteSelectionName?: string;
+    removeAtomSerials?: Set<number>;
+    setStyle?: string;
+    setColorScheme?: string;
+    setHiddenCategory?: string;
+    triggerZoom?: boolean;
+    fetchPdbId?: string;
+    addHydrogens?: boolean;
+    removeHydrogens?: boolean;
     addLabels?: { serial: number; text: string }[];
     clearLabels?: number[];
     addMeasurement?: {
@@ -650,6 +659,184 @@ export class SelectionParser {
   } {
     const qTrim = query.trim();
     const qLower = qTrim.toLowerCase();
+
+    // 0. remove / delete command: remove solvent, remove hydro, remove (expr), delete sele_1
+    if (qLower.startsWith('remove ') || qLower.startsWith('delete ') || qLower.startsWith('del ') || qLower === 'remove' || qLower === 'delete') {
+      let target = '';
+      if (qLower.startsWith('remove ')) target = qTrim.slice(7).trim();
+      else if (qLower.startsWith('delete ')) target = qTrim.slice(7).trim();
+      else if (qLower.startsWith('del ')) target = qTrim.slice(4).trim();
+      else target = 'selected';
+
+      // Check if deleting a named selection
+      if (namedSelections) {
+        const match = namedSelections.find(s => s.name.toLowerCase() === target.toLowerCase());
+        if (match) {
+          return {
+            selectedSerials: new Set(),
+            deleteSelectionName: match.name,
+            textOutput: `Delete: removed selection "${match.name}".`
+          };
+        }
+      }
+
+      let exprToParse = target;
+      if (target === 'solvent' || target === 'waters' || target === 'water' || target === 'sol') {
+        exprToParse = 'resn HOH+WAT+DOD+SOL';
+      } else if (target === 'hydro' || target === 'hydrogens' || target === 'hydrogen' || target === 'h') {
+        exprToParse = 'elem H';
+      } else if (target === 'selected' || target === 'sele') {
+        exprToParse = 'all';
+      }
+
+      const serials = this.parse(exprToParse);
+      return {
+        selectedSerials: new Set(),
+        removeAtomSerials: serials,
+        textOutput: `Remove: removed ${serials.size} atom(s) matching "${target}".`
+      };
+    }
+
+    // 0.1 show <representation> [, <selection>]
+    if (qLower.startsWith('show ') || qLower === 'show') {
+      const rest = qTrim.slice(5).trim();
+      const parts = rest.split(',');
+      const styleRaw = (parts[0] || 'cartoon').trim().toLowerCase();
+      let styleMap: Record<string, string> = {
+        'cartoon': 'Cartoon',
+        'ribbon': 'Cartoon',
+        'sticks': 'Stick',
+        'stick': 'Stick',
+        'spheres': 'Space-Filling',
+        'sphere': 'Space-Filling',
+        'vdw': 'Space-Filling',
+        'dots': 'Dots',
+        'dot': 'Dots',
+        'surface': 'Surfaces',
+        'surf': 'Surfaces',
+        'mesh': 'Surfaces',
+        'lines': 'Stick',
+        'line': 'Stick',
+        'putty': 'Putty',
+        'ball_and_stick': 'Ball-and-Stick',
+        'ball and stick': 'Ball-and-Stick'
+      };
+      const resolvedStyle = styleMap[styleRaw] || 'Cartoon';
+      let serials = new Set<number>();
+      if (parts.length >= 2) {
+        serials = this.parse(parts.slice(1).join(',').trim());
+      }
+      return {
+        selectedSerials: serials,
+        setStyle: resolvedStyle,
+        textOutput: `Show: set representation style to "${resolvedStyle}".`
+      };
+    }
+
+    // 0.2 hide <representation | everything | waters> [, <selection>]
+    if (qLower.startsWith('hide ') || qLower === 'hide') {
+      const target = qTrim.slice(5).trim().toLowerCase() || 'everything';
+      if (target === 'waters' || target === 'solvent' || target === 'water') {
+        const serials = this.parse('resn HOH+WAT+DOD+SOL');
+        return {
+          selectedSerials: new Set(),
+          removeAtomSerials: serials,
+          textOutput: `Hide: removed solvent waters from display.`
+        };
+      }
+      if (target === 'labels' || target === 'label') {
+        return {
+          selectedSerials: new Set(),
+          clearLabels: this.atoms.map(a => a.serial),
+          textOutput: `Hide: cleared all labels.`
+        };
+      }
+      return {
+        selectedSerials: new Set(),
+        setHiddenCategory: target,
+        textOutput: `Hide: hidden "${target}".`
+      };
+    }
+
+    // 0.3 color <color_name> [, <selection>]
+    if (qLower.startsWith('color ')) {
+      const rest = qTrim.slice(6).trim();
+      const parts = rest.split(',');
+      const colorRaw = (parts[0] || 'spectrum').trim().toLowerCase();
+      let serials = new Set<number>();
+      if (parts.length >= 2) {
+        serials = this.parse(parts.slice(1).join(',').trim());
+      }
+      let colorMap: Record<string, string> = {
+        'cpk': 'Classic CPK',
+        'element': 'Classic CPK',
+        'jmol': 'Modern Jmol',
+        'chain': 'By Chain',
+        'by_chain': 'By Chain',
+        'ss': 'Secondary Structure',
+        'secondary': 'Secondary Structure',
+        'spectrum': 'spectrum',
+        'rainbow': 'rainbow',
+        'bfactor': 'B-Factor',
+        'b_factor': 'B-Factor',
+        'charge': 'Formal Charge',
+        'hydrophobicity': 'Hydrophobicity',
+        'white': 'monochrome',
+        'gray': 'monochrome',
+        'red': 'rainbow',
+        'blue': 'spectrum',
+        'green': 'By Chain'
+      };
+      const resolvedColor = colorMap[colorRaw] || colorRaw;
+      return {
+        selectedSerials: serials,
+        setColorScheme: resolvedColor,
+        textOutput: `Color: color scheme set to "${resolvedColor}".`
+      };
+    }
+
+    // 0.4 zoom / center [expr]
+    if (qLower.startsWith('zoom') || qLower.startsWith('center') || qLower.startsWith('orient')) {
+      let expr = '';
+      if (qLower.startsWith('zoom')) expr = qTrim.slice(4).trim();
+      else if (qLower.startsWith('center')) expr = qTrim.slice(6).trim();
+      else expr = qTrim.slice(6).trim();
+
+      const serials = expr ? this.parse(expr) : new Set<number>();
+      return {
+        selectedSerials: serials,
+        triggerZoom: true,
+        textOutput: `Zoom: centered view on ${expr ? `selection "${expr}"` : 'molecule'}.`
+      };
+    }
+
+    // 0.5 fetch <pdb_id>
+    if (qLower.startsWith('fetch ')) {
+      const pdbId = qTrim.slice(6).trim().toUpperCase();
+      return {
+        selectedSerials: new Set(),
+        fetchPdbId: pdbId,
+        textOutput: `Fetch: fetching structure ${pdbId} from RCSB PDB...`
+      };
+    }
+
+    // 0.6 h_add / add_hydrogens / h_fill
+    if (qLower === 'h_add' || qLower === 'h_fill' || qLower === 'add_hydrogens' || qLower === 'hadd') {
+      return {
+        selectedSerials: new Set(),
+        addHydrogens: true,
+        textOutput: `h_add: added modeled hydrogens to molecular topology.`
+      };
+    }
+
+    // 0.7 remove_h / h_del / del_h
+    if (qLower === 'remove_h' || qLower === 'h_del' || qLower === 'del_h' || qLower === 'hdel') {
+      return {
+        selectedSerials: new Set(),
+        removeHydrogens: true,
+        textOutput: `remove_h: removed non-polar and polar hydrogens from topology.`
+      };
+    }
 
     // label selection, expression
     if (qLower.startsWith('label ')) {

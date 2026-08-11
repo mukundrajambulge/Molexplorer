@@ -379,6 +379,53 @@ export default function MolStudio() {
       }
     }
 
+    if (result.deleteSelectionName) {
+      setNamedSelections(prev => prev.filter(s => s.name.toLowerCase() !== result.deleteSelectionName!.toLowerCase()));
+    }
+
+    if (result.removeAtomSerials && result.removeAtomSerials.size > 0) {
+      const toRemove = result.removeAtomSerials;
+      if (processorRef.current) {
+        TopologyEditor.deleteAtoms(processorRef.current, toRemove);
+        setAtoms([...processorRef.current.atoms]);
+        setProcessedPDB(processorRef.current.toPDB());
+      } else {
+        setAtoms(prev => prev.filter(a => !toRemove.has(a.serial)));
+      }
+      setSelectedAtomSerials(new Set());
+      triggerFocus();
+    }
+
+    if (result.setStyle) {
+      setRenderStyle(result.setStyle as RenderStyle);
+    }
+
+    if (result.setColorScheme) {
+      setColorScheme(result.setColorScheme);
+    }
+
+    if (result.setHiddenCategory) {
+      if (result.setHiddenCategory === 'everything') {
+        setHiddenObjectIds(prev => new Set(prev).add('main_mol'));
+      }
+    }
+
+    if (result.triggerZoom) {
+      triggerFocus();
+    }
+
+    if (result.fetchPdbId) {
+      handleFetchPdb(result.fetchPdbId);
+    }
+
+    if (result.addHydrogens) {
+      handleAddHydrogens();
+    }
+
+    if (result.removeHydrogens) {
+      handleRemoveHydrogens();
+    }
+
     if (result.addLabels) {
       result.addLabels.forEach(l => {
         const atom = atoms.find(a => a.serial === l.serial);
