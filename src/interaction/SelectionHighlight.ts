@@ -2,20 +2,18 @@ import { MolecularSelection, PickedAtom } from './types';
 
 export class SelectionHighlight {
   /**
-   * Applies selection overlay without modifying base molecular representation.
+   * Applies non-destructive selection overlays on top of the 3Dmol scene.
+   * Uses both addStyle and direct 3D luminous sphere/cylinder markers to guarantee 100% visibility
+   * across all representation modes (Cartoon, Sticks, Surfaces, Spheres, Lines).
    */
   static applySelectionOverlay(
     viewer: any,
     selection: MolecularSelection,
     highlightColor: string = '#00f2ff'
   ) {
-    if (!viewer) return;
+    if (!viewer || !selection || selection.atoms.length === 0) return;
 
-    // Clear previous selection shapes if any custom shapes were drawn
-    // In 3Dmol, applying a style overlay to specific serials or AtomSpecs adds the visual indicator
-    if (selection.atoms.length === 0) return;
-
-    // Group atoms by structure/model
+    // 1. Group atoms by model ID
     const atomsByModel = new Map<number, number[]>();
     selection.atoms.forEach(a => {
       const mId = a.modelId !== undefined ? a.modelId : 0;
@@ -27,28 +25,90 @@ export class SelectionHighlight {
       list.push(a.serial);
     });
 
+    // 2. Apply additive style overlay to each model
     atomsByModel.forEach((serials, mId) => {
       if (serials.length === 0) return;
       const model = viewer.getModel ? viewer.getModel(mId) : null;
       const target = model ? model : viewer;
 
-      // Overlay luminous stick and sphere halo
-      target.setStyle(
-        { serial: serials },
-        {
-          stick: {
-            color: highlightColor,
-            radius: 0.26,
-            opacity: 0.95
-          },
-          sphere: {
-            color: highlightColor,
-            scale: 0.38,
-            opacity: 0.95
+      if (typeof target.addStyle === 'function') {
+        target.addStyle(
+          { serial: serials },
+          {
+            stick: {
+              color: highlightColor,
+              radius: 0.28,
+              opacity: 0.95
+            },
+            sphere: {
+              color: highlightColor,
+              scale: 0.38,
+              opacity: 0.95
+            }
           }
-        }
-      );
+        );
+      }
     });
+
+    // 3. Render 3D luminous sphere halos directly on the atom 3D coordinates
+    // This ensures selected atoms glow brightly even in Cartoon or Surface representations
+    selection.atoms.forEach(atom => {
+      if (typeof atom.x === 'number' && typeof atom.y === 'number' && typeof atom.z === 'number') {
+        viewer.addSphere({
+          center: { x: atom.x, y: atom.y, z: atom.z },
+          radius: 0.38,
+          color: highlightColor,
+          opacity: 0.85
+        });
+      }
+    });
+  }
+
+  /**
+   * Renders active measurement markers (points, lines, angles, labels) in the 3D viewport.
+   */
+  static applyMeasurementMarkers(
+    viewer: any,
+    clickedBuffer: Array<{ serial: number; x: number; y: number; z: number; name?: string }>,
+    mode: 'distance' | 'angle' | 'dihedral' | 'label' | null
+  ) {
+    if (!viewer || !clickedBuffer || clickedBuffer.length === 0) return;
+
+    // Draw pulsing highlight spheres on each selected measurement point
+    clickedBuffer.forEach((pt, idx) => {
+      const markerColor = idx === 0 ? '#00f2ff' : idx === 1 ? '#f59e0b' : idx === 2 ? '#a855f7' : '#ec4899';
+      
+      // Marker sphere
+      viewer.addSphere({
+        center: { x: pt.x, y: pt.y, z: pt.z },
+        radius: 0.50,
+        color: markerColor,
+        opacity: 0.90
+      });
+
+      // Point label
+      const ptLabel = `P${idx + 1}: ${(pt.name || '').trim() || `#${pt.serial}`}`;
+      viewer.addLabel(ptLabel, {
+        position: { x: pt.x, y: pt.y + 0.45, z: pt.z },
+        backgroundColor: 'rgba(15, 23, 42, 0.90)',
+        borderColor: markerColor,
+        fontColor: '#ffffff',
+        font: 'monospace',
+        fontSize: 10,
+        backgroundOpacity: 0.90
+      });
+    });
+
+    // Draw temporary connection line if 1 point already clicked for distance
+    if (mode === 'distance' && clickedBuffer.length === 1) {
+      const p1 = clickedBuffer[0];
+      viewer.addSphere({
+        center: { x: p1.x, y: p1.y, z: p1.z },
+        radius: 0.55,
+        color: '#00f2ff',
+        opacity: 0.95
+      });
+    }
   }
 
   /**

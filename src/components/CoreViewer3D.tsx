@@ -8,7 +8,7 @@ import { MolecularPicker } from '../interaction/MolecularPicker';
 import { SelectionManager } from '../interaction/SelectionManager';
 import { SelectionHighlight } from '../interaction/SelectionHighlight';
 import { SelectionLevel, PickedAtom } from '../interaction/types';
-import { MousePointer, Layers, Check, X, Sparkles } from 'lucide-react';
+import { MousePointer, Layers, Check, X, Sparkles, Ruler } from 'lucide-react';
 
 export interface CoreViewer3DRef {
   getView: () => any;
@@ -53,25 +53,19 @@ interface CoreViewer3DProps {
 }
 
 const CHAIN_PALETTE = [
-  '#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b',
-  '#14b8a6', '#ef4444', '#06b6d4', '#84cc16', '#6366f1', '#d97706'
+  "#4A90E2", "#50E3C2", "#F5A623", "#E74C3C", "#9B59B6",
+  "#1ABC9C", "#2ECC71", "#34495E", "#E67E22", "#D35400"
 ];
 
-function getStyleObj(
-  style: string,
-  colorScheme: string = 'spectrum',
-  minResi: number = 1,
-  maxResi: number = 100,
-  chainMap: Record<string, string> = {},
-  opacity: number = 1.0
-) {
-  const strategy = RepresentationStrategyFactory.getStrategy(style as any);
-  return strategy.getStyleObject({
+function getStyleObj(style: RenderStyle, colorScheme: string, minResi: number, maxResi: number, chainMap: Record<string, string>, opacity: number = 1.0) {
+  const colorFunc = getColorFunction(colorScheme, minResi, maxResi, chainMap);
+  const strategy = RepresentationStrategyFactory.getStrategy(style);
+  return strategy.getStyleObject(colorFunc, {
     colorScheme,
     minResi,
     maxResi,
     chainMap,
-    opacity
+    surfaceOpacity: opacity
   });
 }
 
@@ -117,8 +111,8 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
 
     // Determine background color
     const bgColor = mode === 'explorer' 
-      ? (props.viewState?.canvasBackground || '#050508')
-      : (props.backgroundColor || '#050508');
+      ? (props.viewState?.canvasBackground || '#0b0f19')
+      : (props.backgroundColor || '#0b0f19');
 
     if (!viewerRef.current) {
       viewerRef.current = $3Dmol.createViewer(containerRef.current, {
@@ -145,8 +139,8 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
 
     const renderTimer = setTimeout(async () => {
       const bgColor = mode === 'explorer' 
-        ? (props.viewState?.canvasBackground || '#050508')
-        : (props.backgroundColor || '#050508');
+        ? (props.viewState?.canvasBackground || '#0b0f19')
+        : (props.backgroundColor || '#0b0f19');
       viewer.setBackgroundColor(bgColor);
       if (typeof viewer.setProjection === 'function') {
         try { viewer.setProjection(props.orthographic ? 'orthographic' : 'perspective'); } catch (e) {}
@@ -158,7 +152,7 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
       viewer.removeAllLabels();
 
       // Unified Atom Picking & Hover Handlers
-      const handleAtomPicked = (rawAtom: any, event?: any) => {
+      const handleAtomPicked = (rawAtom: any, _viewer?: any, event?: any) => {
         if (!rawAtom) return;
         const structureId = mode === 'explorer'
           ? (props.molecule?.id || props.molecule?.name || 'explorer_mol')
@@ -233,19 +227,25 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         const molContent = props.molecule.rawContent;
 
         // Add main molecule
-        viewer.addModel(molContent, format);
+        const m1 = viewer.addModel(molContent, format);
+        if (m1 && typeof m1.setClickable === 'function') {
+          m1.setClickable({}, true, handleAtomPicked);
+          m1.setHoverable({}, true, handleAtomHovered, handleAtomUnhovered);
+        }
 
         // Add compare molecule
         if (props.compareMolecule?.rawContent) {
           const m2 = viewer.addModel(props.compareMolecule.rawContent, props.compareMolecule.format.toLowerCase());
           m2.setStyle({}, { stick: { colorscheme: 'greenCarbon', radius: 0.15 }, sphere: { hidden: true } });
+          if (m2 && typeof m2.setClickable === 'function') {
+            m2.setClickable({}, true, handleAtomPicked);
+          }
         }
 
         // Apply Explorer Styles with full Opacity, Hydrogen, Label, and Electron Cloud support
         const vs = props.viewState;
         if (vs) {
           const rawOpacity = typeof vs.surfaceOpacity === 'number' ? vs.surfaceOpacity : 0.8;
-          // Enhanced bright opacity scale (80% default is luminous; 100% is fully saturated)
           const opacity = vs.performanceMode ? Math.min(rawOpacity, 0.9) : rawOpacity;
           const isStickRadius = vs.performanceMode ? 0.12 : 0.20;
           const isSphereScale = vs.performanceMode ? 0.22 : 0.30;
@@ -316,7 +316,7 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
               const labelText = `${sym}${num}`;
               viewer.addLabel(labelText, {
                 position: { x: a.x, y: a.y + 0.35, z: a.z },
-                backgroundColor: 'rgba(10, 10, 14, 0.85)',
+                backgroundColor: 'rgba(15, 23, 42, 0.90)',
                 borderColor: '#00f2ff',
                 fontColor: '#FFFFFF',
                 font: 'monospace',
@@ -331,10 +331,21 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
             SelectionHighlight.applySelectionOverlay(viewer, molecularSelection, '#00f2ff');
           }
 
-          // 5. Auto-Spin 3D rotation
+          // 5. Active Measurement Markers in Viewport
+          if (clickedAtomBuffer && clickedAtomBuffer.length > 0) {
+            SelectionHighlight.applyMeasurementMarkers(viewer, clickedAtomBuffer, activeMeasurementMode as any);
+          }
+
+          // 6. Auto-Spin 3D rotation
           if (typeof viewer.spin === 'function') {
             viewer.spin(vs.isSpinning ? 'y' : false, 1.0);
           }
+        }
+
+        // Attach viewer level click/hover listeners
+        if (typeof viewer.setClickable === 'function') {
+          viewer.setClickable({}, true, handleAtomPicked);
+          viewer.setHoverable({}, true, handleAtomHovered, handleAtomUnhovered);
         }
 
         viewer.zoomTo();
@@ -428,7 +439,17 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
           cross: { radius: 0.5, linewidth: 1.5, color: '#ff4d4d' }
         });
 
-        // Apply Selection Highlighting Overlay
+        // Render Surfaces / Mesh / Dots using Representation Strategy Pattern with true opacity
+        const strategy = RepresentationStrategyFactory.getStrategy(rStyle);
+        strategy.applySurfacesOrShapes(viewer, {
+          colorScheme: cScheme,
+          minResi,
+          maxResi,
+          chainMap,
+          surfaceOpacity: currentOpacity
+        });
+
+        // Apply Selection Highlighting Overlay (Glowing Luminous Markers)
         if (molecularSelection && molecularSelection.atoms.length > 0) {
           SelectionHighlight.applySelectionOverlay(viewer, molecularSelection, '#00f2ff');
         } else if (props.selectedAtomSerials && props.selectedAtomSerials.size > 0) {
@@ -440,15 +461,10 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
           });
         }
 
-        // Render Surfaces / Mesh / Dots using Representation Strategy Pattern with true opacity
-        const strategy = RepresentationStrategyFactory.getStrategy(rStyle);
-        strategy.applySurfacesOrShapes(viewer, {
-          colorScheme: cScheme,
-          minResi,
-          maxResi,
-          chainMap,
-          surfaceOpacity: currentOpacity
-        });
+        // Active Measurement In-Progress Markers (P1, P2, P3, P4)
+        if (clickedAtomBuffer && clickedAtomBuffer.length > 0) {
+          SelectionHighlight.applyMeasurementMarkers(viewer, clickedAtomBuffer, activeMeasurementMode as any);
+        }
 
         // Assembly, Symmetry, Alignment & Ligand overlays
         if (props.assemblyPDB) {
@@ -508,42 +524,9 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
             fromCap: true,
             toCap: true
           });
-
-          viewer.addLabel(`μ = ${mag.toFixed(2)} D`, {
-            position: tip,
-            backgroundColor: 'rgba(6, 182, 212, 0.85)',
-            borderColor: '#06b6d4',
-            fontColor: '#ffffff',
-            font: 'monospace',
-            fontSize: 10,
-            backgroundOpacity: 0.9
-          });
         }
 
-        // 2. Render Active Measurement Picking Highlights (Glowing Spheres & Labels)
-        if (clickedAtomBuffer && clickedAtomBuffer.length > 0) {
-          clickedAtomBuffer.forEach((cAtom, idx) => {
-            viewer.addSphere({
-              center: { x: cAtom.x, y: cAtom.y, z: cAtom.z },
-              radius: 0.60,
-              color: '#38bdf8',
-              opacity: 0.85
-            });
-
-            const labelTxt = `Point ${idx + 1}: ${(cAtom.name || '').trim()} #${cAtom.serial}`;
-            viewer.addLabel(labelTxt, {
-              position: { x: cAtom.x, y: cAtom.y + 0.8, z: cAtom.z },
-              backgroundColor: 'rgba(14, 165, 233, 0.95)',
-              borderColor: '#38bdf8',
-              fontColor: '#ffffff',
-              font: 'monospace',
-              fontSize: 10,
-              backgroundOpacity: 0.95
-            });
-          });
-        }
-
-        // Render Active 3D Measurements
+        // Render Committed 3D Measurements
         measurements.forEach((m: any) => {
           if (m.type === 'distance' && m.coordinates.length >= 2) {
             const [p1, p2] = m.coordinates;
@@ -559,12 +542,12 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
             const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2, z: (p1.z + p2.z) / 2 };
             viewer.addLabel(m.label, {
               position: mid,
-              backgroundColor: 'rgba(10, 10, 12, 0.85)',
+              backgroundColor: 'rgba(15, 23, 42, 0.90)',
               borderColor: '#00f2ff',
               fontColor: '#ffffff',
               font: 'monospace',
               fontSize: 10,
-              backgroundOpacity: 0.85
+              backgroundOpacity: 0.90
             });
           } else if (m.type === 'angle' && m.coordinates.length >= 3) {
             const [p1, p2, p3] = m.coordinates;
@@ -572,12 +555,12 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
             viewer.addCylinder({ start: p2, end: p3, radius: 0.06, color: '#f59e0b', dashed: true });
             viewer.addLabel(m.label, {
               position: p2,
-              backgroundColor: 'rgba(10, 10, 12, 0.85)',
+              backgroundColor: 'rgba(15, 23, 42, 0.90)',
               borderColor: '#f59e0b',
               fontColor: '#ffffff',
               font: 'monospace',
               fontSize: 10,
-              backgroundOpacity: 0.85
+              backgroundOpacity: 0.90
             });
           } else if (m.type === 'dihedral' && m.coordinates.length >= 4) {
             const [p1, p2, p3, p4] = m.coordinates;
@@ -587,23 +570,23 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
             const mid = { x: (p2.x + p3.x) / 2, y: (p2.y + p3.y) / 2, z: (p2.z + p3.z) / 2 };
             viewer.addLabel(m.label, {
               position: mid,
-              backgroundColor: 'rgba(10, 10, 12, 0.85)',
+              backgroundColor: 'rgba(15, 23, 42, 0.90)',
               borderColor: '#a855f7',
               fontColor: '#ffffff',
               font: 'monospace',
               fontSize: 10,
-              backgroundOpacity: 0.85
+              backgroundOpacity: 0.90
             });
           } else if (m.type === 'label' && m.coordinates.length >= 1) {
             const p = m.coordinates[0];
             viewer.addLabel(m.label, {
               position: { x: p.x, y: p.y + 0.3, z: p.z },
-              backgroundColor: 'rgba(10, 10, 12, 0.85)',
+              backgroundColor: 'rgba(15, 23, 42, 0.90)',
               borderColor: '#60a5fa',
               fontColor: '#ffffff',
               font: 'monospace',
               fontSize: 9,
-              backgroundOpacity: 0.85
+              backgroundOpacity: 0.90
             });
           }
         });
@@ -627,6 +610,16 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
               toCap: 1
             });
           });
+        }
+
+        // Attach viewer & model picking listeners
+        if (typeof m.setClickable === 'function') {
+          m.setClickable({}, true, handleAtomPicked);
+          m.setHoverable({}, true, handleAtomHovered, handleAtomUnhovered);
+        }
+        if (typeof viewer.setClickable === 'function') {
+          viewer.setClickable({}, true, handleAtomPicked);
+          viewer.setHoverable({}, true, handleAtomHovered, handleAtomUnhovered);
         }
 
         // Apply Zoom / Center Focus
@@ -666,58 +659,83 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
 
   return (
     <div className="w-full h-full relative" ref={containerRef}>
-      {/* Floating Selection Granularity Bar */}
-      <div className="absolute top-3 left-4 z-30 pointer-events-auto flex items-center gap-1.5 rounded-xl border border-white/10 bg-slate-950/80 p-1 backdrop-blur-xl shadow-xl">
-        <div className="flex items-center gap-1 px-2 text-[10px] font-mono text-cyan-400">
-          <MousePointer className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline font-semibold">PICK:</span>
-        </div>
-        {granularityLevels.map((lvl) => (
-          <button
-            key={lvl.id}
-            onClick={() => setSelectionLevel(lvl.id)}
-            className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all ${
-              selectionLevel === lvl.id
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 shadow-[0_0_10px_rgba(0,242,255,0.2)]'
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            {lvl.label}
-          </button>
-        ))}
+      {/* Floating Selection Granularity Bar (Visible in both Explorer and Studio when not in active measurement) */}
+      {!activeMeasurementMode && (
+        <div className="absolute top-3 left-4 z-30 pointer-events-auto flex items-center gap-1.5 rounded-xl border border-slate-700/60 bg-slate-900/85 p-1 backdrop-blur-xl shadow-xl">
+          <div className="flex items-center gap-1 px-2 text-[10px] font-mono text-cyan-400">
+            <MousePointer className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline font-semibold">PICK:</span>
+          </div>
+          {granularityLevels.map((lvl) => (
+            <button
+              key={lvl.id}
+              onClick={() => setSelectionLevel(lvl.id)}
+              className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all ${
+                selectionLevel === lvl.id
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 shadow-[0_0_10px_rgba(0,242,255,0.2)]'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {lvl.label}
+            </button>
+          ))}
 
-        {molecularSelection && molecularSelection.atoms.length > 0 && (
-          <>
-            <div className="h-3.5 w-px bg-white/20 mx-1" />
-            <div className="flex items-center gap-1.5 px-2">
-              <span className="font-mono text-[10px] text-cyan-300 font-bold">
-                {molecularSelection.atoms.length} {molecularSelection.atoms.length === 1 ? 'atom' : 'atoms'}
-              </span>
-              <button
-                onClick={clearSelection}
-                className="p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
-                title="Clear selection"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </div>
-          </>
-        )}
-      </div>
+          {molecularSelection && molecularSelection.atoms.length > 0 && (
+            <>
+              <div className="h-3.5 w-px bg-white/20 mx-1" />
+              <div className="flex items-center gap-1.5 px-2">
+                <span className="font-mono text-[10px] text-cyan-300 font-bold">
+                  {molecularSelection.atoms.length} {molecularSelection.atoms.length === 1 ? 'atom' : 'atoms'}
+                </span>
+                <button
+                  onClick={clearSelection}
+                  className="p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                  title="Clear selection"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Floating Active Measurement Banner in Viewport */}
+      {activeMeasurementMode && (
+        <div className="absolute top-3 left-4 z-30 pointer-events-auto flex items-center gap-3 rounded-xl border border-cyan-400/50 bg-slate-900/90 px-4 py-2 shadow-2xl backdrop-blur-xl animate-fadeIn">
+          <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-cyan-300 uppercase">
+            <Ruler className="h-4 w-4 animate-pulse text-cyan-400" />
+            <span>{activeMeasurementMode}:</span>
+          </div>
+          <span className="text-[11px] font-mono text-slate-300">
+            {clickedAtomBuffer.length === 0
+              ? 'Click atom in 3D canvas...'
+              : clickedAtomBuffer.map((a, i) => `[P${i+1}: ${(a.name || '').trim()} #${a.serial}]`).join(' → ')}
+          </span>
+          <div className="h-3.5 w-px bg-white/20" />
+          <button
+            onClick={() => useStore.getState().setMeasurementMode(null)}
+            className="text-[10px] font-mono text-slate-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-white/10"
+            title="Cancel measurement mode"
+          >
+            Cancel ✕
+          </button>
+        </div>
+      )}
 
       {/* Floating Hover Atom Telemetry Tooltip */}
       {hoveredAtom && (
-        <div className="pointer-events-none absolute bottom-4 left-4 z-30 flex items-center gap-2 rounded-lg border border-cyan-500/30 bg-slate-950/85 px-3 py-1.5 font-mono text-[11px] text-cyan-300 backdrop-blur-xl shadow-lg">
+        <div className="pointer-events-none absolute bottom-4 left-4 z-30 flex items-center gap-2 rounded-lg border border-cyan-500/30 bg-slate-900/90 px-3 py-1.5 font-mono text-[11px] text-cyan-300 backdrop-blur-xl shadow-lg">
           <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
           <span>{SelectionHighlight.formatAtomTooltip(hoveredAtom)}</span>
         </div>
       )}
 
       {isRendering && mode === 'studio' && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-none">
-          <div className="flex flex-col items-center gap-3 p-6 bg-[#111111] rounded-xl border border-white/10 shadow-2xl">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm pointer-events-none">
+          <div className="flex flex-col items-center gap-3 p-6 bg-slate-900/90 rounded-xl border border-slate-700/60 shadow-2xl">
             <div className="w-8 h-8 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin"></div>
-            <div className="text-sm font-medium text-white/90 tracking-wide">Computing Representation...</div>
+            <div className="text-sm font-medium text-slate-100 tracking-wide">Computing Representation...</div>
           </div>
         </div>
       )}

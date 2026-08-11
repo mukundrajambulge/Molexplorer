@@ -51,9 +51,9 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   if (isWorkspace) {
     return (
-      <div className="flex flex-col h-screen w-screen overflow-y-auto scroll-smooth bg-[#050508] text-[#F0F0F0] selection:bg-cyan-500/30 selection:text-cyan-200">
+      <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200">
         <Header />
-        <main className="h-screen w-full flex-shrink-0 overflow-hidden relative flex flex-col">
+        <main className="flex-1 w-full min-h-0 overflow-hidden relative flex flex-col">
           <ErrorBoundary>
             {children}
           </ErrorBoundary>
@@ -63,9 +63,9 @@ function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen font-sans bg-[#050508] text-[#F0F0F0] selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div className="flex flex-col min-h-screen font-sans bg-slate-950 text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200">
       <Header />
-      <main className="flex-1 overflow-hidden relative flex flex-col">
+      <main className="flex-1 relative flex flex-col">
         <ErrorBoundary>
           {children}
         </ErrorBoundary>

@@ -804,7 +804,6 @@ useEffect(() => {
               backgroundColor={backgroundColor} 
               selectedAtomSerials={selectedAtomSerials} 
               hiddenObjectIds={hiddenObjectIds}
-              onAtomClick={handleAtomClick}
               activeMeasurementMode={activeMeasurementMode}
               showDipoleArrow={showDipoleArrow}
               dipoleMoment={dipoleMoment}

@@ -13,40 +13,40 @@ export const Header: React.FC = () => {
   ];
 
   return (
-    <header className="relative z-50 w-full backdrop-blur-2xl bg-[#050508]/85 border-b border-white/[0.08] transition-all">
+    <header className="sticky top-0 z-50 w-full backdrop-blur-2xl bg-slate-900/90 border-b border-slate-700/60 shadow-lg transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16 sm:h-18">
           
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 via-teal-400 to-amber-500 p-[1px] shadow-[0_0_20px_rgba(0,242,255,0.25)] group-hover:shadow-[0_0_30px_rgba(0,242,255,0.4)] transition-all">
-              <div className="w-full h-full bg-[#080a12] rounded-[11px] flex items-center justify-center">
-                <Dna className="w-5 h-5 text-cyan-400 group-hover:rotate-180 transition-transform duration-700" />
+            <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 via-teal-400 to-amber-500 p-[1px] shadow-[0_0_20px_rgba(0,242,255,0.25)] group-hover:shadow-[0_0_30px_rgba(0,242,255,0.4)] transition-all">
+              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+                <Dna className="w-4.5 h-4.5 text-cyan-400 group-hover:rotate-180 transition-transform duration-700" />
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-medium tracking-tight text-white flex items-center gap-1.5 font-sans">
+              <span className="text-base font-semibold tracking-tight text-white flex items-center gap-1.5 font-sans">
                 Molexplorer
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+                <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
                   v2.0
                 </span>
               </span>
-              <span className="text-[10px] text-slate-400 tracking-widest font-mono">CHEMINFORMATICS SUITE</span>
+              <span className="text-[9px] text-slate-400 tracking-widest font-mono">CHEMINFORMATICS SUITE</span>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-950/80 p-1.5 rounded-full border border-white/[0.1] backdrop-blur-xl shadow-inner">
+          <nav className="hidden md:flex items-center gap-1 bg-slate-950/80 p-1.5 rounded-full border border-slate-700/60 backdrop-blur-xl shadow-inner">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
               return (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`relative px-5 py-2 rounded-full text-xs font-medium tracking-wide transition-all duration-300 flex items-center gap-2 ${
+                  className={`relative px-4 py-1.5 rounded-full text-xs font-medium tracking-wide transition-all duration-300 flex items-center gap-2 ${
                     isActive
-                      ? "text-white bg-white/10 shadow-[0_0_15px_rgba(0,242,255,0.15)] border border-cyan-400/30"
-                      : "text-slate-400 hover:text-white hover:bg-white/[0.05]"
+                      ? "text-white bg-slate-800 shadow-[0_0_15px_rgba(0,242,255,0.2)] border border-cyan-400/40"
+                      : "text-slate-300 hover:text-white hover:bg-white/[0.05]"
                   }`}
                 >
                   {isActive && (
