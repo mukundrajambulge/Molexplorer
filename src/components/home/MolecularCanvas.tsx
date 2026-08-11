@@ -10,10 +10,10 @@ export const MolecularCanvas: React.FC = () => {
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // 1. Scene & Perspective Camera Setup (Refined depth & FOV)
+    // 1. Scene & Perspective Camera Setup (Refined FOV & Depth)
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
-      36,
+      34,
       container.clientWidth / container.clientHeight,
       0.1,
       1000
@@ -29,44 +29,40 @@ export const MolecularCanvas: React.FC = () => {
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.05;
     container.appendChild(renderer.domElement);
 
-    // 3. Balanced Dynamic Molecular Lighting Rig
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
+    // 3. Balanced Neutral Studio Lighting Rig (Pure True White Lighting)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0x00f2ff, 3.2);
-    keyLight.position.set(16, 20, 24);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
+    keyLight.position.set(15, 20, 25);
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xf59e0b, 2.4);
-    fillLight.position.set(-16, -12, 14);
+    const fillLight = new THREE.DirectionalLight(0xf1f5f9, 1.6);
+    fillLight.position.set(-15, -10, 15);
     scene.add(fillLight);
 
-    const rimLight = new THREE.PointLight(0xa855f7, 2.5, 70);
-    rimLight.position.set(0, 18, -12);
+    const rimLight = new THREE.PointLight(0xe2e8f0, 1.8, 80);
+    rimLight.position.set(0, 15, -15);
     scene.add(rimLight);
 
-    const backGlow = new THREE.PointLight(0x06b6d4, 1.6, 50);
-    backGlow.position.set(0, -12, -6);
-    scene.add(backGlow);
-
-    // 4. Central Molecular Structure (Refined Compact Ball-and-Stick Scaffold)
+    // 4. Central Molecular Structure (Authentic Standard CPK Ball-and-Stick Scaffold)
     const moleculeGroup = new THREE.Group();
-    // Elegant luxury scale (0.58) so it never overwhelms content
-    moleculeGroup.scale.set(0.58, 0.58, 0.58);
+    moleculeGroup.scale.set(0.55, 0.55, 0.55);
     scene.add(moleculeGroup);
 
-    // Conventional CPK Element Colors
+    // Official IUPAC / CPK Element Colors
     const atomColors: Record<string, number> = {
-      C: 0x334155, // Carbon (Deep Slate)
-      N: 0x06b6d4, // Nitrogen (Cyan)
-      O: 0xef4444, // Oxygen (Crimson)
-      S: 0xf59e0b, // Sulfur (Amber)
-      H: 0xf8fafc, // Hydrogen (Ice White)
-      F: 0x10b981, // Fluorine (Emerald)
-      Cl: 0x22c55e // Chlorine (Green)
+      C: 0x475569, // Carbon (Slate / Neutral Gray)
+      N: 0x2563eb, // Nitrogen (Standard True Blue)
+      O: 0xdc2626, // Oxygen (Standard Pure Red)
+      S: 0xeab308, // Sulfur (Standard Pure Yellow)
+      H: 0xffffff, // Hydrogen (Pure White)
+      F: 0x16a34a, // Fluorine (Standard Pure Green)
+      Cl: 0x22c55e, // Chlorine (Light Green)
+      P: 0xea580c  // Phosphorus (Orange)
     };
 
     // Realistic multi-ring kinase inhibitor bioactive scaffold
@@ -113,7 +109,7 @@ export const MolecularCanvas: React.FC = () => {
       // Methyl on Piperazine Tail
       { x: 10.5, y: -1.3, z: 0.8, elem: 'C' },
 
-      // Terminal Solubilizing Hydroxy / Oxygen
+      // Terminal Solubilizing Hydroxy / Oxygen & Thiophene
       { x: -0.7, y: -1.2, z: -0.1, elem: 'O' },
       { x: -2.1, y: -1.3, z: -0.1, elem: 'C' },
       { x: -2.8, y: -2.5, z: -0.2, elem: 'S' },
@@ -132,26 +128,26 @@ export const MolecularCanvas: React.FC = () => {
       elem: a.elem
     }));
 
-    // Atom Sphere Meshes (Radius 0.36 Å for elegant visual density)
-    const sphereGeo = new THREE.SphereGeometry(0.36, 32, 32);
+    // Atom Sphere Meshes (Radius 0.34 Å with clean specular highlights)
+    const sphereGeo = new THREE.SphereGeometry(0.34, 32, 32);
 
     atoms.forEach((atom) => {
-      const color = atomColors[atom.elem] || 0x06b6d4;
+      const color = atomColors[atom.elem] || 0x64748b;
       const mat = new THREE.MeshStandardMaterial({
         color: color,
-        roughness: 0.20,
-        metalness: 0.22
+        roughness: 0.25,
+        metalness: 0.15
       });
       const sphere = new THREE.Mesh(sphereGeo, mat);
       sphere.position.set(atom.x, atom.y, atom.z);
       moleculeGroup.add(sphere);
     });
 
-    // Bond Cylinders connecting adjacent atoms (Radius 0.08 Å)
+    // Bond Cylinders connecting adjacent atoms (Radius 0.075 Å in clean metallic gray)
     const bondMat = new THREE.MeshStandardMaterial({
       color: 0x94a3b8,
-      roughness: 0.35,
-      metalness: 0.35
+      roughness: 0.3,
+      metalness: 0.3
     });
 
     for (let i = 0; i < atoms.length; i++) {
@@ -161,7 +157,7 @@ export const MolecularCanvas: React.FC = () => {
         const dist = p1.distanceTo(p2);
 
         if (dist > 0.8 && dist < 1.95) {
-          const bondGeo = new THREE.CylinderGeometry(0.08, 0.08, dist, 16);
+          const bondGeo = new THREE.CylinderGeometry(0.075, 0.075, dist, 16);
           const bond = new THREE.Mesh(bondGeo, bondMat);
 
           const midpoint = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
@@ -175,8 +171,8 @@ export const MolecularCanvas: React.FC = () => {
       }
     }
 
-    // 5. Subtle Floating Ambient Particles
-    const particleCount = 45;
+    // 5. Subtle Neutral Floating Particles
+    const particleCount = 35;
     const particleGeo = new THREE.BufferGeometry();
     const particlePos = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount * 3; i++) {
@@ -184,10 +180,10 @@ export const MolecularCanvas: React.FC = () => {
     }
     particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
     const particleMat = new THREE.PointsMaterial({
-      size: 0.12,
-      color: 0x38bdf8,
+      size: 0.10,
+      color: 0x94a3b8,
       transparent: true,
-      opacity: 0.45
+      opacity: 0.4
     });
     const particles = new THREE.Points(particleGeo, particleMat);
     scene.add(particles);
@@ -218,11 +214,11 @@ export const MolecularCanvas: React.FC = () => {
 
     window.addEventListener('resize', handleResize);
 
-    // 8. Deterministic Camera Path Timeline (Macro Scroll Progression)
+    // 8. Deterministic Camera Path Timeline
     const getCameraTrajectory = (t: number) => {
       const progress = Math.max(0, Math.min(1, t));
 
-      let posX = 0, posY = 0, posZ = 30;
+      let posX = 0, posY = 0, posZ = 32;
       let targetX = 0, targetY = 0, targetZ = 0;
       let rotX = 0, rotY = 0, rotZ = 0;
       let molPosX = 0, molPosY = 0;
@@ -230,41 +226,41 @@ export const MolecularCanvas: React.FC = () => {
       if (progress <= 0.25) {
         // Phase 1 (Hero: 0% -> 25%) - Balanced center
         const f = progress / 0.25;
-        posX = THREE.MathUtils.lerp(0, 1.5, f);
-        posY = THREE.MathUtils.lerp(0, 0.8, f);
-        posZ = THREE.MathUtils.lerp(30, 26, f);
-        rotY = THREE.MathUtils.lerp(0, 0.35, f);
-        molPosX = THREE.MathUtils.lerp(0, 0.8, f);
+        posX = THREE.MathUtils.lerp(0, 1.2, f);
+        posY = THREE.MathUtils.lerp(0, 0.6, f);
+        posZ = THREE.MathUtils.lerp(32, 28, f);
+        rotY = THREE.MathUtils.lerp(0, 0.3, f);
+        molPosX = THREE.MathUtils.lerp(0, 0.6, f);
       } else if (progress <= 0.50) {
         // Phase 2 (Inspection Zoom: 25% -> 50%)
         const f = (progress - 0.25) / 0.25;
-        posX = THREE.MathUtils.lerp(1.5, -2.5, f);
-        posY = THREE.MathUtils.lerp(0.8, 1.8, f);
-        posZ = THREE.MathUtils.lerp(26, 22, f);
-        rotY = THREE.MathUtils.lerp(0.35, 1.1, f);
-        rotX = THREE.MathUtils.lerp(0, 0.2, f);
-        molPosX = THREE.MathUtils.lerp(0.8, 2.2, f);
+        posX = THREE.MathUtils.lerp(1.2, -2.0, f);
+        posY = THREE.MathUtils.lerp(0.6, 1.5, f);
+        posZ = THREE.MathUtils.lerp(28, 24, f);
+        rotY = THREE.MathUtils.lerp(0.3, 0.9, f);
+        rotX = THREE.MathUtils.lerp(0, 0.15, f);
+        molPosX = THREE.MathUtils.lerp(0.6, 1.8, f);
       } else if (progress <= 0.75) {
         // Phase 3 (Content Shift Right: 50% -> 75%)
         const f = (progress - 0.50) / 0.25;
-        posX = THREE.MathUtils.lerp(-2.5, -4.5, f);
-        posY = THREE.MathUtils.lerp(1.8, -0.8, f);
-        posZ = THREE.MathUtils.lerp(22, 28, f);
-        targetX = THREE.MathUtils.lerp(0, -1.8, f);
-        rotY = THREE.MathUtils.lerp(1.1, 2.0, f);
-        rotZ = THREE.MathUtils.lerp(0, 0.15, f);
-        molPosX = THREE.MathUtils.lerp(2.2, 5.0, f);
-        molPosY = THREE.MathUtils.lerp(0, -0.4, f);
+        posX = THREE.MathUtils.lerp(-2.0, -3.8, f);
+        posY = THREE.MathUtils.lerp(1.5, -0.6, f);
+        posZ = THREE.MathUtils.lerp(24, 30, f);
+        targetX = THREE.MathUtils.lerp(0, -1.5, f);
+        rotY = THREE.MathUtils.lerp(0.9, 1.8, f);
+        rotZ = THREE.MathUtils.lerp(0, 0.1, f);
+        molPosX = THREE.MathUtils.lerp(1.8, 4.5, f);
+        molPosY = THREE.MathUtils.lerp(0, -0.3, f);
       } else {
         // Phase 4 (Research Wide: 75% -> 100%)
         const f = (progress - 0.75) / 0.25;
-        posX = THREE.MathUtils.lerp(-4.5, 0, f);
-        posY = THREE.MathUtils.lerp(-0.8, 1.5, f);
-        posZ = THREE.MathUtils.lerp(28, 34, f);
-        targetX = THREE.MathUtils.lerp(-1.8, 0, f);
-        rotY = THREE.MathUtils.lerp(2.0, 3.14, f);
-        molPosX = THREE.MathUtils.lerp(5.0, 0, f);
-        molPosY = THREE.MathUtils.lerp(-0.4, 0, f);
+        posX = THREE.MathUtils.lerp(-3.8, 0, f);
+        posY = THREE.MathUtils.lerp(-0.6, 1.2, f);
+        posZ = THREE.MathUtils.lerp(30, 36, f);
+        targetX = THREE.MathUtils.lerp(-1.5, 0, f);
+        rotY = THREE.MathUtils.lerp(1.8, 3.14, f);
+        molPosX = THREE.MathUtils.lerp(4.5, 0, f);
+        molPosY = THREE.MathUtils.lerp(-0.3, 0, f);
       }
 
       return { posX, posY, posZ, targetX, targetY, targetZ, rotX, rotY, rotZ, molPosX, molPosY };
@@ -272,7 +268,7 @@ export const MolecularCanvas: React.FC = () => {
 
     // 9. Ultra-Smooth 60/144 FPS Animation Loop with Decoupled RAF Scroll Calculation
     let animationId: number;
-    let currentCamPos = new THREE.Vector3(0, 0, 30);
+    let currentCamPos = new THREE.Vector3(0, 0, 32);
     let currentCamTarget = new THREE.Vector3(0, 0, 0);
     let currentMolPos = new THREE.Vector2(0, 0);
     let baseRotationY = 0;
@@ -281,47 +277,47 @@ export const MolecularCanvas: React.FC = () => {
     const animate = () => {
       animationId = requestAnimationFrame(animate);
 
-      // Directly compute scroll progress inside RAF without React state re-render overhead!
+      // Directly compute scroll progress inside RAF without React state re-render overhead
       const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
       const rawProgress = totalScroll > 0 ? Math.min(Math.max(window.scrollY / totalScroll, 0), 1) : 0;
       
       // Butter-smooth scroll progress damping
-      smoothScrollProgress += (rawProgress - smoothScrollProgress) * 0.1;
+      smoothScrollProgress += (rawProgress - smoothScrollProgress) * 0.08;
 
       // Micro cursor parallax interpolation
       mouseX += (targetMouseX - mouseX) * 0.05;
       mouseY += (targetMouseY - mouseY) * 0.05;
 
-      // Base rotation (slow, majestic spin)
+      // Base rotation
       if (!prefersReducedMotion) {
-        baseRotationY += 0.003;
+        baseRotationY += 0.0025;
       }
 
       // Macro scroll trajectory
       const traj = getCameraTrajectory(smoothScrollProgress);
 
       // Smooth camera interpolation
-      currentCamPos.x += (traj.posX + mouseX * 1.2 - currentCamPos.x) * 0.07;
-      currentCamPos.y += (traj.posY - mouseY * 1.2 - currentCamPos.y) * 0.07;
-      currentCamPos.z += (traj.posZ - currentCamPos.z) * 0.07;
+      currentCamPos.x += (traj.posX + mouseX * 1.0 - currentCamPos.x) * 0.06;
+      currentCamPos.y += (traj.posY - mouseY * 1.0 - currentCamPos.y) * 0.06;
+      currentCamPos.z += (traj.posZ - currentCamPos.z) * 0.06;
       camera.position.copy(currentCamPos);
 
-      currentCamTarget.x += (traj.targetX - currentCamTarget.x) * 0.07;
-      currentCamTarget.y += (traj.targetY - currentCamTarget.y) * 0.07;
-      currentCamTarget.z += (traj.targetZ - currentCamTarget.z) * 0.07;
+      currentCamTarget.x += (traj.targetX - currentCamTarget.x) * 0.06;
+      currentCamTarget.y += (traj.targetY - currentCamTarget.y) * 0.06;
+      currentCamTarget.z += (traj.targetZ - currentCamTarget.z) * 0.06;
       camera.lookAt(currentCamTarget);
 
       // Smooth molecule shift & rotation
-      currentMolPos.x += (traj.molPosX - currentMolPos.x) * 0.07;
-      currentMolPos.y += (traj.molPosY - currentMolPos.y) * 0.07;
+      currentMolPos.x += (traj.molPosX - currentMolPos.x) * 0.06;
+      currentMolPos.y += (traj.molPosY - currentMolPos.y) * 0.06;
       moleculeGroup.position.set(currentMolPos.x, currentMolPos.y, 0);
 
-      moleculeGroup.rotation.y = baseRotationY + traj.rotY + mouseX * 0.25;
-      moleculeGroup.rotation.x = traj.rotX + mouseY * 0.25;
+      moleculeGroup.rotation.y = baseRotationY + traj.rotY + mouseX * 0.2;
+      moleculeGroup.rotation.x = traj.rotX + mouseY * 0.2;
       moleculeGroup.rotation.z = traj.rotZ;
 
       // Particle drift
-      particles.rotation.y -= 0.0006;
+      particles.rotation.y -= 0.0004;
 
       renderer.render(scene, camera);
     };

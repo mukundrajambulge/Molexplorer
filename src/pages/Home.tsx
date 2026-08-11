@@ -11,15 +11,22 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState(0);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const h = window.innerHeight;
-      if (scrollY < h * 0.7) {
-        setActiveSection(0);
-      } else if (scrollY < h * 2.2) {
-        setActiveSection(1);
-      } else {
-        setActiveSection(2);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+          const h = window.innerHeight;
+          if (scrollY < h * 0.7) {
+            setActiveSection(0);
+          } else if (scrollY < h * 2.2) {
+            setActiveSection(1);
+          } else {
+            setActiveSection(2);
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
@@ -40,23 +47,18 @@ export default function Home() {
   ];
 
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 font-sans text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div className="relative min-h-screen w-full bg-slate-950 font-sans text-slate-100 selection:bg-slate-700 selection:text-white">
       
       {/* 1. Persistent Hardware-Accelerated 3D Molecular Background Canvas (60/144 FPS) */}
       <MolecularCanvas />
 
-      {/* 2. Soft Ambient Radial Lighting Background */}
-      <div className="pointer-events-none fixed -top-40 left-1/4 h-[500px] w-[500px] rounded-full bg-cyan-500/10 blur-[150px] z-0" />
-      <div className="pointer-events-none fixed top-1/2 -right-40 h-[500px] w-[500px] rounded-full bg-amber-500/10 blur-[150px] z-0" />
-      <div className="pointer-events-none fixed bottom-10 left-10 h-[400px] w-[400px] rounded-full bg-indigo-500/10 blur-[150px] z-0" />
-
-      {/* 3. Floating Right-Side Scroll HUD Indicator */}
+      {/* 2. Floating Right-Side Scroll HUD Indicator */}
       <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-3 pointer-events-auto">
         {navItems.map((item, idx) => (
           <button
             key={item.label}
             onClick={() => scrollTo(item.ref)}
-            className="group flex items-center justify-end gap-2.5 transition-all"
+            className="group flex items-center justify-end gap-2.5 transition-all cursor-pointer"
             title={item.label}
           >
             <span className={`text-[10px] font-mono tracking-wider transition-all duration-300 opacity-0 group-hover:opacity-100 ${
@@ -66,14 +68,14 @@ export default function Home() {
             </span>
             <span className={`h-2.5 rounded-full transition-all duration-300 ${
               activeSection === idx
-                ? "w-7 bg-gradient-to-r from-cyan-400 to-teal-300 shadow-[0_0_12px_rgba(0,242,255,0.6)]"
+                ? "w-7 bg-gradient-to-r from-cyan-400 to-teal-400 shadow-[0_0_10px_rgba(6,182,212,0.5)]"
                 : "w-2.5 bg-slate-700 hover:bg-slate-500"
             }`} />
           </button>
         ))}
       </div>
 
-      {/* 4. Foreground Transparent DOM Overlays */}
+      {/* 3. Foreground Transparent DOM Overlays */}
       <div className="relative z-10 flex flex-col">
         {/* Full-Screen Hero View */}
         <div ref={heroRef}>
