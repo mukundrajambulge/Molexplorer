@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { MoleculeData } from "../types";
-import { Info, BarChart2, Library } from "lucide-react";
+import { Info, BarChart2, Library, MousePointer, X, Atom, Dna } from "lucide-react";
 import { getRDKit } from "../lib/rdkit";
+import { useStore } from "../store";
+import { SelectionManager } from "../interaction/SelectionManager";
 
 interface SidebarRightProps {
   molecule: MoleculeData | null;
@@ -22,6 +24,13 @@ interface ComputedProperties {
 
 export default function SidebarRight({ molecule, library, onSelectMolecule }: SidebarRightProps) {
   const [props, setProps] = useState<ComputedProperties | null>(null);
+  const { molecularSelection, clearSelection } = useStore();
+
+  const selectionSummary = molecularSelection && molecularSelection.atoms.length > 0 
+    ? SelectionManager.computeSummary(molecularSelection)
+    : null;
+
+  const firstAtom = molecularSelection?.atoms?.[0] || null;
 
   useEffect(() => {
     if (!molecule || !molecule.rawContent) {
@@ -50,7 +59,7 @@ export default function SidebarRight({ molecule, library, onSelectMolecule }: Si
             hbd: descriptors.NumHBD?.toString() || "N/A",
             rotatable: descriptors.NumRotatableBonds?.toString() || "N/A",
             rings: descriptors.NumRings?.toString() || "N/A",
-            formula: mol.get_smiles() // Using smiles as formula placeholder, RdKit JS doesn't expose formula easily, wait, it does not.
+            formula: mol.get_smiles()
           });
 
           mol.delete();
@@ -63,7 +72,65 @@ export default function SidebarRight({ molecule, library, onSelectMolecule }: Si
   }, [molecule]);
 
   return (
-    <div className="w-full h-full p-6 sm:p-8 overflow-y-auto flex flex-col gap-8">
+    <div className="w-full h-full p-5 sm:p-6 overflow-y-auto flex flex-col gap-6">
+      
+      {/* Selected Entity Inspector Panel */}
+      {molecularSelection && molecularSelection.atoms.length > 0 && (
+        <div className="p-4 rounded-xl border border-cyan-500/30 bg-cyan-500/5 backdrop-blur-xl shadow-lg space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] tracking-[0.2em] font-mono uppercase text-cyan-400 font-semibold flex items-center gap-1.5">
+              <MousePointer size={12} /> Selected ({molecularSelection.atoms.length})
+            </span>
+            <button
+              onClick={clearSelection}
+              className="p-1 rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+              title="Clear selection"
+            >
+              <X size={12} />
+            </button>
+          </div>
+
+          {firstAtom && (
+            <div className="space-y-2 text-xs font-mono">
+              <div className="flex items-center justify-between pb-1 border-b border-white/10">
+                <span className="text-slate-400">Atom:</span>
+                <span className="text-cyan-300 font-bold">{firstAtom.atomName} (#{firstAtom.serial})</span>
+              </div>
+              <div className="flex items-center justify-between pb-1 border-b border-white/10">
+                <span className="text-slate-400">Element:</span>
+                <span className="text-white">{firstAtom.element}</span>
+              </div>
+              <div className="flex items-center justify-between pb-1 border-b border-white/10">
+                <span className="text-slate-400">Residue:</span>
+                <span className="text-amber-300">{firstAtom.residueName} {firstAtom.residueNumber}</span>
+              </div>
+              <div className="flex items-center justify-between pb-1 border-b border-white/10">
+                <span className="text-slate-400">Chain:</span>
+                <span className="text-white">{firstAtom.chainId}</span>
+              </div>
+              <div className="flex flex-col gap-0.5 pt-1">
+                <span className="text-slate-400 text-[10px]">3D Coordinates:</span>
+                <span className="text-[11px] text-slate-200">
+                  X: {firstAtom.x.toFixed(3)}, Y: {firstAtom.y.toFixed(3)}, Z: {firstAtom.z.toFixed(3)}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {selectionSummary && selectionSummary.totalAtoms > 1 && (
+            <div className="pt-2 border-t border-white/10 text-[11px] font-mono text-slate-400 space-y-1">
+              <div>Level: <span className="text-cyan-300 uppercase">{molecularSelection.level}</span></div>
+              {selectionSummary.residues.length > 0 && (
+                <div>Residues: <span className="text-white">{selectionSummary.residues.slice(0, 4).join(', ')}{selectionSummary.residues.length > 4 ? '...' : ''}</span></div>
+              )}
+              {selectionSummary.chains.length > 0 && (
+                <div>Chains: <span className="text-white">{selectionSummary.chains.join(', ')}</span></div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       <div>
         <h2 className="text-[10px] tracking-[0.3em] uppercase opacity-50 mb-4 flex items-center gap-2">
           <Info size={12} /> Active Molecule

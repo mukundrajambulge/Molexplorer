@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { RenderStyle, MoleculeData, FilterState, TableSortState } from '../types';
+import { SelectionLevel, PickedAtom, MolecularSelection, createSelectionKey } from '../interaction/types';
 
 export interface Molecule {
   data: string | Uint8Array;
@@ -21,6 +22,9 @@ interface MoleculeState {
   processedPDB: string | null;
   atoms: any[];
   selectedAtomSerials: Set<number>;
+  selectionLevel: SelectionLevel;
+  molecularSelection: MolecularSelection;
+  hoveredAtom: PickedAtom | null;
   ssData: any[];
   // MolExplorer integration
   explorerMolecule: MoleculeData | null;
@@ -30,6 +34,10 @@ interface MoleculeState {
   setProcessedPDB: (data: string | null) => void;
   setAtoms: (atoms: any[]) => void;
   setSelectedAtomSerials: (serials: Set<number>) => void;
+  setSelectionLevel: (level: SelectionLevel) => void;
+  setMolecularSelection: (sel: MolecularSelection) => void;
+  setHoveredAtom: (atom: PickedAtom | null) => void;
+  clearSelection: () => void;
   setSsData: (data: any[]) => void;
   setExplorerMolecule: (mol: MoleculeData | null) => void;
   setExplorerCompareMolecule: (mol: MoleculeData | null) => void;
@@ -111,6 +119,13 @@ export const useStore = create<MoleculeState & ViewerState & UIState & Measureme
   processedPDB: null,
   atoms: [],
   selectedAtomSerials: new Set(),
+  selectionLevel: 'atom',
+  molecularSelection: {
+    level: 'atom',
+    atoms: [],
+    selectedKeys: new Set()
+  },
+  hoveredAtom: null,
   ssData: [],
   explorerMolecule: null,
   explorerCompareMolecule: null,
@@ -119,6 +134,20 @@ export const useStore = create<MoleculeState & ViewerState & UIState & Measureme
   setProcessedPDB: (data) => set({ processedPDB: data }),
   setAtoms: (atoms) => set({ atoms }),
   setSelectedAtomSerials: (serials) => set({ selectedAtomSerials: serials }),
+  setSelectionLevel: (selectionLevel) => set({ selectionLevel }),
+  setMolecularSelection: (molecularSelection) => set({
+    molecularSelection,
+    selectedAtomSerials: new Set(molecularSelection.atoms.map(a => a.serial))
+  }),
+  setHoveredAtom: (hoveredAtom) => set({ hoveredAtom }),
+  clearSelection: () => set({
+    molecularSelection: {
+      level: 'atom',
+      atoms: [],
+      selectedKeys: new Set()
+    },
+    selectedAtomSerials: new Set()
+  }),
   setSsData: (ssData) => set({ ssData }),
   setExplorerMolecule: (mol) => set({ explorerMolecule: mol }),
   setExplorerCompareMolecule: (mol) => set({ explorerCompareMolecule: mol }),

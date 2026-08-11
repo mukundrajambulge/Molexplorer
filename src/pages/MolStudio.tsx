@@ -755,15 +755,6 @@ useEffect(() => {
 
       {/* Main Viewer Area */}
       <div className="flex-1 relative w-full h-full overflow-hidden flex flex-col">
-        {/* Decorative HUD Viewport Corner Reticles */}
-        <div className="pointer-events-none absolute top-3 left-3 z-20 flex items-center gap-2 border-t border-l border-cyan-400/40 pt-1 pl-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
-          <span className="font-mono text-[10px] tracking-widest text-cyan-300/80">3D VIEWPORT • PYMOL ENGINE</span>
-        </div>
-        <div className="pointer-events-none absolute top-3 right-3 z-20 hidden md:block border-t border-r border-cyan-400/40 pt-1 pr-1 font-mono text-[10px] tracking-wider text-slate-500">
-          PROJECTION: {orthographic ? 'ORTHO' : 'PERSPECTIVE'} | STEREO: {stereoMode ? stereoMode.toUpperCase() : 'MONO'}
-        </div>
-
         {/* Active 3D Measurement Mode & Telemetry Floating HUD Banner */}
         {activeMeasurementMode && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex items-center gap-3 px-5 py-2.5 bg-slate-950/90 border border-cyan-400/50 rounded-xl shadow-[0_0_30px_rgba(0,242,255,0.3)] backdrop-blur-2xl animate-fadeIn">

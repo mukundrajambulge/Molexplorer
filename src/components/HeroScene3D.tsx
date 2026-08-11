@@ -11,14 +11,14 @@ export const HeroScene3D: React.FC = () => {
     // 1. Scene & Camera Setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
-      45,
+      40,
       container.clientWidth / container.clientHeight,
       0.1,
       1000
     );
-    camera.position.set(0, 0, 32);
+    camera.position.set(0, 0, 24);
 
-    // 2. WebGL Renderer
+    // 2. High-performance WebGL Renderer
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
@@ -26,234 +26,144 @@ export const HeroScene3D: React.FC = () => {
     });
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
     container.appendChild(renderer.domElement);
 
-    // 3. Lighting
-    const ambientLight = new THREE.AmbientLight(0x0f172a, 2.5);
+    // 3. Balanced Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
     scene.add(ambientLight);
 
-    const cyanLight = new THREE.PointLight(0x00f2ff, 4, 60);
-    cyanLight.position.set(15, 12, 18);
-    scene.add(cyanLight);
+    const keyLight = new THREE.DirectionalLight(0x00f2ff, 3.0);
+    keyLight.position.set(10, 15, 15);
+    scene.add(keyLight);
 
-    const amberLight = new THREE.PointLight(0xf27d26, 3.5, 60);
-    amberLight.position.set(-15, -12, 15);
-    scene.add(amberLight);
+    const fillLight = new THREE.DirectionalLight(0xf27d26, 2.5);
+    fillLight.position.set(-10, -10, 10);
+    scene.add(fillLight);
 
-    const violetLight = new THREE.PointLight(0x8b5cf6, 2.5, 50);
-    violetLight.position.set(0, 18, -10);
-    scene.add(violetLight);
+    const rimLight = new THREE.PointLight(0x8b5cf6, 2.0, 40);
+    rimLight.position.set(0, 12, -8);
+    scene.add(rimLight);
 
-    // 4. Floating Molecule Group
+    // 4. Central Molecular Structure (Clean, Elegant Ball-and-Stick Model)
     const moleculeGroup = new THREE.Group();
     scene.add(moleculeGroup);
 
-    // Element Colors & Radii
+    // CPK Colors
     const atomColors: Record<string, number> = {
-      C: 0x334155, // Dark slate
-      N: 0x00f2ff, // Neon Cyan
-      O: 0xef4444, // Crimson Red
-      S: 0xf59e0b, // Amber Gold
-      H: 0xe2e8f0, // Silver Ice
-      P: 0x8b5cf6  // Violet Purple
+      C: 0x334155, // Carbon (Slate)
+      N: 0x00f2ff, // Nitrogen (Cyan)
+      O: 0xef4444, // Oxygen (Crimson)
+      S: 0xf59e0b, // Sulfur (Amber)
+      H: 0xe2e8f0, // Hydrogen (Ice)
+      F: 0x10b981  // Fluorine (Emerald)
     };
 
-    // Procedural Complex Molecule Coordinates (Macrocycle / Peptide Mimic)
-    const atomData: { x: number; y: number; z: number; elem: string }[] = [];
-    const numAtoms = 48;
-    for (let i = 0; i < numAtoms; i++) {
-      const theta = (i / numAtoms) * Math.PI * 4;
-      const phi = (i / numAtoms) * Math.PI * 2;
-      const r = 5.5 + Math.sin(phi * 3) * 1.8;
-      
-      const x = Math.cos(theta) * r;
-      const y = (i - numAtoms / 2) * 0.35 + Math.sin(theta * 2) * 1.5;
-      const z = Math.sin(theta) * r + Math.cos(phi * 2) * 1.2;
+    // Realistic multi-ring drug molecule geometry (Bioactive heterocyclic scaffold)
+    const atoms = [
+      // Core Aromatic Ring A
+      { x: 0.0, y: 0.0, z: 0.0, elem: 'C' },
+      { x: 1.4, y: 0.0, z: 0.0, elem: 'C' },
+      { x: 2.1, y: 1.2, z: 0.0, elem: 'N' },
+      { x: 1.4, y: 2.4, z: 0.0, elem: 'C' },
+      { x: 0.0, y: 2.4, z: 0.0, elem: 'C' },
+      { x: -0.7, y: 1.2, z: 0.0, elem: 'C' },
 
-      let elem = 'C';
-      if (i % 4 === 0) elem = 'N';
-      else if (i % 5 === 0) elem = 'O';
-      else if (i % 7 === 0) elem = 'S';
-      else if (i % 9 === 0) elem = 'P';
-      else if (i % 3 === 0) elem = 'H';
+      // Ring B (Fused hetero ring)
+      { x: 3.4, y: 1.2, z: 0.2, elem: 'C' },
+      { x: 4.1, y: 2.3, z: 0.3, elem: 'O' },
+      { x: 3.5, y: 3.4, z: 0.2, elem: 'C' },
+      { x: 2.1, y: 3.4, z: 0.1, elem: 'C' },
 
-      atomData.push({ x, y, z, elem });
-    }
+      // Substituents & Functional Groups
+      { x: -2.1, y: 1.2, z: -0.1, elem: 'O' },
+      { x: -2.9, y: 2.3, z: -0.2, elem: 'C' },
+      { x: -4.3, y: 2.1, z: -0.1, elem: 'F' },
+      { x: -2.5, y: 3.6, z: -0.3, elem: 'F' },
 
-    // Atom Meshes
-    const sphereGeo = new THREE.SphereGeometry(0.55, 32, 32);
-    const smallSphereGeo = new THREE.SphereGeometry(0.35, 24, 24);
+      { x: -0.7, y: 3.6, z: 0.1, elem: 'N' },
+      { x: -0.3, y: 4.8, z: 0.3, elem: 'C' },
+      { x: 1.1, y: 4.8, z: 0.3, elem: 'S' },
 
-    atomData.forEach((atom) => {
-      const isH = atom.elem === 'H';
+      { x: 4.8, y: 4.5, z: 0.4, elem: 'N' },
+      { x: 6.0, y: 4.2, z: 0.6, elem: 'C' },
+      { x: 6.7, y: 5.3, z: 0.7, elem: 'O' },
+      { x: 6.7, y: 2.9, z: 0.6, elem: 'C' },
+
+      // Terminal Chain
+      { x: -0.7, y: -1.2, z: 0.1, elem: 'C' },
+      { x: -2.1, y: -1.4, z: 0.2, elem: 'N' },
+      { x: -2.8, y: -2.6, z: 0.3, elem: 'C' },
+      { x: -2.1, y: -3.8, z: 0.2, elem: 'O' },
+      { x: -4.3, y: -2.6, z: 0.5, elem: 'C' },
+      { x: 2.1, y: -1.2, z: -0.1, elem: 'O' }
+    ];
+
+    // Center the molecule at (0, 0, 0)
+    let avgX = 0, avgY = 0, avgZ = 0;
+    atoms.forEach(a => { avgX += a.x; avgY += a.y; avgZ += a.z; });
+    avgX /= atoms.length; avgY /= atoms.length; avgZ /= atoms.length;
+    atoms.forEach(a => { a.x -= avgX; a.y -= avgY; a.z -= avgZ; });
+
+    // Sphere Geometry & Materials
+    const atomGeo = new THREE.SphereGeometry(0.52, 32, 32);
+
+    atoms.forEach((atom) => {
       const color = atomColors[atom.elem] || 0x38bdf8;
-      
-      const mat = new THREE.MeshPhysicalMaterial({
+      const mat = new THREE.MeshStandardMaterial({
         color: color,
-        emissive: color,
-        emissiveIntensity: atom.elem === 'N' || atom.elem === 'S' || atom.elem === 'P' ? 0.35 : 0.08,
-        roughness: 0.15,
-        metalness: 0.1,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.1,
-        transmission: 0.3,
-        ior: 1.4
+        roughness: 0.25,
+        metalness: 0.15
       });
-
-      const mesh = new THREE.Mesh(isH ? smallSphereGeo : sphereGeo, mat);
+      const mesh = new THREE.Mesh(atomGeo, mat);
       mesh.position.set(atom.x, atom.y, atom.z);
       moleculeGroup.add(mesh);
     });
 
-    // Bond Cylinders connecting adjacent atoms
-    const bondMat = new THREE.MeshPhysicalMaterial({
+    // Bond Cylinders connecting atoms with distance threshold
+    const bondMat = new THREE.MeshStandardMaterial({
       color: 0x64748b,
-      metalness: 0.8,
-      roughness: 0.2,
-      clearcoat: 0.8
+      roughness: 0.3,
+      metalness: 0.5
     });
 
-    for (let i = 0; i < atomData.length - 1; i++) {
-      const a1 = atomData[i];
-      const a2 = atomData[i + 1];
-      const p1 = new THREE.Vector3(a1.x, a1.y, a1.z);
-      const p2 = new THREE.Vector3(a2.x, a2.y, a2.z);
-      const dist = p1.distanceTo(p2);
+    for (let i = 0; i < atoms.length; i++) {
+      for (let j = i + 1; j < atoms.length; j++) {
+        const p1 = new THREE.Vector3(atoms[i].x, atoms[i].y, atoms[i].z);
+        const p2 = new THREE.Vector3(atoms[j].x, atoms[j].y, atoms[j].z);
+        const dist = p1.distanceTo(p2);
 
-      if (dist < 4.5) {
-        const bondGeo = new THREE.CylinderGeometry(0.12, 0.12, dist, 12);
-        const bond = new THREE.Mesh(bondGeo, bondMat);
+        if (dist > 0.8 && dist < 1.95) {
+          const bondGeo = new THREE.CylinderGeometry(0.12, 0.12, dist, 16);
+          const bond = new THREE.Mesh(bondGeo, bondMat);
 
-        const midpoint = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-        bond.position.copy(midpoint);
+          const midpoint = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+          bond.position.copy(midpoint);
 
-        const dir = new THREE.Vector3().subVectors(p2, p1).normalize();
-        const axis = new THREE.Vector3(0, 1, 0);
-        bond.quaternion.setFromUnitVectors(axis, dir);
+          const dir = new THREE.Vector3().subVectors(p2, p1).normalize();
+          bond.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
 
-        moleculeGroup.add(bond);
+          moleculeGroup.add(bond);
+        }
       }
     }
 
-    // 5. DNA Helical Satellite Ring
-    const helixGroup = new THREE.Group();
-    scene.add(helixGroup);
-
-    const helixPoints = 120;
-    const strand1Geo = new THREE.BufferGeometry();
-    const strand2Geo = new THREE.BufferGeometry();
-    const strand1Pos: number[] = [];
-    const strand2Pos: number[] = [];
-
-    for (let i = 0; i < helixPoints; i++) {
-      const t = (i / helixPoints) * Math.PI * 6;
-      const hR = 9.0;
-      const hY = (i - helixPoints / 2) * 0.22;
-
-      const x1 = Math.cos(t) * hR;
-      const z1 = Math.sin(t) * hR;
-      strand1Pos.push(x1, hY, z1);
-
-      const x2 = Math.cos(t + Math.PI) * hR;
-      const z2 = Math.sin(t + Math.PI) * hR;
-      strand2Pos.push(x2, hY, z2);
-
-      // Base pairs every 6 points
-      if (i % 6 === 0) {
-        const rungMat = new THREE.LineBasicMaterial({
-          color: i % 12 === 0 ? 0x00f2ff : 0xf27d26,
-          transparent: true,
-          opacity: 0.6
-        });
-        const rungGeo = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(x1, hY, z1),
-          new THREE.Vector3(x2, hY, z2)
-        ]);
-        const rung = new THREE.Line(rungGeo, rungMat);
-        helixGroup.add(rung);
-      }
-    }
-
-    strand1Geo.setAttribute('position', new THREE.Float32BufferAttribute(strand1Pos, 3));
-    strand2Geo.setAttribute('position', new THREE.Float32BufferAttribute(strand2Pos, 3));
-
-    const lineMat1 = new THREE.LineBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.75 });
-    const lineMat2 = new THREE.LineBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.75 });
-
-    helixGroup.add(new THREE.Line(strand1Geo, lineMat1));
-    helixGroup.add(new THREE.Line(strand2Geo, lineMat2));
-    helixGroup.rotation.x = 0.4;
-    helixGroup.rotation.z = -0.3;
-
-    // 6. Ambient Particle Cloud (Atom Dust)
-    const particleCount = 280;
-    const particleGeo = new THREE.BufferGeometry();
-    const particlePos = new Float32Array(particleCount * 3);
-    const particleScales = new Float32Array(particleCount);
-
-    for (let i = 0; i < particleCount; i++) {
-      particlePos[i * 3] = (Math.random() - 0.5) * 60;
-      particlePos[i * 3 + 1] = (Math.random() - 0.5) * 40;
-      particlePos[i * 3 + 2] = (Math.random() - 0.5) * 40;
-      particleScales[i] = Math.random() * 2 + 0.5;
-    }
-
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
-
-    // Particle Material with Soft Glow
-    const particleMat = new THREE.PointsMaterial({
-      color: 0x00f2ff,
-      size: 0.35,
-      transparent: true,
-      opacity: 0.65,
-      blending: THREE.AdditiveBlending
-    });
-
-    const particles = new THREE.Points(particleGeo, particleMat);
-    scene.add(particles);
-
-    // 7. HUD Target Rings (Decorative 3D Reticle)
-    const reticleGroup = new THREE.Group();
-    scene.add(reticleGroup);
-
-    const ringGeo = new THREE.RingGeometry(11, 11.08, 64);
-    const ringMat = new THREE.MeshBasicMaterial({
-      color: 0x00f2ff,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.18
-    });
-    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-    reticleGroup.add(ringMesh);
-
-    const outerRingGeo = new THREE.RingGeometry(13.5, 13.55, 64);
-    const outerRingMat = new THREE.MeshBasicMaterial({
-      color: 0xf27d26,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.12
-    });
-    const outerRingMesh = new THREE.Mesh(outerRingGeo, outerRingMat);
-    reticleGroup.add(outerRingMesh);
-
-    // 8. Mouse Parallax Tracking
+    // 5. Interactive Mouse Rotation & Parallax
     let mouseX = 0;
     let mouseY = 0;
     let targetX = 0;
     let targetY = 0;
 
     const handleMouseMove = (event: MouseEvent) => {
-      const windowHalfX = window.innerWidth / 2;
-      const windowHalfY = window.innerHeight / 2;
-      mouseX = (event.clientX - windowHalfX) * 0.0008;
-      mouseY = (event.clientY - windowHalfY) * 0.0008;
+      const rect = container.getBoundingClientRect();
+      const x = event.clientX - rect.left - rect.width / 2;
+      const y = event.clientY - rect.top - rect.height / 2;
+      mouseX = x * 0.001;
+      mouseY = y * 0.001;
     };
 
     window.addEventListener('mousemove', handleMouseMove);
 
-    // 9. Resize Listener
+    // 6. Responsive Resize
     const handleResize = () => {
       if (!container) return;
       camera.aspect = container.clientWidth / container.clientHeight;
@@ -263,47 +173,25 @@ export const HeroScene3D: React.FC = () => {
 
     window.addEventListener('resize', handleResize);
 
-    // 10. Render Loop
+    // 7. Smooth Animation Loop
     let animationId: number;
-    let clock = new THREE.Clock();
-
     const animate = () => {
       animationId = requestAnimationFrame(animate);
-      const delta = clock.getDelta();
-      const elapsed = clock.getElapsedTime();
 
-      // Smooth mouse interpolation
       targetX += (mouseX - targetX) * 0.05;
       targetY += (mouseY - targetY) * 0.05;
 
-      // Molecule rotation & organic bobbing
-      moleculeGroup.rotation.y += 0.005;
-      moleculeGroup.rotation.x = Math.sin(elapsed * 0.5) * 0.2 + targetY * 2;
-      moleculeGroup.rotation.z = Math.cos(elapsed * 0.3) * 0.15 + targetX * 2;
-      moleculeGroup.position.y = Math.sin(elapsed * 0.8) * 0.8;
-
-      // Helix rotation
-      helixGroup.rotation.y -= 0.003;
-      helixGroup.rotation.x = 0.4 + Math.sin(elapsed * 0.4) * 0.1;
-
-      // Particles subtle drift
-      particles.rotation.y += 0.001;
-      particles.rotation.x += 0.0005;
-
-      // Reticle rotation
-      ringMesh.rotation.z += 0.002;
-      outerRingMesh.rotation.z -= 0.0015;
-
-      // Dynamic light pulsation
-      cyanLight.intensity = 4.0 + Math.sin(elapsed * 2) * 1.0;
-      amberLight.intensity = 3.5 + Math.cos(elapsed * 1.8) * 0.8;
+      // Steady, elegant rotation
+      moleculeGroup.rotation.y += 0.006;
+      moleculeGroup.rotation.x = targetY * 1.5;
+      moleculeGroup.rotation.z = targetX * 1.5;
 
       renderer.render(scene, camera);
     };
 
     animate();
 
-    // 11. Cleanup
+    // 8. Cleanup
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener('mousemove', handleMouseMove);
@@ -318,24 +206,12 @@ export const HeroScene3D: React.FC = () => {
   return (
     <div className="relative h-full w-full">
       {/* 3D WebGL Canvas Container */}
-      <div ref={containerRef} className="h-full w-full" />
+      <div ref={containerRef} className="h-full w-full cursor-grab active:cursor-grabbing" />
 
-      {/* Cyber Grid & HUD Vignette Overlays */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,#050508_95%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#050508_0%,transparent_15%,transparent_85%,#050508_100%)]" />
-
-      {/* Live 3D Viewport Telemetry Badge */}
-      <div className="pointer-events-none absolute top-4 right-4 flex items-center gap-2 rounded-md border border-cyan-500/20 bg-slate-950/60 px-3 py-1.5 backdrop-blur-md">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75"></span>
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-500"></span>
-        </span>
-        <span className="font-mono text-[11px] tracking-wider text-cyan-300">WEBGL 3D REAL-TIME</span>
-      </div>
-
-      {/* Coordinate HUD Readout */}
-      <div className="pointer-events-none absolute bottom-4 left-4 hidden font-mono text-[10px] tracking-widest text-slate-500 sm:block">
-        RENDER: THREE.JS ACES-FILMIC | ROTATION: AUTO-ORBIT | PARTICLES: 280
+      {/* Subtle Bottom Status Line */}
+      <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-3 py-1 text-[10px] font-mono text-slate-400 backdrop-blur-md">
+        <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+        <span>3D MOLECULAR STRUCTURE PREVIEW</span>
       </div>
     </div>
   );
