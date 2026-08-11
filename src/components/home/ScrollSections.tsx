@@ -81,16 +81,16 @@ export const ScrollSections: React.FC = () => {
   }, [customSmiles]);
 
   return (
-    <div className="relative z-10 space-y-32 py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pointer-events-auto">
+    <div className="relative z-10 space-y-36 py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pointer-events-auto">
       
       {/* ========================================================================= */}
       {/* SECTION 2: 3D MOLECULAR VISUALIZATION & INTERACTIVE PICKING                */}
       {/* ========================================================================= */}
       <motion.section
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 35 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-100px' }}
-        transition={{ duration: 0.6 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
       >
         <div className="lg:col-span-6 space-y-6">
@@ -111,18 +111,18 @@ export const ScrollSections: React.FC = () => {
           </p>
 
           <div className="grid grid-cols-2 gap-3 pt-2 font-mono text-xs">
-            <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-700/60 backdrop-blur-xl space-y-1">
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-700/60 backdrop-blur-xl space-y-1 hover:border-cyan-400/40 transition-colors shadow-lg">
               <span className="text-cyan-400 font-semibold flex items-center gap-1.5">
                 <MousePointer className="h-3.5 w-3.5" /> 5 Granularities
               </span>
-              <p className="text-slate-400 text-[11px]">Atom, Residue, Ligand, Chain & Molecule expansion.</p>
+              <p className="text-slate-400 text-[11px] leading-normal">Atom, Residue, Ligand, Chain & Molecule expansion.</p>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-700/60 backdrop-blur-xl space-y-1">
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-700/60 backdrop-blur-xl space-y-1 hover:border-amber-400/40 transition-colors shadow-lg">
               <span className="text-amber-400 font-semibold flex items-center gap-1.5">
                 <Ruler className="h-3.5 w-3.5" /> 3D Measurement
               </span>
-              <p className="text-slate-400 text-[11px]">Distance (Å), bond angles (°) & dihedral torsions.</p>
+              <p className="text-slate-400 text-[11px] leading-normal">Distance (Å), bond angles (°) & dihedral torsions.</p>
             </div>
           </div>
 
@@ -138,7 +138,7 @@ export const ScrollSections: React.FC = () => {
         </div>
 
         <div className="lg:col-span-6">
-          <div className="p-6 rounded-2xl border border-slate-700/60 bg-slate-900/80 backdrop-blur-2xl shadow-2xl space-y-4">
+          <div className="p-6 sm:p-8 rounded-2xl border border-slate-700/60 bg-slate-900/80 backdrop-blur-2xl shadow-2xl space-y-4">
             <div className="flex items-center justify-between text-xs font-mono text-slate-400 pb-3 border-b border-slate-700/50">
               <span className="text-cyan-400 font-semibold">VIEWPORT CAPABILITIES</span>
               <span>HARDWARE ACCELERATED</span>
@@ -150,7 +150,7 @@ export const ScrollSections: React.FC = () => {
                 { title: 'Electrostatic SAS & VDW Surfaces', desc: 'Real-time marching cubes isosurfacing with adjustable transparency and mesh grids.', color: 'text-teal-400' },
                 { title: 'Interactive Picking & Measurement', desc: 'Instant raycasting feedback with real-time Ångström distance, angle, and dihedral calculations.', color: 'text-amber-400' }
               ].map((cap, i) => (
-                <div key={i} className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-700/40 space-y-1">
+                <div key={i} className="p-4 rounded-xl bg-slate-950/60 border border-slate-700/40 space-y-1 hover:border-slate-600 transition-colors">
                   <div className={`text-xs font-semibold ${cap.color}`}>{cap.title}</div>
                   <div className="text-xs text-slate-300 font-normal leading-relaxed">{cap.desc}</div>
                 </div>
@@ -164,10 +164,10 @@ export const ScrollSections: React.FC = () => {
       {/* SECTION 3: IN-BROWSER CHEMINFORMATICS & CHEMICAL CALCULATOR                */}
       {/* ========================================================================= */}
       <motion.section
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 35 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-100px' }}
-        transition={{ duration: 0.6 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         className="rounded-2xl border border-slate-700/60 bg-slate-900/80 p-6 sm:p-8 backdrop-blur-2xl shadow-2xl space-y-6"
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-700/60">
@@ -272,10 +272,10 @@ export const ScrollSections: React.FC = () => {
       {/* SECTION 4: BIOPHYSICAL ANALYSIS & DOCKING ALIGNMENT                       */}
       {/* ========================================================================= */}
       <motion.section
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 35 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-100px' }}
-        transition={{ duration: 0.6 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
         <GlassCard accentColor="cyan" className="h-full">

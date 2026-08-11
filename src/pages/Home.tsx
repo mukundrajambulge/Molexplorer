@@ -1,62 +1,94 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { MolecularCanvas } from "../components/home/MolecularCanvas";
 import { HeroContent } from "../components/home/HeroContent";
 import { ScrollSections } from "../components/home/ScrollSections";
 import { ResearchSection } from "../components/home/ResearchSection";
 
 export default function Home() {
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const exploreRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const sectionsRef = useRef<HTMLDivElement>(null);
+  const researchRef = useRef<HTMLDivElement>(null);
+  const [activeSection, setActiveSection] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (totalScroll <= 0) {
-        setScrollProgress(0);
-        return;
+      const scrollY = window.scrollY;
+      const h = window.innerHeight;
+      if (scrollY < h * 0.7) {
+        setActiveSection(0);
+      } else if (scrollY < h * 2.2) {
+        setActiveSection(1);
+      } else {
+        setActiveSection(2);
       }
-      const currentScroll = window.scrollY;
-      const progress = Math.min(Math.max(currentScroll / totalScroll, 0), 1);
-      setScrollProgress(progress);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleScrollToExplore = () => {
-    if (exploreRef.current) {
-      exploreRef.current.scrollIntoView({ behavior: "smooth" });
-    } else {
-      window.scrollTo({ top: window.innerHeight * 0.85, behavior: "smooth" });
+  const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) => {
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  const navItems = [
+    { label: "Overview", ref: heroRef },
+    { label: "Features", ref: sectionsRef },
+    { label: "Research", ref: researchRef }
+  ];
 
   return (
     <div className="relative min-h-screen w-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 font-sans text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200">
       
-      {/* 1. Persistent Interactive 3D Molecular Background Canvas */}
-      <MolecularCanvas scrollProgress={scrollProgress} />
+      {/* 1. Persistent Hardware-Accelerated 3D Molecular Background Canvas (60/144 FPS) */}
+      <MolecularCanvas />
 
-      {/* 2. Soft Ambient Radial Glows */}
+      {/* 2. Soft Ambient Radial Lighting Background */}
       <div className="pointer-events-none fixed -top-40 left-1/4 h-[500px] w-[500px] rounded-full bg-cyan-500/10 blur-[150px] z-0" />
       <div className="pointer-events-none fixed top-1/2 -right-40 h-[500px] w-[500px] rounded-full bg-amber-500/10 blur-[150px] z-0" />
       <div className="pointer-events-none fixed bottom-10 left-10 h-[400px] w-[400px] rounded-full bg-indigo-500/10 blur-[150px] z-0" />
 
-      {/* 3. Foreground DOM Layer (Translucent Overlays) */}
+      {/* 3. Floating Right-Side Scroll HUD Indicator */}
+      <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-3 pointer-events-auto">
+        {navItems.map((item, idx) => (
+          <button
+            key={item.label}
+            onClick={() => scrollTo(item.ref)}
+            className="group flex items-center justify-end gap-2.5 transition-all"
+            title={item.label}
+          >
+            <span className={`text-[10px] font-mono tracking-wider transition-all duration-300 opacity-0 group-hover:opacity-100 ${
+              activeSection === idx ? "text-cyan-300 opacity-100 font-semibold" : "text-slate-400"
+            }`}>
+              {item.label}
+            </span>
+            <span className={`h-2.5 rounded-full transition-all duration-300 ${
+              activeSection === idx
+                ? "w-7 bg-gradient-to-r from-cyan-400 to-teal-300 shadow-[0_0_12px_rgba(0,242,255,0.6)]"
+                : "w-2.5 bg-slate-700 hover:bg-slate-500"
+            }`} />
+          </button>
+        ))}
+      </div>
+
+      {/* 4. Foreground Transparent DOM Overlays */}
       <div className="relative z-10 flex flex-col">
         {/* Full-Screen Hero View */}
-        <HeroContent onScrollToExplore={handleScrollToExplore} />
+        <div ref={heroRef}>
+          <HeroContent onScrollToExplore={() => scrollTo(sectionsRef)} />
+        </div>
 
-        {/* Scroll Sections Anchor */}
-        <div ref={exploreRef}>
+        {/* Feature & Computation Sections */}
+        <div ref={sectionsRef}>
           <ScrollSections />
         </div>
 
         {/* Research & Platform Launch */}
-        <ResearchSection />
+        <div ref={researchRef}>
+          <ResearchSection />
+        </div>
       </div>
 
     </div>
