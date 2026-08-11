@@ -28,7 +28,7 @@ export const HeroContent: React.FC<HeroContentProps> = ({ onScrollToExplore }) =
         transition={{ duration: 0.5 }}
         className="flex items-center"
       >
-        <div className="inline-flex items-center gap-2.5 rounded-full border border-cyan-400/30 bg-slate-900/80 px-4 py-1.5 backdrop-blur-xl shadow-lg">
+        <div className="inline-flex items-center gap-2.5 rounded-full border border-cyan-400/30 bg-slate-900/90 px-4 py-1.5 shadow-sm">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75"></span>
             <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400"></span>
@@ -63,7 +63,7 @@ export const HeroContent: React.FC<HeroContentProps> = ({ onScrollToExplore }) =
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
           <Link
             to="/molexplorer"
-            className="btn-luminous group inline-flex items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 px-8 py-4 text-sm font-semibold text-slate-950 shadow-[0_0_30px_rgba(0,242,255,0.35)] transition-all hover:shadow-[0_0_40px_rgba(0,242,255,0.55)] hover:-translate-y-0.5"
+            className="group inline-flex items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 px-8 py-4 text-sm font-semibold text-slate-950 shadow-lg transition-all hover:shadow-[0_0_40px_rgba(0,242,255,0.55)] hover:-translate-y-0.5"
           >
             <FlaskConical className="h-5 w-5 text-slate-950" />
             <span>Explore Molecules</span>
@@ -72,7 +72,7 @@ export const HeroContent: React.FC<HeroContentProps> = ({ onScrollToExplore }) =
 
           <Link
             to="/molstudio"
-            className="btn-luminous group inline-flex items-center justify-center gap-3 rounded-xl border border-amber-500/40 bg-slate-900/80 px-8 py-4 text-sm font-semibold text-amber-300 backdrop-blur-xl shadow-[0_0_20px_rgba(242,125,38,0.2)] transition-all hover:border-amber-400 hover:bg-amber-500/15 hover:shadow-[0_0_30px_rgba(242,125,38,0.4)] hover:-translate-y-0.5"
+            className="group inline-flex items-center justify-center gap-3 rounded-xl border border-amber-500/40 bg-slate-900/90 px-8 py-4 text-sm font-semibold text-amber-300 shadow-md transition-all hover:border-amber-400 hover:bg-amber-500/15 hover:shadow-[0_0_30px_rgba(242,125,38,0.4)] hover:-translate-y-0.5"
           >
             <Beaker className="h-5 w-5 text-amber-400" />
             <span>Watch Demo</span>

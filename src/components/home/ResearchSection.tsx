@@ -20,10 +20,8 @@ export const ResearchSection: React.FC = () => {
     <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pointer-events-auto">
       
       {/* Container with Glassmorphic Luxury Border */}
-      <div className="relative rounded-3xl border border-slate-700/60 bg-gradient-to-b from-slate-900/90 via-slate-900/80 to-slate-950/95 p-8 sm:p-14 backdrop-blur-2xl shadow-2xl overflow-hidden text-center space-y-8">
+      <div className="relative rounded-3xl border border-slate-700/60 bg-gradient-to-b from-slate-900/90 via-slate-900/80 to-slate-950/95 p-8 sm:p-14 shadow-lg overflow-hidden text-center space-y-8">
         
-        {/* Subtle Ambient Radial Glow */}
-        <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[600px] rounded-full bg-cyan-500/10 blur-[120px]" />
 
         <div className="relative z-10 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-400/30 bg-slate-900/80 text-xs font-mono text-cyan-300">
           <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
@@ -66,7 +64,7 @@ export const ResearchSection: React.FC = () => {
         <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
           <Link
             to="/molexplorer"
-            className="btn-luminous inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-400 text-slate-950 text-sm font-semibold shadow-[0_0_25px_rgba(0,242,255,0.35)] hover:shadow-[0_0_35px_rgba(0,242,255,0.55)] transition-all"
+            className="inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-400 text-slate-950 text-sm font-semibold shadow-lg hover:shadow-[0_0_35px_rgba(0,242,255,0.55)] transition-all"
           >
             <FlaskConical className="h-4 w-4" />
             <span>Launch MolExplorer</span>
@@ -75,7 +73,7 @@ export const ResearchSection: React.FC = () => {
 
           <Link
             to="/molstudio"
-            className="btn-luminous inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl border border-amber-500/40 bg-slate-900/80 text-amber-300 text-sm font-semibold hover:border-amber-400 hover:bg-amber-500/15 shadow-[0_0_20px_rgba(242,125,38,0.2)] transition-all"
+            className="inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl border border-amber-500/40 bg-slate-900/80 text-amber-300 text-sm font-semibold hover:border-amber-400 hover:bg-amber-500/15 shadow-md transition-all"
           >
             <Beaker className="h-4 w-4" />
             <span>Launch MolStudio 3D</span>

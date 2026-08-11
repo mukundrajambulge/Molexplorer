@@ -58,14 +58,14 @@ const CHAIN_PALETTE = [
 ];
 
 function getStyleObj(style: RenderStyle, colorScheme: string, minResi: number, maxResi: number, chainMap: Record<string, string>, opacity: number = 1.0) {
-  const colorFunc = getColorFunction(colorScheme, minResi, maxResi, chainMap);
   const strategy = RepresentationStrategyFactory.getStrategy(style);
-  return strategy.getStyleObject(colorFunc, {
+  return strategy.getStyleObject({
     colorScheme,
     minResi,
     maxResi,
     chainMap,
-    surfaceOpacity: opacity
+    surfaceOpacity: opacity,
+    opacity
   });
 }
 

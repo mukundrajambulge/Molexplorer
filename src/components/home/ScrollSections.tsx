@@ -94,7 +94,7 @@ export const ScrollSections: React.FC = () => {
         className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
       >
         <div className="lg:col-span-6 space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-400/30 bg-slate-900/80 text-xs font-mono text-cyan-300 backdrop-blur-xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-400/30 bg-slate-900/80 text-xs font-mono text-cyan-300">
             <Eye className="h-3.5 w-3.5 text-cyan-400" />
             <span>STAGE 01 • VISUALIZATION & PICKING</span>
           </div>
@@ -111,14 +111,14 @@ export const ScrollSections: React.FC = () => {
           </p>
 
           <div className="grid grid-cols-2 gap-3 pt-2 font-mono text-xs">
-            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-700/60 backdrop-blur-xl space-y-1 hover:border-cyan-400/40 transition-colors shadow-lg">
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-700/60 space-y-1 hover:border-cyan-400/40 transition-colors shadow-lg">
               <span className="text-cyan-400 font-semibold flex items-center gap-1.5">
                 <MousePointer className="h-3.5 w-3.5" /> 5 Granularities
               </span>
               <p className="text-slate-400 text-[11px] leading-normal">Atom, Residue, Ligand, Chain & Molecule expansion.</p>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-700/60 backdrop-blur-xl space-y-1 hover:border-amber-400/40 transition-colors shadow-lg">
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-700/60 space-y-1 hover:border-amber-400/40 transition-colors shadow-lg">
               <span className="text-amber-400 font-semibold flex items-center gap-1.5">
                 <Ruler className="h-3.5 w-3.5" /> 3D Measurement
               </span>
@@ -129,7 +129,7 @@ export const ScrollSections: React.FC = () => {
           <div className="pt-2">
             <Link
               to="/molstudio"
-              className="btn-luminous inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 text-xs font-semibold hover:bg-cyan-500/30 transition-all shadow-md"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 text-xs font-semibold hover:bg-cyan-500/30 transition-all shadow-md"
             >
               <span>Explore MolStudio 3D</span>
               <ArrowRight className="h-4 w-4" />
@@ -138,7 +138,7 @@ export const ScrollSections: React.FC = () => {
         </div>
 
         <div className="lg:col-span-6">
-          <div className="p-6 sm:p-8 rounded-2xl border border-slate-700/60 bg-slate-900/80 backdrop-blur-2xl shadow-2xl space-y-4">
+          <div className="p-6 sm:p-8 rounded-2xl border border-slate-700/60 bg-slate-900/80 shadow-lg space-y-4">
             <div className="flex items-center justify-between text-xs font-mono text-slate-400 pb-3 border-b border-slate-700/50">
               <span className="text-cyan-400 font-semibold">VIEWPORT CAPABILITIES</span>
               <span>HARDWARE ACCELERATED</span>
@@ -168,7 +168,7 @@ export const ScrollSections: React.FC = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-60px' }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className="rounded-2xl border border-slate-700/60 bg-slate-900/80 p-6 sm:p-8 backdrop-blur-2xl shadow-2xl space-y-6"
+        className="rounded-2xl border border-slate-700/60 bg-slate-900/80 p-6 sm:p-8 shadow-lg space-y-6"
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-700/60">
           <div>

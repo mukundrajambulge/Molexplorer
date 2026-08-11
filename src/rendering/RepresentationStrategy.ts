@@ -86,6 +86,14 @@ export function getColorFunction(
       return CHAIN_PALETTE[idx];
     }
 
+    // By Molecule (maps to chain palette for multi-model structures)
+    if (csLower === 'by molecule') {
+      const ch = atom.chain || 'A';
+      if (chainMap[ch]) return chainMap[ch];
+      const idx = ch.charCodeAt(0) % CHAIN_PALETTE.length;
+      return CHAIN_PALETTE[idx];
+    }
+
     // Secondary Structure Jmol
     if (csLower === 'ssjmol') {
       const ss = (atom.ss || '').toLowerCase();
@@ -142,8 +150,22 @@ export function getColorFunction(
       return cbPalette[idx];
     }
 
+    // SMARTS (default to element coloring)
+    if (csLower === 'smarts') {
+      const elem = (atom.elem || atom.element || '').toUpperCase();
+      switch (elem) {
+        case 'C': return '#909090';
+        case 'N': return '#3050f8';
+        case 'O': return '#ff0d0d';
+        case 'S': return '#ffff30';
+        case 'P': return '#ff8000';
+        case 'H': return '#ffffff';
+        default: return '#b8b8b8';
+      }
+    }
+
     const isHex = /^#[0-9A-F]{6}$/i.test(colorScheme);
-    return isHex ? colorScheme : '#3b82f6';
+    return isHex ? colorScheme : '#b0b0b0';
   };
 }
 

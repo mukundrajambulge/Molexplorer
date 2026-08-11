@@ -52,7 +52,8 @@ function Layout({ children }: { children: React.ReactNode }) {
   if (isWorkspace) {
     return (
       <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200">
-        <main className="flex-1 w-full h-full min-h-0 overflow-hidden relative flex flex-col">
+        <Header />
+        <main className="flex-1 w-full min-h-0 overflow-hidden relative flex flex-col">
           <ErrorBoundary>
             {children}
           </ErrorBoundary>

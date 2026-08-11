@@ -7,10 +7,13 @@ export const MolecularCanvas: React.FC = () => {
   useEffect(() => {
     if (!containerRef.current) return;
     const container = containerRef.current;
+    
+    let docScrollHeight = document.documentElement.scrollHeight;
+    let winInnerHeight = window.innerHeight;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // 1. Scene & Perspective Camera Setup (Refined FOV & Depth)
+    // 1. Scene & Perspective Camera Setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
       34,
@@ -28,8 +31,6 @@ export const MolecularCanvas: React.FC = () => {
     });
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
     container.appendChild(renderer.domElement);
 
     // 3. Balanced Neutral Studio Lighting Rig (Pure True White Lighting)
@@ -40,48 +41,41 @@ export const MolecularCanvas: React.FC = () => {
     keyLight.position.set(15, 20, 25);
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xf1f5f9, 1.6);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 1.6);
     fillLight.position.set(-15, -10, 15);
     scene.add(fillLight);
 
-    const rimLight = new THREE.PointLight(0xe2e8f0, 1.8, 80);
+    const rimLight = new THREE.PointLight(0xffffff, 1.8, 80);
     rimLight.position.set(0, 15, -15);
     scene.add(rimLight);
 
-    // 4. Central Molecular Structure (Authentic Standard CPK Ball-and-Stick Scaffold)
+    // 4. Central Molecular Structure
     const moleculeGroup = new THREE.Group();
     moleculeGroup.scale.set(0.55, 0.55, 0.55);
     scene.add(moleculeGroup);
 
-    // Official IUPAC / CPK Element Colors
     const atomColors: Record<string, number> = {
-      C: 0x475569, // Carbon (Slate / Neutral Gray)
-      N: 0x2563eb, // Nitrogen (Standard True Blue)
-      O: 0xdc2626, // Oxygen (Standard Pure Red)
-      S: 0xeab308, // Sulfur (Standard Pure Yellow)
-      H: 0xffffff, // Hydrogen (Pure White)
-      F: 0x16a34a, // Fluorine (Standard Pure Green)
-      Cl: 0x22c55e, // Chlorine (Light Green)
-      P: 0xea580c  // Phosphorus (Orange)
+      C: 0x475569,
+      N: 0x2563eb,
+      O: 0xdc2626,
+      S: 0xeab308,
+      H: 0xffffff,
+      F: 0x16a34a,
+      Cl: 0x22c55e,
+      P: 0xea580c
     };
 
-    // Realistic multi-ring kinase inhibitor bioactive scaffold
     const rawAtoms = [
-      // Core Pyrimidine Ring A
       { x: 0.0, y: 0.0, z: 0.0, elem: 'C' },
       { x: 1.4, y: 0.0, z: 0.0, elem: 'N' },
       { x: 2.1, y: 1.2, z: 0.0, elem: 'C' },
       { x: 1.4, y: 2.4, z: 0.0, elem: 'N' },
       { x: 0.0, y: 2.4, z: 0.0, elem: 'C' },
       { x: -0.7, y: 1.2, z: 0.0, elem: 'C' },
-
-      // Fused Imidazole Ring B
       { x: 3.5, y: 1.2, z: 0.1, elem: 'N' },
       { x: 4.3, y: 2.3, z: 0.2, elem: 'C' },
       { x: 3.5, y: 3.4, z: 0.1, elem: 'N' },
       { x: 2.1, y: 2.4, z: 0.0, elem: 'C' },
-
-      // Substituted Aromatic Phenyl Ring C
       { x: -2.1, y: 1.2, z: 0.1, elem: 'N' },
       { x: -3.0, y: 2.3, z: 0.2, elem: 'C' },
       { x: -4.4, y: 2.1, z: 0.3, elem: 'C' },
@@ -89,13 +83,9 @@ export const MolecularCanvas: React.FC = () => {
       { x: -4.6, y: 4.5, z: 0.3, elem: 'C' },
       { x: -3.2, y: 4.7, z: 0.2, elem: 'C' },
       { x: -2.4, y: 3.6, z: 0.1, elem: 'C' },
-
-      // Fluorine & Methyl substituents
       { x: -5.0, y: 0.8, z: 0.4, elem: 'F' },
       { x: -5.4, y: 5.7, z: 0.4, elem: 'C' },
       { x: -6.7, y: 5.5, z: 0.5, elem: 'F' },
-
-      // Secondary Amide Bridge & Heterocycle Tail
       { x: 5.7, y: 2.3, z: 0.3, elem: 'C' },
       { x: 6.4, y: 3.4, z: 0.4, elem: 'O' },
       { x: 6.3, y: 1.1, z: 0.3, elem: 'N' },
@@ -105,11 +95,7 @@ export const MolecularCanvas: React.FC = () => {
       { x: 10.5, y: 1.1, z: 0.7, elem: 'C' },
       { x: 9.8, y: 2.3, z: 0.6, elem: 'C' },
       { x: 8.4, y: 2.3, z: 0.5, elem: 'C' },
-
-      // Methyl on Piperazine Tail
       { x: 10.5, y: -1.3, z: 0.8, elem: 'C' },
-
-      // Terminal Solubilizing Hydroxy / Oxygen & Thiophene
       { x: -0.7, y: -1.2, z: -0.1, elem: 'O' },
       { x: -2.1, y: -1.3, z: -0.1, elem: 'C' },
       { x: -2.8, y: -2.5, z: -0.2, elem: 'S' },
@@ -117,7 +103,6 @@ export const MolecularCanvas: React.FC = () => {
       { x: -0.2, y: -2.7, z: -0.1, elem: 'N' }
     ];
 
-    // Center centroid
     let avgX = 0, avgY = 0, avgZ = 0;
     rawAtoms.forEach(a => { avgX += a.x; avgY += a.y; avgZ += a.z; });
     avgX /= rawAtoms.length; avgY /= rawAtoms.length; avgZ /= rawAtoms.length;
@@ -128,48 +113,56 @@ export const MolecularCanvas: React.FC = () => {
       elem: a.elem
     }));
 
-    // Atom Sphere Meshes (Radius 0.34 Å with clean specular highlights)
-    const sphereGeo = new THREE.SphereGeometry(0.34, 32, 32);
-
-    atoms.forEach((atom) => {
-      const color = atomColors[atom.elem] || 0x64748b;
-      const mat = new THREE.MeshStandardMaterial({
-        color: color,
-        roughness: 0.25,
-        metalness: 0.15
-      });
-      const sphere = new THREE.Mesh(sphereGeo, mat);
-      sphere.position.set(atom.x, atom.y, atom.z);
-      moleculeGroup.add(sphere);
+    const sphereGeo = new THREE.SphereGeometry(0.34, 24, 24);
+    const sphereMat = new THREE.MeshStandardMaterial({
+      roughness: 0.25,
+      metalness: 0.15
     });
-
-    // Bond Cylinders connecting adjacent atoms (Radius 0.075 Å in clean metallic gray)
-    const bondMat = new THREE.MeshStandardMaterial({
-      color: 0x94a3b8,
-      roughness: 0.3,
-      metalness: 0.3
+    const sphereMesh = new THREE.InstancedMesh(sphereGeo, sphereMat, atoms.length);
+    const dummy = new THREE.Object3D();
+    const color = new THREE.Color();
+    
+    atoms.forEach((atom, i) => {
+      dummy.position.set(atom.x, atom.y, atom.z);
+      dummy.updateMatrix();
+      sphereMesh.setMatrixAt(i, dummy.matrix);
+      sphereMesh.setColorAt(i, color.setHex(atomColors[atom.elem] || 0x64748b));
     });
+    sphereMesh.instanceMatrix.needsUpdate = true;
+    if(sphereMesh.instanceColor) sphereMesh.instanceColor.needsUpdate = true;
+    moleculeGroup.add(sphereMesh);
 
+    const bonds: { p1: THREE.Vector3, p2: THREE.Vector3, dist: number }[] = [];
     for (let i = 0; i < atoms.length; i++) {
       for (let j = i + 1; j < atoms.length; j++) {
         const p1 = new THREE.Vector3(atoms[i].x, atoms[i].y, atoms[i].z);
         const p2 = new THREE.Vector3(atoms[j].x, atoms[j].y, atoms[j].z);
         const dist = p1.distanceTo(p2);
-
         if (dist > 0.8 && dist < 1.95) {
-          const bondGeo = new THREE.CylinderGeometry(0.075, 0.075, dist, 16);
-          const bond = new THREE.Mesh(bondGeo, bondMat);
-
-          const midpoint = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-          bond.position.copy(midpoint);
-
-          const dir = new THREE.Vector3().subVectors(p2, p1).normalize();
-          bond.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-
-          moleculeGroup.add(bond);
+          bonds.push({ p1, p2, dist });
         }
       }
     }
+
+    const bondGeo = new THREE.CylinderGeometry(0.075, 0.075, 1, 12);
+    bondGeo.translate(0, 0.5, 0);
+    bondGeo.rotateX(Math.PI / 2);
+    const bondMat = new THREE.MeshStandardMaterial({
+      color: 0x94a3b8,
+      roughness: 0.3,
+      metalness: 0.3
+    });
+    
+    const bondMesh = new THREE.InstancedMesh(bondGeo, bondMat, bonds.length);
+    bonds.forEach((bond, i) => {
+      dummy.position.copy(bond.p1);
+      dummy.scale.set(1, 1, bond.dist);
+      dummy.lookAt(bond.p2);
+      dummy.updateMatrix();
+      bondMesh.setMatrixAt(i, dummy.matrix);
+    });
+    bondMesh.instanceMatrix.needsUpdate = true;
+    moleculeGroup.add(bondMesh);
 
     // 5. Subtle Neutral Floating Particles
     const particleCount = 35;
@@ -207,6 +200,8 @@ export const MolecularCanvas: React.FC = () => {
     // 7. Responsive Resizing
     const handleResize = () => {
       if (!container) return;
+      docScrollHeight = document.documentElement.scrollHeight;
+      winInnerHeight = window.innerHeight;
       camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(container.clientWidth, container.clientHeight);
@@ -224,7 +219,6 @@ export const MolecularCanvas: React.FC = () => {
       let molPosX = 0, molPosY = 0;
 
       if (progress <= 0.25) {
-        // Phase 1 (Hero: 0% -> 25%) - Balanced center
         const f = progress / 0.25;
         posX = THREE.MathUtils.lerp(0, 1.2, f);
         posY = THREE.MathUtils.lerp(0, 0.6, f);
@@ -232,7 +226,6 @@ export const MolecularCanvas: React.FC = () => {
         rotY = THREE.MathUtils.lerp(0, 0.3, f);
         molPosX = THREE.MathUtils.lerp(0, 0.6, f);
       } else if (progress <= 0.50) {
-        // Phase 2 (Inspection Zoom: 25% -> 50%)
         const f = (progress - 0.25) / 0.25;
         posX = THREE.MathUtils.lerp(1.2, -2.0, f);
         posY = THREE.MathUtils.lerp(0.6, 1.5, f);
@@ -241,7 +234,6 @@ export const MolecularCanvas: React.FC = () => {
         rotX = THREE.MathUtils.lerp(0, 0.15, f);
         molPosX = THREE.MathUtils.lerp(0.6, 1.8, f);
       } else if (progress <= 0.75) {
-        // Phase 3 (Content Shift Right: 50% -> 75%)
         const f = (progress - 0.50) / 0.25;
         posX = THREE.MathUtils.lerp(-2.0, -3.8, f);
         posY = THREE.MathUtils.lerp(1.5, -0.6, f);
@@ -252,7 +244,6 @@ export const MolecularCanvas: React.FC = () => {
         molPosX = THREE.MathUtils.lerp(1.8, 4.5, f);
         molPosY = THREE.MathUtils.lerp(0, -0.3, f);
       } else {
-        // Phase 4 (Research Wide: 75% -> 100%)
         const f = (progress - 0.75) / 0.25;
         posX = THREE.MathUtils.lerp(-3.8, 0, f);
         posY = THREE.MathUtils.lerp(-0.6, 1.2, f);
@@ -266,7 +257,6 @@ export const MolecularCanvas: React.FC = () => {
       return { posX, posY, posZ, targetX, targetY, targetZ, rotX, rotY, rotZ, molPosX, molPosY };
     };
 
-    // 9. Ultra-Smooth 60/144 FPS Animation Loop with Decoupled RAF Scroll Calculation
     let animationId: number;
     let currentCamPos = new THREE.Vector3(0, 0, 32);
     let currentCamTarget = new THREE.Vector3(0, 0, 0);
@@ -277,26 +267,20 @@ export const MolecularCanvas: React.FC = () => {
     const animate = () => {
       animationId = requestAnimationFrame(animate);
 
-      // Directly compute scroll progress inside RAF without React state re-render overhead
-      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const totalScroll = docScrollHeight - winInnerHeight;
       const rawProgress = totalScroll > 0 ? Math.min(Math.max(window.scrollY / totalScroll, 0), 1) : 0;
       
-      // Butter-smooth scroll progress damping
       smoothScrollProgress += (rawProgress - smoothScrollProgress) * 0.08;
 
-      // Micro cursor parallax interpolation
       mouseX += (targetMouseX - mouseX) * 0.05;
       mouseY += (targetMouseY - mouseY) * 0.05;
 
-      // Base rotation
       if (!prefersReducedMotion) {
         baseRotationY += 0.0025;
       }
 
-      // Macro scroll trajectory
       const traj = getCameraTrajectory(smoothScrollProgress);
 
-      // Smooth camera interpolation
       currentCamPos.x += (traj.posX + mouseX * 1.0 - currentCamPos.x) * 0.06;
       currentCamPos.y += (traj.posY - mouseY * 1.0 - currentCamPos.y) * 0.06;
       currentCamPos.z += (traj.posZ - currentCamPos.z) * 0.06;
@@ -307,7 +291,6 @@ export const MolecularCanvas: React.FC = () => {
       currentCamTarget.z += (traj.targetZ - currentCamTarget.z) * 0.06;
       camera.lookAt(currentCamTarget);
 
-      // Smooth molecule shift & rotation
       currentMolPos.x += (traj.molPosX - currentMolPos.x) * 0.06;
       currentMolPos.y += (traj.molPosY - currentMolPos.y) * 0.06;
       moleculeGroup.position.set(currentMolPos.x, currentMolPos.y, 0);
@@ -316,13 +299,14 @@ export const MolecularCanvas: React.FC = () => {
       moleculeGroup.rotation.x = traj.rotX + mouseY * 0.2;
       moleculeGroup.rotation.z = traj.rotZ;
 
-      // Particle drift
       particles.rotation.y -= 0.0004;
 
       renderer.render(scene, camera);
     };
 
     animate();
+
+    handleResize();
 
     return () => {
       cancelAnimationFrame(animationId);
@@ -337,7 +321,6 @@ export const MolecularCanvas: React.FC = () => {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      {/* 3D WebGL Canvas Viewport */}
       <div ref={containerRef} className="w-full h-full" />
     </div>
   );

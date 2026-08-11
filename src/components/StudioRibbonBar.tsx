@@ -180,24 +180,10 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
     <div className="w-full bg-[#0E0E12] border-b border-white/10 select-none flex flex-col shrink-0 text-white z-30">
       {/* Row 1: Brand Title & Global Quick Actions */}
       <div className="flex items-center justify-between px-4 bg-[#070709] h-10 border-b border-white/[0.05] text-xs">
-        <div className="flex items-center gap-3 shrink-0">
-          <a href="/" className="flex items-center gap-1.5 font-bold tracking-tight text-[#4A90E2] text-sm hover:text-cyan-300 transition-colors" title="Back to Home">
-            <Activity className="w-4.5 h-4.5 text-[#F27D26]" />
-            <span>MolStudio</span>
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/70">Studio</span>
-          </a>
-
-          <div className="h-4 w-px bg-white/15 hidden sm:block" />
-
-          {/* Quick Page Switcher */}
-          <div className="hidden sm:flex items-center gap-1 text-[11px] font-medium">
-            <a href="/" className="px-2 py-0.5 rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-colors" title="Go to Home Page">
-              🏠 Home
-            </a>
-            <a href="/molexplorer" className="px-2 py-0.5 rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-colors" title="Switch to MolExplorer">
-              🧪 MolExplorer
-            </a>
-          </div>
+        <div className="flex items-center gap-2 font-bold tracking-tight text-[#4A90E2] text-sm shrink-0">
+          <Activity className="w-4.5 h-4.5 text-[#F27D26]" />
+          <span>MolStudio</span>
+          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/70">Studio</span>
         </div>
 
         <div className="flex items-center gap-3 text-[11px] font-mono text-white/50 shrink-0">
