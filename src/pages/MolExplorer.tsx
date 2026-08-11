@@ -149,14 +149,15 @@ export default function MolExplorer() {
   });
 
   return (
-    <div className="h-full w-full flex flex-col font-sans overflow-hidden bg-[#0A0A0A] text-[#F0F0F0] relative">
-      <div className="absolute top-[-100px] left-[-100px] w-[500px] h-[500px] bg-gradient-to-br from-[#1a1a1a] to-transparent rounded-full blur-[100px] opacity-40 pointer-events-none z-0"></div>
+    <div className="h-full w-full flex flex-col font-sans overflow-hidden bg-[#050508] text-[#F0F0F0] relative">
+      <div className="absolute top-[-100px] left-[-100px] w-[500px] h-[500px] bg-gradient-to-br from-cyan-500/10 to-transparent rounded-full blur-[120px] opacity-40 pointer-events-none z-0"></div>
+      <div className="absolute bottom-[-100px] right-[-100px] w-[500px] h-[500px] bg-gradient-to-br from-amber-500/10 to-transparent rounded-full blur-[120px] opacity-30 pointer-events-none z-0"></div>
 
-      <header className="h-16 border-b border-white/10 flex items-center justify-between px-4 sm:px-8 bg-transparent flex-shrink-0 z-20 relative">
+      <header className="h-16 border-b border-white/10 flex items-center justify-between px-4 sm:px-8 bg-slate-950/60 backdrop-blur-xl flex-shrink-0 z-20 relative">
         <div className="flex items-center gap-2 sm:gap-4">
           <Link 
             to="/"
-            className="p-2 rounded-lg border border-white/10 text-white/70 hover:text-white hover:border-white/20 transition-all bg-transparent"
+            className="p-2 rounded-lg border border-white/10 text-slate-400 hover:text-white hover:border-cyan-400/40 hover:bg-cyan-500/10 transition-all"
             title="Back to Home"
           >
             <ArrowLeft size={16} />
@@ -164,38 +165,41 @@ export default function MolExplorer() {
 
           <button 
             onClick={() => setShowLeftSidebar(!showLeftSidebar)}
-            className={`p-2 rounded-lg border transition-all ${showLeftSidebar ? 'border-[#F27D26] text-[#F27D26] bg-[#F27D26]/10' : 'border-white/10 text-white/70 hover:text-white hover:border-white/20'}`}
+            className={`p-2 rounded-lg border transition-all ${showLeftSidebar ? 'border-cyan-400 text-cyan-300 bg-cyan-500/20 shadow-[0_0_15px_rgba(0,242,255,0.2)]' : 'border-white/10 text-slate-400 hover:text-white hover:border-white/20'}`}
             title="Import & Filters"
           >
             <SlidersHorizontal size={16} />
           </button>
           
-          <Link to="/" className="text-base sm:text-xl tracking-tight flex items-center gap-2 sm:gap-3 select-none hover:opacity-80 transition-opacity">
-            <div className="w-5 h-5 sm:w-6 sm:h-6 border border-white/20 rounded-full flex items-center justify-center text-[#F27D26] text-[10px] font-serif italic">M</div>
-            <span className="font-light tracking-tighter">Mol<span className="font-serif italic text-[#F27D26]">Explorer</span></span>
+          <Link to="/" className="text-base sm:text-lg tracking-tight flex items-center gap-2 sm:gap-3 select-none hover:opacity-90 transition-opacity">
+            <div className="w-6 h-6 border border-cyan-400/30 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-xs font-mono font-bold shadow-[0_0_10px_rgba(0,242,255,0.2)]">M</div>
+            <span className="font-light tracking-wide text-white">Mol<span className="font-semibold text-cyan-400">Explorer</span></span>
+            <span className="hidden sm:inline-block text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+              LIBRARY & ANALYTICS
+            </span>
           </Link>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
           <button 
             onClick={() => setShowSketcher(true)}
-            className="text-[10px] uppercase tracking-[0.2em] opacity-70 hover:text-[#F27D26] hover:opacity-100 flex items-center gap-1.5 sm:gap-2 transition-colors py-2 px-1"
+            className="text-[11px] font-mono uppercase tracking-wider text-slate-300 hover:text-cyan-300 flex items-center gap-1.5 transition-colors py-2 px-2.5 rounded-lg border border-white/5 hover:border-cyan-500/30 hover:bg-cyan-500/10"
           >
             <span className="hidden sm:inline">2D Sketcher</span>
           </button>
           
           <button 
             onClick={() => setShowExport(true)}
-            className="text-[10px] uppercase tracking-[0.2em] opacity-70 hover:text-[#F27D26] hover:opacity-100 flex items-center gap-1.5 sm:gap-2 transition-colors py-2 px-1"
+            className="text-[11px] font-mono uppercase tracking-wider text-slate-300 hover:text-cyan-300 flex items-center gap-1.5 transition-colors py-2 px-2.5 rounded-lg border border-white/5 hover:border-cyan-500/30 hover:bg-cyan-500/10"
           >
-            <Download size={16} />
+            <Download size={15} />
             <span className="hidden sm:inline">Export</span>
           </button>
           <button 
             onClick={() => setShowAbout(true)}
-            className="text-[10px] uppercase tracking-[0.2em] opacity-70 hover:text-[#F27D26] hover:opacity-100 flex items-center gap-1.5 sm:gap-2 transition-colors py-2 px-1"
+            className="text-[11px] font-mono uppercase tracking-wider text-slate-300 hover:text-cyan-300 flex items-center gap-1.5 transition-colors py-2 px-2.5 rounded-lg border border-white/5 hover:border-cyan-500/30 hover:bg-cyan-500/10"
           >
-            <Info size={16} />
+            <Info size={15} />
             <span className="hidden sm:inline">About</span>
           </button>
 
@@ -203,7 +207,7 @@ export default function MolExplorer() {
 
           <button 
             onClick={() => setShowRightSidebar(!showRightSidebar)}
-            className={`p-2 rounded-lg border transition-all ${showRightSidebar ? 'border-[#F27D26] text-[#F27D26] bg-[#F27D26]/10' : 'border-white/10 text-white/70 hover:text-white hover:border-white/20'}`}
+            className={`p-2 rounded-lg border transition-all ${showRightSidebar ? 'border-cyan-400 text-cyan-300 bg-cyan-500/20 shadow-[0_0_15px_rgba(0,242,255,0.2)]' : 'border-white/10 text-slate-400 hover:text-white hover:border-white/20'}`}
             title="Properties & Metrics"
           >
             <BarChart2 size={16} />
@@ -215,7 +219,7 @@ export default function MolExplorer() {
         {/* Backdrop for Left Sidebar on Mobile/Tablet */}
         {showLeftSidebar && (
           <div 
-            className="lg:hidden absolute inset-0 bg-black/60 z-30 transition-opacity duration-300"
+            className="lg:hidden absolute inset-0 bg-black/70 z-30 transition-opacity duration-300 backdrop-blur-sm"
             onClick={() => setShowLeftSidebar(false)}
           />
         )}
@@ -224,7 +228,7 @@ export default function MolExplorer() {
         <div className={`
           absolute lg:relative top-0 bottom-0 left-0 
           h-full w-72 z-40 lg:z-20 border-r border-white/10 flex flex-col
-          bg-[#0A0A0A] lg:bg-transparent transition-transform duration-300 ease-in-out
+          bg-[#050508]/95 lg:bg-slate-950/40 backdrop-blur-xl transition-transform duration-300 ease-in-out
           ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:hidden'}
         `}>
           <div className="flex-1 overflow-hidden">

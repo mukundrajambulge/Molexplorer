@@ -697,60 +697,76 @@ useEffect(() => {
   }, []);
 
   return (
-    <div className="h-screen w-screen flex flex-col font-sans bg-[#0A0A0A] text-[#F0F0F0] overflow-hidden relative">
+    <div className="h-screen w-screen flex flex-col font-sans bg-[#050508] text-[#F0F0F0] overflow-hidden relative hud-grid">
+      {/* Bioluminescent ambient background glows */}
+      <div className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-cyan-500/5 blur-[160px]" />
+      <div className="pointer-events-none absolute -bottom-40 -left-40 h-[600px] w-[600px] rounded-full bg-amber-500/5 blur-[160px]" />
+
       {/* Top Ribbon Control Panel (Studio Ribbon Style) */}
-      <StudioRibbonBar
-        onFileUpload={handleFileUpload}
-        onFetchPdb={handleFetch}
-        renderStyle={renderStyle}
-        setRenderStyle={setRenderStyle}
-        colorScheme={colorScheme}
-        setColorScheme={setColorScheme}
-        surfaceOpacity={surfaceOpacity}
-        setSurfaceOpacity={setSurfaceOpacity}
-        backgroundColor={backgroundColor}
-        setBackgroundColor={setBackgroundColor}
-        onRunQuery={handleRunQuery}
-        onClearSelection={handleClearSelection}
-        selectedAtomCount={selectedAtomSerials.size}
-        totalAtomCount={atoms.length}
-        onAlignFetch={(id) => { setAlignFetchId(id); }}
-        onSaveSession={handleSaveSession}
-        onOpenExport={() => setIsExportOpen(true)}
-        onToggleHelp={() => setIsHelpOpen(!isHelpOpen)}
-        cleaningState={cleaningState}
-        setCleaningState={setCleaningState}
-        onResetCleaning={() => setCleaningState(defaultCleaningState)}
-        showDipoleArrow={showDipoleArrow}
-        setShowDipoleArrow={setShowDipoleArrow}
-        dipoleMoment={dipoleMoment}
-        isValidationOpen={isValidationOpen}
-        setIsValidationOpen={setIsValidationOpen}
-        activeMeasurementMode={activeMeasurementMode}
-        setMeasurementMode={setMeasurementMode}
-        clearMeasurements={clearMeasurements}
-        measurements={measurements}
-        onOpenWizard={(w) => setActiveWizard(w)}
-        onLoadSession={handleLoadSessionFile}
-        showSequenceViewer={showSequenceViewer}
-        onToggleSequenceViewer={() => setShowSequenceViewer(prev => !prev)}
-        orthographic={orthographic}
-        onToggleOrthographic={() => setOrthographic(prev => !prev)}
-        stereoMode={stereoMode}
-        setStereoMode={setStereoMode}
-        onOpenHotkeysModal={() => setShowHotkeysModal(true)}
-        isSculptingActive={isSculptingActive}
-        onToggleSculpting={() => setIsSculptingActive(prev => !prev)}
-        onAddHydrogens={handleAddHydrogens}
-        onRemoveHydrogens={handleRemoveHydrogens}
-        onDeleteSelectedAtoms={handleDeleteSelectedAtoms}
-        onCycleValence={handleCycleValence}
-      />
+      <div className="relative z-30 bg-slate-950/80 backdrop-blur-2xl border-b border-white/10">
+        <StudioRibbonBar
+          onFileUpload={handleFileUpload}
+          onFetchPdb={handleFetch}
+          renderStyle={renderStyle}
+          setRenderStyle={setRenderStyle}
+          colorScheme={colorScheme}
+          setColorScheme={setColorScheme}
+          surfaceOpacity={surfaceOpacity}
+          setSurfaceOpacity={setSurfaceOpacity}
+          backgroundColor={backgroundColor}
+          setBackgroundColor={setBackgroundColor}
+          onRunQuery={handleRunQuery}
+          onClearSelection={handleClearSelection}
+          selectedAtomCount={selectedAtomSerials.size}
+          totalAtomCount={atoms.length}
+          onAlignFetch={(id) => { setAlignFetchId(id); }}
+          onSaveSession={handleSaveSession}
+          onOpenExport={() => setIsExportOpen(true)}
+          onToggleHelp={() => setIsHelpOpen(!isHelpOpen)}
+          cleaningState={cleaningState}
+          setCleaningState={setCleaningState}
+          onResetCleaning={() => setCleaningState(defaultCleaningState)}
+          showDipoleArrow={showDipoleArrow}
+          setShowDipoleArrow={setShowDipoleArrow}
+          dipoleMoment={dipoleMoment}
+          isValidationOpen={isValidationOpen}
+          setIsValidationOpen={setIsValidationOpen}
+          activeMeasurementMode={activeMeasurementMode}
+          setMeasurementMode={setMeasurementMode}
+          clearMeasurements={clearMeasurements}
+          measurements={measurements}
+          onOpenWizard={(w) => setActiveWizard(w)}
+          onLoadSession={handleLoadSessionFile}
+          showSequenceViewer={showSequenceViewer}
+          onToggleSequenceViewer={() => setShowSequenceViewer(prev => !prev)}
+          orthographic={orthographic}
+          onToggleOrthographic={() => setOrthographic(prev => !prev)}
+          stereoMode={stereoMode}
+          setStereoMode={setStereoMode}
+          onOpenHotkeysModal={() => setShowHotkeysModal(true)}
+          isSculptingActive={isSculptingActive}
+          onToggleSculpting={() => setIsSculptingActive(prev => !prev)}
+          onAddHydrogens={handleAddHydrogens}
+          onRemoveHydrogens={handleRemoveHydrogens}
+          onDeleteSelectedAtoms={handleDeleteSelectedAtoms}
+          onCycleValence={handleCycleValence}
+        />
+      </div>
+
       {/* Main Viewer Area */}
       <div className="flex-1 relative w-full h-full overflow-hidden flex flex-col">
+        {/* Decorative HUD Viewport Corner Reticles */}
+        <div className="pointer-events-none absolute top-3 left-3 z-20 flex items-center gap-2 border-t border-l border-cyan-400/40 pt-1 pl-1">
+          <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
+          <span className="font-mono text-[10px] tracking-widest text-cyan-300/80">3D VIEWPORT • PYMOL ENGINE</span>
+        </div>
+        <div className="pointer-events-none absolute top-3 right-3 z-20 hidden md:block border-t border-r border-cyan-400/40 pt-1 pr-1 font-mono text-[10px] tracking-wider text-slate-500">
+          PROJECTION: {orthographic ? 'ORTHO' : 'PERSPECTIVE'} | STEREO: {stereoMode ? stereoMode.toUpperCase() : 'MONO'}
+        </div>
+
         {/* Active 3D Measurement Mode & Telemetry Floating HUD Banner */}
         {activeMeasurementMode && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex items-center gap-3 px-4 py-2 bg-[#0E0E12]/95 border border-cyan-500/40 rounded-xl shadow-2xl backdrop-blur-xl animate-fadeIn">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex items-center gap-3 px-5 py-2.5 bg-slate-950/90 border border-cyan-400/50 rounded-xl shadow-[0_0_30px_rgba(0,242,255,0.3)] backdrop-blur-2xl animate-fadeIn">
             <div className="flex items-center gap-2">
               <Ruler className="w-4 h-4 text-cyan-400 animate-pulse" />
               <span className="text-xs font-semibold text-white uppercase tracking-wider">
@@ -771,7 +787,7 @@ useEffect(() => {
 
             <button
               onClick={() => setMeasurementMode(null)}
-              className="p-1 rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors text-xs font-bold"
+              className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors text-xs font-bold"
               title="Cancel measurement mode"
             >
               ✕
