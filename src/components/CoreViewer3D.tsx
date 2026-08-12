@@ -9,6 +9,7 @@ import { SelectionManager } from '../interaction/SelectionManager';
 import { SelectionHighlight } from '../interaction/SelectionHighlight';
 import { SelectionLevel, PickedAtom } from '../interaction/types';
 import { MousePointer, Layers, Check, X, Sparkles, Ruler } from 'lucide-react';
+import { ContextMenu3D } from './ContextMenu3D';
 
 export interface CoreViewer3DRef {
   getView: () => any;
@@ -73,6 +74,7 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
   const [isRendering, setIsRendering] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; atom: PickedAtom } | null>(null);
   const lastZoomedData = useRef<string | null>(null);
   
   const { mode } = props;
@@ -670,7 +672,75 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
   ];
 
   return (
-    <div className="w-full h-full relative" ref={containerRef}>
+    <div 
+      className="w-full h-full relative" 
+      ref={containerRef}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        if (hoveredAtom) {
+          setContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            atom: hoveredAtom
+          });
+        }
+      }}
+    >
+      {/* 3D Context Menu */}
+      {contextMenu && (
+        <ContextMenu3D
+          x={contextMenu.x}
+          y={contextMenu.y}
+          atom={contextMenu.atom}
+          onClose={() => setContextMenu(null)}
+          onSelectPocket={(radius) => {
+            const viewer = viewerRef.current;
+            if (!viewer) return;
+            const targetAtom = contextMenu.atom;
+            const allAtoms = MolecularPicker.extractAllAtoms(viewer, targetAtom.structureId);
+            const pocketAtoms = allAtoms.filter(a => {
+              const dx = a.x - targetAtom.x;
+              const dy = a.y - targetAtom.y;
+              const dz = a.z - targetAtom.z;
+              return Math.sqrt(dx * dx + dy * dy + dz * dz) <= radius;
+            });
+            const keys = new Set<string>();
+            pocketAtoms.forEach(a => keys.add(`${a.structureId}:${a.serial}`));
+            setMolecularSelection({
+              level: 'residue',
+              atoms: pocketAtoms,
+              selectedKeys: keys
+            });
+          }}
+          onCenterResidue={() => {
+            viewerRef.current?.center({ resi: contextMenu.atom.residueNumber, chain: contextMenu.atom.chainId });
+            viewerRef.current?.zoom(1.5, 500);
+          }}
+          onMeasureFromAtom={() => {
+            useStore.getState().setMeasurementMode('distance');
+            useStore.getState().addClickedAtom(contextMenu.atom);
+          }}
+          onToggleSticks={() => {
+            const viewer = viewerRef.current;
+            if (!viewer) return;
+            viewer.addStyle(
+              { resi: contextMenu.atom.residueNumber, chain: contextMenu.atom.chainId },
+              { stick: { colorscheme: 'default', radius: 0.25 } }
+            );
+            viewer.render();
+          }}
+          onColorResidue={(colorHex) => {
+            const viewer = viewerRef.current;
+            if (!viewer) return;
+            viewer.setStyle(
+              { resi: contextMenu.atom.residueNumber, chain: contextMenu.atom.chainId },
+              { cartoon: { color: colorHex }, stick: { color: colorHex } }
+            );
+            viewer.render();
+          }}
+        />
+      )}
+
       {/* Floating Selection Granularity Bar (Visible in both Explorer and Studio when not in active measurement) */}
       {!activeMeasurementMode && (
         <div className="absolute top-3 left-4 z-30 pointer-events-auto flex items-center gap-1.5 rounded-xl border border-slate-700/60 bg-slate-900/85 p-1 backdrop-blur-xl shadow-xl">

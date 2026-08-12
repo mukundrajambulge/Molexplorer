@@ -7,6 +7,8 @@ export interface RenderContextOptions {
   chainMap: Record<string, string>;
   surfaceOpacity?: number;
   opacity?: number;
+  minBfactor?: number;
+  maxBfactor?: number;
 }
 
 export interface IRepresentationStrategy {
@@ -14,7 +16,7 @@ export interface IRepresentationStrategy {
   applySurfacesOrShapes(viewer: any, options: RenderContextOptions): void;
 }
 
-// Convert HSL hue to Hex string for smooth Spectrum gradients
+// Convert HSL hue to Hex string for smooth gradients
 function hslToHex(h: number, s: number, l: number): string {
   l /= 100;
   const a = (s * Math.min(l, 1 - l)) / 100;
@@ -32,7 +34,7 @@ const CHAIN_PALETTE = [
   '#f97316', '#14b8a6', '#ef4444', '#84cc16', '#6366f1', '#d97706'
 ];
 
-// Shapely Amino Acid Palette (Standard Biochemical Residue Colors)
+// Shapely Amino Acid Palette
 const SHAPELY_AMINO_COLORS: Record<string, string> = {
   // Acidic (Negatively charged) - Red
   'ASP': '#dc2626', 'GLU': '#dc2626',
@@ -57,13 +59,10 @@ const SHAPELY_AMINO_COLORS: Record<string, string> = {
 
 // Kyte-Doolittle Hydrophobicity Palette
 const HYDROPHOBICITY_COLORS: Record<string, string> = {
-  // Most Hydrophobic (> 1.8) - Warm Amber & Orange
   'ILE': '#f59e0b', 'VAL': '#f97316', 'LEU': '#f59e0b', 'PHE': '#ea580c',
   'CYS': '#eab308', 'MET': '#facc15', 'ALA': '#fbbf24',
-  // Amphipathic / Neutral (-0.4 to -1.6) - Emerald to Light Sage
   'GLY': '#10b981', 'THR': '#14b8a6', 'SER': '#06b6d4', 'TRP': '#34d399',
   'TYR': '#6ee7b7', 'PRO': '#a7f3d0',
-  // Most Hydrophilic (-3.2 to -4.5) - Royal & Electric Blue
   'HIS': '#60a5fa', 'GLN': '#3b82f6', 'ASP': '#2563eb', 'GLU': '#1d4ed8',
   'ASN': '#2563eb', 'LYS': '#1e40af', 'ARG': '#1e3a8a'
 };
@@ -90,16 +89,24 @@ export function getColorFunction(
       return '#94a3b8';
     }
 
+    // B-Factor Temperature Scale (Blue = Rigid/Low B -> White -> Red = Flexible/High B)
+    if (csLower === 'bfactor' || csLower === 'b-factor' || csLower === 'temperature') {
+      const b = typeof atom.b === 'number' ? atom.b : (typeof atom.bFactor === 'number' ? atom.bFactor : 20.0);
+      // Normalized between 0 and 60 (standard crystallographic range)
+      const norm = Math.max(0, Math.min(1, b / 60));
+      const hue = (1 - norm) * 240; // 240 (Blue) -> 0 (Red)
+      return hslToHex(hue, 100, 50);
+    }
+
     // 1. Classic CPK
     if (csLower === 'classic cpk' || csLower === 'element' || csLower === 'by element') {
       if (isRibbonStyle) {
-        // In cartoon ribbons, show Secondary Structure with CPK color accents
         const ss = (atom.ss || '').toLowerCase();
         if (ss === 'h') return '#e11d48'; // Red Alpha-Helices
         if (ss === 's' || ss === 'e') return '#eab308'; // Golden Beta-Sheets
         const ch = atom.chain || 'A';
         const idx = ch.charCodeAt(0) % CHAIN_PALETTE.length;
-        return CHAIN_PALETTE[idx]; // Chain-specific loop accents
+        return CHAIN_PALETTE[idx];
       }
       
       const elem = (atom.elem || atom.element || '').toUpperCase();
@@ -168,15 +175,15 @@ export function getColorFunction(
     if (csLower === 'spectrum' || csLower === 'rainbow') {
       const resi = typeof atom.resi === 'number' ? atom.resi : minResi;
       const t = Math.max(0, Math.min(1, (resi - minResi) / resiRange));
-      const hue = (1 - t) * 240; // 240 (Blue) -> 120 (Green) -> 60 (Yellow) -> 0 (Red)
+      const hue = (1 - t) * 240;
       return hslToHex(hue, 100, 48);
     }
 
-    // 8. By Formal Charge (Acidic Red, Basic Blue, Neutral Slate)
+    // 8. By Formal Charge
     if (csLower === 'by formal charge' || csLower === 'formal charge') {
       const charge = atom.formalCharge || 0;
-      if (charge > 0) return '#2563eb'; // Positive Blue
-      if (charge < 0) return '#dc2626'; // Negative Red
+      if (charge > 0) return '#2563eb';
+      if (charge < 0) return '#dc2626';
       
       const resn = (atom.resname || atom.resn || '').toUpperCase();
       if (resn === 'ARG' || resn === 'LYS' || resn === 'HIS') return '#2563eb';
@@ -187,15 +194,15 @@ export function getColorFunction(
     // 9. By Partial Charge / Electrostatic Potential (ESP)
     if (csLower === 'by partial charge' || csLower === 'esp' || csLower === 'electrostatic') {
       const resn = (atom.resname || atom.resn || '').toUpperCase();
-      if (resn === 'ARG' || resn === 'LYS' || resn === 'HIS') return '#2563eb'; // Basic Electropositive Blue
-      if (resn === 'ASP' || resn === 'GLU') return '#dc2626'; // Acidic Electronegative Red
-      if (['SER', 'THR', 'ASN', 'GLN'].includes(resn)) return '#38bdf8'; // Polar Light Blue
-      if (['PHE', 'TYR', 'TRP'].includes(resn)) return '#a855f7'; // Aromatic Soft Violet
+      if (resn === 'ARG' || resn === 'LYS' || resn === 'HIS') return '#2563eb';
+      if (resn === 'ASP' || resn === 'GLU') return '#dc2626';
+      if (['SER', 'THR', 'ASN', 'GLN'].includes(resn)) return '#38bdf8';
+      if (['PHE', 'TYR', 'TRP'].includes(resn)) return '#a855f7';
       
       const elem = (atom.elem || atom.element || '').toUpperCase();
       if (elem === 'O' || elem === 'F' || elem === 'CL') return '#ef4444';
       if (elem === 'N') return '#3b82f6';
-      return '#cbd5e1'; // Clean Neutral Backbone
+      return '#cbd5e1';
     }
 
     // 10. Hydrophobicity (Kyte-Doolittle)
@@ -229,7 +236,7 @@ export function getColorFunction(
       }
     }
 
-    // Custom Hex String Fallback or Neutral Slate
+    // Custom Hex String Fallback
     const isHex = /^#[0-9A-F]{6}$/i.test(colorScheme);
     return isHex ? colorScheme : '#94a3b8';
   };
@@ -269,7 +276,17 @@ export class DefaultRepresentationStrategy implements IRepresentationStrategy {
       case "Cartoon":
         return { cartoon: { ...base, arrows: true, tubes: false } };
       case "Putty":
-        return { cartoon: { ...base, tubes: true, thickness: 0.5 } };
+        // B-Factor Putty: variable thickness tube mapped to B-factor
+        return { 
+          cartoon: { 
+            ...base, 
+            tubes: true, 
+            thickness: 0.45,
+            colorfunc: options.colorScheme === 'spectrum' 
+              ? getColorFunction('bfactor', options.minResi, options.maxResi, options.chainMap, true) 
+              : colorfunc
+          } 
+        };
       case "Dots":
       case "Dot Surface":
         return { dot: { ...base, radius: 0.35 } };

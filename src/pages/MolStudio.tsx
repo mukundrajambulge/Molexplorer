@@ -13,6 +13,7 @@ import UserManualModal from "../components/UserManualModal";
 import { ObjectControlPanel, ObjectItem } from "../components/ObjectControlPanel";
 import { ViewportContextMenu, ContextMenuTarget } from "../components/ViewportContextMenu";
 import { RenderStyle, NamedSelection } from "../types";
+import { HistoryManager } from "../state/HistoryManager";
 import { SSInfo, MolProcessor } from "../lib/MolProcessor";
 import { SelectionParser } from "../lib/SelectionParser";
 import { alignStructures, AlignmentResult } from "../lib/Alignment";
@@ -307,16 +308,34 @@ export default function MolStudio() {
   }, [molData, atoms.length, renderStyle, alignmentResult, alignMol, selectedAtomSerials.size, namedSelections, hiddenObjectIds]);
 
   const handleObjectSetStyle = (id: string, newStyle: RenderStyle) => {
+    const prevStyle = renderStyle;
+    HistoryManager.getInstance().record({
+      description: `Change representation to ${newStyle}`,
+      undo: () => setRenderStyle(prevStyle),
+      redo: () => setRenderStyle(newStyle)
+    });
     setRenderStyle(newStyle);
   };
 
   const handleObjectSetColor = (id: string, colorSchemeName: string) => {
+    const prevColor = colorScheme;
+    HistoryManager.getInstance().record({
+      description: `Change color scheme to ${colorSchemeName}`,
+      undo: () => setColorScheme(prevColor),
+      redo: () => setColorScheme(colorSchemeName)
+    });
     setColorScheme(colorSchemeName);
   };
 
-  const handleObjectHideStyle = (id: string, category: string) => {
-    if (category === "everything") {
+  const handleObjectHideStyle = (id: string, target: 'all' | 'ribbon' | 'surface' | 'waters' | 'hydrogens') => {
+    if (target === 'all') {
       setHiddenObjectIds((prev) => new Set(prev).add(id));
+    } else if (target === 'waters') {
+      handleRemoveSolvent();
+    } else if (target === 'hydrogens') {
+      handleRemoveHydrogens();
+    } else if (target === 'surface') {
+      setSurfaceOpacity(0.0);
     }
   };
 
@@ -346,11 +365,42 @@ export default function MolStudio() {
     });
   };
 
-  const handleObjectLabel = (_id: string, _labelType: string) => {
-    // Label handling placeholder
+  const handleObjectLabel = (id: string, labelType: 'resn' | 'resi' | 'name' | 'bfactor' | 'clear') => {
+    if (labelType === 'clear') {
+      clearMeasurements();
+      return;
+    }
+    // Add 3D labels to atoms based on type
+    const targetAtoms = id === 'sele_active'
+      ? atoms.filter(a => selectedAtomSerials.has(a.serial))
+      : atoms.slice(0, 50); // cap to first 50 atoms to maintain performance
+
+    targetAtoms.forEach(a => {
+      let text = `${a.resName}-${a.resSeq}`;
+      if (labelType === 'name') text = a.name;
+      else if (labelType === 'resi') text = `${a.resSeq}`;
+      else if (labelType === 'bfactor') text = `B=${a.bFactor !== undefined ? a.bFactor.toFixed(1) : '20.0'}`;
+
+      addMeasurement({
+        id: `label-${a.serial}-${labelType}`,
+        type: 'label',
+        atomSerials: [a.serial],
+        coordinates: [{ x: a.x, y: a.y, z: a.z }],
+        value: 0,
+        label: text
+      });
+    });
   };
 
-  const handleClearSelection = () => setSelectedAtomSerials(new Set());
+  const handleClearSelection = () => {
+    const prev = new Set(selectedAtomSerials);
+    HistoryManager.getInstance().record({
+      description: 'Clear selection',
+      undo: () => setSelectedAtomSerials(prev),
+      redo: () => setSelectedAtomSerials(new Set())
+    });
+    setSelectedAtomSerials(new Set());
+  };
 
   const handleAtomClick = (atom: any) => {
     if (!atom || !atom.serial) return;

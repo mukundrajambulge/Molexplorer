@@ -1,314 +1,365 @@
-import React, { useState } from "react";
-import { Eye, EyeOff, Layers, ChevronRight, ChevronDown, Trash2, Maximize2 } from "lucide-react";
-import { RenderStyle } from "../types";
+import React, { useState } from 'react';
+import { 
+  Eye, 
+  EyeOff, 
+  Trash2, 
+  Maximize2, 
+  Palette, 
+  Tag, 
+  Layers, 
+  Sparkles, 
+  Download, 
+  ChevronRight,
+  SlidersHorizontal,
+  ChevronDown
+} from 'lucide-react';
+import { NamedSelection, RenderStyle } from '../types';
 
-export interface ObjectItem {
+export interface ObjectControlItem {
   id: string;
   name: string;
-  type: "molecule" | "selection" | "alignment" | "assembly";
+  type: 'master_all' | 'active_sele' | 'structure' | 'named_selection';
   atomCount: number;
   visible: boolean;
-  color?: string;
+  colorHex?: string;
   style?: RenderStyle;
 }
 
-interface ObjectControlPanelProps {
-  objects: ObjectItem[];
+export interface ObjectControlPanelProps {
+  items: ObjectControlItem[];
+  onAction: (id: string, action: string) => void;
+  onShow: (id: string, style: RenderStyle) => void;
+  onHide: (id: string, target: 'all' | 'ribbon' | 'surface' | 'waters' | 'hydrogens') => void;
+  onLabel: (id: string, type: 'resn' | 'resi' | 'name' | 'bfactor' | 'clear') => void;
+  onColor: (id: string, schemeOrHex: string) => void;
   onToggleVisibility: (id: string) => void;
-  onDeleteObject: (id: string) => void;
-  onZoomObject: (id: string) => void;
-  onSetStyle: (id: string, style: RenderStyle) => void;
-  onSetColor: (id: string, colorScheme: string) => void;
-  onHideStyle: (id: string, styleCategory: string) => void;
-  onLabelObject: (id: string, labelType: string) => void;
-  isCollapsed?: boolean;
-  onToggleCollapse?: () => void;
+  onDeleteObject?: (id: string) => void;
 }
 
 export const ObjectControlPanel: React.FC<ObjectControlPanelProps> = ({
-  objects,
+  items,
+  onAction,
+  onShow,
+  onHide,
+  onLabel,
+  onColor,
   onToggleVisibility,
-  onDeleteObject,
-  onZoomObject,
-  onSetStyle,
-  onSetColor,
-  onHideStyle,
-  onLabelObject,
-  isCollapsed = false,
-  onToggleCollapse,
+  onDeleteObject
 }) => {
-  const [activeMenu, setActiveMenu] = useState<{ id: string; menu: "A" | "S" | "H" | "L" | "C" } | null>(null);
+  const [activeMenu, setActiveMenu] = useState<{ id: string; col: 'A' | 'S' | 'H' | 'L' | 'C' } | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const toggleMenu = (id: string, menu: "A" | "S" | "H" | "L" | "C") => {
-    if (activeMenu?.id === id && activeMenu.menu === menu) {
+  const toggleMenu = (id: string, col: 'A' | 'S' | 'H' | 'L' | 'C', e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (activeMenu?.id === id && activeMenu?.col === col) {
       setActiveMenu(null);
     } else {
-      setActiveMenu({ id, menu });
+      setActiveMenu({ id, col });
     }
   };
 
+  // Close menus on outside click
+  React.useEffect(() => {
+    const handleClose = () => setActiveMenu(null);
+    window.addEventListener('click', handleClose);
+    return () => window.removeEventListener('click', handleClose);
+  }, []);
+
   return (
-    <div className="bg-[#111116]/90 backdrop-blur-md border border-white/10 rounded-xl text-white/90 text-xs w-72 shadow-2xl overflow-hidden font-sans select-none">
-      {/* Panel Header */}
-      <div className="flex items-center justify-between px-3 py-2 bg-white/5 border-b border-white/10 font-medium">
-        <div className="flex items-center gap-2">
-          <Layers className="w-3.5 h-3.5 text-[#F27D26]" />
-          <span className="font-semibold tracking-wide text-white">Objects & Selections</span>
-          <span className="px-1.5 py-0.2 text-[10px] bg-white/10 rounded text-white/60 font-mono">
-            {objects.length}
-          </span>
+    <div className="flex flex-col bg-[#07070A]/95 border-l border-white/10 text-white font-sans text-xs w-72 shrink-0 select-none shadow-2xl backdrop-blur-xl z-20">
+      {/* Header Bar */}
+      <div className="flex items-center justify-between px-3 h-9 bg-[#0B0B10] border-b border-white/10 text-[11px] font-mono text-slate-300">
+        <div className="flex items-center gap-1.5 font-bold text-cyan-300">
+          <SlidersHorizontal className="w-3.5 h-3.5" />
+          <span>OBJECTS & SELECTIONS</span>
         </div>
-        {onToggleCollapse && (
-          <button
-            onClick={onToggleCollapse}
-            className="text-white/40 hover:text-white transition-colors"
-          >
-            {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-        )}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="p-1 text-slate-400 hover:text-white rounded hover:bg-white/10 transition-colors"
+          title={isCollapsed ? 'Expand panel' : 'Collapse panel'}
+        >
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`} />
+        </button>
       </div>
 
-      {/* Objects List */}
+      {/* Object Matrix Table */}
       {!isCollapsed && (
-        <div className="divide-y divide-white/5 max-h-80 overflow-y-auto custom-scrollbar">
-          {objects.length === 0 ? (
-            <div className="p-4 text-center text-white/40 italic text-[11px]">
-              No loaded objects or active selections
-            </div>
-          ) : (
-            objects.map((obj) => (
-              <div key={obj.id} className="relative p-2 hover:bg-white/[0.02] transition-colors">
-                <div className="flex items-center justify-between gap-1.5">
-                  {/* Object Name & Visibility */}
-                  <div className="flex items-center gap-1.5 truncate flex-1 min-w-0">
-                    <button
-                      onClick={() => onToggleVisibility(obj.id)}
-                      className={`p-0.5 rounded transition-colors ${
-                        obj.visible ? "text-emerald-400 hover:text-emerald-300" : "text-white/30 hover:text-white/60"
-                      }`}
-                      title={obj.visible ? "Hide Object" : "Show Object"}
-                    >
-                      {obj.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                    </button>
-                    <span
-                      className={`truncate font-mono text-[11px] ${
-                        obj.type === "selection" ? "text-pink-400 italic" : "text-white font-medium"
-                      }`}
-                      title={`${obj.name} (${obj.atomCount} atoms)`}
-                    >
-                      {obj.name}
+        <div className="flex-1 overflow-y-auto divide-y divide-white/[0.04] p-1 space-y-1">
+          {items.map((item) => {
+            const isMaster = item.id === 'all';
+            const isSele = item.id === 'sele';
+
+            return (
+              <div 
+                key={item.id} 
+                className={`relative flex items-center justify-between px-2 py-1.5 rounded-lg transition-colors ${
+                  isMaster 
+                    ? 'bg-slate-900/60 border border-slate-800' 
+                    : isSele 
+                      ? 'bg-cyan-950/30 border border-cyan-500/30' 
+                      : 'hover:bg-white/[0.04]'
+                }`}
+              >
+                {/* Left: Eye + Object Name */}
+                <div className="flex items-center gap-2 truncate pr-2 min-w-0">
+                  <button
+                    onClick={() => onToggleVisibility(item.id)}
+                    className="p-0.5 text-slate-400 hover:text-white rounded transition-colors"
+                    title={item.visible ? 'Hide object' : 'Show object'}
+                  >
+                    {item.visible ? (
+                      <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                    ) : (
+                      <EyeOff className="w-3.5 h-3.5 text-slate-600" />
+                    )}
+                  </button>
+
+                  <div className="flex flex-col truncate">
+                    <span className={`text-[11px] font-medium truncate ${
+                      isMaster 
+                        ? 'font-mono text-cyan-300 font-bold' 
+                        : isSele 
+                          ? 'font-mono text-amber-300 font-bold' 
+                          : 'text-slate-200'
+                    }`}>
+                      {item.name}
                     </span>
-                    <span className="text-[10px] text-white/30 font-mono">({obj.atomCount})</span>
-                  </div>
-
-                  {/* Action Control Buttons */}
-                  <div className="flex items-center gap-0.5 shrink-0 font-mono text-[10px]">
-                    {/* A - Action */}
-                    <button
-                      onClick={() => toggleMenu(obj.id, "A")}
-                      className={`px-1.5 py-0.5 rounded font-bold transition-all border ${
-                        activeMenu?.id === obj.id && activeMenu.menu === "A"
-                          ? "bg-amber-500/30 text-amber-300 border-amber-500/50"
-                          : "bg-white/5 hover:bg-white/10 text-amber-400 border-white/10"
-                      }`}
-                      title="Action Menu"
-                    >
-                      A
-                    </button>
-
-                    {/* S - Show */}
-                    <button
-                      onClick={() => toggleMenu(obj.id, "S")}
-                      className={`px-1.5 py-0.5 rounded font-bold transition-all border ${
-                        activeMenu?.id === obj.id && activeMenu.menu === "S"
-                          ? "bg-emerald-500/30 text-emerald-300 border-emerald-500/50"
-                          : "bg-white/5 hover:bg-white/10 text-emerald-400 border-white/10"
-                      }`}
-                      title="Show Representation"
-                    >
-                      S
-                    </button>
-
-                    {/* H - Hide */}
-                    <button
-                      onClick={() => toggleMenu(obj.id, "H")}
-                      className={`px-1.5 py-0.5 rounded font-bold transition-all border ${
-                        activeMenu?.id === obj.id && activeMenu.menu === "H"
-                          ? "bg-rose-500/30 text-rose-300 border-rose-500/50"
-                          : "bg-white/5 hover:bg-white/10 text-rose-400 border-white/10"
-                      }`}
-                      title="Hide Representation"
-                    >
-                      H
-                    </button>
-
-                    {/* L - Label */}
-                    <button
-                      onClick={() => toggleMenu(obj.id, "L")}
-                      className={`px-1.5 py-0.5 rounded font-bold transition-all border ${
-                        activeMenu?.id === obj.id && activeMenu.menu === "L"
-                          ? "bg-cyan-500/30 text-cyan-300 border-cyan-500/50"
-                          : "bg-white/5 hover:bg-white/10 text-cyan-400 border-white/10"
-                      }`}
-                      title="Label Options"
-                    >
-                      L
-                    </button>
-
-                    {/* C - Color */}
-                    <button
-                      onClick={() => toggleMenu(obj.id, "C")}
-                      className={`px-1.5 py-0.5 rounded font-bold transition-all border ${
-                        activeMenu?.id === obj.id && activeMenu.menu === "C"
-                          ? "bg-purple-500/30 text-purple-300 border-purple-500/50"
-                          : "bg-white/5 hover:bg-white/10 text-purple-400 border-white/10"
-                      }`}
-                      title="Color Options"
-                    >
-                      C
-                    </button>
+                    <span className="text-[9px] font-mono text-slate-500">
+                      {item.atomCount} {item.atomCount === 1 ? 'atom' : 'atoms'}
+                    </span>
                   </div>
                 </div>
 
-                {/* Dropdown Popup Menu */}
-                {activeMenu?.id === obj.id && (
-                  <div className="mt-1.5 p-1.5 bg-[#181820] border border-white/15 rounded-lg shadow-xl animate-in fade-in slide-in-from-top-1 duration-150 text-[11px] z-20 relative">
-                    {/* A - Action Sub-Menu */}
-                    {activeMenu.menu === "A" && (
-                      <div className="flex flex-col gap-0.5">
+                {/* Right: ASHLC 5-Button Matrix */}
+                <div className="flex items-center gap-0.5 shrink-0 font-mono text-[10px] font-bold">
+                  {/* [A] Action */}
+                  <div className="relative">
+                    <button
+                      onClick={(e) => toggleMenu(item.id, 'A', e)}
+                      className={`w-5 h-5 rounded flex items-center justify-center transition-all ${
+                        activeMenu?.id === item.id && activeMenu?.col === 'A'
+                          ? 'bg-cyan-400 text-slate-950 shadow-sm'
+                          : 'bg-white/[0.06] text-slate-300 hover:bg-cyan-500/20 hover:text-cyan-300'
+                      }`}
+                      title="Actions (Zoom, Center, Align, Export)"
+                    >
+                      A
+                    </button>
+                    {activeMenu?.id === item.id && activeMenu?.col === 'A' && (
+                      <div className="absolute right-0 top-6 z-50 w-44 rounded-xl border border-slate-700 bg-slate-900/98 p-1 shadow-2xl space-y-0.5 animate-in fade-in zoom-in-95 duration-100">
                         <button
-                          onClick={() => { onZoomObject(obj.id); setActiveMenu(null); }}
-                          className="flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left text-white/80"
+                          onClick={() => onAction(item.id, 'zoom')}
+                          className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-cyan-500/20 hover:text-white"
                         >
-                          <Maximize2 className="w-3 h-3 text-amber-400" /> Center & Zoom
+                          Zoom to Bounding Box
                         </button>
                         <button
-                          onClick={() => { onDeleteObject(obj.id); setActiveMenu(null); }}
-                          className="flex items-center gap-2 px-2 py-1 rounded hover:bg-rose-500/20 text-left text-rose-300"
+                          onClick={() => onAction(item.id, 'center')}
+                          className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-cyan-500/20 hover:text-white"
                         >
-                          <Trash2 className="w-3 h-3 text-rose-400" /> Delete Object
+                          Center Camera
                         </button>
+                        <button
+                          onClick={() => onAction(item.id, 'align')}
+                          className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-cyan-500/20 hover:text-white"
+                        >
+                          Align Kabsch RMSD
+                        </button>
+                        <button
+                          onClick={() => onAction(item.id, 'export')}
+                          className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-cyan-500/20 hover:text-white"
+                        >
+                          Export as PDB File
+                        </button>
+                        {onDeleteObject && !isMaster && (
+                          <button
+                            onClick={() => onDeleteObject(item.id)}
+                            className="w-full text-left px-2 py-1.5 rounded text-[11px] text-rose-400 hover:bg-rose-500/20 hover:text-rose-200"
+                          >
+                            Delete Object
+                          </button>
+                        )}
                       </div>
                     )}
+                  </div>
 
-                    {/* S - Show Sub-Menu */}
-                    {activeMenu.menu === "S" && (
-                      <div className="grid grid-cols-2 gap-0.5">
+                  {/* [S] Show */}
+                  <div className="relative">
+                    <button
+                      onClick={(e) => toggleMenu(item.id, 'S', e)}
+                      className={`w-5 h-5 rounded flex items-center justify-center transition-all ${
+                        activeMenu?.id === item.id && activeMenu?.col === 'S'
+                          ? 'bg-amber-400 text-slate-950 shadow-sm'
+                          : 'bg-white/[0.06] text-slate-300 hover:bg-amber-500/20 hover:text-amber-300'
+                      }`}
+                      title="Show Representation (Cartoon, Sticks, Spheres, Putty, Surface)"
+                    >
+                      S
+                    </button>
+                    {activeMenu?.id === item.id && activeMenu?.col === 'S' && (
+                      <div className="absolute right-0 top-6 z-50 w-44 rounded-xl border border-slate-700 bg-slate-900/98 p-1 shadow-2xl space-y-0.5 animate-in fade-in zoom-in-95 duration-100">
                         {[
-                          { label: "Cartoon", style: "Cartoon" },
-                          { label: "B-factor Putty", style: "Putty" },
-                          { label: "Lines", style: "Line" },
-                          { label: "Sticks", style: "Stick" },
-                          { label: "Spheres (VDW)", style: "Space-Filling" },
-                          { label: "Non-bonded (crosses)", style: "Non-bonded (crosses)" },
-                          { label: "Non-bonded (spheres)", style: "Non-bonded (small spheres)" },
-                          { label: "Surface (VDW)", style: "Van der Waals Surface" },
-                          { label: "Surface (SES)", style: "Solvent-Excluded Surface" },
-                          { label: "Dot Surface", style: "Dots" },
-                        ].map((item) => (
+                          'Cartoon', 
+                          'Stick', 
+                          'Ball-and-Stick', 
+                          'Space-Filling', 
+                          'Putty', 
+                          'Solvent-Accessible Surface', 
+                          'Mesh', 
+                          'Dots', 
+                          'Line'
+                        ].map((st) => (
                           <button
-                            key={item.style}
-                            onClick={() => {
-                              onSetStyle(obj.id, item.style as RenderStyle);
-                              setActiveMenu(null);
-                            }}
-                            className="px-2 py-1 rounded hover:bg-emerald-500/20 text-left text-emerald-200 text-[10px] truncate"
+                            key={st}
+                            onClick={() => onShow(item.id, st as RenderStyle)}
+                            className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-amber-500/20 hover:text-white"
                           >
-                            + {item.label}
+                            as {st}
                           </button>
                         ))}
                       </div>
                     )}
+                  </div>
 
-                    {/* H - Hide Sub-Menu */}
-                    {activeMenu.menu === "H" && (
-                      <div className="flex flex-col gap-0.5">
+                  {/* [H] Hide */}
+                  <div className="relative">
+                    <button
+                      onClick={(e) => toggleMenu(item.id, 'H', e)}
+                      className={`w-5 h-5 rounded flex items-center justify-center transition-all ${
+                        activeMenu?.id === item.id && activeMenu?.col === 'H'
+                          ? 'bg-rose-400 text-slate-950 shadow-sm'
+                          : 'bg-white/[0.06] text-slate-300 hover:bg-rose-500/20 hover:text-rose-300'
+                      }`}
+                      title="Hide Components (Everything, Ribbon, Surface, Waters, Hydrogens)"
+                    >
+                      H
+                    </button>
+                    {activeMenu?.id === item.id && activeMenu?.col === 'H' && (
+                      <div className="absolute right-0 top-6 z-50 w-44 rounded-xl border border-slate-700 bg-slate-900/98 p-1 shadow-2xl space-y-0.5 animate-in fade-in zoom-in-95 duration-100">
                         <button
-                          onClick={() => { onHideStyle(obj.id, "everything"); setActiveMenu(null); }}
-                          className="px-2 py-1 rounded hover:bg-rose-500/20 text-left text-rose-300 font-semibold"
+                          onClick={() => onHide(item.id, 'all')}
+                          className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-rose-500/20 hover:text-white"
                         >
                           Hide Everything
                         </button>
                         <button
-                          onClick={() => { onHideStyle(obj.id, "cartoon"); setActiveMenu(null); }}
-                          className="px-2 py-1 rounded hover:bg-white/10 text-left text-white/70"
+                          onClick={() => onHide(item.id, 'ribbon')}
+                          className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-rose-500/20 hover:text-white"
                         >
-                          Hide Cartoon
+                          Hide Cartoon Ribbon
                         </button>
                         <button
-                          onClick={() => { onHideStyle(obj.id, "nonbonded"); setActiveMenu(null); }}
-                          className="px-2 py-1 rounded hover:bg-white/10 text-left text-white/70"
+                          onClick={() => onHide(item.id, 'surface')}
+                          className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-rose-500/20 hover:text-white"
                         >
-                          Hide Non-bonded / Solvent
+                          Hide Surface
+                        </button>
+                        <button
+                          onClick={() => onHide(item.id, 'waters')}
+                          className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-rose-500/20 hover:text-white"
+                        >
+                          Hide Solvent Waters
+                        </button>
+                        <button
+                          onClick={() => onHide(item.id, 'hydrogens')}
+                          className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-rose-500/20 hover:text-white"
+                        >
+                          Hide Non-Polar Hydrogens
                         </button>
                       </div>
                     )}
+                  </div>
 
-                    {/* L - Label Sub-Menu */}
-                    {activeMenu.menu === "L" && (
-                      <div className="flex flex-col gap-0.5">
+                  {/* [L] Label */}
+                  <div className="relative">
+                    <button
+                      onClick={(e) => toggleMenu(item.id, 'L', e)}
+                      className={`w-5 h-5 rounded flex items-center justify-center transition-all ${
+                        activeMenu?.id === item.id && activeMenu?.col === 'L'
+                          ? 'bg-teal-400 text-slate-950 shadow-sm'
+                          : 'bg-white/[0.06] text-slate-300 hover:bg-teal-500/20 hover:text-teal-300'
+                      }`}
+                      title="Labels (Residue Name, Sequence #, Atom Name, B-Factor)"
+                    >
+                      L
+                    </button>
+                    {activeMenu?.id === item.id && activeMenu?.col === 'L' && (
+                      <div className="absolute right-0 top-6 z-50 w-44 rounded-xl border border-slate-700 bg-slate-900/98 p-1 shadow-2xl space-y-0.5 animate-in fade-in zoom-in-95 duration-100">
                         <button
-                          onClick={() => { onLabelObject(obj.id, "clear"); setActiveMenu(null); }}
-                          className="px-2 py-1 rounded hover:bg-white/10 text-left text-white/50"
+                          onClick={() => onLabel(item.id, 'resn')}
+                          className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-teal-500/20 hover:text-white"
+                        >
+                          Residues (e.g. ALA-12)
+                        </button>
+                        <button
+                          onClick={() => onLabel(item.id, 'name')}
+                          className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-teal-500/20 hover:text-white"
+                        >
+                          Atom Names (e.g. CA)
+                        </button>
+                        <button
+                          onClick={() => onLabel(item.id, 'bfactor')}
+                          className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-teal-500/20 hover:text-white"
+                        >
+                          B-Factor Values
+                        </button>
+                        <button
+                          onClick={() => onLabel(item.id, 'clear')}
+                          className="w-full text-left px-2 py-1.5 rounded text-[11px] text-rose-400 hover:bg-rose-500/20 hover:text-rose-200"
                         >
                           Clear Labels
                         </button>
-                        <button
-                          onClick={() => { onLabelObject(obj.id, "resn"); setActiveMenu(null); }}
-                          className="px-2 py-1 rounded hover:bg-cyan-500/20 text-left text-cyan-200"
-                        >
-                          Label Residue Name (e.g. VAL)
-                        </button>
-                        <button
-                          onClick={() => { onLabelObject(obj.id, "resi"); setActiveMenu(null); }}
-                          className="px-2 py-1 rounded hover:bg-cyan-500/20 text-left text-cyan-200"
-                        >
-                          Label Residue Index (e.g. 99)
-                        </button>
-                        <button
-                          onClick={() => { onLabelObject(obj.id, "name"); setActiveMenu(null); }}
-                          className="px-2 py-1 rounded hover:bg-cyan-500/20 text-left text-cyan-200"
-                        >
-                          Label Atom Name (e.g. CA)
-                        </button>
-                        <button
-                          onClick={() => { onLabelObject(obj.id, "bfactor"); setActiveMenu(null); }}
-                          className="px-2 py-1 rounded hover:bg-cyan-500/20 text-left text-cyan-200"
-                        >
-                          Label B-Factor
-                        </button>
                       </div>
                     )}
+                  </div>
 
-                    {/* C - Color Sub-Menu */}
-                    {activeMenu.menu === "C" && (
-                      <div className="grid grid-cols-2 gap-0.5">
+                  {/* [C] Color */}
+                  <div className="relative">
+                    <button
+                      onClick={(e) => toggleMenu(item.id, 'C', e)}
+                      className={`w-5 h-5 rounded flex items-center justify-center transition-all ${
+                        activeMenu?.id === item.id && activeMenu?.col === 'C'
+                          ? 'bg-violet-400 text-slate-950 shadow-sm'
+                          : 'bg-white/[0.06] text-slate-300 hover:bg-violet-500/20 hover:text-violet-300'
+                      }`}
+                      title="Color Palette (Element CPK, Chain, Spectrum, Hydrophobicity, ESP)"
+                    >
+                      C
+                    </button>
+                    {activeMenu?.id === item.id && activeMenu?.col === 'C' && (
+                      <div className="absolute right-0 top-6 z-50 w-44 rounded-xl border border-slate-700 bg-slate-900/98 p-1 shadow-2xl space-y-0.5 animate-in fade-in zoom-in-95 duration-100">
                         {[
-                          { label: "CPK (by element)", scheme: "Classic CPK" },
-                          { label: "By Chain", scheme: "By Chain" },
-                          { label: "By Secondary Structure", scheme: "By SS" },
-                          { label: "Rainbow Spectrum", scheme: "Rainbow" },
-                          { label: "By Partial Charge", scheme: "By Partial Charge" },
-                          { label: "Hydrophobicity", scheme: "Hydrophobicity" },
-                        ].map((item) => (
+                          { label: 'By Element (CPK)', id: 'Classic CPK' },
+                          { label: 'Modern/Jmol', id: 'Modern/Jmol' },
+                          { label: 'Spectrum / Rainbow', id: 'spectrum' },
+                          { label: 'By Chain', id: 'chain' },
+                          { label: 'Secondary Structure', id: 'Secondary Structure (Standard)' },
+                          { label: 'Hydrophobicity', id: 'Hydrophobicity' },
+                          { label: 'ESP Potential', id: 'ESP' },
+                          { label: 'B-Factor Putty', id: 'bfactor' },
+                          { label: 'Cyan Swatch', id: '#06b6d4' },
+                          { label: 'Amber Swatch', id: '#f59e0b' },
+                          { label: 'Magenta Swatch', id: '#ec4899' },
+                          { label: 'White', id: '#ffffff' }
+                        ].map((c) => (
                           <button
-                            key={item.scheme}
-                            onClick={() => {
-                              onSetColor(obj.id, item.scheme);
-                              setActiveMenu(null);
-                            }}
-                            className="px-2 py-1 rounded hover:bg-purple-500/20 text-left text-purple-200 text-[10px] truncate"
+                            key={c.id}
+                            onClick={() => onColor(item.id, c.id)}
+                            className="w-full text-left px-2 py-1.5 rounded text-[11px] text-slate-200 hover:bg-violet-500/20 hover:text-white flex items-center gap-1.5"
                           >
-                            {item.label}
+                            {c.id.startsWith('#') && (
+                              <span className="w-2.5 h-2.5 rounded-full border border-white/20" style={{ backgroundColor: c.id }} />
+                            )}
+                            <span>{c.label}</span>
                           </button>
                         ))}
                       </div>
                     )}
                   </div>
-                )}
+                </div>
               </div>
-            ))
-          )}
+            );
+          })}
         </div>
       )}
     </div>
