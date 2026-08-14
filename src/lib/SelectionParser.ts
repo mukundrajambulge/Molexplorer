@@ -207,6 +207,11 @@ export class SelectionParser {
         return { type: currentToken, distance: dist, operand };
       }
 
+      if (currentToken === 'select' || currentToken === 'sele') {
+        pos++;
+        return parseFactor();
+      }
+
       // Global flag keywords
       if ([
         'organic', 'inorganic', 'polymer', 'polymer.protein', 'polymer.nucleic',
@@ -887,9 +892,18 @@ export class SelectionParser {
       };
     }
 
-    // 1. select name, expr
-    if (qLower.startsWith('select ')) {
-      const parts = qTrim.slice(7).split(',');
+    // 1. select / sele command
+    if (qLower === 'select' || qLower === 'sele') {
+      const allSerials = new Set(this.atoms.map(a => a.serial));
+      return {
+        selectedSerials: allSerials,
+        textOutput: `Selector: selected all ${allSerials.size} atoms.`
+      };
+    }
+
+    if (qLower.startsWith('select ') || qLower.startsWith('sele ')) {
+      const rest = qLower.startsWith('select ') ? qTrim.slice(7).trim() : qTrim.slice(5).trim();
+      const parts = rest.split(',');
       if (parts.length >= 2) {
         const name = parts[0].trim();
         const expr = parts.slice(1).join(',').trim();
@@ -897,6 +911,15 @@ export class SelectionParser {
         return {
           selectedSerials: serials,
           textOutput: `Selector: selection "${name}" defined with ${serials.size} atoms.`,
+          saveSelection: { name, query: expr }
+        };
+      } else {
+        const expr = rest;
+        const name = 'sele';
+        const serials = this.parse(expr);
+        return {
+          selectedSerials: serials,
+          textOutput: `Selector: selection "${name}" defined with ${serials.size} atoms for query "${expr}".`,
           saveSelection: { name, query: expr }
         };
       }
