@@ -1,1 +1,12 @@
-Before any architectural decision, read MASTER_PLAN.md and follow it as the source of truth.
+# Molexplorer Agent Entry Rules
+
+Before any architectural or scientific decision:
+
+1. Read `MASTER_PLAN.md` and follow it as the repository source of truth.
+2. Read `AGENTS.md` and follow its scientific, architectural, testing, and reporting rules.
+3. Read the relevant specification in `docs/science/`, `docs/testing/`, or `docs/decisions/` before implementing the capability.
+4. Inspect the existing implementation before creating new abstractions.
+5. Use the project's incremental workflow: research → specification → implementation → tests → manual validation → acceptance gate.
+6. Do not silently reorder milestones, weaken scientific tests, introduce a competing molecular data model, or treat the 3D renderer as the scientific authority.
+
+For every completed task, report the milestone, files changed, scientific behavior, tests executed/results, manual test procedure/result, limitations, and the next approved milestone.
