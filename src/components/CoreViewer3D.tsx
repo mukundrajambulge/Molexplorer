@@ -456,15 +456,17 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         });
 
         // Apply Selection Highlighting Overlay (Glowing Luminous Markers)
-        if (molecularSelection && molecularSelection.atoms.length > 0) {
-          SelectionHighlight.applySelectionOverlay(viewer, molecularSelection, '#00f2ff');
-        } else if (props.selectedAtomSerials && props.selectedAtomSerials.size > 0) {
-          const selArray = Array.from(props.selectedAtomSerials);
-          setClickStyle({ serial: selArray }, { 
-            ...getStyleObj(rStyle, '#00f2ff', minResi, maxResi, chainMap, 1.0),
-            stick: { radius: 0.26, color: '#00f2ff' },
-            sphere: { radius: 0.52, color: '#00f2ff' }
-          });
+        if (selectionLevel !== 'none') {
+          if (molecularSelection && molecularSelection.atoms.length > 0) {
+            SelectionHighlight.applySelectionOverlay(viewer, molecularSelection, '#00f2ff');
+          } else if (props.selectedAtomSerials && props.selectedAtomSerials.size > 0) {
+            const selArray = Array.from(props.selectedAtomSerials);
+            setClickStyle({ serial: selArray }, { 
+              ...getStyleObj(rStyle, '#00f2ff', minResi, maxResi, chainMap, 1.0),
+              stick: { radius: 0.26, color: '#00f2ff' },
+              sphere: { radius: 0.52, color: '#00f2ff' }
+            });
+          }
         }
 
         // Active Measurement In-Progress Markers (P1, P2, P3, P4)
@@ -751,7 +753,18 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
           {granularityLevels.map((lvl) => (
             <button
               key={lvl.id}
-              onClick={() => setSelectionLevel(selectionLevel === lvl.id ? 'none' : lvl.id)}
+              onClick={() => {
+                if (lvl.id === 'none') {
+                  setSelectionLevel('none');
+                  clearSelection();
+                } else {
+                  const next = selectionLevel === lvl.id ? 'none' : (lvl.id as SelectionLevel);
+                  setSelectionLevel(next);
+                  if (next === 'none') {
+                    clearSelection();
+                  }
+                }
+              }}
               className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all ${
                 selectionLevel === lvl.id
                   ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 shadow-[0_0_10px_rgba(0,242,255,0.2)]'

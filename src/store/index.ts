@@ -134,7 +134,20 @@ export const useStore = create<MoleculeState & ViewerState & UIState & Measureme
   setProcessedPDB: (data) => set({ processedPDB: data }),
   setAtoms: (atoms) => set({ atoms }),
   setSelectedAtomSerials: (serials) => set({ selectedAtomSerials: serials }),
-  setSelectionLevel: (selectionLevel) => set({ selectionLevel }),
+  setSelectionLevel: (selectionLevel) => set((state) => {
+    if (selectionLevel === 'none') {
+      return {
+        selectionLevel: 'none',
+        molecularSelection: {
+          level: 'none',
+          atoms: [],
+          selectedKeys: new Set()
+        },
+        selectedAtomSerials: new Set()
+      };
+    }
+    return { selectionLevel };
+  }),
   setMolecularSelection: (molecularSelection) => set({
     molecularSelection,
     selectedAtomSerials: new Set(molecularSelection.atoms.map(a => a.serial))
