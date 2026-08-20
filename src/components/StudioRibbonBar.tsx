@@ -275,18 +275,32 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
 
             <div className="h-8 w-[1px] bg-white/10"></div>
 
+            <label className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs transition-all cursor-pointer font-medium">
+              <FileUp className="w-4 h-4 text-cyan-400" />
+              <span>Open Session (.PSE)</span>
+              <input 
+                type="file" 
+                accept=".pse,.json,.pse.json" 
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f && onLoadSession) onLoadSession(f);
+                }} 
+                className="hidden" 
+              />
+            </label>
+
             {onOpenExport && (
               <button 
                 onClick={onOpenExport} 
                 className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs font-semibold cursor-pointer transition-all"
               >
                 <Download className="w-4 h-4 text-emerald-400" />
-                <span>Export All Formats (.PDB, .PDBQT, .SDF, .PNG...)</span>
+                <span>Export All Formats</span>
               </button>
             )}
 
-            <button onClick={onSaveSession} className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] text-xs">
-              <FileText className="w-4 h-4 text-[#4A90E2]" />
+            <button onClick={onSaveSession} className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs font-medium cursor-pointer transition-all">
+              <FileText className="w-4 h-4 text-emerald-400" />
               <span>Save Session (.PSE)</span>
             </button>
           </div>

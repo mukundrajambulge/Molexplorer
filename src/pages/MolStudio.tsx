@@ -45,6 +45,7 @@ export default function MolStudio() {
     processedPDB, setProcessedPDB,
     atoms, setAtoms,
     selectedAtomSerials, setSelectedAtomSerials,
+    selectionLevel, setSelectionLevel,
     ssData, setSsData,
     renderStyle, setRenderStyle,
     colorScheme, setColorScheme,
@@ -137,33 +138,72 @@ export default function MolStudio() {
     return () => clearInterval(interval);
   }, [isSculptingActive, atoms]);
 
+  const [sessionNotification, setSessionNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
   const handleSaveSession = () => {
-    const session: MolStudioSession = {
-      version: '1.0',
-      timestamp: Date.now(),
-      molecule: molData ? {
-        data: molData.data instanceof Uint8Array ? new TextDecoder().decode(molData.data) : molData.data,
+    if (!molData) {
+      alert("No active structure loaded to save.");
+      return;
+    }
+
+    const cameraView = viewerRef.current?.getView ? viewerRef.current.getView() : undefined;
+
+    const molecules: any[] = [
+      {
+        id: 'main_mol',
+        name: molData.name || 'molecule',
         format: molData.format,
-        name: molData.name
-      } : null,
-      selectedAtomSerials: Array.from(selectedAtomSerials),
-      namedSelections,
-      measurements,
-      biophysical: {
-        showDipoleArrow,
-        ramachandranData,
-        dipoleMoment
-      },
-      viewState: {
+        data: molData.data instanceof Uint8Array ? new TextDecoder().decode(molData.data) : molData.data,
+        atomCount: atoms.length,
+        visible: !hiddenObjectIds.has('main_mol'),
+        style: renderStyle,
+        colorScheme
+      }
+    ];
+
+    if (alignmentResult && alignMol) {
+      molecules.push({
+        id: 'aligned_target',
+        name: alignMol.name || 'aligned_target',
+        format: alignMol.format,
+        data: alignMol.data instanceof Uint8Array ? new TextDecoder().decode(alignMol.data) : alignMol.data,
+        atomCount: alignmentResult.alignedAtomsB.length,
+        visible: !hiddenObjectIds.has('aligned_target')
+      });
+    }
+
+    const session = SessionManager.createSession({
+      molecules,
+      viewerState: {
         renderStyle,
         colorScheme,
         surfaceOpacity,
         backgroundColor,
         orthographic,
-        stereoMode
+        stereoMode,
+        hiddenObjectIds: Array.from(hiddenObjectIds),
+        camera: cameraView ? { viewMatrix: cameraView } : undefined
+      },
+      selectionState: {
+        selectionLevel,
+        selectedAtomSerials: Array.from(selectedAtomSerials),
+        namedSelections
+      },
+      measurements,
+      biophysical: {
+        showDipoleArrow,
+        ramachandranData,
+        dipoleMoment
       }
-    };
-    SessionManager.downloadSessionFile(session, `${molData?.name || 'workspace'}_session.pse.json`);
+    });
+
+    const filename = `${molData.name || 'workspace'}.pse`;
+    SessionManager.downloadSessionFile(session, filename);
+    setSessionNotification({
+      type: 'success',
+      message: `Session saved successfully: ${filename}`
+    });
+    setTimeout(() => setSessionNotification(null), 4000);
   };
 
   const handleLoadSessionFile = (file: File) => {
@@ -172,31 +212,73 @@ export default function MolStudio() {
       try {
         const text = ev.target?.result as string;
         const session = SessionManager.importSession(text);
-        
-        if (session.molecule) {
-          setMolData({ data: session.molecule.data, format: session.molecule.format, name: session.molecule.name });
+
+        // 1. Reconstruct molecules
+        if (session.molecules && session.molecules.length > 0) {
+          const mainMol = session.molecules[0];
+          setMolData({
+            data: mainMol.data,
+            format: mainMol.format,
+            name: mainMol.name
+          });
         }
-        setSelectedAtomSerials(new Set(session.selectedAtomSerials));
-        setNamedSelections(session.namedSelections);
+
+        // 2. Reconstruct selection state
+        if (session.selectionState) {
+          if (session.selectionState.selectionLevel) {
+            setSelectionLevel(session.selectionState.selectionLevel);
+          }
+          if (Array.isArray(session.selectionState.selectedAtomSerials)) {
+            setSelectedAtomSerials(new Set(session.selectionState.selectedAtomSerials));
+          }
+          if (Array.isArray(session.selectionState.namedSelections)) {
+            setNamedSelections(session.selectionState.namedSelections);
+          }
+        }
+
+        // 3. Reconstruct measurements
         clearMeasurements();
-        session.measurements.forEach(m => addMeasurement(m));
-        
+        if (Array.isArray(session.measurements)) {
+          session.measurements.forEach(m => addMeasurement(m));
+        }
+
+        // 4. Reconstruct biophysical state
         if (session.biophysical) {
           setShowDipoleArrow(Boolean(session.biophysical.showDipoleArrow));
           if (session.biophysical.ramachandranData) setRamachandranData(session.biophysical.ramachandranData);
           if (session.biophysical.dipoleMoment) setDipoleMoment(session.biophysical.dipoleMoment);
         }
 
-        if (session.viewState) {
-          setRenderStyle(session.viewState.renderStyle);
-          setColorScheme(session.viewState.colorScheme);
-          setSurfaceOpacity(session.viewState.surfaceOpacity);
-          setBackgroundColor(session.viewState.backgroundColor);
-          setOrthographic(session.viewState.orthographic);
-          setStereoMode(session.viewState.stereoMode);
+        // 5. Reconstruct viewer state
+        if (session.viewerState) {
+          setRenderStyle(session.viewerState.renderStyle);
+          setColorScheme(session.viewerState.colorScheme);
+          setSurfaceOpacity(session.viewerState.surfaceOpacity);
+          setBackgroundColor(session.viewerState.backgroundColor);
+          setOrthographic(session.viewerState.orthographic);
+          setStereoMode(session.viewerState.stereoMode);
+          if (Array.isArray(session.viewerState.hiddenObjectIds)) {
+            setHiddenObjectIds(new Set(session.viewerState.hiddenObjectIds));
+          }
+          if (session.viewerState.camera?.viewMatrix && viewerRef.current?.setView) {
+            setTimeout(() => {
+              try { viewerRef.current.setView(session.viewerState.camera!.viewMatrix); } catch (e) {}
+            }, 100);
+          }
         }
+
+        const isLegacy = session.metadata?.legacyConverted;
+        setSessionNotification({
+          type: 'success',
+          message: isLegacy ? 'Session restored successfully (converted from legacy format).' : 'Session restored successfully.'
+        });
+        setTimeout(() => setSessionNotification(null), 4000);
       } catch (err: any) {
-        alert(err.message || 'Failed to load session');
+        setSessionNotification({
+          type: 'error',
+          message: err.message || 'Failed to load session file.'
+        });
+        setTimeout(() => setSessionNotification(null), 6000);
       }
     };
     reader.readAsText(file);
@@ -575,12 +657,60 @@ export default function MolStudio() {
       setStereoMode: (mode: 'none' | 'cross-eye' | 'anaglyph') => setStereoMode(mode),
       toggleSequenceViewer: () => setShowSequenceViewer(prev => !prev),
       setShowDipoleArrow: (val: boolean) => setShowDipoleArrow(val),
+      saveSession: () => handleSaveSession(),
+      exportSessionString: () => {
+        if (!molData) return null;
+        const cameraView = viewerRef.current?.getView ? viewerRef.current.getView() : undefined;
+        const session = SessionManager.createSession({
+          molecules: [
+            {
+              id: 'main_mol',
+              name: molData.name || 'molecule',
+              format: molData.format,
+              data: molData.data instanceof Uint8Array ? new TextDecoder().decode(molData.data) : molData.data,
+              atomCount: atoms.length,
+              visible: !hiddenObjectIds.has('main_mol'),
+              style: renderStyle,
+              colorScheme
+            }
+          ],
+          viewerState: {
+            renderStyle,
+            colorScheme,
+            surfaceOpacity,
+            backgroundColor,
+            orthographic,
+            stereoMode,
+            hiddenObjectIds: Array.from(hiddenObjectIds),
+            camera: cameraView ? { viewMatrix: cameraView } : undefined
+          },
+          selectionState: {
+            selectionLevel,
+            selectedAtomSerials: Array.from(selectedAtomSerials),
+            namedSelections
+          },
+          measurements,
+          biophysical: {
+            showDipoleArrow,
+            ramachandranData,
+            dipoleMoment
+          }
+        });
+        return SessionManager.exportSession(session);
+      },
+      importSessionString: (text: string) => {
+        const file = new File([text], 'test.pse', { type: 'application/vnd.molstudio.pse' });
+        handleLoadSessionFile(file);
+      },
       getState: () => ({
         molName: molData?.name || null,
         atomsCount: atoms.length,
         selectedCount: selectedAtomSerials.size,
         renderStyle,
         colorScheme,
+        surfaceOpacity,
+        backgroundColor,
+        selectionLevel,
         measurementsCount: measurements.length,
         dipoleMagnitude: dipoleMoment?.magnitude || 0,
         ramachandranCount: ramachandranData.length,
@@ -588,7 +718,7 @@ export default function MolStudio() {
         stereoMode
       })
     };
-  }, [molData, atoms, selectedAtomSerials, renderStyle, colorScheme, measurements, dipoleMoment, ramachandranData, orthographic, stereoMode]);
+  }, [molData, atoms, selectedAtomSerials, selectionLevel, renderStyle, colorScheme, measurements, dipoleMoment, ramachandranData, orthographic, stereoMode]);
 
 
   // Re-process whenever molData or cleaningState changes
@@ -1014,6 +1144,17 @@ useEffect(() => {
 
         {/* Measurement & Density Map Wizards */}
         <MeasurementWizard modal={activeWizard} onClose={() => setActiveWizard(null)} processor={processorRef.current} />
+
+        {/* Floating Session Notification Toast */}
+        {sessionNotification && (
+          <div className={`fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl border text-xs font-mono font-semibold shadow-2xl backdrop-blur-xl animate-fadeIn ${
+            sessionNotification.type === 'success'
+              ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-300'
+              : 'bg-rose-950/90 border-rose-500/50 text-rose-300'
+          }`}>
+            {sessionNotification.message}
+          </div>
+        )}
 
         {/* Hotkeys Guide Modal */}
         {showHotkeysModal && (

@@ -1,0 +1,84 @@
+{
+  "format": "MolStudio-PSE",
+  "version": 1,
+  "createdAt": "2026-08-20T07:19:22.351Z",
+  "application": {
+    "name": "Molexplorer",
+    "module": "MolStudio"
+  },
+  "molecules": [
+    {
+      "id": "main_mol",
+      "name": "03_protein_with_ligand",
+      "format": "pdb",
+      "data": "HEADER    TEST PROTEIN WITH LIGAND                20-AUG-26   03PL              \nTITLE     CONTROLLED TEST FIXTURE FOR PHASE 4 PSE SESSION PERSISTENCE\nREMARK   1 20 TOTAL ATOMS (16 PROTEIN RESIDUE ATOMS + 4 LIGAND HETATM ATOMS)\nATOM      1  N   ALA A   1      10.000  10.000  10.000  1.00 20.00           N  \nATOM      2  CA  ALA A   1      11.450  10.000  10.000  1.00 20.00           C  \nATOM      3  C   ALA A   1      12.000  11.450  10.000  1.00 20.00           C  \nATOM      4  O   ALA A   1      11.300  12.450  10.000  1.00 20.00           O  \nATOM      5  CB  ALA A   1      12.000   9.000  11.000  1.00 20.00           C  \nATOM      6  N   GLY A   2      13.300  11.500  10.000  1.00 20.00           N  \nATOM      7  CA  GLY A   2      14.000  12.800  10.000  1.00 20.00           C  \nATOM      8  C   GLY A   2      15.500  12.700  10.000  1.00 20.00           C  \nATOM      9  O   GLY A   2      16.100  11.600  10.000  1.00 20.00           O  \nATOM     10  N   VAL A   3      16.100  13.850  10.000  1.00 20.00           N  \nATOM     11  CA  VAL A   3      17.550  13.900  10.000  1.00 20.00           C  \nATOM     12  CB  VAL A   3      18.100  14.500  11.400  1.00 20.00           C  \nATOM     13  CG1 VAL A   3      19.600  14.500  11.400  1.00 20.00           C  \nATOM     14  CG2 VAL A   3      17.600  15.900  11.500  1.00 20.00           C  \nATOM     15  C   VAL A   3      18.100  12.500  09.700  1.00 20.00           C  \nATOM     16  O   VAL A   3      17.400  11.500  09.700  1.00 20.00           O  \nHETATM   17  C1  LIG A 100      20.000  20.000  20.000  1.00 25.00           C  \nHETATM   18  C2  LIG A 100      21.400  20.000  20.000  1.00 25.00           C  \nHETATM   19  O1  LIG A 100      22.000  21.200  20.000  1.00 25.00           O  \nHETATM   20  N1  LIG A 100      19.300  21.200  20.000  1.00 25.00           N  \nCONECT   17   18   20\nCONECT   18   17   19\nCONECT   19   18\nCONECT   20   17\nEND\n",
+      "atomCount": 20,
+      "visible": true
+    }
+  ],
+  "viewerState": {
+    "renderStyle": "Ball-and-Stick",
+    "colorScheme": "Modern/Jmol",
+    "surfaceOpacity": 0.65,
+    "backgroundColor": "#1A1A24",
+    "orthographic": true,
+    "stereoMode": "none",
+    "camera": {
+      "position": {
+        "x": 15.5,
+        "y": 14.2,
+        "z": 12.8
+      },
+      "zoom": 1.8
+    }
+  },
+  "selectionState": {
+    "selectionLevel": "ligand",
+    "selectedAtomSerials": [
+      17,
+      18,
+      19,
+      20
+    ],
+    "namedSelections": [
+      {
+        "name": "active_site",
+        "query": "resn LIG",
+        "atomIds": [
+          17,
+          18,
+          19,
+          20
+        ]
+      }
+    ]
+  },
+  "measurements": [
+    {
+      "id": "dist-1",
+      "type": "distance",
+      "atomSerials": [
+        16,
+        17
+      ],
+      "coordinates": [
+        {
+          "x": 17.4,
+          "y": 11.5,
+          "z": 9.7
+        },
+        {
+          "x": 20,
+          "y": 20,
+          "z": 20
+        }
+      ],
+      "value": 12.55,
+      "label": "12.55 Å"
+    }
+  ],
+  "biophysical": {
+    "showDipoleArrow": true
+  },
+  "metadata": {}
+}

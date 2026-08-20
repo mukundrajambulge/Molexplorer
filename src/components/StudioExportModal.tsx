@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { X, Download, FileText, Camera, Table, ShieldCheck, Check } from 'lucide-react';
 import { useStore } from '../store';
 import { MolProcessor } from '../lib/MolProcessor';
+import { SessionManager } from '../session/SessionManager';
+
 
 interface StudioExportModalProps {
   isOpen: boolean;
@@ -72,22 +74,39 @@ export const StudioExportModal: React.FC<StudioExportModalProps> = ({ isOpen, on
       filename = `${baseName}.sdf`;
       mimeType = 'chemical/x-mdl-sdfile';
     } else if (exportType === 'pse') {
-      const sessionData = {
-        version: '1.0-molstudio',
-        name: baseName,
-        timestamp: Date.now(),
-        atomCount: atoms.length,
-        renderStyle,
-        colorScheme,
-        surfaceOpacity,
-        backgroundColor,
-        measurements,
-        ssData,
-        pdbContent: processedPDB
-      };
-      content = JSON.stringify(sessionData, null, 2);
-      filename = `${baseName}_session.pse.json`;
-      mimeType = 'application/json';
+      const cameraView = viewerRef?.current?.getView ? viewerRef.current.getView() : undefined;
+      const session = SessionManager.createSession({
+        molecules: [
+          {
+            id: 'main_mol',
+            name: baseName,
+            format: 'pdb',
+            data: processedPDB || '',
+            atomCount: atoms.length,
+            visible: true,
+            style: renderStyle,
+            colorScheme
+          }
+        ],
+        viewerState: {
+          renderStyle,
+          colorScheme,
+          surfaceOpacity,
+          backgroundColor,
+          orthographic: false,
+          stereoMode: 'none',
+          camera: cameraView ? { viewMatrix: cameraView } : undefined
+        },
+        selectionState: {
+          selectionLevel: 'atom',
+          selectedAtomSerials: [],
+          namedSelections: []
+        },
+        measurements
+      });
+      content = SessionManager.exportSession(session);
+      filename = `${baseName}.pse`;
+      mimeType = 'application/vnd.molstudio.pse';
     } else if (exportType === 'csv') {
       let csv = 'Residue,ChainID,SeqNum,SSType,Phi,Psi\n';
       ramachandranData.forEach(r => {
