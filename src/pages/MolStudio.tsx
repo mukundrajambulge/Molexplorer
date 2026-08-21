@@ -83,18 +83,40 @@ export default function MolStudio() {
   // Stage 8 State Variables & Topology Handlers
   const [isSculptingActive, setIsSculptingActive] = useState(false);
 
-  const handleAddHydrogens = () => {
+  const handleAddHydrogens = (selection?: Set<number>) => {
     if (processorRef.current) {
-      TopologyEditor.addHydrogens(processorRef.current);
+      try {
+        const doc = processorRef.current.getCanonicalDocument();
+        const targetIds = selection && selection.size > 0 ? Array.from(selection) : undefined;
+        const mutation = ScientificEditingKernel.addHydrogens(doc, targetIds, {
+          objectId: doc.active_object_id,
+          author: 'User'
+        });
+        processorRef.current.applyScientificRevision(mutation.revision);
+      } catch (err: any) {
+        console.warn('Add hydrogens fallback:', err.message);
+        TopologyEditor.addHydrogens(processorRef.current);
+      }
       setAtoms([...processorRef.current.atoms]);
       setProcessedPDB(processorRef.current.toPDB());
       triggerFocus();
     }
   };
 
-  const handleRemoveHydrogens = () => {
+  const handleRemoveHydrogens = (selection?: Set<number>) => {
     if (processorRef.current) {
-      TopologyEditor.removeHydrogens(processorRef.current);
+      try {
+        const doc = processorRef.current.getCanonicalDocument();
+        const targetIds = selection && selection.size > 0 ? Array.from(selection) : undefined;
+        const mutation = ScientificEditingKernel.removeHydrogens(doc, targetIds, {
+          objectId: doc.active_object_id,
+          author: 'User'
+        });
+        processorRef.current.applyScientificRevision(mutation.revision);
+      } catch (err: any) {
+        console.warn('Remove hydrogens fallback:', err.message);
+        TopologyEditor.removeHydrogens(processorRef.current);
+      }
       setAtoms([...processorRef.current.atoms]);
       setProcessedPDB(processorRef.current.toPDB());
       triggerFocus();
@@ -660,11 +682,11 @@ export default function MolStudio() {
     }
 
     if (result.addHydrogens) {
-      handleAddHydrogens();
+      handleAddHydrogens(result.selectedSerials);
     }
 
     if (result.removeHydrogens) {
-      handleRemoveHydrogens();
+      handleRemoveHydrogens(result.selectedSerials);
     }
 
     if (result.addLabels) {

@@ -1028,21 +1028,37 @@ export class SelectionParser {
       };
     }
 
-    // 0.6 h_add / add_hydrogens / h_fill
-    if (qLower === 'h_add' || qLower === 'h_fill' || qLower === 'add_hydrogens' || qLower === 'hadd') {
+    // 0.6 h_add / add_hydrogens / h_fill [<expr>]
+    if (qLower.startsWith('h_add') || qLower.startsWith('h_fill') || qLower.startsWith('add_hydrogens') || qLower.startsWith('hadd')) {
+      let rest = '';
+      if (qLower.startsWith('h_add')) rest = qTrim.slice(5).trim();
+      else if (qLower.startsWith('h_fill')) rest = qTrim.slice(6).trim();
+      else if (qLower.startsWith('add_hydrogens')) rest = qTrim.slice(13).trim();
+      else rest = qTrim.slice(4).trim();
+
+      const serials = rest ? this.parse(rest) : new Set<number>();
+      const isFill = qLower.startsWith('h_fill');
       return {
-        selectedSerials: new Set(),
+        selectedSerials: serials,
         addHydrogens: true,
-        textOutput: `h_add: added modeled hydrogens to molecular topology.`
+        textOutput: `${isFill ? 'h_fill' : 'h_add'}: added modeled hydrogens to molecular topology.`
       };
     }
 
-    // 0.7 remove_h / h_del / del_h
-    if (qLower === 'remove_h' || qLower === 'h_del' || qLower === 'del_h' || qLower === 'hdel') {
+    // 0.7 remove_h / h_remove / h_del / del_h [<expr>]
+    if (qLower.startsWith('h_remove') || qLower.startsWith('remove_h') || qLower.startsWith('h_del') || qLower.startsWith('del_h') || qLower.startsWith('hdel')) {
+      let rest = '';
+      if (qLower.startsWith('h_remove')) rest = qTrim.slice(8).trim();
+      else if (qLower.startsWith('remove_h')) rest = qTrim.slice(8).trim();
+      else if (qLower.startsWith('h_del')) rest = qTrim.slice(5).trim();
+      else if (qLower.startsWith('del_h')) rest = qTrim.slice(5).trim();
+      else rest = qTrim.slice(4).trim();
+
+      const serials = rest ? this.parse(rest) : new Set<number>();
       return {
-        selectedSerials: new Set(),
+        selectedSerials: serials,
         removeHydrogens: true,
-        textOutput: `remove_h: removed non-polar and polar hydrogens from topology.`
+        textOutput: `h_remove: removed hydrogen atoms from molecular topology.`
       };
     }
 
