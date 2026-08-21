@@ -1,5 +1,6 @@
-import { CanonicalAtom } from '../types/domain';
+import { CanonicalAtom, CanonicalBond, CanonicalTopology } from '../types/domain';
 import { toCanonicalAtomSet } from '../domain/AtomAdapter';
+import { toCanonicalBondSet, buildCanonicalTopology } from '../domain/BondAdapter';
 
 // Safe non-top-level-await import for 3dmol
 let $3Dmol: any = { Parsers: { mmtf: () => [] } };
@@ -118,6 +119,9 @@ export class MolProcessor {
 
   private _cachedCanonicalAtoms: CanonicalAtom[] | null = null;
   private _cachedCanonicalSource: Atom[] | null = null;
+  private _cachedCanonicalBonds: CanonicalBond[] | null = null;
+  private _cachedCanonicalBondsSource: Atom[] | null = null;
+  private _cachedCanonicalTopology: CanonicalTopology | null = null;
 
   /**
    * Retrieves the canonical Atom domain representation of parsed atoms.
@@ -130,6 +134,36 @@ export class MolProcessor {
       this._cachedCanonicalSource = this.atoms;
     }
     return this._cachedCanonicalAtoms;
+  }
+
+  /**
+   * Retrieves the canonical Bond domain representation of molecular connectivity.
+   * Endpoints reference CanonicalAtom IDs (canonical_id), strictly normalized with atom_a < atom_b.
+   * Caches the result and automatically invalidates if processor atoms array reference changes.
+   */
+  public getCanonicalBonds(moleculeRef?: string): CanonicalBond[] {
+    if (!this._cachedCanonicalBonds || this._cachedCanonicalBondsSource !== this.atoms) {
+      const canonicalAtoms = this.getCanonicalAtoms(moleculeRef);
+      this._cachedCanonicalBonds = toCanonicalBondSet(canonicalAtoms, this.atoms, {
+        defaultSource: 'inferred'
+      });
+      this._cachedCanonicalBondsSource = this.atoms;
+      this._cachedCanonicalTopology = null; // Invalidate topology cache
+    }
+    return this._cachedCanonicalBonds;
+  }
+
+  /**
+   * Retrieves the complete CanonicalTopology graph containing sorted bonds,
+   * adjacency lists, and fast composite-key bond lookups.
+   */
+  public getCanonicalTopology(moleculeRef?: string): CanonicalTopology {
+    if (!this._cachedCanonicalTopology || this._cachedCanonicalBondsSource !== this.atoms) {
+      const canonicalAtoms = this.getCanonicalAtoms(moleculeRef);
+      const canonicalBonds = this.getCanonicalBonds(moleculeRef);
+      this._cachedCanonicalTopology = buildCanonicalTopology(canonicalAtoms, canonicalBonds);
+    }
+    return this._cachedCanonicalTopology;
   }
 
   constructor(input: string | Uint8Array, format: 'pdb' | 'mmtf' = 'pdb') {

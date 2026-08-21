@@ -48,6 +48,42 @@ export interface CanonicalAtom {
 }
 
 /**
+ * Authoritative Canonical Bond Model.
+ * Formally specified in docs/science/DATA_MODEL_SPEC.yaml.
+ *
+ * IDENTITY & TOPOLOGY POLICY:
+ * - atom_a and atom_b refer strictly to CanonicalAtom IDs (canonical_id).
+ * - Normalized with atom_a < atom_b for deterministic unordered edge representation.
+ * - Explicitly decoupled from volatile memory array indices.
+ */
+export interface CanonicalBond {
+  // --- CANONICAL IDENTITY & ENDPOINTS ---
+  bond_id: string;                // Unique UUID or deterministic identifier (e.g. "b-1-2")
+  atom_a: number;                 // CanonicalAtom ID (canonical_id) for endpoint A (min endpoint)
+  atom_b: number;                 // CanonicalAtom ID (canonical_id) for endpoint B (max endpoint)
+
+  // --- CHEMICAL TOPOLOGY ---
+  order: 1 | 1.5 | 2 | 3;         // Multiplicity: 1 (single), 1.5 (aromatic), 2 (double), 3 (triple)
+  is_aromatic: boolean;           // True if participating in an aromatic conjugated ring system
+
+  // --- SOURCE & PROVENANCE ---
+  source: 'file' | 'inferred' | 'editor'; // Origin of bond definition
+  is_inferred: boolean;           // True if generated computationally by distance algorithm
+  confidence?: number;            // Derived confidence metric [0.0, 1.0]
+  provenance?: string;            // Optional revision UUID
+}
+
+/**
+ * Authoritative Canonical Topology Graph.
+ * Encapsulates complete covalent bond topology and fast lookup structures.
+ */
+export interface CanonicalTopology {
+  bonds: CanonicalBond[];                 // Deterministically sorted array of canonical bonds
+  adjacency_map: Map<number, number[]>;   // CanonicalAtom ID -> neighbor CanonicalAtom IDs
+  bond_map: Map<string, CanonicalBond>;   // Composite key `${atom_a}:${atom_b}` -> CanonicalBond
+}
+
+/**
  * Legacy Atom representation retained for backward compatibility with existing consumers.
  */
 export interface AtomDomain {
