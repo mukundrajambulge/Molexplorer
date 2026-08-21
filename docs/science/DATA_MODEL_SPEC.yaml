@@ -1,0 +1,1280 @@
+metadata:
+  specification_id: "MOLEXPLORER-DATA-MODEL"
+  specification_name: "Canonical Molecular Data Model Specification"
+  version: "1.0"
+  status: "PROPOSED"
+  effective_date: "2026-08-21"
+  repository: "mukundrajambulge/Molexplorer"
+  branch: "dev"
+  audience: "Computational Biophysicists, Bioinformaticians, Software Architects, and Autonomous Coding Agents"
+  authority: "Molexplorer Project Owner & Lead Scientific Architect"
+  supersedes: "None"
+  related_documents:
+    - "MASTER_PLAN.md"
+    - "AGENTS.md"
+    - "docs/science/SCIENTIFIC_FOUNDATION.md"
+
+governance:
+  rules:
+    - rule_id: DM-G001
+      severity: MUST
+      statement: "The scientific domain shall use exactly one canonical molecular data model."
+      rationale: "Prevents divergent data structures and incompatible states across parsing, selection, editing, and visualization modules."
+      applies_to:
+        - frontend
+        - scientific-core
+        - persistence
+        - API
+      validation_requirement:
+        - "Code audit must verify no duplicate or parallel atom/bond models are active."
+    
+    - rule_id: DM-G002
+      severity: MUST
+      statement: "Raw source molecular data artifacts are treated as immutable ground truth."
+      rationale: "Maintains reproducibility and auditability of scientific calculations and docking runs."
+      applies_to:
+        - scientific-core
+        - persistence
+      validation_requirement:
+        - "Raw string or byte payloads must be hashed (SHA-256) and preserved without alteration."
+
+    - rule_id: DM-G003
+      severity: MUST
+      statement: "Every scientific mutation or editing operation must create a derived state revision."
+      rationale: "Ensures non-destructive edits, multi-level undo/redo capabilities, and full lineage tracking."
+      applies_to:
+        - scientific-core
+        - editor
+      validation_requirement:
+        - "Operation commits must generate a new revision object referencing its parent ID."
+
+    - rule_id: DM-G004
+      severity: MUST
+      statement: "The WebGL/3D viewer is strictly a downstream observer and cannot hold authoritative state."
+      rationale: "Prevents lossy round-tripping through presentation structures and WebGL buffers."
+      applies_to:
+        - components
+        - renderer
+      validation_requirement:
+        - "The rendering adapter must receive unidirectional data flow from the canonical scientific model."
+
+    - rule_id: DM-G005
+      severity: MUST
+      statement: "All coordinate positions must be finite numbers in Ångströms."
+      rationale: "Prevents mathematical overflows, NaN propagation, and ensures physical consistency across algorithms."
+      applies_to:
+        - scientific-core
+        - parser
+      validation_requirement:
+        - "Coordinates must be checked for finite floats (no NaN, Inf, or nulls allowed)."
+
+    - rule_id: DM-G006
+      severity: MUST
+      statement: "The chemical bonding topology must be modeled as an explicit, validated graph."
+      rationale: "Covalent linkages dictate molecular identity, valency limits, and structural edit operations."
+      applies_to:
+        - scientific-core
+        - editor
+      validation_requirement:
+        - "Graph edge endpoint integrity and lack of self-bonds must be validated upon modification."
+
+    - rule_id: DM-G007
+      severity: MUST
+      statement: "Selection resolution must be based on canonical atom identifiers, not array indexes."
+      rationale: "Array indices shift during deletion/insertion edits, rendering index-based selections invalid."
+      applies_to:
+        - scientific-core
+        - selection-engine
+      validation_requirement:
+        - "Selections must return sets of canonical atom IDs that persist across structural mutations."
+
+    - rule_id: DM-G008
+      severity: MUST
+      statement: "Parsing and chemical normalizations must be bitwise-deterministic."
+      rationale: "Ensures identical input payloads yield identical scientific analyses, selections, and models."
+      applies_to:
+        - parser
+        - normalization
+      validation_requirement:
+        - "A golden parsing fixture must produce identical canonical models across all runs."
+
+    - rule_id: DM-G009
+      severity: MUST
+      statement: "All scientific operations must fail closed on invalid, malformed, or physical-violating states."
+      rationale: "Prevents silent data corruption or heuristic guesswork that compromises physical reality."
+      applies_to:
+        - scientific-core
+        - editor
+      validation_requirement:
+        - "Errors must be explicitly raised and transactions rolled back; no silent recovery."
+
+    - rule_id: DM-G010
+      severity: SHOULD
+      statement: "No scientific state metadata, conformer, alternate location, or chemical property shall be silently dropped."
+      rationale: "Crystallographic disorder, isotropic B-factors, and formal charges are vital biophysical records."
+      applies_to:
+        - parser
+        - persistence
+      validation_requirement:
+        - "Unrecognized PDB or mmCIF records must be retained in an associated warnings/remarks structure."
+
+units:
+  coordinates:
+    unit: "angstrom"
+    symbol: "Å"
+    scale_to_si: 1e-10
+  distance:
+    unit: "angstrom"
+    symbol: "Å"
+    scale_to_si: 1e-10
+  angles:
+    unit: "degree"
+    symbol: "°"
+    radians_allowed_internal: "Allowed for internal trigonometric computations only; must expose and serialize in degrees."
+  charges:
+    unit: "elementary_charge"
+    symbol: "e"
+    scale_to_si: 1.602176634e-19
+  dipole:
+    unit: "Debye"
+    symbol: "D"
+    scale_to_si: 3.33564e-30
+  energy:
+    unit: "kilocalorie_per_mole"
+    symbol: "kcal/mol"
+    status: "DEFINED"
+    rationale: "Used for DSSP hydrogen-bond electrostatics (E = q1 * q2 * f * (1/r_ON + 1/r_CH - 1/r_OH - 1/r_CN), with f = 332) yielding energy in kcal/mol."
+
+identity:
+  evaluation:
+    pdb_serial:
+      description: "1-based integer from source ATOM/HETATM records."
+      pros: "Matches source file formatting exactly, simplifies direct export round-trip."
+      cons: "Non-consecutive, duplicate across models, missing in generated files, shifts on edits."
+    array_index:
+      description: "0-based array index in memory."
+      pros: "Fast lookups, simple implementation in memory arrays."
+      cons: "Shifts whenever atoms are deleted or inserted, breaking selections, measurements, and bonds."
+    composite_identity:
+      description: "String key of format: chainID:resSeq:iCode:name:altLoc."
+      pros: "Chemically meaningful and unique for standard static structures."
+      cons: "Extremely fragile during structural edits like renaming, renumbering, or deleting altLocs."
+    generated_uuid:
+      description: "Cryptographically random unique identifier."
+      pros: "Perfect stability across all deletion, insertion, and revision operations."
+      cons: "Higher memory overhead, non-readable, complicates standard numeric matrix math."
+
+  resolution:
+    canonical_id:
+      type: "integer"
+      format: "positive non-zero sequential (1-indexed)"
+      stability: "STABLE_WITHIN_REVISION"
+      scope: "Molecule"
+      generation_rule: "Assigned sequentially starting at 1 when molecule is loaded. Revisions maintain mapping."
+      collision_rule: "Never reuse a deleted canonical_id within the same revision lineage. Added atoms receive new, strictly increasing IDs."
+      persistence_rule: "Serialized in PSE and transient selections to ensure reference integrity."
+      export_mapping: "Mapped back to sequential PDB serials on export. If ID exceeds 99999, output using hybrid-36 or hexadecimal format."
+
+entities:
+  SourceArtifact:
+    classification: "CANONICAL"
+    description: "Byte-for-byte representation of the raw input file."
+    properties:
+      id: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      source_type: { type: "string", enum: ["pdb", "mmcif", "mmtf", "sdf", "mol2", "generated"], classification: "CANONICAL", mutable: false }
+      original_name: { type: "string", classification: "CANONICAL", mutable: false }
+      media_type: { type: "string", classification: "CANONICAL", mutable: false }
+      raw_content: { type: "string_or_binary", classification: "CANONICAL", mutable: false }
+      hash: { type: "string", format: "sha-256", classification: "CANONICAL", mutable: false }
+      imported_at: { type: "integer", format: "epoch_ms", classification: "CANONICAL", mutable: false }
+      source_reference: { type: "string", nullable: true, classification: "CANONICAL", mutable: false }
+      provenance: { type: "object", classification: "CANONICAL", mutable: false }
+    invariants:
+      - "SourceArtifact is strictly immutable once written."
+
+  MolecularDocument:
+    classification: "CANONICAL"
+    description: "The top-level workspace container containing objects, active states, and session metadata."
+    properties:
+      document_id: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      version: { type: "integer", classification: "CANONICAL", mutable: false }
+      objects: { type: "array", items: "Object", classification: "CANONICAL", mutable: true }
+      active_selections: { type: "array", items: "Selection", classification: "CANONICAL", mutable: true }
+      session_metadata: { type: "object", classification: "CANONICAL", mutable: true }
+
+  Molecule:
+    classification: "CANONICAL"
+    description: "The hierarchical chemical graph containing atoms, bonds, chains, and residues."
+    properties:
+      molecule_id: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      source_reference_id: { type: "string", format: "uuid", nullable: true, classification: "CANONICAL", mutable: false }
+      chains: { type: "array", items: "Chain", classification: "CANONICAL", mutable: true }
+      bonds: { type: "array", items: "Bond", classification: "CANONICAL", mutable: true }
+      metadata: { type: "object", classification: "CANONICAL", mutable: true }
+      classification: { type: "string", enum: ["protein", "nucleic", "ligand_complex", "mixture"], classification: "DERIVED", mutable: false }
+    ownership:
+      type: "identifier-based & nested"
+      rules:
+        - "Molecule owns Chain by-value (nested JSON structure)."
+        - "Chain owns Residue by-value (nested JSON structure)."
+        - "Residue owns Atom by-value (nested JSON structure)."
+        - "Molecule owns Bond by-reference (bonds are stored flat at Molecule level and reference Atom canonical_ids)."
+
+  Object:
+    classification: "CANONICAL"
+    description: "A named workspace reference to a Molecule, wrapping its states and visual settings."
+    properties:
+      object_id: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      name: { type: "string", classification: "CANONICAL", mutable: true }
+      molecule_ref: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      states: { type: "array", items: "State", classification: "CANONICAL", mutable: true }
+      visibility: { type: "boolean", classification: "VIEWER", mutable: true }
+      object_metadata: { type: "object", classification: "CANONICAL", mutable: true }
+
+  State:
+    classification: "CANONICAL"
+    description: "A single coordinate frame or conformational instance (e.g. NMR model, docking pose)."
+    properties:
+      state_id: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      state_index: { type: "integer", classification: "CANONICAL", mutable: false }
+      coordinates: { type: "array", items: "float[3]", classification: "CANONICAL", mutable: true }
+      topology_reference: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      parent_state_id: { type: "string", format: "uuid", nullable: true, classification: "CANONICAL", mutable: false }
+      state_metadata: { type: "object", classification: "CANONICAL", mutable: true }
+    topology_sharing:
+      policy: "SHARED"
+      statement: "Multiple states share the identical base topology graph (bonds and atoms) of the parent Molecule. Modifying coordinates changes State; modifying topology generates a new Molecule revision."
+
+  Chain:
+    classification: "CANONICAL"
+    description: "A continuous polymer strand or standard group within a Molecule."
+    properties:
+      chain_id: { type: "string", classification: "CANONICAL", mutable: false }
+      chain_name: { type: "string", classification: "CANONICAL", mutable: true }
+      residues: { type: "array", items: "Residue", classification: "CANONICAL", mutable: true }
+      ordering: { type: "array", items: "integer", classification: "CANONICAL", mutable: false }
+      source_identifier: { type: "string", classification: "SOURCE", mutable: false }
+      polymer_type: { type: "string", enum: ["protein", "nucleic", "solvent", "ion", "ligand", "other"], classification: "DERIVED", mutable: false }
+    handling:
+      blank_ids: "Represented as a single space character ' ' to maintain alignment with PDB fixed-width constraints."
+      multi_character_ids: "Supported up to 4 characters for mmCIF compatibility."
+      renaming: "Supported via explicit rename operation that updates residue chain_ref and creates a new revision."
+
+  Residue:
+    classification: "CANONICAL"
+    description: "A chemically contiguous residue subunit (e.g. amino acid, nucleotide, water molecule)."
+    properties:
+      residue_id: { type: "integer", classification: "CANONICAL", mutable: false }
+      resSeq: { type: "integer", classification: "CANONICAL", mutable: false }
+      iCode: { type: "string", format: "character", classification: "CANONICAL", mutable: false }
+      resName: { type: "string", classification: "CANONICAL", mutable: false }
+      chain_ref: { type: "string", classification: "CANONICAL", mutable: false }
+      atom_refs: { type: "array", items: "integer", classification: "CANONICAL", mutable: true }
+      classification: { type: "string", enum: ["standard_amino_acid", "standard_nucleic_acid", "ligand", "water", "ion", "modified_residue", "unknown"], classification: "DERIVED", mutable: false }
+    hierarchy:
+      mutual_exclusivity: false
+      statement: "A residue has a primary classification for parser logic, but can support secondary classification attributes (e.g., a modified_residue can also behave as a standard_amino_acid subclass)."
+
+  Atom:
+    classification: "CANONICAL"
+    description: "Detailed properties and matrix for the fundamental chemical entity."
+    properties:
+      canonical_id:
+        semantic_name: "Canonical Atom ID"
+        type: "integer"
+        required: true
+        nullable: false
+        source: false
+        derived: false
+        canonical: true
+        mutable: false
+        validation: "Must be positive, non-zero, unique in Molecule."
+        serialization: "Required"
+        export_mapping: "Sequential re-index on PDB export."
+      source_serial:
+        semantic_name: "Source Serial Number"
+        type: "integer"
+        required: false
+        nullable: true
+        source: true
+        derived: false
+        canonical: false
+        mutable: false
+        validation: "Inherited from file record."
+        serialization: "Optional"
+        export_mapping: "Preserved in REMARK headers or directly mapped if possible."
+      element:
+        semantic_name: "Element Symbol"
+        type: "string"
+        required: true
+        nullable: false
+        source: true
+        derived: false
+        canonical: true
+        mutable: false
+        validation: "Must be normalized uppercase IUPAC element symbol."
+        serialization: "Required"
+        export_mapping: "PDB columns 77-78."
+      atomic_number:
+        semantic_name: "Atomic Number"
+        type: "integer"
+        required: true
+        nullable: false
+        source: false
+        derived: true
+        canonical: true
+        mutable: false
+        validation: "Derived from element symbol."
+        serialization: "Optional"
+        export_mapping: "None"
+      name:
+        semantic_name: "Atom Name"
+        type: "string"
+        required: true
+        nullable: false
+        source: true
+        derived: false
+        canonical: true
+        mutable: false
+        validation: "Standard PDB name format, padded/trimmed."
+        serialization: "Required"
+        export_mapping: "PDB columns 13-16."
+      normalized_name:
+        semantic_name: "Normalized Atom Name"
+        type: "string"
+        required: true
+        nullable: false
+        source: false
+        derived: true
+        canonical: true
+        mutable: false
+        validation: "Standardized naming convention (e.g., CA, N, O)."
+        serialization: "Optional"
+        export_mapping: "None"
+      position:
+        semantic_name: "Cartesian Position"
+        type: "float[3]"
+        unit: "angstrom"
+        required: true
+        nullable: false
+        source: true
+        derived: false
+        canonical: true
+        mutable: true
+        validation: "Must be finite Float64 values."
+        serialization: "Required"
+        export_mapping: "PDB columns 31-54."
+      residue_ref:
+        semantic_name: "Parent Residue ID"
+        type: "integer"
+        required: true
+        nullable: false
+        source: false
+        derived: false
+        canonical: true
+        mutable: false
+        validation: "Must match a valid Residue ID in the Molecule."
+        serialization: "Required"
+        export_mapping: "Used to build resSeq columns."
+      chain_ref:
+        semantic_name: "Parent Chain ID"
+        type: "string"
+        required: true
+        nullable: false
+        source: false
+        derived: false
+        canonical: true
+        mutable: false
+        validation: "Must match parent Chain ID."
+        serialization: "Required"
+        export_mapping: "PDB column 22."
+      molecule_ref:
+        semantic_name: "Parent Molecule ID"
+        type: "string"
+        required: true
+        nullable: false
+        source: false
+        derived: false
+        canonical: true
+        mutable: false
+        validation: "Must match parent Molecule ID."
+        serialization: "Required"
+        export_mapping: "None"
+      is_hetero:
+        semantic_name: "HETATM Flag"
+        type: "boolean"
+        required: true
+        nullable: false
+        source: true
+        derived: false
+        canonical: true
+        mutable: false
+        validation: "True for ligand/solvent/ion; False for polymer."
+        serialization: "Required"
+        export_mapping: "Record type ATOM vs HETATM."
+      occupancy:
+        semantic_name: "Occupancy"
+        type: "float"
+        required: false
+        nullable: true
+        source: true
+        derived: false
+        canonical: true
+        mutable: true
+        validation: "Must be between 0.0 and 1.0 inclusive."
+        serialization: "Required"
+        export_mapping: "PDB columns 55-60."
+      b_factor:
+        semantic_name: "B-Factor"
+        type: "float"
+        unit: "angstrom^2"
+        required: false
+        nullable: true
+        source: true
+        derived: false
+        canonical: true
+        mutable: true
+        validation: "Must be non-negative."
+        serialization: "Required"
+        export_mapping: "PDB columns 61-66."
+      alt_loc:
+        semantic_name: "Alternate Location Indicator"
+        type: "string"
+        required: false
+        nullable: true
+        source: true
+        derived: false
+        canonical: true
+        mutable: false
+        validation: "Single character identifier or blank."
+        serialization: "Required"
+        export_mapping: "PDB column 17."
+      formal_charge:
+        semantic_name: "Formal Charge"
+        type: "integer"
+        unit: "elementary_charge"
+        required: false
+        nullable: true
+        source: true
+        derived: false
+        canonical: true
+        mutable: true
+        validation: "Must be integer between -8 and +8."
+        serialization: "Required"
+        export_mapping: "PDB columns 79-80."
+      partial_charge:
+        semantic_name: "Electrostatic Partial Charge"
+        type: "float"
+        unit: "elementary_charge"
+        required: false
+        nullable: true
+        source: false
+        derived: true
+        canonical: false
+        mutable: true
+        validation: "Computed charge value."
+        serialization: "Optional"
+        export_mapping: "MOL2/SDF charges."
+      isotope:
+        semantic_name: "Isotope Mass Number"
+        type: "integer"
+        required: false
+        nullable: true
+        source: true
+        derived: false
+        canonical: true
+        mutable: false
+        validation: "Must be positive integer."
+        serialization: "Optional"
+        export_mapping: "SDF isotope field."
+      modeled_hydrogen:
+        semantic_name: "Modeled Hydrogen Flag"
+        type: "boolean"
+        required: false
+        nullable: false
+        source: false
+        derived: true
+        canonical: false
+        mutable: false
+        validation: "True if placed computationally; False if experimental."
+        serialization: "Required"
+        export_mapping: "Flagged via B-factor 99.90 in standard exports."
+      secondary_structure:
+        semantic_name: "Secondary Structure Class"
+        type: "string"
+        required: false
+        nullable: true
+        source: false
+        derived: true
+        canonical: false
+        mutable: true
+        validation: "helix, sheet, or loop."
+        serialization: "Required"
+        export_mapping: "PDB HELIX/SHEET records."
+
+  Bond:
+    classification: "CANONICAL"
+    description: "Covalent linkage between two atoms."
+    properties:
+      bond_id: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      atom_a: { type: "integer", classification: "CANONICAL", mutable: false }
+      atom_b: { type: "integer", classification: "CANONICAL", mutable: false }
+      order: { type: "float", enum: [1, 1.5, 2, 3], classification: "CANONICAL", mutable: true }
+      is_aromatic: { type: "boolean", classification: "CANONICAL", mutable: true }
+      source: { type: "string", enum: ["file", "inferred", "editor"], classification: "CANONICAL", mutable: false }
+      confidence: { type: "float", classification: "DERIVED", mutable: true }
+      provenance: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      is_inferred: { type: "boolean", classification: "DERIVED", mutable: false }
+    aromaticity_semantics:
+      distinction: "Bond order (numeric multiplicity) and Aromaticity (conjugated cyclic electronic property) are explicitly distinct."
+      bond_order_field: "order (1, 1.5, 2, 3)"
+      aromatic_flag_field: "is_aromatic (boolean)"
+      delocalized_order_value: 1.5
+      policy: "An aromatic ring may be represented using delocalized 1.5 bond orders OR localized Kekule 1/2 alternating orders; in both cases, the is_aromatic flag remains true for the participating bonds and ring atoms."
+    invariants:
+      duplicate_bonds: "Disallowed; at most one edge between any unordered pair (atom_a, atom_b)."
+      self_bonding: "Disallowed; atom_a must not equal atom_b."
+      invalid_endpoints: "Disallowed; endpoints must refer to valid canonical_ids."
+
+  Selection:
+    classification: "CANONICAL"
+    description: "A named or transient selection of atoms."
+    properties:
+      selection_id: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      expression: { type: "string", classification: "CANONICAL", mutable: false }
+      normalized_expression: { type: "string", classification: "CANONICAL", mutable: false }
+      AST_reference: { type: "object", classification: "CANONICAL", mutable: false }
+      resolved_atom_ids: { type: "array", items: "integer", classification: "CANONICAL", mutable: true }
+      scope: { type: "string", enum: ["molecule", "object", "workspace"], classification: "CANONICAL", mutable: false }
+      created_at: { type: "integer", format: "epoch_ms", classification: "CANONICAL", mutable: false }
+      parent_revision: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      determinism: { type: "boolean", classification: "CANONICAL", mutable: false }
+    resolution_semantics:
+      runtime_selection_cache:
+        classification: "TRANSIENT"
+        type: "Set<integer>"
+        description: "In-memory set of canonical atom IDs evaluated dynamically for high-frequency viewport interactions and hover highlighting."
+      canonical_selection_semantics:
+        classification: "CANONICAL"
+        type: "AST / Expression"
+        description: "The mathematical and logical AST definition (e.g. byres (resn LIG around 5.0)) defining the deterministic query."
+      persisted_selection_resolution:
+        classification: "SERIALIZED / PERSISTED"
+        type: "Array<integer>"
+        description: "The resolved canonical atom ID array stored in .PSE session envelopes or Provenance records to guarantee exact historical state restoration across sessions and mutations."
+
+  CustomProperties:
+    classification: "LAYERED"
+    description: "Classification schema for arbitrary metadata and custom properties."
+    tiers:
+      SOURCE:
+        description: "Properties parsed directly from source file headers and auxiliary records (e.g. REMARK 350 matrices, SDF custom data fields, mmCIF categories)."
+        storage: "Stored under Molecule.metadata.source_records or Atom.source_properties; immutable."
+      CANONICAL:
+        description: "Properties that define or alter core physical/chemical identity in the domain model."
+        storage: "Stored as explicit top-level fields on domain entities; mutable only via validated revisions."
+      DERIVED:
+        description: "Computed biophysical metrics (e.g. Gasteiger partial charges, DSSP secondary structure, SASA, dipole moment)."
+        storage: "Stored in DerivedProperty records or cached on domain entities with source_revision references."
+      PERSISTENT_USER_METADATA:
+        description: "User-defined labels, custom annotations, workspace grouping tags, and color overrides."
+        storage: "Serialized in .PSE session envelopes under metadata and object_metadata."
+      TRANSIENT:
+        description: "Ephemeral runtime states (e.g. UI hover states, active measurement click buffers, WebGL pick caches)."
+        storage: "Held in volatile frontend store; never serialized."
+
+  Measurement:
+    classification: "DERIVED"
+    description: "A derived biophysical metric calculated on specific atoms."
+    properties:
+      id: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      type: { type: "string", enum: ["distance", "angle", "dihedral", "label"], classification: "CANONICAL", mutable: false }
+      atom_ids: { type: "array", items: "integer", classification: "CANONICAL", mutable: false }
+      source_revision: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      algorithm: { type: "string", classification: "DERIVED", mutable: false }
+      numerical_result: { type: "float", classification: "DERIVED", mutable: false }
+      units: { type: "string", classification: "DERIVED", mutable: false }
+    invariants:
+      mutability: "Measurements must never mutate molecular state."
+
+  DerivedProperty:
+    classification: "DERIVED"
+    description: "A calculated biophysical property associated with a structure."
+    properties:
+      property_id: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      source_revision: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      algorithm: { type: "string", classification: "DERIVED", mutable: false }
+      parameters: { type: "object", classification: "DERIVED", mutable: false }
+      output_type: { type: "string", classification: "DERIVED", mutable: false }
+      units: { type: "string", classification: "DERIVED", mutable: false }
+      version: { type: "string", classification: "DERIVED", mutable: false }
+      validity: { type: "boolean", classification: "DERIVED", mutable: true }
+
+  ScientificRevision:
+    classification: "CANONICAL"
+    description: "Record of a scientific state transformation."
+    properties:
+      revision_id: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      parent_revision_id: { type: "string", format: "uuid", nullable: true, classification: "CANONICAL", mutable: false }
+      operation: { type: "string", classification: "CANONICAL", mutable: false }
+      parameters: { type: "object", classification: "CANONICAL", mutable: false }
+      input_state: { type: "string", format: "sha-256", classification: "CANONICAL", mutable: false }
+      output_state: { type: "string", format: "sha-256", classification: "CANONICAL", mutable: false }
+      created_at: { type: "integer", format: "epoch_ms", classification: "CANONICAL", mutable: false }
+      tool_version: { type: "string", classification: "CANONICAL", mutable: false }
+      hash: { type: "string", format: "sha-256", classification: "CANONICAL", mutable: false }
+
+  ProvenanceRecord:
+    classification: "CANONICAL"
+    description: "The replication and lineage trace for a molecular structure."
+    properties:
+      parent_state: { type: "string", format: "sha-256", classification: "CANONICAL", mutable: false }
+      operation: { type: "string", classification: "CANONICAL", mutable: false }
+      parameters: { type: "object", classification: "CANONICAL", mutable: false }
+      tool_version: { type: "string", classification: "CANONICAL", mutable: false }
+      timestamp: { type: "string", format: "iso-8601", classification: "CANONICAL", mutable: false }
+      output_state: { type: "string", format: "sha-256", classification: "CANONICAL", mutable: false }
+      validation_results: { type: "object", classification: "CANONICAL", mutable: false }
+
+  Session:
+    classification: "CANONICAL"
+    description: "The complete serialization envelope of a workspace."
+    properties:
+      session_id: { type: "string", format: "uuid", classification: "CANONICAL", mutable: false }
+      objects: { type: "array", items: "Object", classification: "CANONICAL", mutable: true }
+      states: { type: "array", items: "State", classification: "CANONICAL", mutable: true }
+      selections: { type: "array", items: "Selection", classification: "CANONICAL", mutable: true }
+      measurements: { type: "array", items: "Measurement", classification: "CANONICAL", mutable: true }
+      viewer_state: { type: "object", classification: "VIEWER", mutable: true }
+      provenance_references: { type: "array", items: "string", classification: "CANONICAL", mutable: true }
+      metadata: { type: "object", classification: "CANONICAL", mutable: true }
+
+relationships:
+  hierarchy:
+    - "SourceArtifact --(deterministically parses to)--> Molecule"
+    - "Object --(references)--> Molecule"
+    - "Object --(owns)--> State(s)"
+    - "Molecule --(contains)--> Chain(s)"
+    - "Chain --(contains)--> Residue(s)"
+    - "Residue --(references)--> Atom(s)"
+    - "Molecule --(contains)--> Bond(s)"
+    - "Bond --(references)--> Atom(s) by canonical_id"
+
+alternate_locations:
+  policy: "Disordered conformers represented within one topological graph"
+  rules:
+    - rule_id: DM-A001
+      description: "Alternate location atoms are stored as distinct elements in the single Molecule graph, with their `altLoc` field populated ('A', 'B', etc.)."
+    - rule_id: DM-A002
+      description: "Covalent bonding constraints: Atoms with altLoc 'A' may bond to atoms with altLoc 'A' or blank ' '. They must never bond to atoms with altLoc 'B' or other disjoint conformer sets."
+    - rule_id: DM-A003
+      description: "Active conformer selection: Calculations and visualization adapters may filter the graph to isolate a single active conformer (e.g. default to 'A' or '1' if altLoc is present)."
+
+multi_state:
+  status_distinction:
+    CURRENT_IMPLEMENTATION:
+      status: "IMPLEMENTED"
+      description: "Single-model flat coordinate storage in MolProcessor.atoms and store/index.ts:processedPDB. Multi-model PDB files are parsed with first model active or biological assembly matrices parsed separately."
+    SPECIFIED_FUTURE_MODEL:
+      status: "SPECIFIED"
+      description: "State-invariant topology container where the base Molecule topology graph (atoms, canonical_ids, covalent bonds) is shared across N State instances, with each State holding an independent Float64 Cartesian coordinate array [(x, y, z)_1, ..., (x, y, z)_N], per-state derived properties (DSSP, SASA, dipole), and per-state measurements."
+    NOT_YET_IMPLEMENTED:
+      status: "NOT_YET_IMPLEMENTED"
+      description: "Multi-state trajectory animation playback, conformational ensemble averaging, state-specific topology mutations, and NMR constraint distance checking."
+
+viewer_boundary:
+  policy: "Strict physical state isolation"
+  viewer_only_fields:
+    - "Camera matrices (view, projection, rotation)"
+    - "Display representations (Cartoon, Stick, Spheres, Surface)"
+    - "Coloring scheme (CPK, spectrum, monochrome)"
+    - "Opacity and lighting parameters"
+    - "Object visibility flags"
+    - "WebGL handles, meshes, and textures"
+  allowed_flow_direction: "Scientific State -> Viewer Adapter -> WebGL Canvas"
+  interaction_policy: "Viewer events (clicking, dragging) generate commands which are processed and committed by the Scientific Core; the viewer updates only after a new state revision is emitted."
+
+validation:
+  scientific_audit_matrix:
+    - concept: "Coordinate Finiteness"
+      requirement: "Coordinates must be finite numbers; no NaN, null, +Inf, -Inf."
+      implementation_status: "IMPLEMENTED"
+      validation_status: "IMPLEMENTED / SOFTWARE VERIFIED"
+      evidence: "src/lib/MolProcessor.ts:95-97, scratch/test_phase4_pse_session.ts"
+    - concept: "Coordinate System Units"
+      requirement: "Spatial metric must strictly be Ångströms (Å)."
+      implementation_status: "IMPLEMENTED"
+      validation_status: "IMPLEMENTED / SOFTWARE VERIFIED"
+      evidence: "src/lib/MolProcessor.ts, scratch/qa_group1_small_molecules.ts"
+    - concept: "Stable Atom Serials"
+      requirement: "Atom serial numbers and array indices must remain consistent during read operations."
+      implementation_status: "IMPLEMENTED"
+      validation_status: "IMPLEMENTED / SOFTWARE VERIFIED"
+      evidence: "src/lib/MolProcessor.ts:33, scratch/test_phase4_pse_session.ts"
+    - concept: "Bond Reference Integrity"
+      requirement: "Every bond endpoint must resolve to an existing atom in the same model."
+      implementation_status: "IMPLEMENTED"
+      validation_status: "IMPLEMENTED / SOFTWARE VERIFIED"
+      evidence: "src/lib/MolProcessor.ts:700-740, scratch/qa_group1_small_molecules.ts"
+    - concept: "Source Immutability"
+      requirement: "Raw PDB/mmCIF string/buffer must never be mutated in place."
+      implementation_status: "IMPLEMENTED"
+      validation_status: "IMPLEMENTED / SOFTWARE VERIFIED"
+      evidence: "src/store/index.ts, scratch/test_phase4_pse_session.ts"
+    - concept: "Topology Change Explicitness"
+      requirement: "Bond additions/removals occur only via explicit domain operations."
+      implementation_status: "IMPLEMENTED"
+      validation_status: "IMPLEMENTED / NOT SCIENTIFICALLY BENCHMARKED"
+      evidence: "src/editor/TopologyEditor.ts:7-35 (interactive editing implemented; formal stress validation pending)"
+    - concept: "Viewer Decoupling"
+      requirement: "Camera rotation, zoom, coloring, and style changes never alter atomic coordinates or chemistry."
+      implementation_status: "IMPLEMENTED"
+      validation_status: "IMPLEMENTED / SOFTWARE VERIFIED"
+      evidence: "src/components/CoreViewer3D.tsx, scratch/test_phase4_e2e_pse.cjs"
+    - concept: "Multi-Conformer Disjointness"
+      requirement: "Alternate location conformers must not be bonded across disjoint conformer sets."
+      implementation_status: "PARTIAL"
+      validation_status: "PARTIAL / NOT YET VALIDATED"
+      evidence: "src/lib/MolProcessor.ts:350-380 (basic altloc filtering implemented; multi-conformer graph unvalidated)"
+    - concept: "Valency Bounds"
+      requirement: "Atom covalent valencies must not exceed physically allowable maximums."
+      implementation_status: "PARTIAL"
+      validation_status: "PARTIAL / NOT YET VALIDATED"
+      evidence: "src/editor/TopologyEditor.ts:48 (standard valency lookup implemented; full quantum/hybridization unvalidated)"
+    - concept: "DSSP Secondary Structure"
+      requirement: "Hydrogen-bond energy calculation and pattern recognition must assign standard secondary structure."
+      implementation_status: "IMPLEMENTED"
+      validation_status: "IMPLEMENTED / SCIENTIFICALLY BENCHMARKED"
+      evidence: "docs/reports/validate_dssp_dihedrals.md (benchmarked against Kabsch-Sander 1983 reference values)"
+    - concept: "Kabsch Alignment & RMSD"
+      requirement: "SVD decomposition and rotation matrix calculation must yield optimal alignment (det(R)=+1)."
+      implementation_status: "IMPLEMENTED"
+      validation_status: "IMPLEMENTED / SCIENTIFICALLY BENCHMARKED"
+      evidence: "docs/reports/validate_dipole_kabsch.md (benchmarked against Kabsch 1976 algorithm)"
+    - concept: "Dipole Moment Calculation"
+      requirement: "Molecular dipole moment magnitude and vector calculated from partial charges."
+      implementation_status: "IMPLEMENTED"
+      validation_status: "IMPLEMENTED / NOT SCIENTIFICALLY BENCHMARKED"
+      evidence: "docs/reports/validate_dipole_kabsch.md (geometric Debye 1912 formulation implemented; quantum benchmarking pending)"
+    - concept: "Non-Covalent Interactions"
+      requirement: "Geometric detection of hydrogen bonds, salt bridges, pi-stacking, cation-pi, halogen bonds."
+      implementation_status: "IMPLEMENTED"
+      validation_status: "IMPLEMENTED / NOT SCIENTIFICALLY BENCHMARKED"
+      evidence: "src/lib/Interactions.ts (geometric criteria implemented; experimental affinity benchmark pending)"
+    - concept: "Multi-State Topology Invariance"
+      requirement: "Multi-model ensembles must share identical atom topologies across all states."
+      implementation_status: "NOT_YET_IMPLEMENTED"
+      validation_status: "NOT YET IMPLEMENTED"
+      evidence: "Multi-state coordinate container deferred to future data model milestone"
+
+  rules:
+    - rule_id: DM-V001
+      entity: "Atom"
+      severity: MUST
+      condition: "Coordinates must be finite Float64 numbers."
+      failure_behavior: "Raise CoordinateSanityError; abort operation."
+      test_requirement: "Unit test parsing coordinate strings containing NaN, Inf, or empty values."
+    
+    - rule_id: DM-V002
+      entity: "Atom"
+      severity: SHOULD
+      condition: "Occupancy must fall in range [0.0, 1.0]."
+      failure_behavior: "Issue occupancy warning; clip to range if forced, otherwise retain."
+      test_requirement: "Parser warnings test with occupancy 1.2."
+
+    - rule_id: DM-V003
+      entity: "Bond"
+      severity: MUST
+      condition: "endpoints exist in Molecule atoms."
+      failure_behavior: "Raise TopologyConsistencyError; abort operation."
+      test_requirement: "TopologyEditor addBond test with invalid index."
+
+    - rule_id: DM-V004
+      entity: "Bond"
+      severity: MUST
+      condition: "No self-bonds allowed."
+      failure_behavior: "Raise TopologyConsistencyError; abort."
+      test_requirement: "TopologyEditor addBond test with same atom A and B."
+
+    - rule_id: DM-V005
+      entity: "Bond"
+      severity: SHOULD
+      condition: "Distance between bonded atoms must satisfy 0.4 Å <= d <= 4.0 Å."
+      failure_behavior: "Issue physical distance warning."
+      test_requirement: "Structure verification check with stretched bonds."
+
+    - rule_id: DM-V006
+      entity: "Residue"
+      severity: MUST
+      condition: "Standard residues must contain CA/P guide atoms."
+      failure_behavior: "Mark secondary structure as undetermined."
+      test_requirement: "DSSP calculation with missing CA atoms."
+
+    - rule_id: DM-V007
+      entity: "State"
+      severity: MUST
+      condition: "Length of coordinate array must match atom count of parent topology."
+      failure_behavior: "Raise StateCoordinateMismatchError; abort."
+      test_requirement: "NMR model parsing with varying atom counts."
+
+immutability_matrix:
+  schema:
+    - Entity_Property: "string"
+      Immutable: "boolean"
+      Editable: "boolean"
+      Derived: "boolean"
+      Viewer_Only: "boolean"
+  matrix:
+    - Entity_Property: "Source Artifact"
+      Immutable: true
+      Editable: false
+      Derived: false
+      Viewer_Only: false
+    - Entity_Property: "Atom ID"
+      Immutable: true
+      Editable: false
+      Derived: false
+      Viewer_Only: false
+    - Entity_Property: "Atom Coordinates"
+      Immutable: false
+      Editable: true
+      Derived: false
+      Viewer_Only: false
+    - Entity_Property: "Atom Element"
+      Immutable: true
+      Editable: false
+      Derived: false
+      Viewer_Only: false
+    - Entity_Property: "Residue Name"
+      Immutable: false
+      Editable: true
+      Derived: false
+      Viewer_Only: false
+    - Entity_Property: "Chain ID"
+      Immutable: false
+      Editable: true
+      Derived: false
+      Viewer_Only: false
+    - Entity_Property: "Bond Topology"
+      Immutable: false
+      Editable: true
+      Derived: false
+      Viewer_Only: false
+    - Entity_Property: "B-factor"
+      Immutable: false
+      Editable: true
+      Derived: false
+      Viewer_Only: false
+    - Entity_Property: "Occupancy"
+      Immutable: false
+      Editable: true
+      Derived: false
+      Viewer_Only: false
+    - Entity_Property: "Partial Charge"
+      Immutable: false
+      Editable: true
+      Derived: true
+      Viewer_Only: false
+    - Entity_Property: "Secondary Structure"
+      Immutable: false
+      Editable: true
+      Derived: true
+      Viewer_Only: false
+    - Entity_Property: "Measurements"
+      Immutable: false
+      Editable: true
+      Derived: true
+      Viewer_Only: false
+    - Entity_Property: "Selection"
+      Immutable: false
+      Editable: true
+      Derived: false
+      Viewer_Only: false
+    - Entity_Property: "Camera View State"
+      Immutable: false
+      Editable: true
+      Derived: false
+      Viewer_Only: true
+
+mutability_matrix:
+  schema:
+    - Entity: "string"
+      Operation: "string"
+      Allowed: "boolean"
+      Creates_Revision: "boolean"
+      Provenance: "boolean"
+  matrix:
+    - Entity: "Atom"
+      Operation: "Change coordinate"
+      Allowed: true
+      Creates_Revision: true
+      Provenance: true
+    - Entity: "Atom"
+      Operation: "Delete atom"
+      Allowed: true
+      Creates_Revision: true
+      Provenance: true
+    - Entity: "Atom"
+      Operation: "Add atom"
+      Allowed: true
+      Creates_Revision: true
+      Provenance: true
+    - Entity: "Bond"
+      Operation: "Create bond"
+      Allowed: true
+      Creates_Revision: true
+      Provenance: true
+    - Entity: "Bond"
+      Operation: "Delete bond"
+      Allowed: true
+      Creates_Revision: true
+      Provenance: true
+    - Entity: "Bond"
+      Operation: "Change bond order"
+      Allowed: true
+      Creates_Revision: true
+      Provenance: true
+    - Entity: "Chain"
+      Operation: "Rename chain"
+      Allowed: true
+      Creates_Revision: true
+      Provenance: true
+    - Entity: "Residue"
+      Operation: "Change residue name"
+      Allowed: true
+      Creates_Revision: true
+      Provenance: true
+    - Entity: "Selection"
+      Operation: "Select atoms"
+      Allowed: true
+      Creates_Revision: false
+      Provenance: false
+    - Entity: "Viewer"
+      Operation: "Rotate/zoom camera"
+      Allowed: true
+      Creates_Revision: false
+      Provenance: false
+
+serialization_contract:
+  serializable_fields:
+    Molecule: [molecule_id, source_reference_id, chains, bonds, metadata]
+    State: [state_id, state_index, coordinates, topology_reference, parent_state_id, state_metadata]
+    Selection: [selection_id, expression, resolved_atom_ids]
+    Measurement: [id, type, atom_ids, value, label]
+    Session: [session_id, objects, states, selections, measurements, viewer_state, metadata]
+  prohibited_fields:
+    - "WebGL handles / buffer IDs"
+    - "React components & virtual DOM nodes"
+    - "Javascript function references & closures"
+    - "Instance references of Parser classes (e.g. MolProcessor instances)"
+    - "Viewport DOM nodes"
+
+repository_mapping:
+  mappings:
+    - canonical_concept: "Atom"
+      current_implementation:
+        - "src/types/domain.ts:AtomDomain (Domain interface)"
+        - "src/lib/MolProcessor.ts:Atom (Parser interface)"
+        - "src/lib/SelectionParser.ts:Atom (Selection-engine interface)"
+      status: "PARTIAL"
+      migration_requirement:
+        - "Unify into a single Atom domain representation."
+        - "Transition internal indices and references to the canonical sequential Atom ID."
+    
+    - canonical_concept: "Bond"
+      current_implementation:
+        - "src/types/domain.ts:BondDomain (Domain interface)"
+        - "src/editor/TopologyEditor.ts (Methods for mutating bonds)"
+        - "src/lib/MolProcessor.ts (Bonds flatly mapped as array indices on Atoms)"
+      status: "PARTIAL"
+      migration_requirement:
+        - "Transition bond representation from index-based arrays to a Molecule-level edge list referencing canonical Atom IDs."
+        - "Add order and is_aromatic tracking to support aromatic systems."
+    
+    - canonical_concept: "Residue"
+      current_implementation:
+        - "src/types/domain.ts:ResidueDomain (Domain interface)"
+        - "src/lib/MolProcessor.ts (Residues grouped implicitly during SS/Summary runs)"
+      status: "PARTIAL"
+      migration_requirement:
+        - "Ensure clear Residue ownership hierarchy in domain model."
+        - "Verify classification logic standardizes HETATM vs standard amino/nucleic definitions."
+
+    - canonical_concept: "Chain"
+      current_implementation:
+        - "src/types/domain.ts:ChainDomain (Domain interface)"
+        - "src/lib/MolProcessor.ts (Chains managed implicitly via atom chainID)"
+      status: "PARTIAL"
+      migration_requirement:
+        - "Enforce nested ChainDomain object structure in processing parser."
+        - "Add alphanumeric and blank chain ID handling checks."
+
+    - canonical_concept: "Molecule"
+      current_implementation:
+        - "src/types/domain.ts:MoleculeDomain (Domain model)"
+        - "src/types.ts:MoleculeData (SMILES/desc representation)"
+      status: "PARTIAL"
+      migration_requirement:
+        - "Define clear separation between the Molecule (chemical structure) and MoleculeData (SMILES/metadata properties)."
+        - "Establish consistent object serialization logic."
+
+    - canonical_concept: "Object"
+      current_implementation:
+        - "src/store/index.ts:ExplorerMolecule / ExplorerCompareMolecule (implicit workspace objects)"
+      status: "PARTIAL"
+      migration_requirement:
+        - "Refactor state store to manage named Object items containing multi-state lists."
+
+    - canonical_concept: "State"
+      current_implementation:
+        - "src/store/index.ts:ProcessedPDB / atoms (flat arrays representing current state)"
+      status: "PARTIAL"
+      migration_requirement:
+        - "Encapsulate coordinates in State records to support multi-model (NMR/Docking) formats."
+
+    - canonical_concept: "Selection"
+      current_implementation:
+        - "src/lib/SelectionParser.ts (Evaluation and command execution)"
+        - "src/store/index.ts:SelectedAtomSerials / MolecularSelection"
+      status: "IMPLEMENTED"
+      migration_requirement:
+        - "Decouple AST creation from execution to allow cached query evaluation."
+        - "Reference canonical Atom IDs instead of serial numbers."
+
+    - canonical_concept: "Measurement"
+      current_implementation:
+        - "src/types.ts:Measurement (Interface)"
+        - "src/store/index.ts:Measurements (Zustand slice)"
+      status: "IMPLEMENTED"
+      migration_requirement:
+        - "Migrate measurement targets from PDB serials to canonical Atom IDs."
+
+    - canonical_concept: "Session"
+      current_implementation:
+        - "src/session/SessionSchema.ts:MolStudioPSESession (JSON Schema)"
+        - "src/session/SessionManager.ts (Serialization/import manager)"
+      status: "IMPLEMENTED"
+      migration_requirement:
+        - "Validate full round-trip session persistence using the newly structured canonical model adapter."
+
+    - canonical_concept: "Revision"
+      current_implementation:
+        - "src/types.ts:EditHistory"
+      status: "PARTIAL"
+      migration_requirement:
+        - "Implement structural operational transformation/undo journal using formal revisions."
+
+    - canonical_concept: "Provenance"
+      current_implementation:
+        - "src/session/SessionSchema.ts:metadata (Simple metadata tracker)"
+      status: "PARTIAL"
+      migration_requirement:
+        - "Design formal lineage record logging step in editor kernel."
+
+backward_compatibility:
+  pdb_input: "PDB fixed-width ATOM/HETATM parser extracts serial, names, altLoc, coords, and Cryst1 records. Unrecognized fields are logged as warnings."
+  mmtf_input: "Decoded via binary MMTF reader into identical canonical structure fields."
+  sdf_input: "SDF parsed via RDKit client/backend adapter; aromatic bonds normalized to 1.5 order."
+  existing_sessions: "Legacy sessions are automatically mapped to version 1 MolStudio-PSE schema. Missing fields are backfilled with defaults."
+
+api_boundary:
+  policy: "Decoupled domain serialization contract"
+  boundaries:
+    - path: "Parser -> Scientific Core"
+      format: "In-memory Molecule & State records."
+    - path: "Scientific Core -> Session Persistence"
+      format: "JSON-serialized versioned PSE schema."
+    - path: "Scientific Core -> Viewer Adapter"
+      format: "Read-only coordinate arrays and color mapping instructions."
+    - path: "Frontend UI -> Backend API"
+      format: "REST/WebSocket JSON payloads containing Molecule session schema items."
+
+multi_language_compatibility:
+  policy: "Identical serialization models across C++, Python, and TypeScript"
+  requirements:
+    C++: "Must implement parser, Kabsch alignment, and DSSP algorithms using identical Float64 precision."
+    Python: "Fast data serialization using MsgPack or JSON, mapping directly to NumPy arrays for coordinates."
+    TypeScript: "Core workspace UI and client-side selection query execution engine."
+  precision: "Float64 coordinate representation must match exactly across all boundaries (no lossy conversions)."
+  identity: "Canonical IDs must be strictly preserved."
+
+versioning:
+  schema_version: 1
+  model_version: "1.0.0"
+  migration_version: "1.0.0"
+  change_policy: "Breaking changes to coordinate formatting or entity graphs require a schema_version bump and validation of legacy converter logic."
+
+migration_strategy:
+  rules:
+    - "Migration version must be declared explicitly in files."
+    - "Migration conversion must be deterministic (same legacy file converts to identical canonical representation)."
+    - "Full validation rules must be run and pass on migrated sessions."
+    - "Legacy metadata is preserved in a 'legacyConverted' metadata field to maintain provenance history."
+
+open_decisions:
+  - decision_id: OD-001
+    question: "What is the optimal Canonical Atom Identifier scheme?"
+    status: "PROPOSED"
+    owner: "Lead Scientific Architect"
+    current_repository_behavior: "Parser uses PDB serial; topology editor uses array index; session uses serial; store uses serial."
+    scientific_options:
+      - "Option A: 1-based sequential integer assigned on load (retained on edits with tombstoned deletions)."
+      - "Option B: Cryptographically random UUID string."
+      - "Option C: Alphanumeric composite key (chain:resi:name:altloc)."
+    advantages:
+      Option A: "Extremely fast array lookups, small memory footprint, simple serialization mapping."
+      Option B: "Guaranteed absolute uniqueness across separate files, workspaces, and merges."
+      Option C: "Directly human-readable and chemically intuitive."
+    risks:
+      Option A: "Requires keeping a tombstone list of deleted IDs to prevent collisions when adding atoms."
+      Option B: "Significantly increases JSON session file sizes and decreases numeric processing performance."
+      Option C: "Fails when chain renames, residue renumbering, or structural mutations occur."
+    compatibility_impact: "Dictates selection store representation, measurement endpoints, and transaction validation."
+    recommended_option: "Option A: Stable sequential integers assigned on load, tracking deleted IDs to avoid collisions."
+    evidence_required: "Stress test with multiple atom deletion and insertion cycles in the topology editor."
+    decision_gate: "P1 Canonical Molecular Data Model Implementation Gate"
+
+  - decision_id: OD-002
+    question: "How should alternate location coordinate disorder (altLoc) be represented?"
+    status: "PROPOSED"
+    owner: "Lead Scientific Architect"
+    current_repository_behavior: "MolProcessor filters out all altLocs except blank, 'A', or '1' on load."
+    scientific_options:
+      - "Option A: Separate atoms in a single topology graph with altLoc tags."
+      - "Option B: Multiple alternate coordinate states in a multi-state container."
+      - "Option C: Disjoint bond graphs."
+    advantages:
+      Option A: "Keeps a single Molecule graph structure, compatible with standard flat representation."
+      Option B: "Physically clean; represents alternate conformations as parallel states."
+      Option C: "Maintains chemical valency correctness for disjoint configurations."
+    risks:
+      Option A: "Can trigger valency warnings if bond detection ignores altLoc identities."
+      Option B: "Increases coordinate state management complexity."
+      Option C: "Substantially complicates selection query and parser execution."
+    compatibility_impact: "Critical for high-resolution crystallographic structure analysis and modeling."
+    recommended_option: "Option A: Separate atoms in a single graph paired with strict bond disjointness rules (atoms of altLoc A do not bond to altLoc B)."
+    evidence_required: "Test connectivity graphs of multi-conformer structures such as 1CRN and 4HHB."
+    decision_gate: "P1 Canonical Molecular Data Model Implementation Gate"
+
+  - decision_id: OD-003
+    question: "How should aromatic bonds and aromaticity be represented in the topology graph?"
+    status: "PROPOSED"
+    owner: "Lead Scientific Architect"
+    current_repository_behavior: "Parser accepts double bonds; SDF uses aromatic order; internal bonds list is integer array."
+    scientific_options:
+      - "Option A: Localized Kekulé structures (alternating single and double bonds) plus is_aromatic flag."
+      - "Option B: Delocalized aromatic bond orders (1.5) plus is_aromatic flag."
+      - "Option C: Dual representation (Kekule orders stored with aromatic ring perception metadata)."
+    advantages:
+      Option A: "Standard chemical valence checking is straightforward."
+      Option B: "Avoids artificial symmetry breaking and coordinates directly with RDKit aromatic descriptors."
+      Option C: "Provides maximum interoperability between PDB (Kekule) and SDF/Mol2 (delocalized)."
+    risks:
+      Option A: "Requires aromaticity perception algorithm to alternate single/double bonds deterministically."
+      Option B: "Requires supporting float-based bond orders in algorithms and schemas."
+      Option C: "Increases memory and validation synchronization overhead."
+    compatibility_impact: "Affects valency bounds checks, hydrogen addition, and force-field parameterizations."
+    recommended_option: "Option C: Dual representation decoupling numeric bond order from the is_aromatic topological flag."
+    evidence_required: "Validate SDF/PDB round-trip calculations for ligand structures with complex heterocyclic aromatic systems."
+    decision_gate: "P4 Bond Topology Editing Gate"
+
+  - decision_id: OD-004
+    question: "Which algorithm should classify nucleic-acid secondary structure?"
+    status: "PROPOSED"
+    owner: "Lead Scientific Architect"
+    current_repository_behavior: "None; secondary structure calculation only supports proteinogenic residues via DSSP/Quick."
+    scientific_options:
+      - "Option A: Simple base-pair distance-based classification."
+      - "Option B: Full 3DNA/DSSR matrix criteria."
+    advantages:
+      Option A: "Fast, simple, client-side execution."
+      Option B: "Highly accurate and standard in structural biology."
+    risks:
+      Option A: "Prone to false positives in distorted structures."
+      Option B: "Requires porting complex geometric code to TypeScript."
+    compatibility_impact: "Secondary structure representation of DNA/RNA cartoon models."
+    recommended_option: "Option A: Geometric distance/angle classification on the client, with hooks to integrate DSSP/3DNA results from the backend."
+    evidence_required: "Test cartoon rendering matching for duplex RNA/DNA structures (e.g. 1BNA)."
+    decision_gate: "P10 Measurements and Structural Analysis Gate"
+
+  - decision_id: OD-005
+    question: "What partial-charge model should be standardized on the client?"
+    status: "PROPOSED"
+    owner: "Lead Scientific Architect"
+    current_repository_behavior: "Dipole command assigns Gasteiger charges; RDKit computes descriptors; backend handles docking preparation."
+    scientific_options:
+      - "Option A: Client-side Gasteiger-Marsili calculation."
+      - "Option B: Hook to backend-calculated AM1-BCC charges."
+    advantages:
+      Option A: "Fully offline, fast, independent of backend connectivity."
+      Option B: "Highly accurate quantum-chemical charges."
+    risks:
+      Option A: "Limited accuracy for complex organometallics or nucleic acids."
+      Option B: "Requires network request; breaks offline session persistence requirements."
+    compatibility_impact: "Dipole moments, electrostatic coloring, and non-covalent interaction scoring."
+    recommended_option: "Option A: Client-side Gasteiger default, with support to overwrite charges using Option B when backend is available."
+    evidence_required: "Audit dipole calculations on small polar molecules against quantum-chemical reference sets."
+    decision_gate: "D1 Structure Preparation and Validation Gate"
+
+implementation_readiness:
+  tasks:
+    - task_id: DM-001
+      title: "Canonical Atom Identity Refactor"
+      dependency: "OD-001"
+      files_likely_affected:
+        - "src/types/domain.ts"
+        - "src/lib/MolProcessor.ts"
+        - "src/lib/SelectionParser.ts"
+        - "src/store/index.ts"
+      tests_required:
+        - "Unit tests for sequential stable ID generation."
+        - "Atom deletion and coordinate update tests."
+      manual_validation:
+        - "Inspect atom selection highlighting and measurements after deleting solvent atoms."
+      acceptance_gate:
+        - "Selections and measurements remain valid and target correct atoms after multiple structural mutations."
+
+    - task_id: DM-002
+      title: "Topology Edge List Migration"
+      dependency: "OD-003"
+      files_likely_affected:
+        - "src/types/domain.ts"
+        - "src/editor/TopologyEditor.ts"
+        - "src/lib/MolProcessor.ts"
+      tests_required:
+        - "Covalent radii bonding assignment tests."
+        - "Topology mutation undo/redo tests."
+      manual_validation:
+        - "Verify bond addition, deletion, and order changes in the TopologyEditor console."
+      acceptance_gate:
+        - "Topology graph invariants (no duplicate bonds, valid references) must pass verification post-edit."
+
+    - task_id: DM-003
+      title: "Multi-State Coordinator Container"
+      dependency: "OD-002"
+      files_likely_affected:
+        - "src/types/domain.ts"
+        - "src/store/index.ts"
+        - "src/session/SessionManager.ts"
+      tests_required:
+        - "NMR multi-model parser validation."
+        - "Coordinate state persistence round-trip."
+      manual_validation:
+        - "Load NMR ensemble PDB and scroll through models in viewport."
+      acceptance_gate:
+        - "Atom connectivity topology remains shared and invariant across coordinate frames."
+
+acceptance_criteria:
+  checklist:
+    - "Valid YAML format (checked via node-yaml and pyyaml parsers)."
+    - "Defines exactly one canonical molecular state model."
+    - "Includes metadata with version 1.0 and status PROPOSED."
+    - "Governance section contains severity MUST rules for data models, immutability, and coordinate metrics."
+    - "Standard physical units are explicitly declared for all metric parameters."
+    - "Identity system is resolved with stable ID rules and evaluation."
+    - "Detailed entities list covers all requested domain components."
+    - "Validation rules contain rule_id, severity, condition, failure_behavior, and tests."
+    - "Immutability and mutability matrices define allowed mutations and revision boundaries."
+    - "Repository mapping links concepts to existing ts/py code."
+    - "Five open decisions are evaluated with status PROPOSED, recommended options, and gates."
+    - "No application source code or test file under src/ or backend/ is modified."
