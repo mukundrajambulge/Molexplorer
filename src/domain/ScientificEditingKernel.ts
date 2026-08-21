@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import {
   CanonicalAtom,
   CanonicalBond,
@@ -16,7 +15,7 @@ import {
 import { buildCanonicalTopology } from './BondAdapter';
 import { buildCanonicalMolecule, validateCanonicalMolecule } from './HierarchyAdapter';
 import { buildCanonicalState, validateCanonicalDocument } from './DocumentAdapter';
-import { computeCanonicalStateHash, computeRevisionHash } from './StateHasher';
+import { computeCanonicalStateHash, computeRevisionHash, generateUUID } from './StateHasher';
 
 export class ScientificEditingError extends Error {
   code: string;
@@ -43,8 +42,8 @@ export class ScientificEditingKernel {
   ): ScientificRevision {
     const timestamp = new Date().toISOString();
     const stateHash = computeCanonicalStateHash(molecule);
-    const opId = `op-root-${crypto.randomUUID()}`;
-    const revId = `rev-0-${crypto.randomUUID().slice(0, 8)}`;
+    const opId = `op-root-${generateUUID()}`;
+    const revId = `rev-0-${generateUUID().slice(0, 8)}`;
     const revHash = computeRevisionHash(null, opId, stateHash, timestamp);
 
     return {
@@ -215,8 +214,8 @@ export class ScientificEditingKernel {
 
     const timestamp = new Date().toISOString();
     const parentRevId = options?.currentRevision?.revision_id || null;
-    const opId = `op-remove-${crypto.randomUUID()}`;
-    const revId = `rev-${crypto.randomUUID().slice(0, 8)}`;
+    const opId = `op-remove-${generateUUID()}`;
+    const revId = `rev-${generateUUID().slice(0, 8)}`;
     const revHash = computeRevisionHash(parentRevId, opId, newStateHash, timestamp);
 
     const revision: ScientificRevision = {
@@ -235,7 +234,7 @@ export class ScientificEditingKernel {
 
     // 8. Append Provenance Record
     const provenance: ProvenanceRecord = {
-      provenance_id: `prov-${crypto.randomUUID()}`,
+      provenance_id: `prov-${generateUUID()}`,
       revision_id: revId,
       parent_revision_id: parentRevId,
       operation_name: 'remove',
@@ -324,6 +323,441 @@ export class ScientificEditingKernel {
     return {
       updatedDocument,
       restoredMolecule: restoredMol
+    };
+  }
+
+  /**
+   * Executes the atomic "bond(atomA, atomB, order)" mutation.
+   * Creates or updates a covalent bond edge between two canonical atoms.
+   */
+  public static bond(
+    document: CanonicalMolecularDocument,
+    atomA: number,
+    atomB: number,
+    order: number = 1.0,
+    options?: {
+      objectId?: string;
+      stateId?: string;
+      author?: string;
+      expectedRevisionId?: string;
+      currentRevision?: ScientificRevision;
+    }
+  ): {
+    revision: ScientificRevision;
+    provenance: ProvenanceRecord;
+    updatedDocument: CanonicalMolecularDocument;
+    updatedMolecule: CanonicalMolecule;
+    bond: CanonicalBond;
+  } {
+    const targetObjectId = options?.objectId || document.active_object_id;
+    if (!targetObjectId) {
+      throw new ScientificEditingError(
+        'bond: target objectId must be specified or active in document',
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    const obj = document.objects.get(targetObjectId);
+    if (!obj) {
+      throw new ScientificEditingError(
+        `bond: target object "${targetObjectId}" not found in document`,
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    const mol = document.molecules.get(obj.molecule_ref);
+    if (!mol) {
+      throw new ScientificEditingError(
+        `bond: molecule "${obj.molecule_ref}" not found in document`,
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    // 1. Revision concurrency check
+    if (options?.expectedRevisionId && options?.currentRevision) {
+      if (options.currentRevision.revision_id !== options.expectedRevisionId) {
+        throw new ScientificEditingError(
+          `bond: revision conflict. Expected "${options.expectedRevisionId}", current is "${options.currentRevision.revision_id}"`,
+          'REVISION_CONFLICT'
+        );
+      }
+    }
+
+    // 2. Precondition: Self-bond check (DM-TOP-002)
+    if (atomA === atomB) {
+      throw new ScientificEditingError(
+        `bond: self-bonding is strictly prohibited (atom ${atomA} to ${atomB})`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    // 3. Precondition: Endpoint existence check (DM-TOP-001)
+    const atom1 = mol.atom_map.get(atomA);
+    const atom2 = mol.atom_map.get(atomB);
+
+    if (!atom1) {
+      throw new ScientificEditingError(
+        `bond: atom endpoint ${atomA} does not exist in molecule ${mol.molecule_id}`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    if (!atom2) {
+      throw new ScientificEditingError(
+        `bond: atom endpoint ${atomB} does not exist in molecule ${mol.molecule_id}`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    // 4. Precondition: AltLoc conformer disjointness check (DM-TOP-004)
+    if (atom1.alt_loc !== ' ' && atom2.alt_loc !== ' ' && atom1.alt_loc !== atom2.alt_loc) {
+      throw new ScientificEditingError(
+        `bond: cannot form covalent bond across disjoint altLoc conformers ('${atom1.alt_loc}' to '${atom2.alt_loc}')`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    // 5. Precondition: Supported bond order check (P1.2)
+    const VALID_BOND_ORDERS = [1, 1.5, 2, 3];
+    if (!VALID_BOND_ORDERS.includes(order)) {
+      throw new ScientificEditingError(
+        `bond: unsupported bond order ${order}. Must be 1, 1.5, 2, or 3`,
+        'VALENCE_VALIDATION_ERROR'
+      );
+    }
+
+    // 6. Normalize endpoints
+    const normA = Math.min(atomA, atomB);
+    const normB = Math.max(atomA, atomB);
+
+    // 7. Check existing bond (DM-TOP-003 duplicate check)
+    const existingIndex = mol.topology.bonds.findIndex(
+      b => b.atom_a === normA && b.atom_b === normB
+    );
+
+    let updatedBonds: CanonicalBond[];
+    let targetBond: CanonicalBond;
+
+    if (existingIndex >= 0) {
+      const existing = mol.topology.bonds[existingIndex];
+      if (existing.order === order) {
+        throw new ScientificEditingError(
+          `bond: duplicate bond with identical order (${order}) already exists between atoms ${normA} and ${normB}`,
+          'TOPOLOGY_VALIDATION_ERROR'
+        );
+      }
+      // Update existing bond order
+      targetBond = {
+        ...existing,
+        order: order,
+        is_aromatic: order === 1.5,
+        source: 'edited',
+        is_inferred: false
+      };
+      updatedBonds = [...mol.topology.bonds];
+      updatedBonds[existingIndex] = targetBond;
+    } else {
+      // Create new bond
+      targetBond = {
+        bond_id: `bond-${normA}-${normB}`,
+        atom_a: normA,
+        atom_b: normB,
+        order: order,
+        is_aromatic: order === 1.5,
+        source: 'edited',
+        is_inferred: false
+      };
+      updatedBonds = [...mol.topology.bonds, targetBond];
+    }
+
+    // 8. Staging & Validation
+    const survivingAtoms = mol.atoms.map(a => ({ ...a }));
+    const derivedTopology = buildCanonicalTopology(survivingAtoms, updatedBonds);
+
+    const derivedMolecule = buildCanonicalMolecule(survivingAtoms, derivedTopology, {
+      molecule_id: mol.molecule_id,
+      name: mol.name,
+      source_format: mol.source_format,
+      metadata: mol.metadata
+    });
+
+    validateCanonicalMolecule(derivedMolecule);
+
+    // 9. Compute State Hashes & Construct Revision
+    const previousStateHash = computeCanonicalStateHash(mol);
+    const newStateHash = computeCanonicalStateHash(derivedMolecule);
+
+    if (newStateHash === previousStateHash) {
+      throw new ScientificEditingError(
+        'bond: internal error - derived state hash identical after topology change',
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    const timestamp = new Date().toISOString();
+    const parentRevId = options?.currentRevision?.revision_id || null;
+    const opId = `op-bond-${generateUUID()}`;
+    const revId = `rev-${generateUUID().slice(0, 8)}`;
+    const revHash = computeRevisionHash(parentRevId, opId, newStateHash, timestamp);
+
+    const revision: ScientificRevision = {
+      revision_id: revId,
+      parent_revision_id: parentRevId,
+      operation_id: opId,
+      document_id: document.document_id,
+      object_id: targetObjectId,
+      state_id: options?.stateId || obj.active_state_id,
+      canonical_state_hash: newStateHash,
+      revision_hash: revHash,
+      timestamp: timestamp,
+      author: options?.author || 'User',
+      molecule_snapshot: derivedMolecule
+    };
+
+    // 10. Append Provenance Record
+    const provenance: ProvenanceRecord = {
+      provenance_id: `prov-${generateUUID()}`,
+      revision_id: revId,
+      parent_revision_id: parentRevId,
+      operation_name: 'bond',
+      resolved_atom_ids: [normA, normB],
+      parameters: {
+        target_object_id: targetObjectId,
+        atom_a: normA,
+        atom_b: normB,
+        order: order,
+        is_aromatic: order === 1.5
+      },
+      timestamp: timestamp,
+      tool_version: 'Molexplorer 1.0',
+      validation_summary: 'PASSED (Covalent Edge Validated)'
+    };
+
+    // 11. Construct Updated CanonicalMolecularDocument Container
+    const updatedMoleculeMap = new Map(document.molecules);
+    updatedMoleculeMap.set(derivedMolecule.molecule_id, derivedMolecule);
+
+    const derivedState = buildCanonicalState(
+      derivedMolecule,
+      1,
+      obj.active_state_id,
+      'Active State'
+    );
+    const updatedStateMap = new Map(document.states);
+    updatedStateMap.set(derivedState.state_id, derivedState);
+
+    const updatedDocument: CanonicalMolecularDocument = {
+      ...document,
+      molecules: updatedMoleculeMap,
+      states: updatedStateMap,
+      updated_at: timestamp
+    };
+
+    validateCanonicalDocument(updatedDocument);
+
+    return {
+      revision,
+      provenance,
+      updatedDocument,
+      updatedMolecule: derivedMolecule,
+      bond: targetBond
+    };
+  }
+
+  /**
+   * Executes the atomic "unbond(atomA, atomB)" mutation.
+   * Removes a covalent bond edge between two canonical atoms.
+   */
+  public static unbond(
+    document: CanonicalMolecularDocument,
+    atomA: number,
+    atomB: number,
+    options?: {
+      objectId?: string;
+      stateId?: string;
+      author?: string;
+      expectedRevisionId?: string;
+      currentRevision?: ScientificRevision;
+    }
+  ): {
+    revision: ScientificRevision;
+    provenance: ProvenanceRecord;
+    updatedDocument: CanonicalMolecularDocument;
+    updatedMolecule: CanonicalMolecule;
+    removedBond: CanonicalBond;
+  } {
+    const targetObjectId = options?.objectId || document.active_object_id;
+    if (!targetObjectId) {
+      throw new ScientificEditingError(
+        'unbond: target objectId must be specified or active in document',
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    const obj = document.objects.get(targetObjectId);
+    if (!obj) {
+      throw new ScientificEditingError(
+        `unbond: target object "${targetObjectId}" not found in document`,
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    const mol = document.molecules.get(obj.molecule_ref);
+    if (!mol) {
+      throw new ScientificEditingError(
+        `unbond: molecule "${obj.molecule_ref}" not found in document`,
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    // 1. Revision concurrency check
+    if (options?.expectedRevisionId && options?.currentRevision) {
+      if (options.currentRevision.revision_id !== options.expectedRevisionId) {
+        throw new ScientificEditingError(
+          `unbond: revision conflict. Expected "${options.expectedRevisionId}", current is "${options.currentRevision.revision_id}"`,
+          'REVISION_CONFLICT'
+        );
+      }
+    }
+
+    // 2. Precondition: Self-bond check
+    if (atomA === atomB) {
+      throw new ScientificEditingError(
+        `unbond: self-bonding is invalid (atom ${atomA} to ${atomB})`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    // 3. Precondition: Endpoint existence check
+    const atom1 = mol.atom_map.get(atomA);
+    const atom2 = mol.atom_map.get(atomB);
+
+    if (!atom1) {
+      throw new ScientificEditingError(
+        `unbond: atom endpoint ${atomA} does not exist in molecule ${mol.molecule_id}`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    if (!atom2) {
+      throw new ScientificEditingError(
+        `unbond: atom endpoint ${atomB} does not exist in molecule ${mol.molecule_id}`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    // 4. Normalize endpoints
+    const normA = Math.min(atomA, atomB);
+    const normB = Math.max(atomA, atomB);
+
+    // 5. Precondition: Bond existence check
+    const existingIndex = mol.topology.bonds.findIndex(
+      b => b.atom_a === normA && b.atom_b === normB
+    );
+
+    if (existingIndex === -1) {
+      throw new ScientificEditingError(
+        `unbond: no bond exists between specified atoms ${normA} and ${normB}`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    const targetBond = mol.topology.bonds[existingIndex];
+
+    // 6. Staging: Remove bond
+    const updatedBonds = mol.topology.bonds.filter(
+      (_, idx) => idx !== existingIndex
+    );
+
+    const survivingAtoms = mol.atoms.map(a => ({ ...a }));
+    const derivedTopology = buildCanonicalTopology(survivingAtoms, updatedBonds);
+
+    const derivedMolecule = buildCanonicalMolecule(survivingAtoms, derivedTopology, {
+      molecule_id: mol.molecule_id,
+      name: mol.name,
+      source_format: mol.source_format,
+      metadata: mol.metadata
+    });
+
+    validateCanonicalMolecule(derivedMolecule);
+
+    // 7. Compute State Hashes & Construct Revision
+    const previousStateHash = computeCanonicalStateHash(mol);
+    const newStateHash = computeCanonicalStateHash(derivedMolecule);
+
+    if (newStateHash === previousStateHash) {
+      throw new ScientificEditingError(
+        'unbond: internal error - derived state hash identical after unbonding',
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    const timestamp = new Date().toISOString();
+    const parentRevId = options?.currentRevision?.revision_id || null;
+    const opId = `op-unbond-${generateUUID()}`;
+    const revId = `rev-${generateUUID().slice(0, 8)}`;
+    const revHash = computeRevisionHash(parentRevId, opId, newStateHash, timestamp);
+
+    const revision: ScientificRevision = {
+      revision_id: revId,
+      parent_revision_id: parentRevId,
+      operation_id: opId,
+      document_id: document.document_id,
+      object_id: targetObjectId,
+      state_id: options?.stateId || obj.active_state_id,
+      canonical_state_hash: newStateHash,
+      revision_hash: revHash,
+      timestamp: timestamp,
+      author: options?.author || 'User',
+      molecule_snapshot: derivedMolecule
+    };
+
+    // 8. Append Provenance Record
+    const provenance: ProvenanceRecord = {
+      provenance_id: `prov-${generateUUID()}`,
+      revision_id: revId,
+      parent_revision_id: parentRevId,
+      operation_name: 'unbond',
+      resolved_atom_ids: [normA, normB],
+      parameters: {
+        target_object_id: targetObjectId,
+        atom_a: normA,
+        atom_b: normB,
+        removed_order: targetBond.order
+      },
+      timestamp: timestamp,
+      tool_version: 'Molexplorer 1.0',
+      validation_summary: 'PASSED (Covalent Edge Removed)'
+    };
+
+    // 9. Construct Updated CanonicalMolecularDocument Container
+    const updatedMoleculeMap = new Map(document.molecules);
+    updatedMoleculeMap.set(derivedMolecule.molecule_id, derivedMolecule);
+
+    const derivedState = buildCanonicalState(
+      derivedMolecule,
+      1,
+      obj.active_state_id,
+      'Active State'
+    );
+    const updatedStateMap = new Map(document.states);
+    updatedStateMap.set(derivedState.state_id, derivedState);
+
+    const updatedDocument: CanonicalMolecularDocument = {
+      ...document,
+      molecules: updatedMoleculeMap,
+      states: updatedStateMap,
+      updated_at: timestamp
+    };
+
+    validateCanonicalDocument(updatedDocument);
+
+    return {
+      revision,
+      provenance,
+      updatedDocument,
+      updatedMolecule: derivedMolecule,
+      removedBond: targetBond
     };
   }
 }

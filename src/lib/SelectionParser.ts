@@ -719,9 +719,71 @@ export class SelectionParser {
       energy: number;
       distance: number;
     }[];
+    bondRequest?: {
+      atomA: number;
+      atomB: number;
+      order?: number;
+    };
+    unbondRequest?: {
+      atomA: number;
+      atomB: number;
+    };
   } {
     const qTrim = query.trim();
     const qLower = qTrim.toLowerCase();
+
+    // 0.0 bond <selA>, <selB> [, <order>]
+    if (qLower.startsWith('bond ')) {
+      const rest = qTrim.slice(5).trim();
+      const parts = rest.split(',').map(p => p.trim());
+      if (parts.length < 2) {
+        throw new Error('Syntax error: "bond" requires two atom selections (e.g. "bond id 1, id 2 [, order]")');
+      }
+      const setA = this.parse(parts[0]);
+      const setB = this.parse(parts[1]);
+      if (setA.size !== 1) {
+        throw new Error(`Syntax error: bond first operand must resolve to exactly 1 atom (got ${setA.size})`);
+      }
+      if (setB.size !== 1) {
+        throw new Error(`Syntax error: bond second operand must resolve to exactly 1 atom (got ${setB.size})`);
+      }
+      const atomA = Array.from(setA)[0];
+      const atomB = Array.from(setB)[0];
+      let order = 1.0;
+      if (parts.length >= 3) {
+        order = parseFloat(parts[2]);
+        if (isNaN(order)) throw new Error(`Syntax error: invalid bond order "${parts[2]}"`);
+      }
+      return {
+        selectedSerials: new Set([atomA, atomB]),
+        bondRequest: { atomA, atomB, order },
+        textOutput: `Bond: created covalent bond edge between atom ${atomA} and atom ${atomB} (order ${order}).`
+      };
+    }
+
+    // 0.01 unbond <selA>, <selB>
+    if (qLower.startsWith('unbond ')) {
+      const rest = qTrim.slice(7).trim();
+      const parts = rest.split(',').map(p => p.trim());
+      if (parts.length < 2) {
+        throw new Error('Syntax error: "unbond" requires two atom selections (e.g. "unbond id 1, id 2")');
+      }
+      const setA = this.parse(parts[0]);
+      const setB = this.parse(parts[1]);
+      if (setA.size !== 1) {
+        throw new Error(`Syntax error: unbond first operand must resolve to exactly 1 atom (got ${setA.size})`);
+      }
+      if (setB.size !== 1) {
+        throw new Error(`Syntax error: unbond second operand must resolve to exactly 1 atom (got ${setB.size})`);
+      }
+      const atomA = Array.from(setA)[0];
+      const atomB = Array.from(setB)[0];
+      return {
+        selectedSerials: new Set([atomA, atomB]),
+        unbondRequest: { atomA, atomB },
+        textOutput: `Unbond: removed covalent bond edge between atom ${atomA} and atom ${atomB}.`
+      };
+    }
 
     // 0. remove / delete command: remove solvent, remove hydro, remove (expr), delete sele_1
     if (qLower.startsWith('remove ') || qLower.startsWith('delete ') || qLower.startsWith('del ') || qLower === 'remove' || qLower === 'delete') {

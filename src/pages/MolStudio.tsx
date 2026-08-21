@@ -546,7 +546,7 @@ export default function MolStudio() {
             object_id: 'main_mol'
           };
           const mutation = ScientificEditingKernel.remove(doc, selResult, {
-            objectId: 'main_mol',
+            objectId: doc.active_object_id,
             author: 'User'
           });
           processorRef.current.applyScientificRevision(mutation.revision);
@@ -560,6 +560,43 @@ export default function MolStudio() {
         setAtoms(prev => prev.filter(a => !toRemove.has(a.serial)));
       }
       setSelectedAtomSerials(new Set());
+      triggerFocus();
+    }
+
+    if (result.bondRequest && processorRef.current) {
+      try {
+        const doc = processorRef.current.getCanonicalDocument();
+        const mutation = ScientificEditingKernel.bond(
+          doc,
+          result.bondRequest.atomA,
+          result.bondRequest.atomB,
+          result.bondRequest.order || 1.0,
+          { objectId: doc.active_object_id, author: 'User' }
+        );
+        processorRef.current.applyScientificRevision(mutation.revision);
+        setAtoms([...processorRef.current.atoms]);
+        setProcessedPDB(processorRef.current.toPDB());
+      } catch (err: any) {
+        console.warn('Bond operation error:', err.message);
+      }
+      triggerFocus();
+    }
+
+    if (result.unbondRequest && processorRef.current) {
+      try {
+        const doc = processorRef.current.getCanonicalDocument();
+        const mutation = ScientificEditingKernel.unbond(
+          doc,
+          result.unbondRequest.atomA,
+          result.unbondRequest.atomB,
+          { objectId: doc.active_object_id, author: 'User' }
+        );
+        processorRef.current.applyScientificRevision(mutation.revision);
+        setAtoms([...processorRef.current.atoms]);
+        setProcessedPDB(processorRef.current.toPDB());
+      } catch (err: any) {
+        console.warn('Unbond operation error:', err.message);
+      }
       triggerFocus();
     }
 
