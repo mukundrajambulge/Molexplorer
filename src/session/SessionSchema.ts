@@ -21,6 +21,8 @@ export interface NamedSelectionSession {
   name: string;
   query: string;
   atomIds: number[];
+  objectId?: string;
+  stateId?: string;
 }
 
 export interface MeasurementSession {
@@ -50,6 +52,9 @@ export interface SelectionSessionState {
   selectedAtomSerials: number[];
   namedSelections: NamedSelectionSession[];
   lastSelectionQuery?: string;
+  scopedKeys?: string[];
+  activeObjectId?: string;
+  activeStateId?: string;
 }
 
 export interface ViewerSessionData {

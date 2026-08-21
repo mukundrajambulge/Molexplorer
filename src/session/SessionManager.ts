@@ -102,9 +102,18 @@ export class SessionManager {
           ? raw.selectionState.selectedAtomSerials
           : [],
         namedSelections: Array.isArray(raw.selectionState?.namedSelections)
-          ? raw.selectionState.namedSelections
+          ? raw.selectionState.namedSelections.map((ns: any) => ({
+              name: ns.name,
+              query: ns.query,
+              atomIds: Array.isArray(ns.atomIds) ? ns.atomIds : [],
+              objectId: ns.objectId,
+              stateId: ns.stateId
+            }))
           : [],
-        lastSelectionQuery: raw.selectionState?.lastSelectionQuery || undefined
+        lastSelectionQuery: raw.selectionState?.lastSelectionQuery || undefined,
+        scopedKeys: Array.isArray(raw.selectionState?.scopedKeys) ? raw.selectionState.scopedKeys : undefined,
+        activeObjectId: raw.selectionState?.activeObjectId,
+        activeStateId: raw.selectionState?.activeStateId
       };
 
       return {

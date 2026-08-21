@@ -15,6 +15,7 @@ import {
   buildCanonicalDocument
 } from '../src/domain/DocumentAdapter';
 import { CanonicalSelectionEvaluator } from '../src/domain/CanonicalSelectionEvaluator';
+import { SessionManager } from '../src/session/SessionManager';
 
 function runSelectionScopeTestSuite() {
   console.log("================================================================================");
@@ -205,6 +206,131 @@ function runSelectionScopeTestSuite() {
       () => SelectionParser.evaluateDocument("all", doc, { scopeType: 'explicit_object', objectId: 'obj-ghost' }),
       /object "obj-ghost" does not exist/
     );
+  });
+
+  // --- SECTION 6: DEDICATED PSE MULTI-OBJECT SCOPED SELECTION ROUND-TRIP ---
+  console.log("\n--- 6. Dedicated PSE Multi-Object Scoped Selection Round-Trip ---");
+
+  test("6.1 Multi-object scoped selection save and restore round-trip via MolStudio-PSE persistence", () => {
+    // 1. Construct selections for Object A (Crambin, 46 CA atoms) and Object B (Ubiquitin, 76 CA atoms)
+    const selA = SelectionParser.evaluateCanonical("name CA", molA, { objectId: objAId, stateId: 'mol-crn-state-1' });
+    const selB = SelectionParser.evaluateCanonical("name CA", molB, { objectId: objBId, stateId: 'mol-ubq-state-1' });
+
+    assert.strictEqual(selA.count, 46);
+    assert.strictEqual(selB.count, 76);
+
+    const workspaceScopedResult = SelectionParser.evaluateDocument("name CA", doc, { scopeType: 'workspace' });
+    assert.strictEqual(workspaceScopedResult.total_count, 122);
+    assert.strictEqual(workspaceScopedResult.scoped_keys.size, 122);
+
+    // 2. Build MolStudioPSESession incorporating multi-object structure and scoped selection state
+    const session = SessionManager.createSession({
+      molecules: [
+        { id: objAId, name: '1CRN (Crambin)', format: 'pdb', data: crnPdb, atomCount: 327 },
+        { id: objBId, name: '1UBQ (Ubiquitin)', format: 'pdb', data: ubqPdb, atomCount: 660 }
+      ],
+      viewerState: {
+        renderStyle: 'Cartoon',
+        colorScheme: 'Modern/Jmol',
+        surfaceOpacity: 0.8,
+        backgroundColor: '#0A0A0A',
+        orthographic: true,
+        stereoMode: 'none'
+      },
+      selectionState: {
+        selectionLevel: 'atom',
+        selectedAtomSerials: selA.selected_array,
+        scopedKeys: Array.from(workspaceScopedResult.scoped_keys),
+        activeObjectId: objAId,
+        activeStateId: 'mol-crn-state-1',
+        lastSelectionQuery: 'name CA',
+        namedSelections: [
+          {
+            name: 'Crambin_CAs',
+            query: 'name CA',
+            atomIds: selA.selected_array,
+            objectId: objAId,
+            stateId: 'mol-crn-state-1'
+          },
+          {
+            name: 'Ubiquitin_CAs',
+            query: 'name CA',
+            atomIds: selB.selected_array,
+            objectId: objBId,
+            stateId: 'mol-ubq-state-1'
+          }
+        ]
+      }
+    });
+
+    // 3. Export to MolStudio-PSE JSON string
+    const pseContent = SessionManager.exportSession(session);
+    assert(pseContent.includes('MolStudio-PSE'), 'PSE content must include format header');
+    assert(pseContent.includes('Crambin_CAs'), 'PSE content must include named selection A');
+    assert(pseContent.includes('Ubiquitin_CAs'), 'PSE content must include named selection B');
+
+    // 4. Import / Reload session
+    const reloadedSession = SessionManager.importSession(pseContent);
+    assert.strictEqual(reloadedSession.format, 'MolStudio-PSE');
+    assert.strictEqual(reloadedSession.version, 1);
+    assert.strictEqual(reloadedSession.molecules.length, 2);
+
+    // 5. Restore scoped selections & assert exact properties
+    const selState = reloadedSession.selectionState;
+    assert.strictEqual(selState.lastSelectionQuery, 'name CA');
+    assert.strictEqual(selState.activeObjectId, objAId);
+    assert.strictEqual(selState.activeStateId, 'mol-crn-state-1');
+    assert.strictEqual(selState.scopedKeys?.length, 122);
+
+    const reloadedScopedKeys = new Set(selState.scopedKeys);
+    assert.strictEqual(reloadedScopedKeys.size, 122);
+
+    // Assert exact equality of scoped atom keys set
+    for (const key of workspaceScopedResult.scoped_keys) {
+      assert(reloadedScopedKeys.has(key), `Reloaded scoped keys must contain ${key}`);
+    }
+
+    // Check named selections
+    const nsA = selState.namedSelections.find(n => n.name === 'Crambin_CAs')!;
+    assert(nsA, 'Named selection A must exist');
+    assert.strictEqual(nsA.objectId, objAId);
+    assert.strictEqual(nsA.stateId, 'mol-crn-state-1');
+    assert.strictEqual(nsA.query, 'name CA');
+    assert.strictEqual(nsA.atomIds.length, 46);
+    assert.deepStrictEqual(nsA.atomIds, selA.selected_array);
+
+    const nsB = selState.namedSelections.find(n => n.name === 'Ubiquitin_CAs')!;
+    assert(nsB, 'Named selection B must exist');
+    assert.strictEqual(nsB.objectId, objBId);
+    assert.strictEqual(nsB.stateId, 'mol-ubq-state-1');
+    assert.strictEqual(nsB.query, 'name CA');
+    assert.strictEqual(nsB.atomIds.length, 76);
+    assert.deepStrictEqual(nsB.atomIds, selB.selected_array);
+  });
+
+  test("6.2 ObjectA:1 !== ObjectB:1 semantic distinction and fail-closed validation on object deletion", () => {
+    const keyA1 = createScopedAtomKey(objAId, 1);
+    const keyB1 = createScopedAtomKey(objBId, 1);
+
+    // Object A:1 is strictly distinct from Object B:1
+    assert.strictEqual(keyA1, "obj-mol-crn:1");
+    assert.strictEqual(keyB1, "obj-mol-ubq:1");
+    assert.notStrictEqual(keyA1, keyB1);
+
+    // Create selection referencing Object B
+    const selDoc = SelectionParser.evaluateDocument("name CA", doc, { scopeType: 'workspace' });
+    assert.strictEqual(selDoc.total_count, 122);
+
+    // Build document without Object B (Object B removed)
+    const docWithoutB = buildCanonicalDocument([molA], {
+      document_id: 'doc-workspace-crn-only',
+      name: 'Single Molecule Workspace'
+    });
+
+    // Validate that selection referencing Object B fails closed
+    const validationResult = CanonicalSelectionEvaluator.validateSelection(docWithoutB, selDoc);
+    assert.strictEqual(validationResult.valid, false);
+    assert(validationResult.missingObjects.includes(objBId), "Must detect missing Object B");
   });
 
   console.log("\n================================================================================");
