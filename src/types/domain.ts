@@ -133,7 +133,7 @@ export interface CanonicalChain {
 
 /**
  * Authoritative Canonical Molecule Model.
- * Top-level root of the canonical molecular domain hierarchy.
+ * Root of the canonical molecular domain graph.
  */
 export interface CanonicalMolecule {
   molecule_id: string;              // Unique molecule identifier (UUID or stable key)
@@ -154,6 +154,50 @@ export interface CanonicalMolecule {
     has_cryst1?: boolean;
     debug_remarks?: string[];
   };
+}
+
+/**
+ * Authoritative Canonical State Model.
+ * Represents a single coordinate/conformation state under a CanonicalMolecule or CanonicalObject.
+ */
+export interface CanonicalState {
+  state_id: string;                 // Unique state identifier (e.g. "state-1" or UUID)
+  state_index: number;              // 1-indexed state number (1, 2, ...)
+  molecule_ref: string;             // Parent CanonicalMolecule ID reference
+  coordinates: { x: number; y: number; z: number }[]; // Ordered Cartesian coordinates aligned with molecule.atoms
+  name?: string;                    // Optional label (e.g. "Model 1", "Conformation A")
+  metadata?: Record<string, any>;   // Optional state metadata
+}
+
+/**
+ * Authoritative Canonical Object Model.
+ * Encapsulates a named scientific entity within a workspace document.
+ */
+export interface CanonicalObject {
+  object_id: string;                // Unique object identifier (e.g. "obj-1" or UUID)
+  name: string;                     // Object display name
+  molecule_ref: string;             // Bound CanonicalMolecule ID reference
+  state_ids: string[];              // Associated CanonicalState IDs
+  active_state_id: string;          // Current active CanonicalState ID
+  enabled: boolean;                 // Scientific entity active/enabled status
+  metadata?: Record<string, any>;   // Optional object metadata
+}
+
+/**
+ * Authoritative Canonical Molecular Document Model.
+ * Top-level workspace scientific container.
+ */
+export interface CanonicalMolecularDocument {
+  document_id: string;              // Unique document UUID or identifier
+  name: string;                     // Workspace title / document name
+  object_ids: string[];             // Ordered list of contained CanonicalObject IDs
+  active_object_id: string | null;  // Reference to current active CanonicalObject
+  objects: Map<string, CanonicalObject>;     // Fast object_id -> CanonicalObject lookup
+  molecules: Map<string, CanonicalMolecule>; // Fast molecule_id -> CanonicalMolecule lookup
+  states: Map<string, CanonicalState>;       // Fast state_id -> CanonicalState lookup
+  created_at: string;               // ISO 8601 creation timestamp
+  updated_at: string;               // ISO 8601 update timestamp
+  metadata?: Record<string, any>;   // Document-level metadata
 }
 
 /**

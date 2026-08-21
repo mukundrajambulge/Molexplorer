@@ -1,7 +1,8 @@
-import { CanonicalAtom, CanonicalBond, CanonicalTopology, CanonicalMolecule } from '../types/domain';
+import { CanonicalAtom, CanonicalBond, CanonicalTopology, CanonicalMolecule, CanonicalMolecularDocument } from '../types/domain';
 import { toCanonicalAtomSet } from '../domain/AtomAdapter';
 import { toCanonicalBondSet, buildCanonicalTopology } from '../domain/BondAdapter';
 import { buildCanonicalMolecule } from '../domain/HierarchyAdapter';
+import { buildCanonicalDocument } from '../domain/DocumentAdapter';
 
 // Safe non-top-level-await import for 3dmol
 let $3Dmol: any = { Parsers: { mmtf: () => [] } };
@@ -124,6 +125,7 @@ export class MolProcessor {
   private _cachedCanonicalBondsSource: Atom[] | null = null;
   private _cachedCanonicalTopology: CanonicalTopology | null = null;
   private _cachedCanonicalMolecule: CanonicalMolecule | null = null;
+  private _cachedCanonicalDocument: CanonicalMolecularDocument | null = null;
 
   /**
    * Retrieves the canonical Atom domain representation of parsed atoms.
@@ -152,6 +154,7 @@ export class MolProcessor {
       this._cachedCanonicalBondsSource = this.atoms;
       this._cachedCanonicalTopology = null; // Invalidate topology cache
       this._cachedCanonicalMolecule = null; // Invalidate molecule cache
+      this._cachedCanonicalDocument = null; // Invalidate document cache
     }
     return this._cachedCanonicalBonds;
   }
@@ -166,6 +169,7 @@ export class MolProcessor {
       const canonicalBonds = this.getCanonicalBonds(moleculeRef);
       this._cachedCanonicalTopology = buildCanonicalTopology(canonicalAtoms, canonicalBonds);
       this._cachedCanonicalMolecule = null; // Invalidate molecule cache
+      this._cachedCanonicalDocument = null; // Invalidate document cache
     }
     return this._cachedCanonicalTopology;
   }
@@ -190,8 +194,28 @@ export class MolProcessor {
           debug_remarks: this.debug_remarks
         }
       });
+      this._cachedCanonicalDocument = null; // Invalidate document cache
     }
     return this._cachedCanonicalMolecule;
+  }
+
+  /**
+   * Retrieves the top-level CanonicalMolecularDocument workspace container.
+   * Assembles the document, canonical object, molecule, and active coordinate state.
+   * Caches the result and automatically invalidates if processor atoms change.
+   */
+  public getCanonicalDocument(options?: { name?: string; documentId?: string; moleculeId?: string }): CanonicalMolecularDocument {
+    if (!this._cachedCanonicalDocument || this._cachedCanonicalBondsSource !== this.atoms) {
+      const mol = this.getCanonicalMolecule({
+        name: options?.name,
+        moleculeId: options?.moleculeId
+      });
+      this._cachedCanonicalDocument = buildCanonicalDocument([mol], {
+        document_id: options?.documentId || 'doc-default',
+        name: options?.name || mol.name
+      });
+    }
+    return this._cachedCanonicalDocument;
   }
 
   constructor(input: string | Uint8Array, format: 'pdb' | 'mmtf' = 'pdb') {
