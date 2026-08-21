@@ -1,4 +1,5 @@
-import { CanonicalAtom } from '../types/domain';
+import { CanonicalAtom, CanonicalMolecule, SelectionResult } from '../types/domain';
+import { CanonicalSelectionEvaluator } from '../domain/CanonicalSelectionEvaluator';
 
 // Minimal Atom interface corresponding to MolProcessor structures
 export interface Atom {
@@ -118,6 +119,19 @@ export class SelectionParser {
       isModeledH: ca.modeled_hydrogen
     }));
     return new SelectionParser(parserAtoms);
+  }
+
+  /**
+   * Evaluates a selection query directly against a CanonicalMolecule hierarchy,
+   * returning an authoritative SelectionResult.
+   */
+  static evaluateCanonical(
+    query: string,
+    molecule: CanonicalMolecule,
+    options?: { objectId?: string; stateId?: string }
+  ): SelectionResult {
+    const evaluator = new CanonicalSelectionEvaluator(molecule);
+    return evaluator.evaluateQuery(query, options);
   }
 
   parse(query: string): Set<number> {

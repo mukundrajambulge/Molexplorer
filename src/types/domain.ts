@@ -201,6 +201,20 @@ export interface CanonicalMolecularDocument {
 }
 
 /**
+ * Authoritative Canonical Selection Result Model.
+ * Formally specified in docs/science/SELECTION_SPEC.md.
+ */
+export interface SelectionResult {
+  query: string;
+  selected_ids: Set<number>;             // Set of CanonicalAtom IDs (canonical_id)
+  selected_array: number[];              // Deterministically sorted array of CanonicalAtom IDs
+  count: number;                         // Count of selected atoms
+  object_id?: string;                    // Scope object identifier where evaluated
+  state_id?: string;                     // Scope state identifier where evaluated
+  execution_time_ms?: number;            // Evaluation latency in milliseconds
+}
+
+/**
  * Legacy Atom representation retained for backward compatibility with existing consumers.
  */
 export interface AtomDomain {
