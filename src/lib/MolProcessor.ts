@@ -1,3 +1,6 @@
+import { CanonicalAtom } from '../types/domain';
+import { toCanonicalAtomSet } from '../domain/AtomAdapter';
+
 // Safe non-top-level-await import for 3dmol
 let $3Dmol: any = { Parsers: { mmtf: () => [] } };
 if (typeof window !== 'undefined') {
@@ -112,6 +115,22 @@ export class MolProcessor {
   symmetry_matrices: Transformation[] = [];
   hasCryst1: boolean = false;
   debug_remarks: string[] = [];
+
+  private _cachedCanonicalAtoms: CanonicalAtom[] | null = null;
+  private _cachedCanonicalSource: Atom[] | null = null;
+
+  /**
+   * Retrieves the canonical Atom domain representation of parsed atoms.
+   * Derived deterministically via AtomAdapter, strictly matching DATA_MODEL_SPEC.yaml.
+   * Caches the result and automatically invalidates if processor atoms array reference changes.
+   */
+  public getCanonicalAtoms(moleculeRef?: string): CanonicalAtom[] {
+    if (!this._cachedCanonicalAtoms || this._cachedCanonicalSource !== this.atoms) {
+      this._cachedCanonicalAtoms = toCanonicalAtomSet(this.atoms, { moleculeRef });
+      this._cachedCanonicalSource = this.atoms;
+    }
+    return this._cachedCanonicalAtoms;
+  }
 
   constructor(input: string | Uint8Array, format: 'pdb' | 'mmtf' = 'pdb') {
     if (format === 'pdb') {

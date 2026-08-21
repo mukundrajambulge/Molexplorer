@@ -1,3 +1,5 @@
+import { CanonicalAtom } from '../types/domain';
+
 // Minimal Atom interface corresponding to MolProcessor structures
 export interface Atom {
   serial: number;
@@ -90,6 +92,32 @@ export class SelectionParser {
 
   constructor(atoms: Atom[]) {
     this.atoms = atoms;
+  }
+
+  /**
+   * Constructs a SelectionParser instance from an array of CanonicalAtoms.
+   * Enables selection algebra evaluation directly against canonical domain representations.
+   */
+  static fromCanonicalAtoms(canonicalAtoms: CanonicalAtom[]): SelectionParser {
+    const parserAtoms: Atom[] = canonicalAtoms.map(ca => ({
+      serial: ca.canonical_id,
+      name: ca.name,
+      resName: ca.residue_name,
+      chainID: ca.chain_ref,
+      resSeq: ca.residue_ref,
+      x: ca.x,
+      y: ca.y,
+      z: ca.z,
+      elem: ca.element,
+      altLoc: ca.alt_loc,
+      isHetero: ca.is_hetero,
+      bonds: [],
+      bFactor: ca.b_factor,
+      occupancy: ca.occupancy,
+      ss: ca.secondary_structure,
+      isModeledH: ca.modeled_hydrogen
+    }));
+    return new SelectionParser(parserAtoms);
   }
 
   parse(query: string): Set<number> {
