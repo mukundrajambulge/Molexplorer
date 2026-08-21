@@ -1,4 +1,4 @@
-import { CanonicalAtom, CanonicalMolecule, SelectionResult } from '../types/domain';
+import { CanonicalAtom, CanonicalMolecule, CanonicalMolecularDocument, SelectionResult, ScopedSelectionResult } from '../types/domain';
 import { CanonicalSelectionEvaluator } from '../domain/CanonicalSelectionEvaluator';
 
 // Minimal Atom interface corresponding to MolProcessor structures
@@ -130,8 +130,24 @@ export class SelectionParser {
     molecule: CanonicalMolecule,
     options?: { objectId?: string; stateId?: string }
   ): SelectionResult {
-    const evaluator = new CanonicalSelectionEvaluator(molecule);
+    const evaluator = new CanonicalSelectionEvaluator(molecule, options);
     return evaluator.evaluateQuery(query, options);
+  }
+
+  /**
+   * Evaluates a selection query across a CanonicalMolecularDocument workspace,
+   * supporting active_object, explicit_object, and workspace scopes.
+   */
+  static evaluateDocument(
+    query: string,
+    document: CanonicalMolecularDocument,
+    scope?: {
+      scopeType?: 'active_object' | 'explicit_object' | 'workspace';
+      objectId?: string;
+      stateId?: string;
+    }
+  ): ScopedSelectionResult {
+    return CanonicalSelectionEvaluator.evaluateDocument(document, query, scope);
   }
 
   parse(query: string): Set<number> {

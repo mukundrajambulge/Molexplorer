@@ -1,28 +1,40 @@
 import {
   CanonicalAtom,
   CanonicalMolecule,
-  SelectionResult
+  CanonicalState,
+  CanonicalMolecularDocument,
+  SelectionResult,
+  ScopedSelectionResult,
+  createScopedAtomKey
 } from '../types/domain';
 import { SelectionParser, Atom } from '../lib/SelectionParser';
 
 class CanonicalSpatialGrid {
   cellSize: number;
-  grid: Map<string, CanonicalAtom[]>;
+  grid: Map<string, { id: number; x: number; y: number; z: number }[]>;
 
-  constructor(cellSize: number, atoms: CanonicalAtom[], targetIds: Set<number>) {
+  constructor(
+    cellSize: number,
+    atoms: CanonicalAtom[],
+    targetIds: Set<number>,
+    coords?: { x: number; y: number; z: number }[]
+  ) {
     this.cellSize = Math.max(cellSize, 0.1);
     this.grid = new Map();
 
     for (let i = 0; i < atoms.length; i++) {
       const atom = atoms[i];
       if (targetIds.has(atom.canonical_id)) {
-        const key = this.getKey(atom.x, atom.y, atom.z);
+        const x = coords ? coords[i].x : atom.x;
+        const y = coords ? coords[i].y : atom.y;
+        const z = coords ? coords[i].z : atom.z;
+        const key = this.getKey(x, y, z);
         let cell = this.grid.get(key);
         if (!cell) {
           cell = [];
           this.grid.set(key, cell);
         }
-        cell.push(atom);
+        cell.push({ id: atom.canonical_id, x, y, z });
       }
     }
   }
@@ -62,19 +74,39 @@ class CanonicalSpatialGrid {
 
 /**
  * Authoritative Canonical Selection Evaluator.
- * Evaluates Selection AST directly against CanonicalMolecule domain structures.
+ * Evaluates Selection AST directly against CanonicalMolecule domain structures with explicit object and state scoping.
  */
 export class CanonicalSelectionEvaluator {
   molecule: CanonicalMolecule;
   atoms: CanonicalAtom[];
   legacyAtoms: Atom[];
   dummyParser: SelectionParser;
+  objectId?: string;
+  stateId?: string;
+  stateCoordinates?: { x: number; y: number; z: number }[];
   atomIdToResidueId: Map<number, string>;
   atomIdToChainId: Map<number, string>;
 
-  constructor(molecule: CanonicalMolecule) {
+  constructor(
+    molecule: CanonicalMolecule,
+    options?: {
+      objectId?: string;
+      stateId?: string;
+      state?: CanonicalState;
+    }
+  ) {
     this.molecule = molecule;
     this.atoms = molecule.atoms;
+    this.objectId = options?.objectId;
+    this.stateId = options?.stateId || options?.state?.state_id;
+    this.stateCoordinates = options?.state?.coordinates;
+
+    if (this.stateCoordinates && this.stateCoordinates.length !== this.atoms.length) {
+      throw new Error(
+        `State coordinates length (${this.stateCoordinates.length}) does not match molecule atom count (${this.atoms.length})`
+      );
+    }
+
     this.atomIdToResidueId = new Map();
     this.atomIdToChainId = new Map();
 
@@ -91,7 +123,7 @@ export class CanonicalSelectionEvaluator {
     }
 
     // Bridge for macro and property evaluation compatibility
-    this.legacyAtoms = this.atoms.map(ca => ({
+    this.legacyAtoms = this.atoms.map((ca, idx) => ({
       serial: ca.canonical_id,
       elem: ca.element,
       name: ca.name,
@@ -99,9 +131,9 @@ export class CanonicalSelectionEvaluator {
       resSeq: ca.residue_ref,
       chainID: ca.chain_ref,
       bonds: [],
-      x: ca.x,
-      y: ca.y,
-      z: ca.z,
+      x: this.stateCoordinates ? this.stateCoordinates[idx].x : ca.x,
+      y: this.stateCoordinates ? this.stateCoordinates[idx].y : ca.y,
+      z: this.stateCoordinates ? this.stateCoordinates[idx].z : ca.z,
       isHetero: ca.is_hetero,
       altLoc: ca.alt_loc,
       bFactor: ca.b_factor,
@@ -115,17 +147,29 @@ export class CanonicalSelectionEvaluator {
   /**
    * Evaluates a selection query string against the canonical molecule.
    */
-  evaluateQuery(query: string, options?: { objectId?: string; stateId?: string }): SelectionResult {
+  evaluateQuery(
+    query: string,
+    options?: {
+      objectId?: string;
+      stateId?: string;
+      scopeType?: 'active_object' | 'explicit_object' | 'workspace';
+    }
+  ): SelectionResult {
     const startTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
     const qTrim = query.trim();
+    const resolvedObjectId = options?.objectId || this.objectId;
+    const resolvedStateId = options?.stateId || this.stateId;
+    const resolvedScopeType = options?.scopeType || 'active_object';
+
     if (!qTrim) {
       return {
         query: query,
         selected_ids: new Set(),
         selected_array: [],
         count: 0,
-        object_id: options?.objectId,
-        state_id: options?.stateId,
+        object_id: resolvedObjectId,
+        state_id: resolvedStateId,
+        scope_type: resolvedScopeType,
         execution_time_ms: 0
       };
     }
@@ -146,8 +190,9 @@ export class CanonicalSelectionEvaluator {
       selected_ids: selectedIds,
       selected_array: sortedArray,
       count: selectedIds.size,
-      object_id: options?.objectId,
-      state_id: options?.stateId,
+      object_id: resolvedObjectId,
+      state_id: resolvedStateId,
+      scope_type: resolvedScopeType,
       execution_time_ms: endTime - startTime
     };
   }
@@ -186,6 +231,7 @@ export class CanonicalSelectionEvaluator {
       }
 
       case 'not': {
+        // Crucial: NOT complement universe U(scope, state) is strictly this.atoms within this molecule/object
         const operand = this.evaluateAST(expr.operand);
         const result = new Set<number>();
         for (let i = 0; i < this.atoms.length; i++) {
@@ -315,12 +361,15 @@ export class CanonicalSelectionEvaluator {
 
       case 'around': {
         const operand = this.evaluateAST(expr.operand);
-        const grid = new CanonicalSpatialGrid(expr.distance, this.atoms, operand);
+        const grid = new CanonicalSpatialGrid(expr.distance, this.atoms, operand, this.stateCoordinates);
         const result = new Set<number>();
 
         for (let i = 0; i < this.atoms.length; i++) {
           const atom = this.atoms[i];
-          if (!operand.has(atom.canonical_id) && grid.isNear(atom.x, atom.y, atom.z)) {
+          const x = this.stateCoordinates ? this.stateCoordinates[i].x : atom.x;
+          const y = this.stateCoordinates ? this.stateCoordinates[i].y : atom.y;
+          const z = this.stateCoordinates ? this.stateCoordinates[i].z : atom.z;
+          if (!operand.has(atom.canonical_id) && grid.isNear(x, y, z)) {
             result.add(atom.canonical_id);
           }
         }
@@ -329,12 +378,15 @@ export class CanonicalSelectionEvaluator {
 
       case 'within': {
         const operand = this.evaluateAST(expr.operand);
-        const grid = new CanonicalSpatialGrid(expr.distance, this.atoms, operand);
+        const grid = new CanonicalSpatialGrid(expr.distance, this.atoms, operand, this.stateCoordinates);
         const result = new Set<number>();
 
         for (let i = 0; i < this.atoms.length; i++) {
           const atom = this.atoms[i];
-          if (grid.isNear(atom.x, atom.y, atom.z)) {
+          const x = this.stateCoordinates ? this.stateCoordinates[i].x : atom.x;
+          const y = this.stateCoordinates ? this.stateCoordinates[i].y : atom.y;
+          const z = this.stateCoordinates ? this.stateCoordinates[i].z : atom.z;
+          if (grid.isNear(x, y, z)) {
             result.add(atom.canonical_id);
           }
         }
@@ -343,12 +395,15 @@ export class CanonicalSelectionEvaluator {
 
       case 'beyond': {
         const operand = this.evaluateAST(expr.operand);
-        const grid = new CanonicalSpatialGrid(expr.distance, this.atoms, operand);
+        const grid = new CanonicalSpatialGrid(expr.distance, this.atoms, operand, this.stateCoordinates);
         const result = new Set<number>();
 
         for (let i = 0; i < this.atoms.length; i++) {
           const atom = this.atoms[i];
-          if (!grid.isNear(atom.x, atom.y, atom.z)) {
+          const x = this.stateCoordinates ? this.stateCoordinates[i].x : atom.x;
+          const y = this.stateCoordinates ? this.stateCoordinates[i].y : atom.y;
+          const z = this.stateCoordinates ? this.stateCoordinates[i].z : atom.z;
+          if (!grid.isNear(x, y, z)) {
             result.add(atom.canonical_id);
           }
         }
@@ -406,5 +461,180 @@ export class CanonicalSelectionEvaluator {
     }
 
     return result;
+  }
+
+  /**
+   * Evaluates a selection query across a CanonicalMolecularDocument workspace.
+   * Supports ACTIVE_OBJECT, EXPLICIT_OBJECT, and WORKSPACE scopes.
+   */
+  static evaluateDocument(
+    document: CanonicalMolecularDocument,
+    query: string,
+    scope?: {
+      scopeType?: 'active_object' | 'explicit_object' | 'workspace';
+      objectId?: string;
+      stateId?: string;
+    }
+  ): ScopedSelectionResult {
+    const startTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    const scopeType = scope?.scopeType || (scope?.objectId ? 'explicit_object' : 'active_object');
+    const objectResults = new Map<string, SelectionResult>();
+    const scopedKeys = new Set<string>();
+    let totalCount = 0;
+
+    if (scopeType === 'explicit_object') {
+      if (!scope?.objectId) {
+        throw new Error('evaluateDocument: explicit_object scope requires objectId');
+      }
+      const obj = document.objects.get(scope.objectId);
+      if (!obj) {
+        throw new Error(`evaluateDocument: object "${scope.objectId}" does not exist in document`);
+      }
+      const mol = document.molecules.get(obj.molecule_ref);
+      if (!mol) {
+        throw new Error(`evaluateDocument: molecule "${obj.molecule_ref}" not found for object "${scope.objectId}"`);
+      }
+      const targetStateId = scope.stateId || obj.active_state_id;
+      const state = targetStateId ? document.states.get(targetStateId) : undefined;
+      const evaluator = new CanonicalSelectionEvaluator(mol, {
+        objectId: obj.object_id,
+        stateId: targetStateId,
+        state: state
+      });
+      const singleRes = evaluator.evaluateQuery(query, {
+        objectId: obj.object_id,
+        stateId: targetStateId,
+        scopeType: 'explicit_object'
+      });
+      objectResults.set(obj.object_id, singleRes);
+      for (const aId of singleRes.selected_ids) {
+        scopedKeys.add(createScopedAtomKey(obj.object_id, aId));
+      }
+      totalCount = singleRes.count;
+    } else if (scopeType === 'active_object') {
+      if (document.active_object_id) {
+        const obj = document.objects.get(document.active_object_id);
+        if (obj) {
+          const mol = document.molecules.get(obj.molecule_ref);
+          if (mol) {
+            const targetStateId = scope?.stateId || obj.active_state_id;
+            const state = targetStateId ? document.states.get(targetStateId) : undefined;
+            const evaluator = new CanonicalSelectionEvaluator(mol, {
+              objectId: obj.object_id,
+              stateId: targetStateId,
+              state: state
+            });
+            const singleRes = evaluator.evaluateQuery(query, {
+              objectId: obj.object_id,
+              stateId: targetStateId,
+              scopeType: 'active_object'
+            });
+            objectResults.set(obj.object_id, singleRes);
+            for (const aId of singleRes.selected_ids) {
+              scopedKeys.add(createScopedAtomKey(obj.object_id, aId));
+            }
+            totalCount = singleRes.count;
+          }
+        }
+      }
+    } else if (scopeType === 'workspace') {
+      for (const [objId, obj] of document.objects.entries()) {
+        if (!obj.enabled) continue;
+        const mol = document.molecules.get(obj.molecule_ref);
+        if (!mol) continue;
+        const targetStateId = obj.active_state_id;
+        const state = targetStateId ? document.states.get(targetStateId) : undefined;
+        const evaluator = new CanonicalSelectionEvaluator(mol, {
+          objectId: objId,
+          stateId: targetStateId,
+          state: state
+        });
+        const singleRes = evaluator.evaluateQuery(query, {
+          objectId: objId,
+          stateId: targetStateId,
+          scopeType: 'workspace'
+        });
+        objectResults.set(objId, singleRes);
+        for (const aId of singleRes.selected_ids) {
+          scopedKeys.add(createScopedAtomKey(objId, aId));
+        }
+        totalCount += singleRes.count;
+      }
+    }
+
+    const endTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+
+    return {
+      query: query,
+      scoped_keys: scopedKeys,
+      object_results: objectResults,
+      total_count: totalCount,
+      execution_time_ms: endTime - startTime
+    };
+  }
+
+  /**
+   * Validates a selection against a document to detect stale atoms, missing objects, or missing states.
+   */
+  static validateSelection(
+    document: CanonicalMolecularDocument,
+    selection: SelectionResult | ScopedSelectionResult
+  ): {
+    valid: boolean;
+    staleKeys: string[];
+    missingObjects: string[];
+    missingStates: string[];
+  } {
+    const staleKeys: string[] = [];
+    const missingObjects: string[] = [];
+    const missingStates: string[] = [];
+
+    if ('scoped_keys' in selection) {
+      // ScopedSelectionResult
+      for (const [objId, objRes] of selection.object_results.entries()) {
+        const obj = document.objects.get(objId);
+        if (!obj) {
+          missingObjects.push(objId);
+          continue;
+        }
+        if (objRes.state_id && !document.states.has(objRes.state_id)) {
+          missingStates.push(objRes.state_id);
+        }
+        const mol = document.molecules.get(obj.molecule_ref);
+        if (!mol) {
+          missingObjects.push(objId);
+          continue;
+        }
+        for (const aId of objRes.selected_ids) {
+          if (!mol.atom_map.has(aId)) {
+            staleKeys.push(createScopedAtomKey(objId, aId));
+          }
+        }
+      }
+    } else {
+      // Single SelectionResult
+      const objId = selection.object_id;
+      if (objId) {
+        const obj = document.objects.get(objId);
+        if (!obj) {
+          missingObjects.push(objId);
+        } else {
+          if (selection.state_id && !document.states.has(selection.state_id)) {
+            missingStates.push(selection.state_id);
+          }
+          const mol = document.molecules.get(obj.molecule_ref);
+          if (mol) {
+            for (const aId of selection.selected_ids) {
+              if (!mol.atom_map.has(aId)) {
+                staleKeys.push(createScopedAtomKey(objId, aId));
+              }
+            }
+          }
+        }
+      }
+    }
+
+    const valid = staleKeys.length === 0 && missingObjects.length === 0 && missingStates.length === 0;
+    return { valid, staleKeys, missingObjects, missingStates };
   }
 }

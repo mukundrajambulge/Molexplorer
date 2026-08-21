@@ -211,7 +211,37 @@ export interface SelectionResult {
   count: number;                         // Count of selected atoms
   object_id?: string;                    // Scope object identifier where evaluated
   state_id?: string;                     // Scope state identifier where evaluated
+  scope_type?: 'active_object' | 'explicit_object' | 'workspace'; // Scope model
   execution_time_ms?: number;            // Evaluation latency in milliseconds
+}
+
+/**
+ * Scoped Atom Key Helper: Combines object_id with canonical_id to ensure cross-object uniqueness.
+ */
+export function createScopedAtomKey(objectId: string, canonicalId: number): string {
+  return `${objectId}:${canonicalId}`;
+}
+
+export function parseScopedAtomKey(key: string): { objectId: string; canonicalId: number } {
+  const idx = key.lastIndexOf(':');
+  if (idx === -1) {
+    throw new Error(`Invalid scoped atom key format: "${key}"`);
+  }
+  const objectId = key.substring(0, idx);
+  const canonicalId = parseInt(key.substring(idx + 1), 10);
+  return { objectId, canonicalId };
+}
+
+/**
+ * Multi-Object Scoped Selection Result.
+ * Preserves object-local atom identities and maps them to unambiguous composite keys.
+ */
+export interface ScopedSelectionResult {
+  query: string;
+  scoped_keys: Set<string>;                     // Set of `${object_id}:${canonical_id}`
+  object_results: Map<string, SelectionResult>; // Partitioned SelectionResult per object
+  total_count: number;                          // Total atoms selected across workspace
+  execution_time_ms?: number;
 }
 
 /**
