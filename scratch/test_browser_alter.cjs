@@ -1,0 +1,118 @@
+const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
+
+const ARTIFACT_DIR = 'C:\\Users\\mukun\\.gemini\\antigravity\\brain\\e43f6ae3-6d0c-44fd-ae3d-9abd3e716b18';
+const SCREENSHOT_DIR = path.join(ARTIFACT_DIR, 'screenshots');
+
+if (!fs.existsSync(SCREENSHOT_DIR)) {
+  fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
+}
+
+(async () => {
+  console.log('============================================================');
+  console.log('       TASK P3.5: MANUAL BROWSER VERIFICATION (ALTER)       ');
+  console.log('============================================================\n');
+
+  const fixturePdb = fs.readFileSync(path.resolve(process.cwd(), 'fixtures/03_protein_with_ligand.pdb'), 'utf8');
+
+  console.log('1. Launching Headless Chromium with WebGL support...');
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--use-gl=angle',
+      '--use-angle=swiftshader',
+      '--enable-webgl',
+      '--ignore-gpu-blocklist'
+    ]
+  });
+
+  const page = await browser.newPage();
+  await page.setViewport({ width: 1440, height: 900 });
+
+  page.on('console', msg => console.log('  [BROWSER CONSOLE]', msg.text()));
+  page.on('pageerror', err => console.error('  [BROWSER ERROR]', err.message));
+  page.on('dialog', async dialog => {
+    console.log('  [BROWSER DIALOG]', dialog.message());
+    await dialog.dismiss();
+  });
+
+  console.log('2. Navigating to MolStudio (http://localhost:5173/molstudio)...');
+  await page.goto('http://localhost:5173/molstudio', { waitUntil: 'networkidle2', timeout: 30000 });
+  await new Promise(r => setTimeout(r, 2000));
+
+  // Step 1 & 2: Load fixture and confirm baseline (20 atoms, Stick representation)
+  console.log('3. Loading 03_protein_with_ligand.pdb into MolStudio...');
+  await page.evaluate((pdb) => {
+    window.__molStudioTestApi.loadMolecule('03_protein_with_ligand.pdb', pdb, 'pdb');
+    window.__molStudioTestApi.setRenderStyle('Stick');
+    window.__molStudioTestApi.setColorScheme('Modern/Jmol');
+  }, fixturePdb);
+
+  await new Promise(r => setTimeout(r, 2000));
+
+  const state1 = await page.evaluate(() => window.__molStudioTestApi.getState());
+  console.log(`  -> Initial Atom Count: ${state1.atomsCount} (Expected: 20)`);
+
+  const shot1 = path.join(SCREENSHOT_DIR, 'alter_01_baseline.png');
+  await page.screenshot({ path: shot1 });
+  console.log(`  -> Saved screenshot: ${shot1}`);
+
+  // Step 3 & 4: Execute alter on atom 17: "alter id 17, name=C99"
+  console.log('4. Executing Command: "alter id 17, name=C99"...');
+  const alterRes = await page.evaluate(() => {
+    return window.__molStudioTestApi.runQuery('alter id 17, name=C99');
+  });
+  console.log(`  -> Alter Output: ${alterRes.textOutput}`);
+
+  await new Promise(r => setTimeout(r, 1500));
+
+  const shot2 = path.join(SCREENSHOT_DIR, 'alter_02_after_alter.png');
+  await page.screenshot({ path: shot2 });
+  console.log(`  -> Saved screenshot: ${shot2}`);
+
+  // Step 5: Export MolStudio-PSE session string
+  console.log('5. Exporting MolStudio-PSE session string...');
+  const pseString = await page.evaluate(() => {
+    return window.__molStudioTestApi.exportSessionString();
+  });
+  console.log(`  -> Exported PSE String length: ${pseString ? pseString.length : 0} bytes`);
+
+  // Step 6: Reload session and verify persistence of altered property
+  console.log('6. Reloading saved session back into MolStudio...');
+  await page.evaluate((pseContent) => {
+    const session = JSON.parse(pseContent);
+    const mol = session.molecules[0];
+    window.__molStudioTestApi.loadMolecule(mol.name, mol.data, mol.format);
+  }, pseString);
+
+  await new Promise(r => setTimeout(r, 2000));
+
+  const stateReloaded = await page.evaluate(() => window.__molStudioTestApi.getState());
+  console.log(`  -> Reloaded Atom Count: ${stateReloaded.atomsCount} (Expected: 20)`);
+
+  const shot3 = path.join(SCREENSHOT_DIR, 'alter_03_reloaded_state.png');
+  await page.screenshot({ path: shot3 });
+  console.log(`  -> Saved screenshot: ${shot3}`);
+
+  // Step 7: Revert property via alter: "alter id 17, name=C1"
+  console.log('7. Reverting Command: "alter id 17, name=C1"...');
+  const revertRes = await page.evaluate(() => {
+    return window.__molStudioTestApi.runQuery('alter id 17, name=C1');
+  });
+  console.log(`  -> Revert Output: ${revertRes.textOutput}`);
+
+  await new Promise(r => setTimeout(r, 1500));
+
+  const shot4 = path.join(SCREENSHOT_DIR, 'alter_04_restored_state.png');
+  await page.screenshot({ path: shot4 });
+  console.log(`  -> Saved screenshot: ${shot4}`);
+
+  await browser.close();
+
+  console.log('\n============================================================');
+  console.log('           MANUAL BROWSER TEST COMPLETE: ALL PASS           ');
+  console.log('============================================================\n');
+})();

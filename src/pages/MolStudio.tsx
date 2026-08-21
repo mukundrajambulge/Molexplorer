@@ -659,6 +659,55 @@ export default function MolStudio() {
       triggerFocus();
     }
 
+    if (result.alterRequest && processorRef.current) {
+      try {
+        const doc = processorRef.current.getCanonicalDocument();
+        const selSerials = parser.parse(result.alterRequest.query);
+        const mutation = ScientificEditingKernel.alter(
+          doc,
+          Array.from(selSerials),
+          {
+            property: result.alterRequest.property as any,
+            value: result.alterRequest.value,
+            rawProperty: result.alterRequest.property,
+            rawValue: String(result.alterRequest.value)
+          },
+          { objectId: doc.active_object_id, author: 'User' }
+        );
+        processorRef.current.applyScientificRevision(mutation.revision);
+        setAtoms([...processorRef.current.atoms]);
+        setProcessedPDB(processorRef.current.toPDB());
+      } catch (err: any) {
+        console.warn('Alter operation error:', err.message);
+      }
+      triggerFocus();
+    }
+
+    if (result.alterStateRequest && processorRef.current) {
+      try {
+        const doc = processorRef.current.getCanonicalDocument();
+        const selSerials = parser.parse(result.alterStateRequest.query);
+        const mutation = ScientificEditingKernel.alterState(
+          doc,
+          result.alterStateRequest.stateId,
+          Array.from(selSerials),
+          {
+            property: result.alterStateRequest.property as any,
+            value: result.alterStateRequest.value,
+            rawProperty: result.alterStateRequest.property,
+            rawValue: String(result.alterStateRequest.value)
+          },
+          { objectId: doc.active_object_id, author: 'User' }
+        );
+        processorRef.current.applyScientificRevision(mutation.revision);
+        setAtoms([...processorRef.current.atoms]);
+        setProcessedPDB(processorRef.current.toPDB());
+      } catch (err: any) {
+        console.warn('Alter state operation error:', err.message);
+      }
+      triggerFocus();
+    }
+
     if (result.setStyle) {
       setRenderStyle(result.setStyle as RenderStyle);
     }

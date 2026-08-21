@@ -14,7 +14,13 @@ import {
   ValidationReport
 } from '../types/domain';
 import { buildCanonicalTopology } from './BondAdapter';
-import { buildCanonicalMolecule, validateCanonicalMolecule } from './HierarchyAdapter';
+import {
+  buildCanonicalMolecule,
+  validateCanonicalMolecule,
+  classifyResidue,
+  classifyChain,
+  createResidueId
+} from './HierarchyAdapter';
 import { buildCanonicalState, validateCanonicalDocument } from './DocumentAdapter';
 import { computeCanonicalStateHash, computeRevisionHash, generateUUID } from './StateHasher';
 import { validateMolecularValence, calculateAtomValence } from './ValenceValidator';
@@ -1592,5 +1598,443 @@ export class ScientificEditingKernel {
       updatedMolecule: derivedMolecule,
       removedHydrogenIds: hydrogenIds
     };
+  }
+
+  /**
+   * Executes the atomic "alter" mutation on a set of selected atoms.
+   * Modifies an approved scientific property (name, resn, chain, formal_charge, b_factor, occupancy)
+   * while preserving topology invariants and updating hierarchy consistency.
+   */
+  public static alter(
+    document: CanonicalMolecularDocument,
+    selection: SelectionResult | number[],
+    request: {
+      property: 'name' | 'resn' | 'chain' | 'formal_charge' | 'b_factor' | 'occupancy';
+      value: string | number;
+      rawProperty?: string;
+      rawValue?: string;
+    },
+    options?: {
+      objectId?: string;
+      stateId?: string;
+      author?: string;
+      expectedRevisionId?: string;
+      currentRevision?: ScientificRevision;
+      operationName?: string;
+    }
+  ): {
+    revision: ScientificRevision;
+    provenance: ProvenanceRecord;
+    updatedDocument: CanonicalMolecularDocument;
+    updatedMolecule: CanonicalMolecule;
+    affectedAtomIds: number[];
+  } {
+    const targetObjectId = options?.objectId || document.active_object_id;
+    if (!targetObjectId) {
+      throw new ScientificEditingError(
+        'alter: target objectId must be specified or active in document',
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    const obj = document.objects.get(targetObjectId);
+    if (!obj) {
+      throw new ScientificEditingError(
+        `alter: target object "${targetObjectId}" not found in document`,
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    const mol = document.molecules.get(obj.molecule_ref);
+    if (!mol) {
+      throw new ScientificEditingError(
+        `alter: molecule "${obj.molecule_ref}" not found in document`,
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    // 1. Revision concurrency check
+    if (options?.expectedRevisionId && options?.currentRevision) {
+      if (options.currentRevision.revision_id !== options.expectedRevisionId) {
+        throw new ScientificEditingError(
+          `alter: revision conflict. Expected "${options.expectedRevisionId}", current is "${options.currentRevision.revision_id}"`,
+          'REVISION_CONFLICT'
+        );
+      }
+    }
+
+    // 2. Anti-injection & Security Check
+    const rawProp = (request.rawProperty || request.property || '').toString().trim().toLowerCase();
+    const rawValStr = (request.rawValue !== undefined ? request.rawValue : String(request.value)).trim();
+
+    const FORBIDDEN_SECURITY_PATTERNS = [
+      '__proto__', 'constructor', 'prototype', 'eval', 'function',
+      'javascript:', 'script', 'process.', 'import(', 'require(', 'window.', 'document.'
+    ];
+
+    for (const pattern of FORBIDDEN_SECURITY_PATTERNS) {
+      if (rawProp.toLowerCase().includes(pattern) || rawValStr.toLowerCase().includes(pattern)) {
+        throw new ScientificEditingError(
+          `alter: forbidden security pattern "${pattern}" detected in alter expression`,
+          'SECURITY_VALIDATION_ERROR'
+        );
+      }
+    }
+
+    // 3. Normalize Property & Check Allowlist
+    let normProp: 'name' | 'resn' | 'chain' | 'formal_charge' | 'b_factor' | 'occupancy';
+    if (rawProp === 'name' || rawProp === 'atom_name') {
+      normProp = 'name';
+    } else if (rawProp === 'resn' || rawProp === 'resname' || rawProp === 'residue_name') {
+      normProp = 'resn';
+    } else if (rawProp === 'chain' || rawProp === 'chain_id' || rawProp === 'chain_ref') {
+      normProp = 'chain';
+    } else if (rawProp === 'formal_charge' || rawProp === 'charge' || rawProp === 'fc') {
+      normProp = 'formal_charge';
+    } else if (rawProp === 'b_factor' || rawProp === 'bfactor' || rawProp === 'b') {
+      normProp = 'b_factor';
+    } else if (rawProp === 'occupancy' || rawProp === 'q') {
+      normProp = 'occupancy';
+    } else if (rawProp === 'coords' || rawProp === 'coordinates' || rawProp === 'coord') {
+      throw new ScientificEditingError(
+        'alter: arbitrary coordinate mutation is DEFERRED in P3.5. Only scientific metadata and formal charge are permitted.',
+        'SECURITY_VALIDATION_ERROR'
+      );
+    } else {
+      throw new ScientificEditingError(
+        `alter: property "${rawProp}" is not allowed. Approved properties: [name, resn, chain, formal_charge, b_factor, occupancy]`,
+        'SECURITY_VALIDATION_ERROR'
+      );
+    }
+
+    // 4. Validate Value Constraints
+    let typedValue: string | number;
+    if (normProp === 'name') {
+      const s = String(request.value).trim().toUpperCase();
+      if (!s || s.length === 0 || s.length > 4) {
+        throw new ScientificEditingError(
+          `alter: atom name must be 1 to 4 characters (got "${s}")`,
+          'EDIT_PRECONDITION_ERROR'
+        );
+      }
+      typedValue = s;
+    } else if (normProp === 'resn') {
+      const s = String(request.value).trim().toUpperCase();
+      if (!s || s.length === 0 || s.length > 4) {
+        throw new ScientificEditingError(
+          `alter: residue name must be 1 to 4 characters (got "${s}")`,
+          'EDIT_PRECONDITION_ERROR'
+        );
+      }
+      typedValue = s;
+    } else if (normProp === 'chain') {
+      const s = String(request.value).trim().toUpperCase();
+      if (!s || s.length === 0 || s.length > 4) {
+        throw new ScientificEditingError(
+          `alter: chain ID must be 1 to 4 characters (got "${s}")`,
+          'EDIT_PRECONDITION_ERROR'
+        );
+      }
+      typedValue = s;
+    } else if (normProp === 'formal_charge') {
+      const num = typeof request.value === 'number' ? request.value : parseInt(String(request.value), 10);
+      if (isNaN(num) || !Number.isInteger(num) || num < -7 || num > 7) {
+        throw new ScientificEditingError(
+          `alter: formal charge must be an integer between -7 and +7 (got "${request.value}")`,
+          'EDIT_PRECONDITION_ERROR'
+        );
+      }
+      typedValue = num;
+    } else if (normProp === 'b_factor') {
+      const num = typeof request.value === 'number' ? request.value : parseFloat(String(request.value));
+      if (isNaN(num) || !isFinite(num) || num < 0) {
+        throw new ScientificEditingError(
+          `alter: b_factor must be a non-negative finite number (got "${request.value}")`,
+          'EDIT_PRECONDITION_ERROR'
+        );
+      }
+      typedValue = num;
+    } else if (normProp === 'occupancy') {
+      const num = typeof request.value === 'number' ? request.value : parseFloat(String(request.value));
+      if (isNaN(num) || !isFinite(num) || num < 0 || num > 1) {
+        throw new ScientificEditingError(
+          `alter: occupancy must be a number between 0.0 and 1.0 (got "${request.value}")`,
+          'EDIT_PRECONDITION_ERROR'
+        );
+      }
+      typedValue = num;
+    } else {
+      typedValue = request.value;
+    }
+
+    // 5. Resolve target atom IDs
+    let targetIds: number[];
+    if (Array.isArray(selection)) {
+      targetIds = selection;
+    } else {
+      targetIds = selection.selected_array;
+    }
+
+    if (targetIds.length === 0) {
+      throw new ScientificEditingError(
+        'alter: target selection is empty',
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    // Verify all target atom IDs exist
+    for (const tid of targetIds) {
+      if (!mol.atom_map.has(tid)) {
+        throw new ScientificEditingError(
+          `alter: atom ID ${tid} does not exist in molecule ${mol.molecule_id}`,
+          'EDIT_PRECONDITION_ERROR'
+        );
+      }
+    }
+
+    // 6. Check for No-Op Redundancy
+    const targetSet = new Set(targetIds);
+    let changedCount = 0;
+    const oldValues: Record<number, any> = {};
+    const newValues: Record<number, any> = {};
+
+    for (const tid of targetIds) {
+      const atom = mol.atom_map.get(tid)!;
+      let currentVal: any;
+      if (normProp === 'name') currentVal = atom.name;
+      else if (normProp === 'resn') currentVal = atom.residue_name;
+      else if (normProp === 'chain') currentVal = atom.chain_ref;
+      else if (normProp === 'formal_charge') currentVal = atom.formal_charge;
+      else if (normProp === 'b_factor') currentVal = atom.b_factor;
+      else if (normProp === 'occupancy') currentVal = atom.occupancy;
+
+      oldValues[tid] = currentVal;
+      newValues[tid] = typedValue;
+
+      const normCurrent = typeof currentVal === 'string' ? currentVal.trim().toUpperCase() : currentVal;
+      if (normCurrent !== typedValue) {
+        changedCount++;
+      }
+    }
+
+    if (changedCount === 0) {
+      throw new ScientificEditingError(
+        `alter: no-op mutation. All selected atoms already have ${normProp} = ${typedValue}`,
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    // 7. Staging: Apply modifications to atoms
+    const updatedAtoms: CanonicalAtom[] = mol.atoms.map(a => {
+      if (!targetSet.has(a.canonical_id)) {
+        return { ...a };
+      }
+      const updated = { ...a };
+      if (normProp === 'name') updated.name = typedValue as string;
+      else if (normProp === 'resn') updated.residue_name = typedValue as string;
+      else if (normProp === 'chain') updated.chain_ref = typedValue as string;
+      else if (normProp === 'formal_charge') updated.formal_charge = typedValue as number;
+      else if (normProp === 'b_factor') updated.b_factor = typedValue as number;
+      else if (normProp === 'occupancy') updated.occupancy = typedValue as number;
+      return updated;
+    });
+
+    // 8. Rebuild and Validate Hierarchy if resn or chain changed
+    let updatedResidues: CanonicalResidue[] = [];
+    let updatedChains: CanonicalChain[] = [];
+
+    if (normProp === 'resn' || normProp === 'chain') {
+      // Rebuild residues from modified atoms
+      const residueMap = new Map<string, CanonicalResidue>();
+      for (const a of updatedAtoms) {
+        const resId = createResidueId(a.chain_ref, a.residue_ref);
+        if (!residueMap.has(resId)) {
+          const classif = classifyResidue(a.residue_name, a.is_hetero, 1);
+          residueMap.set(resId, {
+            residue_id: resId,
+            name: a.residue_name,
+            chain_ref: a.chain_ref,
+            res_seq: a.residue_ref,
+            atom_ids: [a.canonical_id],
+            is_standard: classif === 'amino_acid' || classif === 'nucleic_acid',
+            classification: classif
+          });
+        } else {
+          residueMap.get(resId)!.atom_ids.push(a.canonical_id);
+        }
+      }
+      updatedResidues = Array.from(residueMap.values());
+
+      // Rebuild chains from updated residues
+      const chainMap = new Map<string, CanonicalChain>();
+      for (const r of updatedResidues) {
+        const cId = r.chain_ref;
+        if (!chainMap.has(cId)) {
+          chainMap.set(cId, {
+            chain_id: cId,
+            residue_ids: [r.residue_id],
+            classification: r.classification === 'amino_acid' ? 'protein' : 'hetero'
+          });
+        } else {
+          chainMap.get(cId)!.residue_ids.push(r.residue_id);
+        }
+      }
+
+      // Re-classify chains based on all their constituent residues
+      for (const c of chainMap.values()) {
+        const chainRes = c.residue_ids.map(rid => residueMap.get(rid)!).filter(Boolean);
+        c.classification = classifyChain(chainRes);
+      }
+      updatedChains = Array.from(chainMap.values());
+    } else {
+      updatedResidues = mol.residues.map(r => ({ ...r, atom_ids: [...r.atom_ids] }));
+      updatedChains = mol.chains.map(c => ({ ...c, residue_ids: [...c.residue_ids] }));
+    }
+
+    // Topology is 100% invariant (bond list and orders unchanged)
+    const derivedTopology = buildCanonicalTopology(updatedAtoms, mol.topology.bonds);
+
+    const derivedMolecule: CanonicalMolecule = {
+      molecule_id: mol.molecule_id,
+      name: mol.name,
+      source_format: mol.source_format,
+      atoms: updatedAtoms,
+      atom_map: new Map(updatedAtoms.map(a => [a.canonical_id, a])),
+      residues: updatedResidues,
+      residue_map: new Map(updatedResidues.map(r => [r.residue_id, r])),
+      chains: updatedChains,
+      chain_map: new Map(updatedChains.map(c => [c.chain_id, c])),
+      topology: derivedTopology,
+      metadata: mol.metadata
+    };
+
+    // 9. Validate canonical structure & valence
+    validateCanonicalMolecule(derivedMolecule);
+    const valenceReport = validateMolecularValence(derivedMolecule);
+    if (!valenceReport.valid) {
+      throw new ScientificEditingError(
+        `alter: valence validation failed after property modification. ${valenceReport.errors.join(' ')}`,
+        'VALENCE_VALIDATION_ERROR'
+      );
+    }
+
+    // 10. Compute State Hashes & Construct Revision
+    const previousStateHash = computeCanonicalStateHash(mol);
+    const newStateHash = computeCanonicalStateHash(derivedMolecule);
+
+    if (newStateHash === previousStateHash) {
+      throw new ScientificEditingError(
+        'alter: internal error - derived state hash identical after property modification',
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    const timestamp = new Date().toISOString();
+    const parentRevId = options?.currentRevision?.revision_id || null;
+    const opName = options?.operationName || 'alter';
+    const opId = `op-${opName}-${generateUUID()}`;
+    const revId = `rev-${generateUUID().slice(0, 8)}`;
+    const revHash = computeRevisionHash(parentRevId, opId, newStateHash, timestamp);
+
+    const revision: ScientificRevision = {
+      revision_id: revId,
+      parent_revision_id: parentRevId,
+      operation_id: opId,
+      document_id: document.document_id,
+      object_id: targetObjectId,
+      state_id: options?.stateId || obj.active_state_id,
+      canonical_state_hash: newStateHash,
+      revision_hash: revHash,
+      timestamp: timestamp,
+      author: options?.author || 'User',
+      molecule_snapshot: derivedMolecule
+    };
+
+    // 11. Append Provenance Record
+    const provenance: ProvenanceRecord = {
+      provenance_id: `prov-${generateUUID()}`,
+      revision_id: revId,
+      parent_revision_id: parentRevId,
+      operation_name: opName,
+      resolved_atom_ids: targetIds,
+      parameters: {
+        target_object_id: targetObjectId,
+        property: normProp,
+        new_value: typedValue,
+        changed_count: changedCount,
+        old_values: oldValues,
+        new_values: newValues,
+        valence_report: valenceReport
+      },
+      timestamp: timestamp,
+      tool_version: 'Molexplorer 1.0',
+      validation_summary: valenceReport.warnings.length > 0
+        ? `PASSED WITH WARNINGS: ${valenceReport.warnings.join(' ')}`
+        : 'PASSED (Property Altered and Hierarchy/Topology Validated)'
+    };
+
+    // 12. Update CanonicalMolecularDocument Container
+    const updatedMoleculeMap = new Map(document.molecules);
+    updatedMoleculeMap.set(derivedMolecule.molecule_id, derivedMolecule);
+
+    const derivedState = buildCanonicalState(
+      derivedMolecule,
+      1,
+      obj.active_state_id,
+      'Active State'
+    );
+    const updatedStateMap = new Map(document.states);
+    updatedStateMap.set(derivedState.state_id, derivedState);
+
+    const updatedDocument: CanonicalMolecularDocument = {
+      ...document,
+      molecules: updatedMoleculeMap,
+      states: updatedStateMap,
+      updated_at: timestamp
+    };
+
+    validateCanonicalDocument(updatedDocument);
+
+    return {
+      revision,
+      provenance,
+      updatedDocument,
+      updatedMolecule: derivedMolecule,
+      affectedAtomIds: targetIds
+    };
+  }
+
+  /**
+   * Executes the state-scoped "alter_state" mutation.
+   */
+  public static alterState(
+    document: CanonicalMolecularDocument,
+    stateId: string,
+    selection: SelectionResult | number[],
+    request: {
+      property: 'name' | 'resn' | 'chain' | 'formal_charge' | 'b_factor' | 'occupancy';
+      value: string | number;
+      rawProperty?: string;
+      rawValue?: string;
+    },
+    options?: {
+      objectId?: string;
+      author?: string;
+      expectedRevisionId?: string;
+      currentRevision?: ScientificRevision;
+    }
+  ) {
+    if (!document.states.has(stateId)) {
+      throw new ScientificEditingError(
+        `alterState: state "${stateId}" not found in document`,
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    return this.alter(document, selection, request, {
+      ...options,
+      stateId,
+      operationName: 'alter_state'
+    });
   }
 }

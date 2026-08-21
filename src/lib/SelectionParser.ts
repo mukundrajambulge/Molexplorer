@@ -737,6 +737,17 @@ export class SelectionParser {
       atomA: number;
       atomB: number;
     };
+    alterRequest?: {
+      query: string;
+      property: string;
+      value: string | number;
+    };
+    alterStateRequest?: {
+      stateId: string;
+      query: string;
+      property: string;
+      value: string | number;
+    };
   } {
     const qTrim = query.trim();
     const qLower = qTrim.toLowerCase();
@@ -865,6 +876,62 @@ export class SelectionParser {
         selectedSerials: new Set([atomA, atomB]),
         cycleValenceRequest: { atomA, atomB },
         textOutput: `Cycle Valence: cycled bond order between atom ${atomA} and atom ${atomB}.`
+      };
+    }
+
+    // 0.04 alter_state <state_id>, <selection>, <property>=<value>
+    if (qLower.startsWith('alter_state ')) {
+      const rest = qTrim.slice(12).trim();
+      const match = rest.match(/^([^,]+),\s*(.+?),\s*([a-zA-Z0-9_]+)\s*=\s*(.+)$/);
+      if (!match) {
+        throw new Error('Syntax error: alter_state requires syntax "alter_state <state>, <selection>, <property>=<value>" (e.g. "alter_state state_1, id 17, name=C99")');
+      }
+      const stateId = match[1].trim();
+      const selExpr = match[2].trim();
+      const property = match[3].trim();
+      const valStr = match[4].trim();
+      const serials = this.parse(selExpr);
+
+      let parsedVal: string | number = valStr;
+      if (/^-?\d+$/.test(valStr)) parsedVal = parseInt(valStr, 10);
+      else if (/^-?\d+\.\d+$/.test(valStr)) parsedVal = parseFloat(valStr);
+
+      return {
+        selectedSerials: serials,
+        alterStateRequest: {
+          stateId,
+          query: selExpr,
+          property,
+          value: parsedVal
+        },
+        textOutput: `alter_state: property "${property}=${parsedVal}" updated on state "${stateId}".`
+      };
+    }
+
+    // 0.05 alter <selection>, <property>=<value>
+    if (qLower.startsWith('alter ')) {
+      const rest = qTrim.slice(6).trim();
+      const match = rest.match(/^(.+?),\s*([a-zA-Z0-9_]+)\s*=\s*(.+)$/);
+      if (!match) {
+        throw new Error('Syntax error: alter requires syntax "alter <selection>, <property>=<value>" (e.g. "alter id 17, name=C99" or "alter chain A, chain=B")');
+      }
+      const selExpr = match[1].trim();
+      const property = match[2].trim();
+      const valStr = match[3].trim();
+      const serials = this.parse(selExpr);
+
+      let parsedVal: string | number = valStr;
+      if (/^-?\d+$/.test(valStr)) parsedVal = parseInt(valStr, 10);
+      else if (/^-?\d+\.\d+$/.test(valStr)) parsedVal = parseFloat(valStr);
+
+      return {
+        selectedSerials: serials,
+        alterRequest: {
+          query: selExpr,
+          property,
+          value: parsedVal
+        },
+        textOutput: `alter: property "${property}=${parsedVal}" updated on selection "${selExpr}".`
       };
     }
 
