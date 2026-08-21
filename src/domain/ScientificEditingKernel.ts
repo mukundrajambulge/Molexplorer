@@ -1935,6 +1935,7 @@ export class ScientificEditingKernel {
     const opId = `op-${opName}-${generateUUID()}`;
     const revId = `rev-${generateUUID().slice(0, 8)}`;
     const revHash = computeRevisionHash(parentRevId, opId, newStateHash, timestamp);
+    const targetStateId = options?.stateId || obj.active_state_id;
 
     const revision: ScientificRevision = {
       revision_id: revId,
@@ -1942,7 +1943,7 @@ export class ScientificEditingKernel {
       operation_id: opId,
       document_id: document.document_id,
       object_id: targetObjectId,
-      state_id: options?.stateId || obj.active_state_id,
+      state_id: targetStateId,
       canonical_state_hash: newStateHash,
       revision_hash: revHash,
       timestamp: timestamp,
@@ -1959,6 +1960,7 @@ export class ScientificEditingKernel {
       resolved_atom_ids: targetIds,
       parameters: {
         target_object_id: targetObjectId,
+        state_id: targetStateId,
         property: normProp,
         new_value: typedValue,
         changed_count: changedCount,
@@ -1980,11 +1982,11 @@ export class ScientificEditingKernel {
     const derivedState = buildCanonicalState(
       derivedMolecule,
       1,
-      obj.active_state_id,
+      targetStateId,
       'Active State'
     );
     const updatedStateMap = new Map(document.states);
-    updatedStateMap.set(derivedState.state_id, derivedState);
+    updatedStateMap.set(targetStateId, derivedState);
 
     const updatedDocument: CanonicalMolecularDocument = {
       ...document,

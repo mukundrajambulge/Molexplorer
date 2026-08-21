@@ -687,9 +687,11 @@ export default function MolStudio() {
       try {
         const doc = processorRef.current.getCanonicalDocument();
         const selSerials = parser.parse(result.alterStateRequest.query);
+        const reqStateId = result.alterStateRequest.stateId;
+        const targetStateId = doc.states.has(reqStateId) ? reqStateId : (doc.active_state_id || Array.from(doc.states.keys())[0]);
         const mutation = ScientificEditingKernel.alterState(
           doc,
-          result.alterStateRequest.stateId,
+          targetStateId,
           Array.from(selSerials),
           {
             property: result.alterStateRequest.property as any,

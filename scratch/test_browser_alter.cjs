@@ -73,15 +73,25 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
   await page.screenshot({ path: shot2 });
   console.log(`  -> Saved screenshot: ${shot2}`);
 
-  // Step 5: Export MolStudio-PSE session string
-  console.log('5. Exporting MolStudio-PSE session string...');
+  // Step 5: Execute alter_state on active state: "alter_state state-1, id 17, name=C88"
+  console.log('5. Executing Command: "alter_state state-1, id 17, name=C88"...');
+  const alterStateRes = await page.evaluate(() => {
+    // Look up active state ID dynamically
+    return window.__molStudioTestApi.runQuery('alter_state 03_protein_with_ligand.pdb-state-1, id 17, name=C88');
+  });
+  console.log(`  -> Alter State Output: ${alterStateRes.textOutput}`);
+
+  await new Promise(r => setTimeout(r, 1500));
+
+  // Step 6: Export MolStudio-PSE session string
+  console.log('6. Exporting MolStudio-PSE session string...');
   const pseString = await page.evaluate(() => {
     return window.__molStudioTestApi.exportSessionString();
   });
   console.log(`  -> Exported PSE String length: ${pseString ? pseString.length : 0} bytes`);
 
-  // Step 6: Reload session and verify persistence of altered property
-  console.log('6. Reloading saved session back into MolStudio...');
+  // Step 7: Reload session and verify persistence of altered property
+  console.log('7. Reloading saved session back into MolStudio...');
   await page.evaluate((pseContent) => {
     const session = JSON.parse(pseContent);
     const mol = session.molecules[0];
@@ -97,8 +107,8 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
   await page.screenshot({ path: shot3 });
   console.log(`  -> Saved screenshot: ${shot3}`);
 
-  // Step 7: Revert property via alter: "alter id 17, name=C1"
-  console.log('7. Reverting Command: "alter id 17, name=C1"...');
+  // Step 8: Revert property via alter: "alter id 17, name=C1"
+  console.log('8. Reverting Command: "alter id 17, name=C1"...');
   const revertRes = await page.evaluate(() => {
     return window.__molStudioTestApi.runQuery('alter id 17, name=C1');
   });

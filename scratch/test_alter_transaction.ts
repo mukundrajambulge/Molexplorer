@@ -9,7 +9,7 @@ import {
   ScientificRevision,
   ProvenanceRecord
 } from '../types/domain';
-import { buildCanonicalDocument } from '../src/domain/DocumentAdapter';
+import { buildCanonicalDocument, buildCanonicalState } from '../src/domain/DocumentAdapter';
 import {
   ScientificEditingKernel,
   ScientificEditingError
@@ -170,22 +170,100 @@ function runAlterTransactionTestSuite() {
   // --- SECTION 2: ALTER_STATE MUTATION ---
   console.log("\n--- 2. State-Scoped Mutation (alter_state) ---");
 
-  test("2.1 alter_state performs property modification scoped to designated state", () => {
+  test("2.1 alter_state modifies designated state while preserving other states intact", () => {
+    const proc = new MolProcessor(pdbContent, 'pdb');
+    proc.assignBonds(1.15);
+    const mol0 = proc.getCanonicalMolecule({ name: '03_protein_with_ligand.pdb', moleculeId: 'mol-target' });
+    const doc0 = buildCanonicalDocument([mol0], { document_id: 'doc-multi-state', name: 'Multi-State Test' });
+    const objId = 'obj-mol-target';
+
+    // Construct multi-state test container with state_1 and state_2
+    const state1 = buildCanonicalState(mol0, 1, 'state_1', 'Conformer 1');
+    const state2 = buildCanonicalState(mol0, 2, 'state_2', 'Conformer 2');
+    const updatedObj = {
+      ...doc0.objects.get(objId)!,
+      active_state_id: 'state_1',
+      state_ids: ['state_1', 'state_2']
+    };
+    const docWith2States: CanonicalMolecularDocument = {
+      ...doc0,
+      objects: new Map([[objId, updatedObj]]),
+      states: new Map([
+        ['state_1', state1],
+        ['state_2', state2]
+      ]),
+      active_state_id: 'state_1'
+    };
+
+    const rootRev = ScientificEditingKernel.createRootRevision(docWith2States.document_id, objId, mol0, 'Tester');
+    const hash0 = rootRev.canonical_state_hash;
+
+    // Mutate state_1
+    const result = ScientificEditingKernel.alterState(
+      docWith2States,
+      'state_1',
+      [17],
+      { property: 'name', value: 'C88' },
+      { objectId: objId, author: 'Scientific Agent', currentRevision: rootRev }
+    );
+
+    const mol1 = result.updatedMolecule;
+    const rev1 = result.revision;
+    const prov1 = result.provenance;
+    const updatedDoc = result.updatedDocument;
+
+    // State 1 is modified
+    assert.strictEqual(mol1.atom_map.get(17)!.name, 'C88');
+    assert.strictEqual(rev1.state_id, 'state_1');
+    assert.strictEqual(prov1.operation_name, 'alter_state');
+    assert.strictEqual(prov1.parameters.state_id, 'state_1');
+    assert.strictEqual(prov1.parameters.new_value, 'C88');
+
+    // Invariants on state_1
+    assert.strictEqual(mol1.atoms.length, 20, "Atom count strictly invariant");
+    assert.strictEqual(mol1.topology.bonds.length, 19, "Bond count strictly invariant");
+    assert.notStrictEqual(rev1.canonical_state_hash, hash0, "State hash must change");
+
+    // State 2 remains strictly untouched
+    assert(updatedDoc.states.has('state_2'), "State 2 must still exist in document");
+    assert.strictEqual(updatedDoc.states.get('state_2')!.name, 'Conformer 2');
+
+    // Restoration on state_1
+    const restored = ScientificEditingKernel.restoreRevision(updatedDoc, rootRev);
+    assert.strictEqual(restored.restoredMolecule.atom_map.get(17)!.name, mol0.atom_map.get(17)!.name);
+    assert.strictEqual(computeCanonicalStateHash(restored.restoredMolecule), hash0);
+  });
+
+  test("2.2 alter_state persistence round-trip through MolStudio-PSE", () => {
     const proc = new MolProcessor(pdbContent, 'pdb');
     proc.assignBonds(1.15);
     const mol0 = proc.getCanonicalMolecule();
     const doc0 = buildCanonicalDocument([mol0]);
-    const stateId = Array.from(doc0.states.keys())[0];
 
-    const result = ScientificEditingKernel.alterState(
+    const stateId = Array.from(doc0.states.keys())[0];
+    const resState = ScientificEditingKernel.alterState(
       doc0,
       stateId,
       [17],
       { property: 'name', value: 'C88' }
     );
 
-    assert.strictEqual(result.provenance.operation_name, 'alter_state');
-    assert.strictEqual(result.updatedMolecule.atom_map.get(17)!.name, 'C88');
+    proc.applyScientificRevision(resState.revision);
+    const pdbStr = proc.toPDB();
+
+    const session = SessionManager.createSession({
+      molecules: [{ id: 'mol_main', name: 'state_altered', format: 'pdb', data: pdbStr, atomCount: 20 }],
+      viewerState: { renderStyle: 'Stick', colorScheme: 'Modern/Jmol', surfaceOpacity: 0.8, backgroundColor: '#0A0A0A' },
+      selectionState: { selectionLevel: 'atom', selectedAtomSerials: [], namedSelections: [] }
+    });
+
+    const pseExport = SessionManager.exportSession(session);
+    const reloaded = SessionManager.importSession(pseExport);
+    const reloadedProc = new MolProcessor(reloaded.molecules[0].data, 'pdb');
+
+    assert.strictEqual(reloadedProc.atoms.length, 20);
+    const reloadedAtom17 = reloadedProc.atoms.find(a => a.serial === 17)!;
+    assert.strictEqual(reloadedAtom17.name.trim(), 'C88');
   });
 
   // --- SECTION 3: SECURITY & ANTI-INJECTION ---
