@@ -251,6 +251,7 @@ export interface ValidationReport {
   valid: boolean;
   errors: string[];
   warnings: string[];
+  info?: string[];
 }
 
 /**

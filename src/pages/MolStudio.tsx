@@ -600,6 +600,43 @@ export default function MolStudio() {
       triggerFocus();
     }
 
+    if (result.setBondOrderRequest && processorRef.current) {
+      try {
+        const doc = processorRef.current.getCanonicalDocument();
+        const mutation = ScientificEditingKernel.setBondOrder(
+          doc,
+          result.setBondOrderRequest.atomA,
+          result.setBondOrderRequest.atomB,
+          result.setBondOrderRequest.order,
+          { objectId: doc.active_object_id, author: 'User' }
+        );
+        processorRef.current.applyScientificRevision(mutation.revision);
+        setAtoms([...processorRef.current.atoms]);
+        setProcessedPDB(processorRef.current.toPDB());
+      } catch (err: any) {
+        console.warn('Set bond order operation error:', err.message);
+      }
+      triggerFocus();
+    }
+
+    if (result.cycleValenceRequest && processorRef.current) {
+      try {
+        const doc = processorRef.current.getCanonicalDocument();
+        const mutation = ScientificEditingKernel.cycleValence(
+          doc,
+          result.cycleValenceRequest.atomA,
+          result.cycleValenceRequest.atomB,
+          { objectId: doc.active_object_id, author: 'User' }
+        );
+        processorRef.current.applyScientificRevision(mutation.revision);
+        setAtoms([...processorRef.current.atoms]);
+        setProcessedPDB(processorRef.current.toPDB());
+      } catch (err: any) {
+        console.warn('Cycle valence operation error:', err.message);
+      }
+      triggerFocus();
+    }
+
     if (result.setStyle) {
       setRenderStyle(result.setStyle as RenderStyle);
     }

@@ -728,6 +728,15 @@ export class SelectionParser {
       atomA: number;
       atomB: number;
     };
+    setBondOrderRequest?: {
+      atomA: number;
+      atomB: number;
+      order: number;
+    };
+    cycleValenceRequest?: {
+      atomA: number;
+      atomB: number;
+    };
   } {
     const qTrim = query.trim();
     const qLower = qTrim.toLowerCase();
@@ -782,6 +791,80 @@ export class SelectionParser {
         selectedSerials: new Set([atomA, atomB]),
         unbondRequest: { atomA, atomB },
         textOutput: `Unbond: removed covalent bond edge between atom ${atomA} and atom ${atomB}.`
+      };
+    }
+
+    // 0.02 set_bond_order / bond_order / order <selA>, <selB>, <order> OR valence <order>, <selA>, <selB>
+    if (qLower.startsWith('set_bond_order ') || qLower.startsWith('bond_order ') || qLower.startsWith('order ') || qLower.startsWith('valence ')) {
+      let rest = '';
+      let isValencePrefix = false;
+      if (qLower.startsWith('set_bond_order ')) rest = qTrim.slice(15).trim();
+      else if (qLower.startsWith('bond_order ')) rest = qTrim.slice(11).trim();
+      else if (qLower.startsWith('order ')) rest = qTrim.slice(6).trim();
+      else {
+        rest = qTrim.slice(8).trim();
+        isValencePrefix = true;
+      }
+
+      const parts = rest.split(',').map(p => p.trim());
+      if (parts.length < 3) {
+        throw new Error('Syntax error: bond order operation requires 3 parameters (e.g. "order id 1, id 2, 2" or "valence 2, id 1, id 2")');
+      }
+
+      let selA: string, selB: string, orderStr: string;
+      if (isValencePrefix) {
+        orderStr = parts[0];
+        selA = parts[1];
+        selB = parts[2];
+      } else {
+        selA = parts[0];
+        selB = parts[1];
+        orderStr = parts[2];
+      }
+
+      const order = parseFloat(orderStr);
+      if (isNaN(order)) throw new Error(`Syntax error: invalid bond order "${orderStr}"`);
+
+      const setA = this.parse(selA);
+      const setB = this.parse(selB);
+      if (setA.size !== 1) {
+        throw new Error(`Syntax error: first operand must resolve to exactly 1 atom (got ${setA.size})`);
+      }
+      if (setB.size !== 1) {
+        throw new Error(`Syntax error: second operand must resolve to exactly 1 atom (got ${setB.size})`);
+      }
+      const atomA = Array.from(setA)[0];
+      const atomB = Array.from(setB)[0];
+
+      return {
+        selectedSerials: new Set([atomA, atomB]),
+        setBondOrderRequest: { atomA, atomB, order },
+        textOutput: `Bond Order: modified bond between atom ${atomA} and atom ${atomB} to order ${order}.`
+      };
+    }
+
+    // 0.03 cycle_valence / cycle <selA>, <selB>
+    if (qLower.startsWith('cycle_valence ') || qLower.startsWith('cycle ')) {
+      const rest = qLower.startsWith('cycle_valence ') ? qTrim.slice(14).trim() : qTrim.slice(6).trim();
+      const parts = rest.split(',').map(p => p.trim());
+      if (parts.length < 2) {
+        throw new Error('Syntax error: "cycle_valence" requires two atom selections (e.g. "cycle_valence id 1, id 2")');
+      }
+      const setA = this.parse(parts[0]);
+      const setB = this.parse(parts[1]);
+      if (setA.size !== 1) {
+        throw new Error(`Syntax error: cycle_valence first operand must resolve to exactly 1 atom (got ${setA.size})`);
+      }
+      if (setB.size !== 1) {
+        throw new Error(`Syntax error: cycle_valence second operand must resolve to exactly 1 atom (got ${setB.size})`);
+      }
+      const atomA = Array.from(setA)[0];
+      const atomB = Array.from(setB)[0];
+
+      return {
+        selectedSerials: new Set([atomA, atomB]),
+        cycleValenceRequest: { atomA, atomB },
+        textOutput: `Cycle Valence: cycled bond order between atom ${atomA} and atom ${atomB}.`
       };
     }
 

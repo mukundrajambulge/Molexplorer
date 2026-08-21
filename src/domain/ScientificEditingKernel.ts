@@ -10,12 +10,14 @@ import {
   SelectionResult,
   ScientificRevision,
   ProvenanceRecord,
-  EditOperation
+  EditOperation,
+  ValidationReport
 } from '../types/domain';
 import { buildCanonicalTopology } from './BondAdapter';
 import { buildCanonicalMolecule, validateCanonicalMolecule } from './HierarchyAdapter';
 import { buildCanonicalState, validateCanonicalDocument } from './DocumentAdapter';
 import { computeCanonicalStateHash, computeRevisionHash, generateUUID } from './StateHasher';
+import { validateMolecularValence } from './ValenceValidator';
 
 export class ScientificEditingError extends Error {
   code: string;
@@ -759,5 +761,313 @@ export class ScientificEditingKernel {
       updatedMolecule: derivedMolecule,
       removedBond: targetBond
     };
+  }
+
+  /**
+   * Executes the atomic "setBondOrder(atomA, atomB, order)" mutation.
+   * Modifies the bond multiplicity between two existing canonical atoms.
+   */
+  public static setBondOrder(
+    document: CanonicalMolecularDocument,
+    atomA: number,
+    atomB: number,
+    order: number,
+    options?: {
+      objectId?: string;
+      stateId?: string;
+      author?: string;
+      expectedRevisionId?: string;
+      currentRevision?: ScientificRevision;
+      operationName?: string;
+    }
+  ): {
+    revision: ScientificRevision;
+    provenance: ProvenanceRecord;
+    updatedDocument: CanonicalMolecularDocument;
+    updatedMolecule: CanonicalMolecule;
+    modifiedBond: CanonicalBond;
+    valenceReport: ValidationReport;
+  } {
+    const targetObjectId = options?.objectId || document.active_object_id;
+    if (!targetObjectId) {
+      throw new ScientificEditingError(
+        'setBondOrder: target objectId must be specified or active in document',
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    const obj = document.objects.get(targetObjectId);
+    if (!obj) {
+      throw new ScientificEditingError(
+        `setBondOrder: target object "${targetObjectId}" not found in document`,
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    const mol = document.molecules.get(obj.molecule_ref);
+    if (!mol) {
+      throw new ScientificEditingError(
+        `setBondOrder: molecule "${obj.molecule_ref}" not found in document`,
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    // 1. Revision concurrency check
+    if (options?.expectedRevisionId && options?.currentRevision) {
+      if (options.currentRevision.revision_id !== options.expectedRevisionId) {
+        throw new ScientificEditingError(
+          `setBondOrder: revision conflict. Expected "${options.expectedRevisionId}", current is "${options.currentRevision.revision_id}"`,
+          'REVISION_CONFLICT'
+        );
+      }
+    }
+
+    // 2. Precondition: Self-bond check
+    if (atomA === atomB) {
+      throw new ScientificEditingError(
+        `setBondOrder: self-bonding is invalid (atom ${atomA} to ${atomB})`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    // 3. Precondition: Endpoint existence check
+    const atom1 = mol.atom_map.get(atomA);
+    const atom2 = mol.atom_map.get(atomB);
+
+    if (!atom1) {
+      throw new ScientificEditingError(
+        `setBondOrder: atom endpoint ${atomA} does not exist in molecule ${mol.molecule_id}`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    if (!atom2) {
+      throw new ScientificEditingError(
+        `setBondOrder: atom endpoint ${atomB} does not exist in molecule ${mol.molecule_id}`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    // 4. Precondition: AltLoc conformer disjointness check
+    if (atom1.alt_loc !== ' ' && atom2.alt_loc !== ' ' && atom1.alt_loc !== atom2.alt_loc) {
+      throw new ScientificEditingError(
+        `setBondOrder: cannot modify bond across disjoint altLoc conformers ('${atom1.alt_loc}' to '${atom2.alt_loc}')`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    // 5. Precondition: Supported bond order check
+    const VALID_BOND_ORDERS = [1, 1.5, 2, 3];
+    if (!VALID_BOND_ORDERS.includes(order)) {
+      throw new ScientificEditingError(
+        `setBondOrder: unsupported bond order ${order}. Must be 1, 1.5, 2, or 3`,
+        'VALENCE_VALIDATION_ERROR'
+      );
+    }
+
+    // 6. Normalize endpoints
+    const normA = Math.min(atomA, atomB);
+    const normB = Math.max(atomA, atomB);
+
+    // 7. Precondition: Existing bond check
+    const existingIndex = mol.topology.bonds.findIndex(
+      b => b.atom_a === normA && b.atom_b === normB
+    );
+
+    if (existingIndex === -1) {
+      throw new ScientificEditingError(
+        `setBondOrder: no bond exists between specified atoms ${normA} and ${normB}`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    const existingBond = mol.topology.bonds[existingIndex];
+
+    if (existingBond.order === order) {
+      throw new ScientificEditingError(
+        `setBondOrder: bond between atoms ${normA} and ${normB} already has order ${order}`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    // 8. Staging: Update bond order
+    const targetBond: CanonicalBond = {
+      ...existingBond,
+      order: order,
+      is_aromatic: order === 1.5,
+      source: 'edited',
+      is_inferred: false
+    };
+
+    const updatedBonds = [...mol.topology.bonds];
+    updatedBonds[existingIndex] = targetBond;
+
+    const survivingAtoms = mol.atoms.map(a => ({ ...a }));
+    const derivedTopology = buildCanonicalTopology(survivingAtoms, updatedBonds);
+
+    const derivedMolecule = buildCanonicalMolecule(survivingAtoms, derivedTopology, {
+      molecule_id: mol.molecule_id,
+      name: mol.name,
+      source_format: mol.source_format,
+      metadata: mol.metadata
+    });
+
+    validateCanonicalMolecule(derivedMolecule);
+
+    // 9. Valence Validation (Fail-Closed on Hard Errors)
+    const valenceReport = validateMolecularValence(derivedMolecule, [normA, normB]);
+    if (!valenceReport.valid) {
+      throw new ScientificEditingError(
+        `setBondOrder: valence validation failed. ${valenceReport.errors.join(' ')}`,
+        'VALENCE_VALIDATION_ERROR'
+      );
+    }
+
+    // 10. Compute State Hashes & Construct Revision
+    const previousStateHash = computeCanonicalStateHash(mol);
+    const newStateHash = computeCanonicalStateHash(derivedMolecule);
+
+    if (newStateHash === previousStateHash) {
+      throw new ScientificEditingError(
+        'setBondOrder: internal error - derived state hash identical after bond order change',
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    const timestamp = new Date().toISOString();
+    const parentRevId = options?.currentRevision?.revision_id || null;
+    const opName = options?.operationName || 'set_bond_order';
+    const opId = `op-${opName}-${generateUUID()}`;
+    const revId = `rev-${generateUUID().slice(0, 8)}`;
+    const revHash = computeRevisionHash(parentRevId, opId, newStateHash, timestamp);
+
+    const revision: ScientificRevision = {
+      revision_id: revId,
+      parent_revision_id: parentRevId,
+      operation_id: opId,
+      document_id: document.document_id,
+      object_id: targetObjectId,
+      state_id: options?.stateId || obj.active_state_id,
+      canonical_state_hash: newStateHash,
+      revision_hash: revHash,
+      timestamp: timestamp,
+      author: options?.author || 'User',
+      molecule_snapshot: derivedMolecule
+    };
+
+    // 11. Append Provenance Record
+    const provenance: ProvenanceRecord = {
+      provenance_id: `prov-${generateUUID()}`,
+      revision_id: revId,
+      parent_revision_id: parentRevId,
+      operation_name: opName,
+      resolved_atom_ids: [normA, normB],
+      parameters: {
+        target_object_id: targetObjectId,
+        atom_a: normA,
+        atom_b: normB,
+        original_order: existingBond.order,
+        target_order: order,
+        is_aromatic: order === 1.5,
+        valence_report: valenceReport
+      },
+      timestamp: timestamp,
+      tool_version: 'Molexplorer 1.0',
+      validation_summary: valenceReport.warnings.length > 0
+        ? `PASSED WITH WARNINGS: ${valenceReport.warnings.join(' ')}`
+        : 'PASSED (Valence & Topology Validated)'
+    };
+
+    // 12. Construct Updated CanonicalMolecularDocument Container
+    const updatedMoleculeMap = new Map(document.molecules);
+    updatedMoleculeMap.set(derivedMolecule.molecule_id, derivedMolecule);
+
+    const derivedState = buildCanonicalState(
+      derivedMolecule,
+      1,
+      obj.active_state_id,
+      'Active State'
+    );
+    const updatedStateMap = new Map(document.states);
+    updatedStateMap.set(derivedState.state_id, derivedState);
+
+    const updatedDocument: CanonicalMolecularDocument = {
+      ...document,
+      molecules: updatedMoleculeMap,
+      states: updatedStateMap,
+      updated_at: timestamp
+    };
+
+    validateCanonicalDocument(updatedDocument);
+
+    return {
+      revision,
+      provenance,
+      updatedDocument,
+      updatedMolecule: derivedMolecule,
+      modifiedBond: targetBond,
+      valenceReport
+    };
+  }
+
+  /**
+   * Executes the atomic "cycleValence(atomA, atomB)" mutation.
+   * Cycles bond multiplicity: 1 -> 1.5 -> 2 -> 3 -> 1.
+   */
+  public static cycleValence(
+    document: CanonicalMolecularDocument,
+    atomA: number,
+    atomB: number,
+    options?: {
+      objectId?: string;
+      stateId?: string;
+      author?: string;
+      expectedRevisionId?: string;
+      currentRevision?: ScientificRevision;
+    }
+  ): {
+    revision: ScientificRevision;
+    provenance: ProvenanceRecord;
+    updatedDocument: CanonicalMolecularDocument;
+    updatedMolecule: CanonicalMolecule;
+    modifiedBond: CanonicalBond;
+    valenceReport: ValidationReport;
+  } {
+    const targetObjectId = options?.objectId || document.active_object_id;
+    const obj = document.objects.get(targetObjectId);
+    if (!obj) {
+      throw new ScientificEditingError(
+        `cycleValence: target object "${targetObjectId}" not found`,
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+    const mol = document.molecules.get(obj.molecule_ref);
+    if (!mol) {
+      throw new ScientificEditingError(
+        `cycleValence: molecule "${obj.molecule_ref}" not found`,
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
+    const normA = Math.min(atomA, atomB);
+    const normB = Math.max(atomA, atomB);
+    const existing = mol.topology.bonds.find(b => b.atom_a === normA && b.atom_b === normB);
+    if (!existing) {
+      throw new ScientificEditingError(
+        `cycleValence: no bond exists between atoms ${normA} and ${normB}`,
+        'TOPOLOGY_VALIDATION_ERROR'
+      );
+    }
+
+    let nextOrder: number;
+    if (existing.order === 1.0) nextOrder = 1.5;
+    else if (existing.order === 1.5) nextOrder = 2.0;
+    else if (existing.order === 2.0) nextOrder = 3.0;
+    else nextOrder = 1.0;
+
+    return this.setBondOrder(document, normA, normB, nextOrder, {
+      ...options,
+      operationName: 'cycle_valence'
+    });
   }
 }
