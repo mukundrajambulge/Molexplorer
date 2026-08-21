@@ -31,6 +31,7 @@ import { SequenceViewer } from "../components/SequenceViewer";
 import { HotkeyManager } from "../input/HotkeyManager";
 import { SculptingEngine } from "../simulation/SculptingEngine";
 import { TopologyEditor } from "../editor/TopologyEditor";
+import { ScientificEditingKernel } from "../domain/ScientificEditingKernel";
 import { MeasurementWizard } from "../components/MeasurementWizard";
 import { StudioExportModal } from "../components/StudioExportModal";
 import { Command, Ruler, CheckCircle2 } from "lucide-react";
@@ -102,7 +103,24 @@ export default function MolStudio() {
 
   const handleDeleteSelectedAtoms = () => {
     if (processorRef.current && selectedAtomSerials.size > 0) {
-      TopologyEditor.deleteAtoms(processorRef.current, selectedAtomSerials);
+      try {
+        const doc = processorRef.current.getCanonicalDocument();
+        const selResult = {
+          query: 'selected',
+          selected_ids: selectedAtomSerials,
+          selected_array: Array.from(selectedAtomSerials).sort((a, b) => a - b),
+          count: selectedAtomSerials.size,
+          object_id: 'main_mol'
+        };
+        const mutation = ScientificEditingKernel.remove(doc, selResult, {
+          objectId: 'main_mol',
+          author: 'User'
+        });
+        processorRef.current.applyScientificRevision(mutation.revision);
+      } catch (err) {
+        // Fallback to legacy delete if canonical transaction encounters non-standard state
+        TopologyEditor.deleteAtoms(processorRef.current, selectedAtomSerials);
+      }
       setSelectedAtomSerials(new Set());
       setAtoms([...processorRef.current.atoms]);
       setProcessedPDB(processorRef.current.toPDB());
@@ -153,7 +171,7 @@ export default function MolStudio() {
         id: 'main_mol',
         name: molData.name || 'molecule',
         format: molData.format,
-        data: molData.data instanceof Uint8Array ? new TextDecoder().decode(molData.data) : molData.data,
+        data: processedPDB || (molData.data instanceof Uint8Array ? new TextDecoder().decode(molData.data) : molData.data),
         atomCount: atoms.length,
         visible: !hiddenObjectIds.has('main_mol'),
         style: renderStyle,
@@ -518,7 +536,24 @@ export default function MolStudio() {
     if (result.removeAtomSerials && result.removeAtomSerials.size > 0) {
       const toRemove = result.removeAtomSerials;
       if (processorRef.current) {
-        TopologyEditor.deleteAtoms(processorRef.current, toRemove);
+        try {
+          const doc = processorRef.current.getCanonicalDocument();
+          const selResult = {
+            query: query,
+            selected_ids: toRemove,
+            selected_array: Array.from(toRemove).sort((a, b) => a - b),
+            count: toRemove.size,
+            object_id: 'main_mol'
+          };
+          const mutation = ScientificEditingKernel.remove(doc, selResult, {
+            objectId: 'main_mol',
+            author: 'User'
+          });
+          processorRef.current.applyScientificRevision(mutation.revision);
+        } catch (err) {
+          // Fallback to legacy delete if canonical transaction encounters non-standard state
+          TopologyEditor.deleteAtoms(processorRef.current, toRemove);
+        }
         setAtoms([...processorRef.current.atoms]);
         setProcessedPDB(processorRef.current.toPDB());
       } else {
@@ -667,7 +702,7 @@ export default function MolStudio() {
               id: 'main_mol',
               name: molData.name || 'molecule',
               format: molData.format,
-              data: molData.data instanceof Uint8Array ? new TextDecoder().decode(molData.data) : molData.data,
+              data: processedPDB || (molData.data instanceof Uint8Array ? new TextDecoder().decode(molData.data) : molData.data),
               atomCount: atoms.length,
               visible: !hiddenObjectIds.has('main_mol'),
               style: renderStyle,

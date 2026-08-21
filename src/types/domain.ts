@@ -245,6 +245,69 @@ export interface ScopedSelectionResult {
 }
 
 /**
+ * Validation Report emitted during scientific edit transaction validation.
+ */
+export interface ValidationReport {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+/**
+ * Authoritative Scientific Revision Model.
+ * Formally specified in docs/science/EDITING_KERNEL_SPEC.md.
+ */
+export interface ScientificRevision {
+  revision_id: string;               // Unique UUID v4 identifying this revision
+  parent_revision_id: string | null; // UUID of parent revision, or null for root R0
+  operation_id: string;              // UUID of triggering EditOperation
+  document_id: string;               // Workspace document context
+  object_id: string;                 // Target workspace Object ID
+  state_id?: string;                 // Target coordinate State ID
+  canonical_state_hash: string;      // Cryptographic SHA-256 hash of canonical molecular state
+  revision_hash: string;             // SHA-256 hash of (parent_revision_id, operation_id, state_hash, timestamp)
+  timestamp: string;                 // ISO 8601 creation timestamp
+  author: string;                    // Author / trigger entity (e.g. "User", "Molexplorer Agent")
+  molecule_snapshot: CanonicalMolecule; // Immutable snapshot of CanonicalMolecule at this revision
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Immutable Provenance Record appended to the revision ledger.
+ * Formally specified in docs/science/EDITING_KERNEL_SPEC.md.
+ */
+export interface ProvenanceRecord {
+  provenance_id: string;             // Unique UUID v4
+  revision_id: string;               // Output revision UUID
+  parent_revision_id: string | null; // Input revision UUID
+  operation_name: string;            // Canonical operation name (e.g. "remove", "bond")
+  selection_query?: string;          // Source selection expression
+  resolved_atom_ids: number[];       // Exact canonical atom IDs targeted by edit
+  parameters: Record<string, any>;   // Exact execution parameters
+  timestamp: string;                 // ISO 8601 timestamp
+  tool_version: string;              // "Molexplorer 1.0"
+  validation_summary: string;        // e.g. "PASSED"
+}
+
+/**
+ * Strongly-typed Edit Operation Transaction Contract.
+ * Formally specified in docs/science/EDITING_KERNEL_SPEC.md.
+ */
+export interface EditOperation {
+  operation_id: string;              // Unique UUID v4
+  operation_name: string;            // "remove" | "bond" | "unbond" | etc.
+  input_revision_id: string;         // Input base revision UUID
+  target_object_id: string;          // Target Object ID
+  target_state_index?: number;       // Target State index (default 1)
+  selection_query?: string;          // Selection query string
+  resolved_atom_ids: number[];       // Targeted canonical atom IDs
+  parameters: Record<string, any>;   // Operation arguments
+  validation_results?: ValidationReport;
+  output_revision_id?: string;
+  provenance_id?: string;
+}
+
+/**
  * Legacy Atom representation retained for backward compatibility with existing consumers.
  */
 export interface AtomDomain {

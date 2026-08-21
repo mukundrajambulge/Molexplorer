@@ -1,4 +1,4 @@
-import { CanonicalAtom, CanonicalBond, CanonicalTopology, CanonicalMolecule, CanonicalMolecularDocument } from '../types/domain';
+import { CanonicalAtom, CanonicalBond, CanonicalTopology, CanonicalMolecule, CanonicalMolecularDocument, ScientificRevision } from '../types/domain';
 import { toCanonicalAtomSet } from '../domain/AtomAdapter';
 import { toCanonicalBondSet, buildCanonicalTopology } from '../domain/BondAdapter';
 import { buildCanonicalMolecule } from '../domain/HierarchyAdapter';
@@ -216,6 +216,60 @@ export class MolProcessor {
       });
     }
     return this._cachedCanonicalDocument;
+  }
+
+  /**
+   * Applies an authoritative ScientificRevision to synchronize internal processor atoms
+   * and invalidate caches unidirectionally.
+   */
+  public applyScientificRevision(revision: ScientificRevision): void {
+    const mol = revision.molecule_snapshot;
+    const atomIdToIdx = new Map<number, number>();
+    const updatedAtoms: Atom[] = [];
+
+    for (let i = 0; i < mol.atoms.length; i++) {
+      const ca = mol.atoms[i];
+      atomIdToIdx.set(ca.canonical_id, i);
+      updatedAtoms.push({
+        serial: ca.canonical_id,
+        name: ca.name,
+        resName: ca.residue_name,
+        chainID: ca.chain_ref,
+        resSeq: ca.residue_ref,
+        x: ca.x,
+        y: ca.y,
+        z: ca.z,
+        occupancy: ca.occupancy,
+        bFactor: ca.b_factor,
+        altLoc: ca.alt_loc,
+        isHetero: ca.is_hetero,
+        elem: ca.element,
+        formalCharge: ca.formal_charge,
+        partialCharge: ca.partial_charge || undefined,
+        ss: (ca.secondary_structure as any) || undefined,
+        isModeledH: ca.modeled_hydrogen,
+        bonds: []
+      });
+    }
+
+    // Map topology bonds
+    for (const bond of mol.topology.bonds) {
+      const idxA = atomIdToIdx.get(bond.atom_a);
+      const idxB = atomIdToIdx.get(bond.atom_b);
+      if (idxA !== undefined && idxB !== undefined) {
+        if (!updatedAtoms[idxA].bonds.includes(idxB)) updatedAtoms[idxA].bonds.push(idxB);
+        if (!updatedAtoms[idxB].bonds.includes(idxA)) updatedAtoms[idxB].bonds.push(idxA);
+      }
+    }
+
+    this.atoms = updatedAtoms;
+    this._cachedCanonicalAtoms = mol.atoms;
+    this._cachedCanonicalSource = this.atoms;
+    this._cachedCanonicalBonds = mol.topology.bonds;
+    this._cachedCanonicalBondsSource = this.atoms;
+    this._cachedCanonicalTopology = mol.topology;
+    this._cachedCanonicalMolecule = mol;
+    this._cachedCanonicalDocument = null;
   }
 
   constructor(input: string | Uint8Array, format: 'pdb' | 'mmtf' = 'pdb') {
