@@ -83,6 +83,79 @@ export interface CanonicalTopology {
   bond_map: Map<string, CanonicalBond>;   // Composite key `${atom_a}:${atom_b}` -> CanonicalBond
 }
 
+export type ResidueClassification =
+  | 'amino_acid'
+  | 'nucleic_acid'
+  | 'modified_monomer'
+  | 'ligand'
+  | 'solvent'
+  | 'ion'
+  | 'other';
+
+/**
+ * Authoritative Canonical Residue Model.
+ * Formally specified in docs/science/DATA_MODEL_SPEC.yaml.
+ */
+export interface CanonicalResidue {
+  residue_id: string;               // Unique ID within molecule (e.g. "A:10" or "A:10:iA")
+  name: string;                     // Three-letter or monomer code (e.g. "ALA", "LIG", "HOH")
+  res_seq: number;                  // Integer sequence number from source
+  icode?: string;                   // PDB insertion code (e.g. 'A', or undefined)
+  chain_ref: string;                // Parent Chain ID reference
+  molecule_ref?: string;            // Parent Molecule ID reference
+  atom_ids: number[];               // Ordered array of CanonicalAtom IDs belonging to residue
+  classification: ResidueClassification;
+  is_standard: boolean;             // True if standard amino acid or nucleic acid monomer
+  is_hetero: boolean;               // True if non-polymer HETATM
+  secondary_structure?: string;     // 'helix' | 'sheet' | 'loop' | 'undetermined'
+}
+
+export type ChainClassification =
+  | 'protein'
+  | 'nucleic'
+  | 'hetero'
+  | 'mixed'
+  | 'solvent'
+  | 'unknown';
+
+/**
+ * Authoritative Canonical Chain Model.
+ * Formally specified in docs/science/DATA_MODEL_SPEC.yaml.
+ */
+export interface CanonicalChain {
+  chain_id: string;                 // Canonical chain identifier (e.g. "A", "B", " ")
+  source_chain_id: string;          // Source chain identifier
+  molecule_ref?: string;            // Parent Molecule ID reference
+  residue_ids: string[];            // Ordered canonical residue IDs belonging to chain
+  atom_ids: number[];               // Ordered canonical atom IDs belonging to chain
+  classification: ChainClassification;
+}
+
+/**
+ * Authoritative Canonical Molecule Model.
+ * Top-level root of the canonical molecular domain hierarchy.
+ */
+export interface CanonicalMolecule {
+  molecule_id: string;              // Unique molecule identifier (UUID or stable key)
+  name: string;                     // Display name / label
+  source_format?: 'pdb' | 'mmtf' | 'sdf' | 'mol2' | 'synthetic';
+  atoms: CanonicalAtom[];           // CanonicalAtom array (1-indexed sequential)
+  topology: CanonicalTopology;      // CanonicalTopology graph
+  residues: CanonicalResidue[];     // Ordered array of CanonicalResidues
+  chains: CanonicalChain[];         // Ordered array of CanonicalChains
+  residue_map: Map<string, CanonicalResidue>; // Fast residue_id -> CanonicalResidue lookup
+  chain_map: Map<string, CanonicalChain>;     // Fast chain_id -> CanonicalChain lookup
+  atom_map: Map<number, CanonicalAtom>;       // Fast canonical_id -> CanonicalAtom lookup
+  raw_pdb?: string;
+  metadata?: {
+    title?: string;
+    resolution?: number;
+    method?: string;
+    has_cryst1?: boolean;
+    debug_remarks?: string[];
+  };
+}
+
 /**
  * Legacy Atom representation retained for backward compatibility with existing consumers.
  */

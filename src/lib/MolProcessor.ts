@@ -1,6 +1,7 @@
-import { CanonicalAtom, CanonicalBond, CanonicalTopology } from '../types/domain';
+import { CanonicalAtom, CanonicalBond, CanonicalTopology, CanonicalMolecule } from '../types/domain';
 import { toCanonicalAtomSet } from '../domain/AtomAdapter';
 import { toCanonicalBondSet, buildCanonicalTopology } from '../domain/BondAdapter';
+import { buildCanonicalMolecule } from '../domain/HierarchyAdapter';
 
 // Safe non-top-level-await import for 3dmol
 let $3Dmol: any = { Parsers: { mmtf: () => [] } };
@@ -122,6 +123,7 @@ export class MolProcessor {
   private _cachedCanonicalBonds: CanonicalBond[] | null = null;
   private _cachedCanonicalBondsSource: Atom[] | null = null;
   private _cachedCanonicalTopology: CanonicalTopology | null = null;
+  private _cachedCanonicalMolecule: CanonicalMolecule | null = null;
 
   /**
    * Retrieves the canonical Atom domain representation of parsed atoms.
@@ -149,6 +151,7 @@ export class MolProcessor {
       });
       this._cachedCanonicalBondsSource = this.atoms;
       this._cachedCanonicalTopology = null; // Invalidate topology cache
+      this._cachedCanonicalMolecule = null; // Invalidate molecule cache
     }
     return this._cachedCanonicalBonds;
   }
@@ -162,8 +165,33 @@ export class MolProcessor {
       const canonicalAtoms = this.getCanonicalAtoms(moleculeRef);
       const canonicalBonds = this.getCanonicalBonds(moleculeRef);
       this._cachedCanonicalTopology = buildCanonicalTopology(canonicalAtoms, canonicalBonds);
+      this._cachedCanonicalMolecule = null; // Invalidate molecule cache
     }
     return this._cachedCanonicalTopology;
+  }
+
+  /**
+   * Retrieves the complete CanonicalMolecule domain hierarchy.
+   * Builds canonical chains, residues, atoms, and topology deterministically.
+   * Caches the result and automatically invalidates if processor atoms array changes.
+   */
+  public getCanonicalMolecule(options?: { name?: string; moleculeId?: string }): CanonicalMolecule {
+    if (!this._cachedCanonicalMolecule || this._cachedCanonicalBondsSource !== this.atoms) {
+      const moleculeId = options?.moleculeId || 'mol-1';
+      const canonicalAtoms = this.getCanonicalAtoms(moleculeId);
+      const canonicalTopology = this.getCanonicalTopology(moleculeId);
+      this._cachedCanonicalMolecule = buildCanonicalMolecule(canonicalAtoms, canonicalTopology, {
+        molecule_id: moleculeId,
+        name: options?.name || 'Molecule',
+        source_format: 'pdb',
+        raw_pdb: this.rawPDB,
+        metadata: {
+          has_cryst1: this.hasCryst1,
+          debug_remarks: this.debug_remarks
+        }
+      });
+    }
+    return this._cachedCanonicalMolecule;
   }
 
   constructor(input: string | Uint8Array, format: 'pdb' | 'mmtf' = 'pdb') {
