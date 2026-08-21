@@ -32,6 +32,7 @@ import { HotkeyManager } from "../input/HotkeyManager";
 import { SculptingEngine } from "../simulation/SculptingEngine";
 import { TopologyEditor } from "../editor/TopologyEditor";
 import { ScientificEditingKernel } from "../domain/ScientificEditingKernel";
+import { ScientificRevisionManager } from "../domain/ScientificRevisionManager";
 import { MeasurementWizard } from "../components/MeasurementWizard";
 import { StudioExportModal } from "../components/StudioExportModal";
 import { Command, Ruler, CheckCircle2 } from "lucide-react";
@@ -535,6 +536,22 @@ export default function MolStudio() {
     setSelectedAtomSerials(next);
   };
 
+  const revisionManagerRef = useRef<ScientificRevisionManager | null>(null);
+
+  const getOrCreateRevisionManager = (processor: MolProcessor): ScientificRevisionManager => {
+    if (!revisionManagerRef.current) {
+      const doc = processor.getCanonicalDocument();
+      const rootRev = ScientificEditingKernel.createRootRevision(
+        doc.document_id,
+        doc.active_object_id || 'main_obj',
+        processor.getCanonicalMolecule(),
+        'Session Baseline'
+      );
+      revisionManagerRef.current = new ScientificRevisionManager(rootRev);
+    }
+    return revisionManagerRef.current;
+  };
+
   const handleRunQuery = (query: string): { count: number; textOutput?: string } => {
     const parser = new SelectionParser(atoms);
     const activeObjectName = molData?.name || "molecule";
@@ -555,10 +572,39 @@ export default function MolStudio() {
       setNamedSelections(prev => prev.filter(s => s.name.toLowerCase() !== result.deleteSelectionName!.toLowerCase()));
     }
 
+    if (result.undoRequest && processorRef.current) {
+      try {
+        const mgr = getOrCreateRevisionManager(processorRef.current);
+        const doc = processorRef.current.getCanonicalDocument();
+        const { restoredRevision } = mgr.undo(doc);
+        processorRef.current.applyScientificRevision(restoredRevision);
+        setAtoms([...processorRef.current.atoms]);
+        setProcessedPDB(processorRef.current.toPDB());
+      } catch (err: any) {
+        console.warn('Undo navigation error:', err.message);
+      }
+      triggerFocus();
+    }
+
+    if (result.redoRequest && processorRef.current) {
+      try {
+        const mgr = getOrCreateRevisionManager(processorRef.current);
+        const doc = processorRef.current.getCanonicalDocument();
+        const { restoredRevision } = mgr.redo(doc);
+        processorRef.current.applyScientificRevision(restoredRevision);
+        setAtoms([...processorRef.current.atoms]);
+        setProcessedPDB(processorRef.current.toPDB());
+      } catch (err: any) {
+        console.warn('Redo navigation error:', err.message);
+      }
+      triggerFocus();
+    }
+
     if (result.removeAtomSerials && result.removeAtomSerials.size > 0) {
       const toRemove = result.removeAtomSerials;
       if (processorRef.current) {
         try {
+          const mgr = getOrCreateRevisionManager(processorRef.current);
           const doc = processorRef.current.getCanonicalDocument();
           const selResult = {
             query: query,
@@ -569,9 +615,11 @@ export default function MolStudio() {
           };
           const mutation = ScientificEditingKernel.remove(doc, selResult, {
             objectId: doc.active_object_id,
-            author: 'User'
+            author: 'User',
+            currentRevision: mgr.getActiveRevision()
           });
           processorRef.current.applyScientificRevision(mutation.revision);
+          mgr.addRevision(mutation.revision, mutation.provenance);
         } catch (err) {
           // Fallback to legacy delete if canonical transaction encounters non-standard state
           TopologyEditor.deleteAtoms(processorRef.current, toRemove);
@@ -587,15 +635,17 @@ export default function MolStudio() {
 
     if (result.bondRequest && processorRef.current) {
       try {
+        const mgr = getOrCreateRevisionManager(processorRef.current);
         const doc = processorRef.current.getCanonicalDocument();
         const mutation = ScientificEditingKernel.bond(
           doc,
           result.bondRequest.atomA,
           result.bondRequest.atomB,
           result.bondRequest.order || 1.0,
-          { objectId: doc.active_object_id, author: 'User' }
+          { objectId: doc.active_object_id, author: 'User', currentRevision: mgr.getActiveRevision() }
         );
         processorRef.current.applyScientificRevision(mutation.revision);
+        mgr.addRevision(mutation.revision, mutation.provenance);
         setAtoms([...processorRef.current.atoms]);
         setProcessedPDB(processorRef.current.toPDB());
       } catch (err: any) {
@@ -606,14 +656,16 @@ export default function MolStudio() {
 
     if (result.unbondRequest && processorRef.current) {
       try {
+        const mgr = getOrCreateRevisionManager(processorRef.current);
         const doc = processorRef.current.getCanonicalDocument();
         const mutation = ScientificEditingKernel.unbond(
           doc,
           result.unbondRequest.atomA,
           result.unbondRequest.atomB,
-          { objectId: doc.active_object_id, author: 'User' }
+          { objectId: doc.active_object_id, author: 'User', currentRevision: mgr.getActiveRevision() }
         );
         processorRef.current.applyScientificRevision(mutation.revision);
+        mgr.addRevision(mutation.revision, mutation.provenance);
         setAtoms([...processorRef.current.atoms]);
         setProcessedPDB(processorRef.current.toPDB());
       } catch (err: any) {
@@ -624,15 +676,17 @@ export default function MolStudio() {
 
     if (result.setBondOrderRequest && processorRef.current) {
       try {
+        const mgr = getOrCreateRevisionManager(processorRef.current);
         const doc = processorRef.current.getCanonicalDocument();
         const mutation = ScientificEditingKernel.setBondOrder(
           doc,
           result.setBondOrderRequest.atomA,
           result.setBondOrderRequest.atomB,
           result.setBondOrderRequest.order,
-          { objectId: doc.active_object_id, author: 'User' }
+          { objectId: doc.active_object_id, author: 'User', currentRevision: mgr.getActiveRevision() }
         );
         processorRef.current.applyScientificRevision(mutation.revision);
+        mgr.addRevision(mutation.revision, mutation.provenance);
         setAtoms([...processorRef.current.atoms]);
         setProcessedPDB(processorRef.current.toPDB());
       } catch (err: any) {
@@ -643,14 +697,16 @@ export default function MolStudio() {
 
     if (result.cycleValenceRequest && processorRef.current) {
       try {
+        const mgr = getOrCreateRevisionManager(processorRef.current);
         const doc = processorRef.current.getCanonicalDocument();
         const mutation = ScientificEditingKernel.cycleValence(
           doc,
           result.cycleValenceRequest.atomA,
           result.cycleValenceRequest.atomB,
-          { objectId: doc.active_object_id, author: 'User' }
+          { objectId: doc.active_object_id, author: 'User', currentRevision: mgr.getActiveRevision() }
         );
         processorRef.current.applyScientificRevision(mutation.revision);
+        mgr.addRevision(mutation.revision, mutation.provenance);
         setAtoms([...processorRef.current.atoms]);
         setProcessedPDB(processorRef.current.toPDB());
       } catch (err: any) {
@@ -661,6 +717,7 @@ export default function MolStudio() {
 
     if (result.alterRequest && processorRef.current) {
       try {
+        const mgr = getOrCreateRevisionManager(processorRef.current);
         const doc = processorRef.current.getCanonicalDocument();
         const selSerials = parser.parse(result.alterRequest.query);
         const mutation = ScientificEditingKernel.alter(
@@ -672,9 +729,10 @@ export default function MolStudio() {
             rawProperty: result.alterRequest.property,
             rawValue: String(result.alterRequest.value)
           },
-          { objectId: doc.active_object_id, author: 'User' }
+          { objectId: doc.active_object_id, author: 'User', currentRevision: mgr.getActiveRevision() }
         );
         processorRef.current.applyScientificRevision(mutation.revision);
+        mgr.addRevision(mutation.revision, mutation.provenance);
         setAtoms([...processorRef.current.atoms]);
         setProcessedPDB(processorRef.current.toPDB());
       } catch (err: any) {
@@ -685,6 +743,7 @@ export default function MolStudio() {
 
     if (result.alterStateRequest && processorRef.current) {
       try {
+        const mgr = getOrCreateRevisionManager(processorRef.current);
         const doc = processorRef.current.getCanonicalDocument();
         const selSerials = parser.parse(result.alterStateRequest.query);
         const reqStateId = result.alterStateRequest.stateId;
@@ -699,9 +758,10 @@ export default function MolStudio() {
             rawProperty: result.alterStateRequest.property,
             rawValue: String(result.alterStateRequest.value)
           },
-          { objectId: doc.active_object_id, author: 'User' }
+          { objectId: doc.active_object_id, author: 'User', currentRevision: mgr.getActiveRevision() }
         );
         processorRef.current.applyScientificRevision(mutation.revision);
+        mgr.addRevision(mutation.revision, mutation.provenance);
         setAtoms([...processorRef.current.atoms]);
         setProcessedPDB(processorRef.current.toPDB());
       } catch (err: any) {

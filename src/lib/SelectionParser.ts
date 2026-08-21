@@ -748,9 +748,37 @@ export class SelectionParser {
       property: string;
       value: string | number;
     };
+    undoRequest?: boolean;
+    redoRequest?: boolean;
+    historyRequest?: boolean;
   } {
     const qTrim = query.trim();
     const qLower = qTrim.toLowerCase();
+
+    // 0.00 undo / redo / history commands
+    if (qLower === 'undo') {
+      return {
+        selectedSerials: new Set<number>(),
+        undoRequest: true,
+        textOutput: 'undo: navigating to parent scientific revision.'
+      };
+    }
+
+    if (qLower === 'redo') {
+      return {
+        selectedSerials: new Set<number>(),
+        redoRequest: true,
+        textOutput: 'redo: navigating to child scientific revision.'
+      };
+    }
+
+    if (qLower === 'history') {
+      return {
+        selectedSerials: new Set<number>(),
+        historyRequest: true,
+        textOutput: 'history: inspected scientific revision ledger.'
+      };
+    }
 
     // 0.0 bond <selA>, <selB> [, <order>]
     if (qLower.startsWith('bond ')) {

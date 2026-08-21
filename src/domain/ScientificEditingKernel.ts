@@ -299,7 +299,21 @@ export class ScientificEditingKernel {
     updatedDocument: CanonicalMolecularDocument;
     restoredMolecule: CanonicalMolecule;
   } {
+    if (targetRevision.document_id && targetRevision.document_id !== document.document_id) {
+      throw new ScientificEditingError(
+        `restoreRevision: revision document scope mismatch ("${targetRevision.document_id}" vs "${document.document_id}")`,
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
     const restoredMol = targetRevision.molecule_snapshot;
+    if (!restoredMol || !Array.isArray(restoredMol.atoms) || !restoredMol.topology) {
+      throw new ScientificEditingError(
+        'restoreRevision: revision does not contain a valid CanonicalMolecule snapshot',
+        'EDIT_PRECONDITION_ERROR'
+      );
+    }
+
     const obj = document.objects.get(targetRevision.object_id);
     if (!obj) {
       throw new ScientificEditingError(
