@@ -35,11 +35,15 @@ import { ScientificEditingKernel } from "../domain/ScientificEditingKernel";
 import { ScientificRevisionManager } from "../domain/ScientificRevisionManager";
 import { MeasurementWizard } from "../components/MeasurementWizard";
 import { StudioExportModal } from "../components/StudioExportModal";
-import { Command, Ruler, CheckCircle2 } from "lucide-react";
+import { Command, Ruler, CheckCircle2, History } from "lucide-react";
+import { ScientificHistoryInspector } from "../components/ScientificHistoryInspector";
 
 export default function MolStudio() {
   const [isConsoleOpen, setIsConsoleOpen] = useState(false);
   const [isValidationOpen, setIsValidationOpen] = useState(false);
+  const [isHistoryInspectorOpen, setIsHistoryInspectorOpen] = useState(false);
+  const [isPseSnapshotOnly, setIsPseSnapshotOnly] = useState(false);
+  const [revisionVersion, setRevisionVersion] = useState(0);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const {
@@ -313,6 +317,10 @@ export default function MolStudio() {
           type: 'success',
           message: isLegacy ? 'Session restored successfully (converted from legacy format).' : 'Session restored successfully.'
         });
+        // P4.2: Mark as PSE snapshot-only — full revision DAG not persisted (P3.6 policy)
+        revisionManagerRef.current = null;
+        setIsPseSnapshotOnly(true);
+        setRevisionVersion(v => v + 1);
         setTimeout(() => setSessionNotification(null), 4000);
       } catch (err: any) {
         setSessionNotification({
@@ -868,6 +876,23 @@ export default function MolStudio() {
       });
     }
 
+    // P4.2: Increment revisionVersion so ScientificHistoryInspector re-renders reactively
+    // after any mutation, undo, redo, or navigateToRevision.
+    if (result.undoRequest || result.redoRequest || result.removeAtomSerials?.size ||
+        result.bondRequest || result.unbondRequest || result.setBondOrderRequest ||
+        result.cycleValenceRequest || result.alterRequest || result.alterStateRequest ||
+        result.addHydrogens || result.removeHydrogens) {
+      setRevisionVersion(v => v + 1);
+      // Any mutation after PSE reload clears the snapshot-only flag
+      if (result.undoRequest || result.redoRequest ||
+          result.removeAtomSerials?.size || result.bondRequest ||
+          result.unbondRequest || result.setBondOrderRequest ||
+          result.cycleValenceRequest || result.alterRequest ||
+          result.alterStateRequest || result.addHydrogens || result.removeHydrogens) {
+        setIsPseSnapshotOnly(false);
+      }
+    }
+
     return { count: result.selectedSerials.size, textOutput: result.textOutput };
   };
 
@@ -876,6 +901,23 @@ export default function MolStudio() {
     const atomIds = Array.from(parser.parse(query));
     setNamedSelections([...namedSelections, { name, query, atomIds }]);
     alert(`Saved selection: ${name}`);
+  };
+
+  // P4.2: Navigate to a historical revision via the history inspector
+  const handleNavigateToRevision = (revisionId: string) => {
+    if (!processorRef.current || !revisionManagerRef.current) return;
+    try {
+      const mgr = revisionManagerRef.current;
+      const doc = processorRef.current.getCanonicalDocument();
+      const { restoredRevision } = mgr.navigateToRevision(doc, revisionId);
+      processorRef.current.applyScientificRevision(restoredRevision);
+      setAtoms([...processorRef.current.atoms]);
+      setProcessedPDB(processorRef.current.toPDB());
+      setRevisionVersion(v => v + 1);
+      triggerFocus();
+    } catch (err: any) {
+      console.warn('Navigate to revision error:', err.message);
+    }
   };
 
   // Expose automated browser test API
@@ -958,9 +1000,20 @@ export default function MolStudio() {
         ramachandranCount: ramachandranData.length,
         orthographic,
         stereoMode
-      })
+      }),
+      // P4.2: History inspector test API
+      openHistoryInspector: () => setIsHistoryInspectorOpen(true),
+      closeHistoryInspector: () => setIsHistoryInspectorOpen(false),
+      getRevisionManagerState: () => revisionManagerRef.current ? {
+        revisionCount: revisionManagerRef.current.getRevisionCount(),
+        activeRevisionId: revisionManagerRef.current.getActiveRevisionId(),
+        canUndo: revisionManagerRef.current.canUndo(),
+        canRedo: revisionManagerRef.current.canRedo(),
+        isPseSnapshotOnly,
+      } : null,
+      navigateToRevision: (revisionId: string) => handleNavigateToRevision(revisionId),
     };
-  }, [molData, atoms, selectedAtomSerials, selectionLevel, renderStyle, colorScheme, measurements, dipoleMoment, ramachandranData, orthographic, stereoMode]);
+  }, [molData, atoms, selectedAtomSerials, selectionLevel, renderStyle, colorScheme, measurements, dipoleMoment, ramachandranData, orthographic, stereoMode, isPseSnapshotOnly]);
 
 
   // Re-process whenever molData or cleaningState changes
@@ -1277,6 +1330,36 @@ useEffect(() => {
             onClose={() => setIsValidationOpen(false)} 
             centerSelection={(sel) => viewerRef.current?.centerSelection(sel)} 
           />
+        )}
+
+        {/* Scientific History Inspector (P4.2) */}
+        <ScientificHistoryInspector
+          revisionManager={revisionManagerRef.current}
+          document={processorRef.current?.getCanonicalDocument() ?? null}
+          isOpen={isHistoryInspectorOpen}
+          onClose={() => setIsHistoryInspectorOpen(false)}
+          onNavigateToRevision={handleNavigateToRevision}
+          isPseSnapshotOnly={isPseSnapshotOnly}
+          revisionVersion={revisionVersion}
+        />
+
+        {/* History Inspector Toggle Button (floating, bottom-left of viewport) */}
+        {molData && (
+          <div className="absolute bottom-16 left-4 z-20 pointer-events-auto">
+            <button
+              onClick={() => setIsHistoryInspectorOpen(p => !p)}
+              title="Scientific History Inspector"
+              data-testid="history-inspector-toggle"
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border shadow-lg backdrop-blur-md transition-colors ${
+                isHistoryInspectorOpen
+                  ? "bg-cyan-950/90 border-cyan-500/50 text-cyan-300"
+                  : "bg-slate-950/80 border-white/10 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30"
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              History
+            </button>
+          </div>
         )}
 
         {/* Status Overlay */}
