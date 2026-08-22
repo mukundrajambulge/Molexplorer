@@ -88,16 +88,35 @@ export default function MolStudio() {
   // Stage 8 State Variables & Topology Handlers
   const [isSculptingActive, setIsSculptingActive] = useState(false);
 
+  const revisionManagerRef = useRef<ScientificRevisionManager | null>(null);
+
+  const getOrCreateRevisionManager = (processor: MolProcessor): ScientificRevisionManager => {
+    if (!revisionManagerRef.current) {
+      const doc = processor.getCanonicalDocument();
+      const rootRev = ScientificEditingKernel.createRootRevision(
+        doc.document_id,
+        doc.active_object_id || 'main_obj',
+        processor.getCanonicalMolecule(),
+        'Session Baseline'
+      );
+      revisionManagerRef.current = new ScientificRevisionManager(rootRev);
+    }
+    return revisionManagerRef.current;
+  };
+
   const handleAddHydrogens = (selection?: Set<number>) => {
     if (processorRef.current) {
       try {
+        const mgr = getOrCreateRevisionManager(processorRef.current);
         const doc = processorRef.current.getCanonicalDocument();
         const targetIds = selection && selection.size > 0 ? Array.from(selection) : undefined;
         const mutation = ScientificEditingKernel.addHydrogens(doc, targetIds, {
           objectId: doc.active_object_id,
-          author: 'User'
+          author: 'User',
+          currentRevision: mgr.getActiveRevision()
         });
         processorRef.current.applyScientificRevision(mutation.revision);
+        mgr.addRevision(mutation.revision, mutation.provenance);
       } catch (err: any) {
         console.warn('Add hydrogens fallback:', err.message);
         TopologyEditor.addHydrogens(processorRef.current);
@@ -111,13 +130,16 @@ export default function MolStudio() {
   const handleRemoveHydrogens = (selection?: Set<number>) => {
     if (processorRef.current) {
       try {
+        const mgr = getOrCreateRevisionManager(processorRef.current);
         const doc = processorRef.current.getCanonicalDocument();
         const targetIds = selection && selection.size > 0 ? Array.from(selection) : undefined;
         const mutation = ScientificEditingKernel.removeHydrogens(doc, targetIds, {
           objectId: doc.active_object_id,
-          author: 'User'
+          author: 'User',
+          currentRevision: mgr.getActiveRevision()
         });
         processorRef.current.applyScientificRevision(mutation.revision);
+        mgr.addRevision(mutation.revision, mutation.provenance);
       } catch (err: any) {
         console.warn('Remove hydrogens fallback:', err.message);
         TopologyEditor.removeHydrogens(processorRef.current);
@@ -542,22 +564,6 @@ export default function MolStudio() {
       next.add(atom.serial);
     }
     setSelectedAtomSerials(next);
-  };
-
-  const revisionManagerRef = useRef<ScientificRevisionManager | null>(null);
-
-  const getOrCreateRevisionManager = (processor: MolProcessor): ScientificRevisionManager => {
-    if (!revisionManagerRef.current) {
-      const doc = processor.getCanonicalDocument();
-      const rootRev = ScientificEditingKernel.createRootRevision(
-        doc.document_id,
-        doc.active_object_id || 'main_obj',
-        processor.getCanonicalMolecule(),
-        'Session Baseline'
-      );
-      revisionManagerRef.current = new ScientificRevisionManager(rootRev);
-    }
-    return revisionManagerRef.current;
   };
 
   const handleRunQuery = (query: string): { count: number; textOutput?: string } => {
@@ -1012,6 +1018,64 @@ export default function MolStudio() {
         isPseSnapshotOnly,
       } : null,
       navigateToRevision: (revisionId: string) => handleNavigateToRevision(revisionId),
+      // P4.3: Visual / Scientific State Synchronization test API
+      getViewerState: () => {
+        const v = viewerRef.current?.getViewer ? viewerRef.current.getViewer() : null;
+        if (!v) return null;
+        const m = typeof v.getModel === 'function' ? (v.getModel(-1) || v.getModel(0) || v.getModel()) : null;
+        const vAtoms = m?.selectedAtoms ? m.selectedAtoms({}) : (typeof v.selectedAtoms === 'function' ? v.selectedAtoms({}) : []);
+        return {
+          atomCount: vAtoms.length,
+          atoms: vAtoms.map((a: any) => ({
+            serial: a.serial,
+            name: (a.atom || '').trim(),
+            elem: a.elem || a.element,
+            x: a.x,
+            y: a.y,
+            z: a.z,
+            resi: a.resi,
+            resn: a.resn,
+            chain: a.chain,
+            bonds: Array.isArray(a.bonds) ? [...a.bonds] : []
+          }))
+        };
+      },
+      getCanonicalState: () => {
+        if (!processorRef.current) return null;
+        const doc = processorRef.current.getCanonicalDocument();
+        const mol = processorRef.current.getCanonicalMolecule();
+        const mgr = revisionManagerRef.current;
+        const activeRev = mgr ? mgr.getActiveRevision() : null;
+        return {
+          documentId: doc.document_id,
+          objectId: doc.active_object_id,
+          stateId: doc.active_state_id || `${mol.molecule_id}-state-1`,
+          activeRevisionId: mgr?.getActiveRevisionId() || null,
+          canonicalStateHash: activeRev?.canonical_state_hash || null,
+          revisionHash: activeRev?.revision_hash || null,
+          atomCount: mol.atoms.length,
+          bondCount: mol.topology.bonds.length,
+          residueCount: mol.residues.length,
+          chainCount: mol.chains.length,
+          atoms: mol.atoms.map(a => ({
+            canonical_id: a.canonical_id,
+            name: a.name,
+            element: a.element,
+            x: a.x,
+            y: a.y,
+            z: a.z,
+            residue_ref: a.residue_ref,
+            chain_ref: a.chain_ref,
+            formal_charge: a.formal_charge
+          })),
+          bonds: mol.topology.bonds.map(b => ({
+            bond_id: b.bond_id,
+            atom_a: b.atom_a,
+            atom_b: b.atom_b,
+            order: b.order
+          }))
+        };
+      },
     };
   }, [molData, atoms, selectedAtomSerials, selectionLevel, renderStyle, colorScheme, measurements, dipoleMoment, ramachandranData, orthographic, stereoMode, isPseSnapshotOnly]);
 

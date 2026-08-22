@@ -1018,10 +1018,10 @@ export class MolProcessor {
     for (const a of this.atoms) {
       const record = a.isHetero ? "HETATM" : "ATOM  ";
       const serial = a.serial.toString().padStart(5, ' ');
-      const name = a.name.padEnd(4, ' ').substring(0, 4);
-      const altLoc = a.altLoc;
+      const name = a.name.length === 1 ? (' ' + a.name + '  ') : a.name.padEnd(4, ' ').substring(0, 4);
+      const altLoc = (a.altLoc && a.altLoc.trim()) ? a.altLoc.substring(0, 1) : " ";
       const resName = a.resName.padStart(3, ' ').substring(0, 3);
-      const chain = a.chainID;
+      const chain = (a.chainID && a.chainID.trim()) ? a.chainID.substring(0, 1) : " ";
       const resSeq = a.resSeq.toString().padStart(4, ' ');
       const x = a.x.toFixed(3).padStart(8, ' ');
       const y = a.y.toFixed(3).padStart(8, ' ');

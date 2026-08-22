@@ -149,6 +149,7 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
       }
 
       viewer.clear();
+      if (typeof viewer.removeAllModels === 'function') viewer.removeAllModels();
       viewer.removeAllSurfaces();
       viewer.removeAllShapes();
       viewer.removeAllLabels();
@@ -360,7 +361,7 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
       } else if (mode === 'studio' && props.pdbData) {
         // STUDIO MODE RENDERING
         setIsRendering(true);
-        const m = viewer.addModel(props.pdbData, "pdb");
+        const m = viewer.addModel(props.pdbData, "pdb", { keepH: true });
         
         try { m.computeSecondaryStructure(); } catch (e) {}
 
@@ -536,8 +537,9 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
 
         // Render Committed 3D Measurements
         measurements.forEach((m: any) => {
-          if (m.type === 'distance' && m.coordinates.length >= 2) {
+          if (m.type === 'distance' && m.coordinates && m.coordinates.length >= 2) {
             const [p1, p2] = m.coordinates;
+            if (!p1 || !p2 || typeof p1.x !== 'number' || typeof p2.x !== 'number') return;
             // High-visibility measurement cylinder
             viewer.addCylinder({
               start: p1,
@@ -561,8 +563,9 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
               fontSize: 11,
               backgroundOpacity: 0.95
             });
-          } else if (m.type === 'angle' && m.coordinates.length >= 3) {
+          } else if (m.type === 'angle' && m.coordinates && m.coordinates.length >= 3) {
             const [p1, p2, p3] = m.coordinates;
+            if (!p1 || !p2 || !p3 || typeof p1.x !== 'number' || typeof p2.x !== 'number' || typeof p3.x !== 'number') return;
             viewer.addCylinder({ start: p1, end: p2, radius: 0.08, color: '#f59e0b', fromCap: 1, toCap: 1 });
             viewer.addCylinder({ start: p2, end: p3, radius: 0.08, color: '#f59e0b', fromCap: 1, toCap: 1 });
             viewer.addSphere({ center: p1, radius: 0.30, color: '#f59e0b', opacity: 0.95 });
@@ -577,8 +580,9 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
               fontSize: 11,
               backgroundOpacity: 0.95
             });
-          } else if (m.type === 'dihedral' && m.coordinates.length >= 4) {
+          } else if (m.type === 'dihedral' && m.coordinates && m.coordinates.length >= 4) {
             const [p1, p2, p3, p4] = m.coordinates;
+            if (!p1 || !p2 || !p3 || !p4 || typeof p1.x !== 'number' || typeof p2.x !== 'number' || typeof p3.x !== 'number' || typeof p4.x !== 'number') return;
             viewer.addCylinder({ start: p1, end: p2, radius: 0.06, color: '#a855f7', fromCap: 1, toCap: 1 });
             viewer.addCylinder({ start: p2, end: p3, radius: 0.10, color: '#a855f7', fromCap: 1, toCap: 1 });
             viewer.addCylinder({ start: p3, end: p4, radius: 0.06, color: '#a855f7', fromCap: 1, toCap: 1 });
@@ -592,8 +596,9 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
               fontSize: 11,
               backgroundOpacity: 0.95
             });
-          } else if (m.type === 'label' && m.coordinates.length >= 1) {
+          } else if (m.type === 'label' && m.coordinates && m.coordinates.length >= 1) {
             const [p1] = m.coordinates;
+            if (!p1 || typeof p1.x !== 'number') return;
             viewer.addLabel(m.label, {
               position: p1,
               backgroundColor: 'rgba(15, 23, 42, 0.95)',
@@ -649,7 +654,16 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
           }
         }
         
-        viewer.render();
+        try {
+          viewer.render();
+        } catch (renderErr) {
+          try {
+            viewer.setStyle({}, { stick: { colorscheme: 'default', radius: 0.2 }, sphere: { colorscheme: 'default', radius: 0.3 } });
+            viewer.render();
+          } catch (fallbackErr) {
+            console.warn('3Dmol render fallback warning:', fallbackErr);
+          }
+        }
         setIsRendering(false);
       }
     }, 10);
