@@ -1,10 +1,11 @@
-# PyMOL Command Compatibility Matrix (Phase SQ3)
+# PyMOL Command Compatibility Matrix (Phase SQ4 Final)
 
-**Status:** `AUTHORITATIVE`  
-**Phase:** `SQ3 — Advanced Composition, Presentation Semantics & PyMOL Compatibility`
+**Status:** `ACCEPTED & VALIDATED`  
+**Phase:** `SQ4 — Scientific Validation, Full Query QA & Final Selection/Presentation Convergence`
+**Verification:** `394 / 394 Tests Passed (100.0%)`
 
 > [!NOTE]
-> Molexplorer is NOT a full PyMOL replacement. This document identifies what is implemented, what deliberately differs, and what is deferred.
+> Molexplorer is NOT a full PyMOL replacement. This document identifies what is implemented, what deliberately differs, and what is deferred under strict evidence classifications.
 
 ---
 

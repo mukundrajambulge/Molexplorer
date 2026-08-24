@@ -8,6 +8,7 @@ import { MolecularPicker } from '../interaction/MolecularPicker';
 import { SelectionManager } from '../interaction/SelectionManager';
 import { SelectionHighlight } from '../interaction/SelectionHighlight';
 import { SelectionLevel, PickedAtom } from '../interaction/types';
+import { SelectionPresentationOverride } from '../domain/PresentationStateManager';
 import { MousePointer, Layers, Check, X, Sparkles, Ruler } from 'lucide-react';
 import { ContextMenu3D } from './ContextMenu3D';
 
@@ -16,6 +17,7 @@ export interface CoreViewer3DRef {
   setView: (view: any) => void;
   resetView: () => void;
   centerSelection: (sel: any) => void;
+  orientSelection: (sel: any) => void;
   getViewer: () => any;
 }
 
@@ -51,12 +53,123 @@ interface CoreViewer3DProps {
   focusTrigger?: number;
   orthographic?: boolean;
   stereoMode?: 'none' | 'cross-eye' | 'anaglyph';
+  // SQ4 Presentation Overrides & Per-Atom Colors
+  presentationOverrides?: SelectionPresentationOverride[];
+  atomColorMap?: Map<number, string> | null;
 }
 
 const CHAIN_PALETTE = [
   "#4A90E2", "#50E3C2", "#F5A623", "#E74C3C", "#9B59B6",
   "#1ABC9C", "#2ECC71", "#34495E", "#E67E22", "#D35400"
 ];
+
+function get3DmolStyleForRep(rep: string, color?: string | null, opacity: number = 1.0) {
+  const norm = (rep || 'cartoon').toLowerCase();
+  const colorSpec = color && color !== 'element' && color !== 'spectrum' && color !== 'chain'
+    ? { color }
+    : {};
+  switch (norm) {
+    case 'sticks':
+    case 'stick':
+      return { stick: { ...colorSpec, radius: 0.22, opacity } };
+    case 'spheres':
+    case 'sphere':
+      return { sphere: { ...colorSpec, radius: 0.65, opacity } };
+    case 'lines':
+    case 'line':
+      return { line: { ...colorSpec, linewidth: 2.0 } };
+    case 'cross':
+      return { cross: { ...colorSpec, radius: 0.5, linewidth: 1.5 } };
+    case 'ribbon':
+      return { cartoon: { ...colorSpec, opacity, style: 'ribbon' } };
+    case 'cartoon':
+    default:
+      return { cartoon: { ...colorSpec, opacity, style: 'oval' } };
+  }
+}
+
+export function computePrincipalAxes(points: { x: number; y: number; z: number }[]): {
+  centroid: { x: number; y: number; z: number };
+  axes: [{ x: number; y: number; z: number }, { x: number; y: number; z: number }, { x: number; y: number; z: number }];
+} | null {
+  if (points.length < 3) return null;
+  const n = points.length;
+  let cx = 0, cy = 0, cz = 0;
+  for (const p of points) { cx += p.x; cy += p.y; cz += p.z; }
+  cx /= n; cy /= n; cz /= n;
+
+  let cxx = 0, cxy = 0, cxz = 0, cyy = 0, cyz = 0, czz = 0;
+  for (const p of points) {
+    const dx = p.x - cx;
+    const dy = p.y - cy;
+    const dz = p.z - cz;
+    cxx += dx * dx; cxy += dx * dy; cxz += dx * dz;
+    cyy += dy * dy; cyz += dy * dz; czz += dz * dz;
+  }
+  let A = [
+    [cxx / n, cxy / n, cxz / n],
+    [cxy / n, cyy / n, cyz / n],
+    [cxz / n, cyz / n, czz / n]
+  ];
+  let V = [
+    [1, 0, 0],
+    [0, 1, 0],
+    [0, 0, 1]
+  ];
+
+  for (let iter = 0; iter < 50; iter++) {
+    let p = 0, q = 1;
+    let maxVal = Math.abs(A[0][1]);
+    if (Math.abs(A[0][2]) > maxVal) { p = 0; q = 2; maxVal = Math.abs(A[0][2]); }
+    if (Math.abs(A[1][2]) > maxVal) { p = 1; q = 2; maxVal = Math.abs(A[1][2]); }
+    if (maxVal < 1e-9) break;
+
+    const diff = A[q][q] - A[p][p];
+    let t: number;
+    if (Math.abs(A[p][q]) < Math.abs(diff) * 1e-15) {
+      t = A[p][q] / diff;
+    } else {
+      const phi = diff / (2.0 * A[p][q]);
+      t = 1.0 / (Math.abs(phi) + Math.sqrt(phi * phi + 1.0));
+      if (phi < 0.0) t = -t;
+    }
+    const c = 1.0 / Math.sqrt(t * t + 1.0);
+    const s = t * c;
+    const tau = s / (1.0 + c);
+    const h = t * A[p][q];
+
+    A[p][q] = 0;
+    A[q][p] = 0;
+    A[p][p] -= h;
+    A[q][q] += h;
+
+    for (let j = 0; j < 3; j++) {
+      if (j !== p && j !== q) {
+        const g = A[j][p];
+        const h2 = A[j][q];
+        A[j][p] = g - s * (h2 + g * tau);
+        A[p][j] = A[j][p];
+        A[j][q] = h2 + s * (g - h2 * tau);
+        A[q][j] = A[j][q];
+      }
+    }
+    for (let j = 0; j < 3; j++) {
+      const g = V[j][p];
+      const h2 = V[j][q];
+      V[j][p] = g - s * (h2 + g * tau);
+      V[j][q] = h2 + s * (g - h2 * tau);
+    }
+  }
+
+  return {
+    centroid: { x: cx, y: cy, z: cz },
+    axes: [
+      { x: V[0][0], y: V[1][0], z: V[2][0] },
+      { x: V[0][1], y: V[1][1], z: V[2][1] },
+      { x: V[0][2], y: V[1][2], z: V[2][2] }
+    ]
+  };
+}
 
 function getStyleObj(style: RenderStyle, colorScheme: string, minResi: number, maxResi: number, chainMap: Record<string, string>, opacity: number = 1.0) {
   const strategy = RepresentationStrategyFactory.getStrategy(style);
@@ -103,7 +216,40 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
     setView: (view: any) => viewerRef.current?.setView(view),
     resetView: () => viewerRef.current?.zoomTo(),
     centerSelection: (sel: any) => {
-      if (viewerRef.current) viewerRef.current.zoomTo(sel);
+      if (viewerRef.current) {
+        if (typeof viewerRef.current.center === 'function') {
+          viewerRef.current.center(sel);
+        } else {
+          viewerRef.current.zoomTo(sel);
+        }
+        viewerRef.current.render();
+      }
+    },
+    orientSelection: (sel: any) => {
+      const viewer = viewerRef.current;
+      if (!viewer) return;
+      const model = typeof viewer.getModel === 'function' ? (viewer.getModel(-1) || viewer.getModel(0) || viewer.getModel()) : null;
+      if (model && typeof model.selectedAtoms === 'function') {
+        const atoms = model.selectedAtoms(sel || {});
+        if (atoms.length >= 3) {
+          const pa = computePrincipalAxes(atoms);
+          if (pa) {
+            const v = pa.axes;
+            const c = pa.centroid;
+            const viewArr = [
+              v[0].x, v[0].y, v[0].z, 0,
+              v[1].x, v[1].y, v[1].z, 0,
+              v[2].x, v[2].y, v[2].z, 0,
+              -c.x, -c.y, -c.z, 1
+            ];
+            if (typeof viewer.setView === 'function') {
+              viewer.setView(viewArr);
+            }
+          }
+        }
+      }
+      viewer.zoomTo(sel || {});
+      viewer.render();
     },
     getViewer: () => viewerRef.current
   }));
@@ -451,6 +597,34 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         setClickStyle({ hetflag: true, resn: ['HOH', 'WAT', 'DOD', 'SOL'] }, {
           cross: { radius: 0.5, linewidth: 1.5, color: '#ff4d4d' }
         });
+
+        // Per-Atom Spectrum Colors (SQ4 Presentation Convergence)
+        if (props.atomColorMap && props.atomColorMap.size > 0) {
+          const colorGroups = new Map<string, number[]>();
+          for (const [serial, hex] of props.atomColorMap) {
+            if (!colorGroups.has(hex)) colorGroups.set(hex, []);
+            colorGroups.get(hex)!.push(serial);
+          }
+          for (const [hex, serials] of colorGroups) {
+            setClickStyle({ serial: serials }, get3DmolStyleForRep(rStyle, hex, currentOpacity));
+          }
+        }
+
+        // Per-Selection Presentation Overrides (SQ4 Presentation Convergence)
+        if (props.presentationOverrides && props.presentationOverrides.length > 0) {
+          for (const override of props.presentationOverrides) {
+            if (override.atomSerials.size === 0) continue;
+            const serials = Array.from(override.atomSerials);
+            if (override.visibility === 'hidden') {
+              setClickStyle({ serial: serials }, { hidden: true });
+              continue;
+            }
+            const rep = override.representation || (rStyle as any);
+            const col = override.color;
+            const op = typeof override.opacity === 'number' ? override.opacity : currentOpacity;
+            setClickStyle({ serial: serials }, get3DmolStyleForRep(rep, col, op));
+          }
+        }
 
         // Render Surfaces / Mesh / Dots using Representation Strategy Pattern with true opacity
         const strategy = RepresentationStrategyFactory.getStrategy(rStyle);

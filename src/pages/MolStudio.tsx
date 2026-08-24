@@ -38,6 +38,7 @@ import { StudioExportModal } from "../components/StudioExportModal";
 import { Command, Ruler, CheckCircle2, History } from "lucide-react";
 import { ScientificHistoryInspector } from "../components/ScientificHistoryInspector";
 import { ScientificCommandRouter } from "../domain/ScientificCommandRouter";
+import { SelectionPresentationOverride, RepresentationName } from "../domain/PresentationStateManager";
 
 export default function MolStudio() {
   const [isConsoleOpen, setIsConsoleOpen] = useState(false);
@@ -79,6 +80,10 @@ export default function MolStudio() {
   const keyframeManager = useMemo(() => new KeyframeManager(), []);
   const [isObjectPanelCollapsed, setIsObjectPanelCollapsed] = useState(false);
   const [hiddenObjectIds, setHiddenObjectIds] = useState<Set<string>>(new Set());
+
+  // SQ4 Presentation Overrides & Per-Atom Colors State
+  const [presentationOverrides, setPresentationOverrides] = useState<SelectionPresentationOverride[]>([]);
+  const [atomColorMap, setAtomColorMap] = useState<Map<number, string> | null>(null);
 
   // Stage 7 State Variables
   const [showSequenceViewer, setShowSequenceViewer] = useState(false);
@@ -798,13 +803,73 @@ export default function MolStudio() {
       setColorScheme(result.setColorScheme);
     }
 
+    // SQ4: Spectrum per-atom color map
+    if (result.spectrumResult) {
+      setAtomColorMap(new Map(result.spectrumResult.atomColors));
+    }
+
+    // SQ4: Per-selection presentation overrides
+    if (result.commandAST) {
+      if (result.commandAST.command_type === 'color') {
+        const colorVal = result.commandAST.color_value || 'element';
+        const selKey = result.commandAST.selection_query || 'selection';
+        setPresentationOverrides(prev => {
+          const next = prev.filter(o => o.selectionKey !== selKey);
+          if (result.commandAST?.verb === 'recolor') {
+            return next;
+          }
+          next.push({
+            selectionKey: selKey,
+            selectionQuery: selKey,
+            atomSerials: new Set(result.selectedSerials),
+            objectScope: null,
+            color: colorVal,
+            representation: null,
+            opacity: 1.0,
+            visibility: 'visible',
+            labelState: null,
+            appliedAt: Date.now()
+          });
+          return next;
+        });
+      } else if (result.commandAST.command_type === 'representation') {
+        const repVal = (result.commandAST.representation_value || 'cartoon') as RepresentationName;
+        const selKey = result.commandAST.selection_query || 'selection';
+        setPresentationOverrides(prev => {
+          const next = prev.filter(o => o.selectionKey !== selKey);
+          next.push({
+            selectionKey: selKey,
+            selectionQuery: selKey,
+            atomSerials: new Set(result.selectedSerials),
+            objectScope: null,
+            color: null,
+            representation: repVal,
+            opacity: 1.0,
+            visibility: result.commandAST?.verb === 'hide' ? 'hidden' : 'visible',
+            labelState: null,
+            appliedAt: Date.now()
+          });
+          return next;
+        });
+      }
+    }
+
     if (result.setHiddenCategory) {
       if (result.setHiddenCategory === 'everything') {
         setHiddenObjectIds(prev => new Set(prev).add('main_mol'));
       }
     }
 
-    if (result.triggerZoom) {
+    // SQ4: Distinct camera operations (zoom, center, orient)
+    if (result.cameraOperation === 'center') {
+      if (viewerRef.current && result.selectedSerials.size > 0) {
+        viewerRef.current.centerSelection({ serial: Array.from(result.selectedSerials) });
+      }
+    } else if (result.cameraOperation === 'orient') {
+      if (viewerRef.current && result.selectedSerials.size > 0) {
+        viewerRef.current.orientSelection({ serial: Array.from(result.selectedSerials) });
+      }
+    } else if (result.triggerZoom) {
       triggerFocus();
     }
 
@@ -989,8 +1054,21 @@ export default function MolStudio() {
   useEffect(() => {
     (window as any).__molStudioTestApi = {
       loadMolecule: (name: string, data: string, format = 'pdb') => {
+        setPresentationOverrides([]);
+        setAtomColorMap(null);
         setMolData({ name, data, format: format as any });
       },
+      getPresentationState: () => ({
+        overridesCount: presentationOverrides.length,
+        overrides: presentationOverrides.map(o => ({
+          selectionKey: o.selectionKey,
+          atomCount: o.atomSerials.size,
+          color: o.color,
+          representation: o.representation,
+          visibility: o.visibility
+        })),
+        atomColorMapSize: atomColorMap ? atomColorMap.size : 0
+      }),
       setRenderStyle: (style: RenderStyle) => setRenderStyle(style),
       setColorScheme: (scheme: string) => setColorScheme(scheme),
       setSurfaceOpacity: (val: number) => setSurfaceOpacity(val),
@@ -1411,6 +1489,8 @@ useEffect(() => {
               focusTrigger={focusTrigger} 
               orthographic={orthographic}
               stereoMode={stereoMode}
+              presentationOverrides={presentationOverrides}
+              atomColorMap={atomColorMap}
             />
           </div>
 

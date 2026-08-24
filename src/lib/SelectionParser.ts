@@ -101,7 +101,11 @@ export class SelectionParser {
     atoms: Atom[],
     namedSelections: { name: string; query: string; atomIds?: number[] }[] = []
   ) {
-    this.atoms = atoms;
+    this.atoms = atoms.map((a, idx) => ({
+      ...a,
+      index: a.index !== undefined ? a.index : idx + 1,
+      rank: a.rank !== undefined ? a.rank : idx
+    }));
     this.namedSelections = namedSelections;
   }
 
@@ -140,8 +144,8 @@ export class SelectionParser {
       occupancy: ca.occupancy,
       ss: ca.secondary_structure,
       formalCharge: ca.formal_charge,
-      index: idx,
-      rank: idx + 1,
+      index: idx + 1,
+      rank: idx,
       segi: ca.alt_loc
     }));
     return new SelectionParser(parserAtoms, namedSelections);
@@ -820,11 +824,11 @@ export class SelectionParser {
     if (prop === 'resi' || prop === 'resv') return parts.some(p => this.matchNumericOrRange(atom.resSeq, p));
     if (prop === 'id') return parts.some(p => this.matchNumericOrRange(atom.serial, p));
     if (prop === 'index') {
-      const atomIdx = atom.index !== undefined ? atom.index : 0;
+      const atomIdx = atom.index !== undefined ? atom.index : 1;
       return parts.some(p => this.matchNumericOrRange(atomIdx, p));
     }
     if (prop === 'rank') {
-      const atomRank = atom.rank !== undefined ? atom.rank : (atom.index !== undefined ? atom.index + 1 : atom.serial);
+      const atomRank = atom.rank !== undefined ? atom.rank : 0;
       return parts.some(p => this.matchNumericOrRange(atomRank, p));
     }
     if (prop === 'formal_charge' || prop === 'fc') {
@@ -863,9 +867,9 @@ export class SelectionParser {
     } else if (prop === 'formal_charge' || prop === 'fc') {
       atomVal = atom.formalCharge !== undefined ? atom.formalCharge : 0;
     } else if (prop === 'index') {
-      atomVal = atom.index !== undefined ? atom.index : 0;
+      atomVal = atom.index !== undefined ? atom.index : 1;
     } else if (prop === 'rank') {
-      atomVal = atom.rank !== undefined ? atom.rank : (atom.index !== undefined ? atom.index + 1 : atom.serial);
+      atomVal = atom.rank !== undefined ? atom.rank : 0;
     } else {
       return false;
     }
@@ -927,7 +931,7 @@ export class SelectionParser {
         if (isSolvent(atom)) return false;
         if (isProteinRes) return proteinBackboneAtoms.has(atomNameUpper);
         if (isNucleicRes) return nucleicBackboneAtoms.has(atomNameUpper);
-        return proteinBackboneAtoms.has(atomNameUpper) || nucleicBackboneAtoms.has(atomNameUpper);
+        return false;
 
       case 'sidechain':
         if (isSolvent(atom)) return false;
