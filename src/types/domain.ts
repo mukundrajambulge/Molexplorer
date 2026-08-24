@@ -364,3 +364,95 @@ export interface MoleculeDomain {
     method?: string;
   };
 }
+
+/**
+ * P4.6 Measurement and Biophysical Interaction Types
+ */
+export interface MeasurementPairRecord {
+  atom1_id: number;
+  atom2_id: number;
+  atom1_name: string;
+  atom2_name: string;
+  atom1_resSeq: number;
+  atom2_resSeq: number;
+  atom1_chain: string;
+  atom2_chain: string;
+  distance: number; // in Ångströms
+}
+
+export interface AngleRecord {
+  atom1_id: number;
+  vertex_id: number;
+  atom3_id: number;
+  atom1_name: string;
+  vertex_name: string;
+  atom3_name: string;
+  vertex_resSeq: number;
+  vertex_chain: string;
+  angle: number; // in degrees [0, 180]
+}
+
+export interface DihedralRecord {
+  atom1_id: number;
+  atom2_id: number;
+  atom3_id: number;
+  atom4_id: number;
+  atom1_name: string;
+  atom2_name: string;
+  atom3_name: string;
+  atom4_name: string;
+  dihedral: number; // in degrees [-180, 180]
+}
+
+export interface PolarContactRecord {
+  id: string;
+  type: 'putative_hydrogen_bond' | 'polar_contact' | 'ambiguous_polar_contact';
+  donor_atom: { id: number; name: string; resSeq: number; chain: string };
+  acceptor_atom: { id: number; name: string; resSeq: number; chain: string };
+  distance: number;
+  angle?: number;
+  criteria: string;
+  validation_status: 'GEOMETRICALLY_VALIDATED';
+}
+
+export interface MeasurementResult {
+  measurement_id: string;
+  measurement_type: 'distance' | 'angle' | 'dihedral' | 'mode2_polar_contacts';
+  name?: string;
+  selection1_query: string;
+  selection2_query?: string;
+  selection3_query?: string;
+  selection4_query?: string;
+  distances?: MeasurementPairRecord[];
+  angle?: AngleRecord;
+  dihedral?: DihedralRecord;
+  polar_contacts?: PolarContactRecord[];
+  count: number;
+  text_output: string;
+  is_read_only: true;
+  visual_measurement?: {
+    type: 'distance' | 'angle' | 'dihedral';
+    atomSerials: number[];
+    label: string;
+    value: number;
+  };
+}
+
+export interface InteractionAnalysisRecord {
+  type: 'hbond' | 'hydrophobic' | 'pistacking' | 'saltbridge' | 'halogen' | 'cationpi';
+  atom1: { serial: number; name: string; resName: string; resSeq: number; chainID: string };
+  atom2: { serial: number; name: string; resName: string; resSeq: number; chainID: string };
+  distance: number;
+  angle?: number;
+  classification: string;
+}
+
+export interface InteractionAnalysisResult {
+  analysis_type: string;
+  selection1_query?: string;
+  selection2_query?: string;
+  interactions: InteractionAnalysisRecord[];
+  count: number;
+  text_output: string;
+  is_read_only: true;
+}

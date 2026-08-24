@@ -702,6 +702,201 @@ The target is not a visual PyMOL clone.
 Success means Mole Explorer provides a scientifically governed molecular workstation with:
 
 - high-value PyMOL-compatible semantics;
+- interaction model
+- scoring/search boundaries
+- numerical precision
+- backend API contracts
+- asynchronous job lifecycle
+
+## D1 — Structure preparation and validation
+
+Build/test deterministic receptor and ligand preparation, validation, normalization, and explicit error handling.
+
+## D2 — Interaction and scoring foundations
+
+Research and document physical/empirical terms separately. Every approximation MUST be identified as such.
+
+## D3 — Search/optimization kernel
+
+Implement the chosen custom search/optimization method behind a stable scientific API.
+
+## D4 — Docking result model
+
+Standardize poses, scores, parameters, provenance, hashes, and result serialization.
+
+## D5 — Scientific benchmark validation
+
+Use frozen benchmark datasets, predefined metrics, numerical oracles, reproducibility tests, and failure analysis. Pilot datasets MUST NOT be presented as final performance evidence unless the benchmark protocol explicitly promotes them.
+
+## D6 — Asynchronous backend execution
+
+Preserve the existing principle that docking computation is server-side and asynchronous. The frontend displays jobs and results; it does not become the scientific compute engine.
+
+---
+
+# 7. Shared architecture between Track A and Track B
+
+Both tracks MUST use the same:
+
+- canonical molecule/data model
+- validation policies
+- state/revision concepts
+- provenance model
+- persistence/session model
+- test fixtures where scientifically appropriate
+- API contracts
+
+Track A MUST NOT create a separate PyMOL molecule model.
+Track B MUST NOT create a separate docking-only molecule model when the canonical model is sufficient.
+
+---
+
+# 8. Test architecture
+
+Every Core feature gets four layers where applicable:
+
+1. **Unit test** — pure semantics/math/parser behavior.
+2. **Integration test** — module/store/API interaction.
+3. **Browser/E2E test** — real UI + viewer path.
+4. **Manual scientific test** — owner inspects the actual MolStudio workflow.
+
+### Test categories
+
+- positive cases
+- zero-result cases
+- malformed-input cases
+- adversarial cases
+- scientific immutability cases
+- serialization round trips
+- regression cases
+- deterministic replay cases
+
+Tests MUST compare scientific state, not screenshots alone.
+
+---
+
+# 9. Golden fixture policy
+
+Create a stable fixture collection for:
+
+- small single-chain protein
+- multi-chain protein
+- ligand complex
+- metal/water/heteroatom case
+- nucleic acid
+- bond-editing molecule
+- hydrogen/valence case
+- large real protein
+- docking benchmark cases
+
+Each fixture SHALL have a documented expected atom/bond/selection/topology result where relevant.
+
+---
+
+# 10. Feature completion contract
+
+A feature may be labeled **COMPLETE** only when:
+
+- scientific behavior is defined;
+- repository implementation is documented;
+- automated tests pass;
+- negative/error behavior is tested;
+- viewer state is synchronized correctly;
+- authoritative scientific state remains intact under viewer-only interactions;
+- persistence/export round trips succeed where relevant;
+- a manual test has passed;
+- limitations are documented;
+- the compatibility matrix status is updated.
+
+---
+
+# 11. Versioning and change control
+
+Use this plan versioning model:
+
+- **Major:** roadmap/architecture/phase-order change.
+- **Minor:** new milestone, capability family, or acceptance rule.
+- **Patch:** clarification with no execution-order change.
+
+Any architectural change MUST be recorded in an ADR and referenced from this file.
+
+---
+
+# 12. Immediate execution queue
+
+The next work SHALL be executed in this exact order:
+
+### Step 1 — Documentation foundation
+
+Create/update:
+
+- `AGENTS.md`
+- `docs/science/SCIENTIFIC_FOUNDATION.md`
+- `docs/science/DATA_MODEL_SPEC.md`
+- `docs/testing/SCIENTIFIC_TEST_ARCHITECTURE.md`
+- `docs/science/PYMOL_COMPATIBILITY_SPEC.md`
+- `docs/science/PYMOL_COMPATIBILITY_MATRIX.md`
+
+### Step 2 — Repository architecture audit
+
+Map each document requirement to existing files/modules/functions. Mark each item:
+
+`REUSE | REFACTOR | EXTEND | NEW | DEFER`
+
+Do not implement broad changes during the audit.
+
+### Step 3 — Canonical data model implementation slice
+
+Implement only the smallest safe canonical-model adapter/types needed to support the next selection work.
+
+### Step 4 — Selection engine hardening
+
+Freeze the Core grammar and evaluator and complete the oracle suite.
+
+### Step 5 — First complete feature
+
+Implement and validate `remove` end-to-end.
+
+### Step 6 onward
+
+Proceed P4 → P14 one gate at a time, maintaining manual verification after each meaningful feature.
+
+---
+
+# 13. Agent output contract for every milestone
+
+Every coding-agent completion report MUST contain:
+
+```text
+MILESTONE:
+STATUS:
+
+1. Scientific specification used:
+2. Repository files inspected:
+3. Files changed:
+4. Scientific behavior implemented:
+5. Automated tests added:
+6. Commands executed:
+7. Test results:
+8. Manual test procedure:
+9. Manual result (if performed):
+10. Scientific invariants checked:
+11. Known limitations:
+12. Compatibility status:
+13. Next approved step:
+```
+
+The agent MUST NOT automatically start the next milestone unless the previous acceptance gate is satisfied or the owner explicitly authorizes an exception.
+
+---
+
+# 14. Definition of project success
+
+The target is not a visual PyMOL clone.
+
+Success means Mole Explorer provides a scientifically governed molecular workstation with:
+
+- high-value PyMOL-compatible semantics;
 - one canonical molecular state model;
 - deterministic selection and editing;
 - validated transactions;
@@ -711,17 +906,23 @@ Success means Mole Explorer provides a scientifically governed molecular worksta
 - 3Dmol-backed visualization as a downstream renderer;
 - a stable command/API surface;
 - and a self-owned scientific/docking backend whose approximations are explicit and testable.
-
 The supplied scientific specification emphasizes exactly this distinction: semantic compatibility rather than superficial cloning, with immutable scientific state, provenance, fail-closed validation, and layered verification.
 
 ---
 
 # 15. Current status
 
-**Plan status:** ACTIVE  
-**Current strategic stage:** P0 — governance/documentation foundation  
-**Next gate:** create the documentation foundation and agent rules  
-**First implementation target after documentation:** canonical scientific data model + Selection Engine v2  
-**First end-to-end scientific editing target:** `remove`  
+**Plan status:** ACTIVE
+**Current strategic stage:** P4.6 Complete — Advanced Scientific Query, Measurement, and Interaction Layer
+**Milestone Deliverables:**
+- Dedicated `src/domain/ScientificCommandRouter.ts` routing layer for selections, measurements, and interactions.
+- `src/domain/MeasurementParser.ts` and `src/domain/ScientificMeasurementEngine.ts` supporting Euclidean distance (1x1 and NxM with cutoff), mode=2 polar contact perception, exact 3-point planar angles (1x1x1 cardinality), and signed 4-point dihedral torsions (1x1x1x1 cardinality).
+- Advanced selection grammar extensions (`bound_to` != `neighbor`, `within` != `expand`, `bycalpha`, `byring`, with `byfragment` & `bycell` fail-closed under `DEFERRED / RESEARCH` status).
+- Full Named Selection semantic resolution across selection, measurement, and interaction pipelines.
+- Biophysical interaction commands (`polar_contacts`, `salt_bridges`, `pi_stack`, `cation_pi`, `halogen_bonds`, `hydrophobic_contacts`).
+- Authoritative documentation: `docs/science/ADVANCED_SELECTION_SPEC.md`, `docs/science/MEASUREMENT_SPEC.md`, `docs/science/ADVANCED_QUERY_CATALOG.md`.
+- Full automated test harnesses: `scratch/test_advanced_query_science.ts` (47/47 passing), `scratch/test_p4_6_query_matrix.ts` (88/88 passing), and Puppeteer QA `scratch/test_browser_advanced_queries.cjs` (17/17 passing).
+- 20-suite regression verification: 100% pass rate across all suites.
+- Strict read-only state hash immutability verified across all measurement operations.
 
-Do not skip phases or silently reorder them. If the order must change, update this file and record an ADR first.
+**Next milestone:** Awaiting instruction before proceeding beyond P4.6. Do not automatically start P4.7.

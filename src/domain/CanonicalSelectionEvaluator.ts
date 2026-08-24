@@ -86,6 +86,7 @@ export class CanonicalSelectionEvaluator {
   stateCoordinates?: { x: number; y: number; z: number }[];
   atomIdToResidueId: Map<number, string>;
   atomIdToChainId: Map<number, string>;
+  namedSelections: { name: string; query: string; atomIds?: number[] }[];
 
   constructor(
     molecule: CanonicalMolecule,
@@ -93,6 +94,7 @@ export class CanonicalSelectionEvaluator {
       objectId?: string;
       stateId?: string;
       state?: CanonicalState;
+      namedSelections?: { name: string; query: string; atomIds?: number[] }[];
     }
   ) {
     this.molecule = molecule;
@@ -100,6 +102,7 @@ export class CanonicalSelectionEvaluator {
     this.objectId = options?.objectId;
     this.stateId = options?.stateId || options?.state?.state_id;
     this.stateCoordinates = options?.state?.coordinates;
+    this.namedSelections = options?.namedSelections || [];
 
     if (this.stateCoordinates && this.stateCoordinates.length !== this.atoms.length) {
       throw new Error(
@@ -141,7 +144,7 @@ export class CanonicalSelectionEvaluator {
       ss: ca.secondary_structure,
       isModeledH: ca.modeled_hydrogen
     }));
-    this.dummyParser = new SelectionParser(this.legacyAtoms);
+    this.dummyParser = new SelectionParser(this.legacyAtoms, this.namedSelections);
   }
 
   /**
@@ -201,6 +204,23 @@ export class CanonicalSelectionEvaluator {
     if (!expr) return new Set();
 
     switch (expr.type) {
+      case 'named_selection': {
+        if (expr.atomIds && expr.atomIds.length > 0) {
+          return new Set(expr.atomIds);
+        }
+        if (expr.query) {
+          return this.evaluateQuery(expr.query).selected_ids;
+        }
+        const match = this.namedSelections.find(s => s.name.toLowerCase() === expr.name.toLowerCase());
+        if (match) {
+          if (match.atomIds && match.atomIds.length > 0) {
+            return new Set(match.atomIds);
+          }
+          return this.evaluateQuery(match.query).selected_ids;
+        }
+        throw new Error(`Unknown selection reference '${expr.name}'`);
+      }
+
       case 'flag':
         return this.evaluateFlag(expr.flag);
 
@@ -321,11 +341,82 @@ export class CanonicalSelectionEvaluator {
           const neighbors = adj.get(id);
           if (neighbors) {
             for (let i = 0; i < neighbors.length; i++) {
+              const nId = neighbors[i];
+              if (!operand.has(nId)) {
+                result.add(nId);
+              }
+            }
+          }
+        }
+        return result;
+      }
+
+      case 'bound_to': {
+        const operand = this.evaluateAST(expr.operand);
+        const result = new Set<number>();
+        const adj = this.molecule.topology.adjacency_map;
+
+        for (const id of operand) {
+          const neighbors = adj.get(id);
+          if (neighbors) {
+            for (let i = 0; i < neighbors.length; i++) {
               result.add(neighbors[i]);
             }
           }
         }
         return result;
+      }
+
+      case 'bycalpha': {
+        const operand = this.evaluateAST(expr.operand);
+        const targetResIds = new Set<string>();
+        for (const aId of operand) {
+          const resId = this.atomIdToResidueId.get(aId);
+          if (resId) targetResIds.add(resId);
+        }
+        const result = new Set<number>();
+        for (const resId of targetResIds) {
+          const res = this.molecule.residue_map.get(resId);
+          if (res) {
+            for (const aId of res.atom_ids) {
+              const atom = this.molecule.atom_map.get(aId);
+              if (atom && atom.name.trim().toUpperCase() === 'CA') {
+                result.add(aId);
+              }
+            }
+          }
+        }
+        return result;
+      }
+
+      case 'byring': {
+        const operand = this.evaluateAST(expr.operand);
+        const aromaticRes = ['PHE', 'TYR', 'TRP', 'HIS', 'PRO'];
+        const aromaticNames: Record<string, string[]> = {
+          PHE: ['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ'],
+          TYR: ['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ'],
+          HIS: ['CG', 'ND1', 'CD2', 'CE1', 'NE2'],
+          TRP: ['CD2', 'CE2', 'CZ2', 'CH2', 'CZ3', 'CE3', 'CD1', 'NE1', 'CG'],
+          PRO: ['N', 'CA', 'CB', 'CG', 'CD']
+        };
+        const resultRing = new Set<number>();
+        for (const res of this.molecule.residues) {
+          const resn = (res.name || '').toUpperCase();
+          if (aromaticRes.includes(resn)) {
+            const validNames = aromaticNames[resn] || [];
+            const ringAtoms: number[] = [];
+            for (const aId of res.atom_ids) {
+              const atom = this.molecule.atom_map.get(aId);
+              if (atom && validNames.includes(atom.name.trim().toUpperCase())) {
+                ringAtoms.push(aId);
+              }
+            }
+            if (ringAtoms.some(aId => operand.has(aId))) {
+              ringAtoms.forEach(aId => resultRing.add(aId));
+            }
+          }
+        }
+        return resultRing;
       }
 
       case 'extend': {
@@ -387,6 +478,23 @@ export class CanonicalSelectionEvaluator {
           const y = this.stateCoordinates ? this.stateCoordinates[i].y : atom.y;
           const z = this.stateCoordinates ? this.stateCoordinates[i].z : atom.z;
           if (grid.isNear(x, y, z)) {
+            result.add(atom.canonical_id);
+          }
+        }
+        return result;
+      }
+
+      case 'expand': {
+        const operand = this.evaluateAST(expr.operand);
+        const grid = new CanonicalSpatialGrid(expr.distance, this.atoms, operand, this.stateCoordinates);
+        const result = new Set<number>(operand);
+
+        for (let i = 0; i < this.atoms.length; i++) {
+          const atom = this.atoms[i];
+          const x = this.stateCoordinates ? this.stateCoordinates[i].x : atom.x;
+          const y = this.stateCoordinates ? this.stateCoordinates[i].y : atom.y;
+          const z = this.stateCoordinates ? this.stateCoordinates[i].z : atom.z;
+          if (!operand.has(atom.canonical_id) && grid.isNear(x, y, z)) {
             result.add(atom.canonical_id);
           }
         }
@@ -474,6 +582,7 @@ export class CanonicalSelectionEvaluator {
       scopeType?: 'active_object' | 'explicit_object' | 'workspace';
       objectId?: string;
       stateId?: string;
+      namedSelections?: { name: string; query: string; atomIds?: number[]; objectId?: string }[];
     }
   ): ScopedSelectionResult {
     const startTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
@@ -481,6 +590,11 @@ export class CanonicalSelectionEvaluator {
     const objectResults = new Map<string, SelectionResult>();
     const scopedKeys = new Set<string>();
     let totalCount = 0;
+
+    const getObjectNamedSelections = (objId: string) => {
+      if (!scope?.namedSelections) return [];
+      return scope.namedSelections.filter(s => !s.objectId || s.objectId === objId);
+    };
 
     if (scopeType === 'explicit_object') {
       if (!scope?.objectId) {
@@ -496,10 +610,12 @@ export class CanonicalSelectionEvaluator {
       }
       const targetStateId = scope.stateId || obj.active_state_id;
       const state = targetStateId ? document.states.get(targetStateId) : undefined;
+      const objNamedSels = getObjectNamedSelections(obj.object_id);
       const evaluator = new CanonicalSelectionEvaluator(mol, {
         objectId: obj.object_id,
         stateId: targetStateId,
-        state: state
+        state: state,
+        namedSelections: objNamedSels
       });
       const singleRes = evaluator.evaluateQuery(query, {
         objectId: obj.object_id,
@@ -519,10 +635,12 @@ export class CanonicalSelectionEvaluator {
           if (mol) {
             const targetStateId = scope?.stateId || obj.active_state_id;
             const state = targetStateId ? document.states.get(targetStateId) : undefined;
+            const objNamedSels = getObjectNamedSelections(obj.object_id);
             const evaluator = new CanonicalSelectionEvaluator(mol, {
               objectId: obj.object_id,
               stateId: targetStateId,
-              state: state
+              state: state,
+              namedSelections: objNamedSels
             });
             const singleRes = evaluator.evaluateQuery(query, {
               objectId: obj.object_id,
@@ -544,10 +662,12 @@ export class CanonicalSelectionEvaluator {
         if (!mol) continue;
         const targetStateId = obj.active_state_id;
         const state = targetStateId ? document.states.get(targetStateId) : undefined;
+        const objNamedSels = getObjectNamedSelections(objId);
         const evaluator = new CanonicalSelectionEvaluator(mol, {
           objectId: objId,
           stateId: targetStateId,
-          state: state
+          state: state,
+          namedSelections: objNamedSels
         });
         const singleRes = evaluator.evaluateQuery(query, {
           objectId: objId,

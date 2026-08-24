@@ -90,16 +90,32 @@ function hasCarbons(atom: Atom, atoms: Atom[]): boolean {
 
 export class SelectionParser {
   atoms: Atom[];
+  namedSelections: { name: string; query: string; atomIds?: number[] }[];
 
-  constructor(atoms: Atom[]) {
+  constructor(
+    atoms: Atom[],
+    namedSelections: { name: string; query: string; atomIds?: number[] }[] = []
+  ) {
     this.atoms = atoms;
+    this.namedSelections = namedSelections;
+  }
+
+  setNamedSelections(namedSelections: { name: string; query: string; atomIds?: number[] }[]) {
+    this.namedSelections = namedSelections;
   }
 
   /**
    * Constructs a SelectionParser instance from an array of CanonicalAtoms.
    * Enables selection algebra evaluation directly against canonical domain representations.
    */
-  static fromCanonicalAtoms(canonicalAtoms: CanonicalAtom[]): SelectionParser {
+  static fromCanonicalAtoms(
+    canonicalAtoms: CanonicalAtom[],
+    topology?: { adjacency_map: Map<number, number[]> },
+    namedSelections: { name: string; query: string; atomIds?: number[] }[] = []
+  ): SelectionParser {
+    const idToIdx = new Map<number, number>();
+    canonicalAtoms.forEach((a, idx) => idToIdx.set(a.canonical_id, idx));
+
     const parserAtoms: Atom[] = canonicalAtoms.map(ca => ({
       serial: ca.canonical_id,
       name: ca.name,
@@ -112,13 +128,22 @@ export class SelectionParser {
       elem: ca.element,
       altLoc: ca.alt_loc,
       isHetero: ca.is_hetero,
-      bonds: [],
+      bonds: topology
+        ? (topology.adjacency_map.get(ca.canonical_id) || []).map(nId => idToIdx.get(nId)!).filter(idx => idx !== undefined)
+        : [],
       bFactor: ca.b_factor,
       occupancy: ca.occupancy,
       ss: ca.secondary_structure,
       isModeledH: ca.modeled_hydrogen
     }));
-    return new SelectionParser(parserAtoms);
+    return new SelectionParser(parserAtoms, namedSelections);
+  }
+
+  static fromCanonicalMolecule(
+    molecule: CanonicalMolecule,
+    namedSelections: { name: string; query: string; atomIds?: number[] }[] = []
+  ): SelectionParser {
+    return this.fromCanonicalAtoms(molecule.atoms, molecule.topology, namedSelections);
   }
 
   /**
@@ -128,7 +153,7 @@ export class SelectionParser {
   static evaluateCanonical(
     query: string,
     molecule: CanonicalMolecule,
-    options?: { objectId?: string; stateId?: string }
+    options?: { objectId?: string; stateId?: string; namedSelections?: { name: string; query: string; atomIds?: number[] }[] }
   ): SelectionResult {
     const evaluator = new CanonicalSelectionEvaluator(molecule, options);
     return evaluator.evaluateQuery(query, options);
@@ -150,7 +175,10 @@ export class SelectionParser {
     return CanonicalSelectionEvaluator.evaluateDocument(document, query, scope);
   }
 
-  parse(query: string): Set<number> {
+  parse(query: string, namedSelections?: { name: string; query: string; atomIds?: number[] }[]): Set<number> {
+    if (namedSelections) {
+      this.namedSelections = namedSelections;
+    }
     const qTrim = query.trim();
     if (!qTrim) return new Set();
     const tokens = this.tokenize(qTrim);
@@ -162,7 +190,7 @@ export class SelectionParser {
   }
 
   tokenize(query: string): string[] {
-    const tokenRegex = /\b(and|or|not|byres|bychain|bymolecule|neighbor|extend|around|within|beyond|of|resn|resi|chain|elem|name|b|q|id|alt|segi|metals|donors?|acceptors?|polymer\.protein|polymer\.nucleic|polymer|backbone|sidechain|organic|inorganic|solvent|hetatm|hydrogens|guide|visible|enabled|all|none)\b|<=|>=|==|!=|<|>|=|\(|\)|[a-zA-Z0-9_\-\*\.\+]+/gi;
+    const tokenRegex = /\b(and|or|not|byres|bychain|bymolecule|bycalpha|byca|byring|byfragment|bycell|neighbor|bound_to|extend|expand|around|within|beyond|of|resn|resi|chain|elem|name|b|q|id|alt|segi|metals|donors?|acceptors?|polymer\.protein|polymer\.nucleic|polymer|backbone|sidechain|organic|inorganic|solvent|hetatm|hydrogens|guide|visible|enabled|all|none)\b|<=|>=|==|!=|<|>|=|\(|\)|[a-zA-Z0-9_\-\*\.\+]+/gi;
     return query.match(tokenRegex) || [];
   }
 
@@ -184,7 +212,7 @@ export class SelectionParser {
       let left = parseFactor();
       while (pos < tokens.length && tokens[pos]?.toLowerCase() !== 'or' && tokens[pos] !== ')') {
         const tok = tokens[pos]?.toLowerCase();
-        if (tok === 'around' || tok === 'within' || tok === 'beyond') {
+        if (tok === 'around' || tok === 'within' || tok === 'beyond' || tok === 'expand') {
           pos++;
           const dist = parseFloat(tokens[pos++]);
           if (isNaN(dist)) throw new Error(`Syntax error: invalid distance for '${tok}' query`);
@@ -241,11 +269,35 @@ export class SelectionParser {
         if (!operand) throw new Error("Syntax error: missing expression after 'bymolecule'");
         return { type: 'bymolecule', operand };
       }
+      if (currentToken === 'bycalpha' || currentToken === 'byca') {
+        pos++;
+        const operand = parseFactor();
+        if (!operand) throw new Error(`Syntax error: missing expression after '${currentToken}'`);
+        return { type: 'bycalpha', operand };
+      }
+      if (currentToken === 'byring') {
+        pos++;
+        const operand = parseFactor();
+        if (!operand) throw new Error("Syntax error: missing expression after 'byring'");
+        return { type: 'byring', operand };
+      }
+      if (currentToken === 'byfragment') {
+        throw new Error("Selection syntax error: 'byfragment' is currently DEFERRED / RESEARCH pending fragment partition specification. Use 'bymolecule' for covalent connected components.");
+      }
+      if (currentToken === 'bycell') {
+        throw new Error("Selection syntax error: 'bycell' is currently DEFERRED / RESEARCH pending crystallographic symmetry infrastructure.");
+      }
       if (currentToken === 'neighbor') {
         pos++;
         const operand = parseFactor();
         if (!operand) throw new Error("Syntax error: missing expression after 'neighbor'");
         return { type: 'neighbor', operand };
+      }
+      if (currentToken === 'bound_to') {
+        pos++;
+        const operand = parseFactor();
+        if (!operand) throw new Error("Syntax error: missing expression after 'bound_to'");
+        return { type: 'bound_to', operand };
       }
       if (currentToken === 'extend') {
         pos++;
@@ -255,7 +307,7 @@ export class SelectionParser {
         if (!operand) throw new Error("Syntax error: missing expression after 'extend'");
         return { type: 'extend', steps, operand };
       }
-      if (currentToken === 'around' || currentToken === 'within' || currentToken === 'beyond') {
+      if (currentToken === 'around' || currentToken === 'within' || currentToken === 'beyond' || currentToken === 'expand') {
         pos++;
         const dist = parseFloat(tokens[pos++]);
         if (isNaN(dist)) throw new Error(`Syntax error: invalid distance for '${currentToken}' query`);
@@ -270,6 +322,7 @@ export class SelectionParser {
         return parseFactor();
       }
 
+
       // Global flag keywords
       if ([
         'organic', 'inorganic', 'polymer', 'polymer.protein', 'polymer.nucleic',
@@ -281,13 +334,27 @@ export class SelectionParser {
         return { type: 'flag', flag: currentToken };
       }
 
-      // Property selector
-      const prop = tokens[pos++].toLowerCase();
+      // Property selector or Named Selection Reference
+      const rawToken = tokens[pos];
+      const prop = rawToken.toLowerCase();
       const validProps = ['resn', 'resi', 'chain', 'elem', 'name', 'id', 'b', 'q', 'ss', 'alt', 'segi'];
+
       if (!validProps.includes(prop)) {
-        throw new Error(`Syntax error: unknown property or keyword '${prop}'`);
+        // Check if this token matches a registered named selection
+        const namedMatch = this.namedSelections?.find(s => s.name.toLowerCase() === prop);
+        if (namedMatch) {
+          pos++;
+          return {
+            type: 'named_selection',
+            name: namedMatch.name,
+            query: namedMatch.query,
+            atomIds: namedMatch.atomIds
+          };
+        }
+        throw new Error(`Unknown selection reference '${rawToken}'`);
       }
 
+      pos++;
       const nextToken = tokens[pos];
       if (nextToken && ['<=', '>=', '==', '!=', '<', '>', '='].includes(nextToken)) {
         const op = tokens[pos++];
@@ -312,6 +379,22 @@ export class SelectionParser {
     if (!expr) return new Set();
 
     switch (expr.type) {
+        case 'named_selection': {
+            if (expr.atomIds && expr.atomIds.length > 0) {
+                return new Set(expr.atomIds);
+            }
+            if (expr.query) {
+                return this.parse(expr.query);
+            }
+            const match = this.namedSelections?.find(s => s.name.toLowerCase() === expr.name.toLowerCase());
+            if (match) {
+                if (match.atomIds && match.atomIds.length > 0) {
+                    return new Set(match.atomIds);
+                }
+                return this.parse(match.query);
+            }
+            throw new Error(`Unknown selection reference '${expr.name}'`);
+        }
         case 'property': {
             const result = new Set<number>();
             this.atoms.forEach(atom => {
@@ -417,12 +500,71 @@ export class SelectionParser {
                     if (atom.bonds) {
                         atom.bonds.forEach(bondIdx => {
                             const bondedAtom = this.atoms[bondIdx];
-                            if (bondedAtom) resultNeighbor.add(bondedAtom.serial);
+                            if (bondedAtom && !sNeighbor.has(bondedAtom.serial)) {
+                                resultNeighbor.add(bondedAtom.serial);
+                            }
                         });
                     }
                 }
             });
             return resultNeighbor;
+        }
+        case 'bound_to': {
+            const sBound = this.evaluate(expr.operand);
+            const resultBound = new Set<number>();
+            this.atoms.forEach(atom => {
+                if (sBound.has(atom.serial)) {
+                    if (atom.bonds) {
+                        atom.bonds.forEach(bondIdx => {
+                            const bondedAtom = this.atoms[bondIdx];
+                            if (bondedAtom) resultBound.add(bondedAtom.serial);
+                        });
+                    }
+                }
+            });
+            return resultBound;
+        }
+        case 'bycalpha': {
+            const sOperand = this.evaluate(expr.operand);
+            const selectedAtoms = this.atoms.filter(a => sOperand.has(a.serial));
+            const residueKeys = new Set(selectedAtoms.map(a => `${a.chainID}:${a.resSeq}`));
+            const resultCA = new Set<number>();
+            this.atoms.forEach(atom => {
+                if (residueKeys.has(`${atom.chainID}:${atom.resSeq}`) && atom.name.trim().toUpperCase() === 'CA') {
+                    resultCA.add(atom.serial);
+                }
+            });
+            return resultCA;
+        }
+        case 'byring': {
+            const sOperand = this.evaluate(expr.operand);
+            const aromaticRes = ['PHE', 'TYR', 'TRP', 'HIS', 'PRO'];
+            const aromaticNames: Record<string, string[]> = {
+                PHE: ['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ'],
+                TYR: ['CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ'],
+                HIS: ['CG', 'ND1', 'CD2', 'CE1', 'NE2'],
+                TRP: ['CD2', 'CE2', 'CZ2', 'CH2', 'CZ3', 'CE3', 'CD1', 'NE1', 'CG'],
+                PRO: ['N', 'CA', 'CB', 'CG', 'CD']
+            };
+            const resultRing = new Set<number>();
+            const resGroups = new Map<string, Atom[]>();
+            this.atoms.forEach(a => {
+                const resn = (a.resName || '').toUpperCase();
+                if (aromaticRes.includes(resn)) {
+                    const key = `${a.chainID}:${a.resSeq}:${resn}`;
+                    if (!resGroups.has(key)) resGroups.set(key, []);
+                    resGroups.get(key)!.push(a);
+                }
+            });
+            resGroups.forEach((resAtoms, key) => {
+                const resn = key.split(':')[2];
+                const validNames = aromaticNames[resn] || [];
+                const ringAtoms = resAtoms.filter(a => validNames.includes(a.name.trim().toUpperCase()));
+                if (ringAtoms.some(a => sOperand.has(a.serial))) {
+                    ringAtoms.forEach(a => resultRing.add(a.serial));
+                }
+            });
+            return resultRing;
         }
         case 'extend': {
             const sExtend = this.evaluate(expr.operand);
@@ -480,6 +622,17 @@ export class SelectionParser {
                 }
             });
             return resultWithin;
+        }
+        case 'expand': {
+            const sExpand = this.evaluate(expr.operand);
+            const gridExpand = new SpatialHashGrid(expr.distance, this.atoms, sExpand);
+            const resultExpand = new Set<number>(sExpand);
+            this.atoms.forEach(atom => {
+                if (!sExpand.has(atom.serial) && gridExpand.isNear(atom.x, atom.y, atom.z)) {
+                    resultExpand.add(atom.serial);
+                }
+            });
+            return resultExpand;
         }
         case 'beyond': {
             const sBeyond = this.evaluate(expr.operand);
@@ -755,6 +908,10 @@ export class SelectionParser {
     const qTrim = query.trim();
     const qLower = qTrim.toLowerCase();
 
+    if (namedSelections) {
+      this.namedSelections = namedSelections;
+    }
+
     // 0.00 undo / redo / history commands
     if (qLower === 'undo') {
       return {
@@ -972,13 +1129,15 @@ export class SelectionParser {
       else target = 'selected';
 
       // Check if deleting a named selection
-      if (namedSelections) {
-        const match = namedSelections.find(s => s.name.toLowerCase() === target.toLowerCase());
-        if (match) {
+      if (this.namedSelections) {
+        const matchIdx = this.namedSelections.findIndex(s => s.name.toLowerCase() === target.toLowerCase());
+        if (matchIdx >= 0) {
+          const name = this.namedSelections[matchIdx].name;
+          this.namedSelections.splice(matchIdx, 1);
           return {
             selectedSerials: new Set(),
-            deleteSelectionName: match.name,
-            textOutput: `Delete: removed selection "${match.name}".`
+            deleteSelectionName: name,
+            textOutput: `Delete: removed selection "${name}".`
           };
         }
       }
@@ -1222,6 +1381,12 @@ export class SelectionParser {
         const name = parts[0].trim();
         const expr = parts.slice(1).join(',').trim();
         const serials = this.parse(expr);
+        if (this.namedSelections) {
+          const idx = this.namedSelections.findIndex(s => s.name.toLowerCase() === name.toLowerCase());
+          const item = { name, query: expr, atomIds: Array.from(serials) };
+          if (idx >= 0) this.namedSelections[idx] = item;
+          else this.namedSelections.push(item);
+        }
         return {
           selectedSerials: serials,
           textOutput: `Selector: selection "${name}" defined with ${serials.size} atoms.`,
@@ -1231,6 +1396,12 @@ export class SelectionParser {
         const expr = rest;
         const name = 'sele';
         const serials = this.parse(expr);
+        if (this.namedSelections) {
+          const idx = this.namedSelections.findIndex(s => s.name.toLowerCase() === name.toLowerCase());
+          const item = { name, query: expr, atomIds: Array.from(serials) };
+          if (idx >= 0) this.namedSelections[idx] = item;
+          else this.namedSelections.push(item);
+        }
         return {
           selectedSerials: serials,
           textOutput: `Selector: selection "${name}" defined with ${serials.size} atoms for query "${expr}".`,

@@ -37,6 +37,7 @@ import { MeasurementWizard } from "../components/MeasurementWizard";
 import { StudioExportModal } from "../components/StudioExportModal";
 import { Command, Ruler, CheckCircle2, History } from "lucide-react";
 import { ScientificHistoryInspector } from "../components/ScientificHistoryInspector";
+import { ScientificCommandRouter } from "../domain/ScientificCommandRouter";
 
 export default function MolStudio() {
   const [isConsoleOpen, setIsConsoleOpen] = useState(false);
@@ -569,7 +570,7 @@ export default function MolStudio() {
   const handleRunQuery = (query: string): { count: number; textOutput?: string } => {
     const parser = new SelectionParser(atoms);
     const activeObjectName = molData?.name || "molecule";
-    const result = parser.evaluateCommand(query, namedSelections, activeObjectName);
+    const result = ScientificCommandRouter.routeAndExecute(query, atoms, namedSelections, activeObjectName);
     setSelectedAtomSerials(result.selectedSerials);
     
     if (result.saveSelection) {
@@ -1007,6 +1008,8 @@ export default function MolStudio() {
         orthographic,
         stereoMode
       }),
+      openSelectionConsole: () => setIsConsoleOpen(true),
+      closeSelectionConsole: () => setIsConsoleOpen(false),
       // P4.2: History inspector test API
       openHistoryInspector: () => setIsHistoryInspectorOpen(true),
       closeHistoryInspector: () => setIsHistoryInspectorOpen(false),
