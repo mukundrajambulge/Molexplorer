@@ -10,6 +10,8 @@ export const SUPPORTED_REPRESENTATIONS = [
   'surface',
   'cartoon',
   'ribbon',
+  'putty',
+  'trace',
   'mesh',
   'dots',
   'nonbonded',
@@ -34,6 +36,10 @@ const REPRESENTATION_ALIASES: Record<string, SupportedRepresentation> = {
   'cartoons': 'cartoon',
   'ribbon': 'ribbon',
   'ribbons': 'ribbon',
+  'putty': 'putty',
+  'putties': 'putty',
+  'trace': 'trace',
+  'traces': 'trace',
   'mesh': 'mesh',
   'meshes': 'mesh',
   'dot': 'dots',
@@ -41,8 +47,7 @@ const REPRESENTATION_ALIASES: Record<string, SupportedRepresentation> = {
   'nonbonded': 'nonbonded',
   'nb_spheres': 'nb_spheres',
   'label': 'labels',
-  'labels': 'labels',
-  'putty': 'cartoon'
+  'labels': 'labels'
 };
 
 export class RepresentationRegistry {

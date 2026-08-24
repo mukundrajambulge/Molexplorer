@@ -112,6 +112,8 @@ export type RenderStyle =
   | "Non-bonded (crosses)"
   | "Dot Surface" 
   | "Cartoon"
+  | "Ribbon"
+  | "Trace"
   | "Putty";
 
 export type ColorTheme = 

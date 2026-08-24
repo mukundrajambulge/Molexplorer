@@ -1113,7 +1113,12 @@ export default function MolStudio() {
         let rep = 'unknown';
         if (a.style?.stick) rep = 'sticks';
         else if (a.style?.sphere) rep = 'spheres';
-        else if (a.style?.cartoon) rep = 'cartoon';
+        else if (a.style?.cartoon) {
+          if (a.style?.cartoon?.style === 'ribbon') rep = 'ribbon';
+          else if (a.style?.cartoon?.style === 'trace') rep = 'trace';
+          else if (a.style?.cartoon?.tubes) rep = 'putty';
+          else rep = 'cartoon';
+        }
         else if (a.style?.line) rep = 'lines';
         else if (a.style?.cross) rep = 'cross';
 
@@ -1141,7 +1146,12 @@ export default function MolStudio() {
           let rep = 'unknown';
           if (a.style?.stick) rep = 'sticks';
           else if (a.style?.sphere) rep = 'spheres';
-          else if (a.style?.cartoon) rep = 'cartoon';
+          else if (a.style?.cartoon) {
+            if (a.style?.cartoon?.style === 'ribbon') rep = 'ribbon';
+            else if (a.style?.cartoon?.style === 'trace') rep = 'trace';
+            else if (a.style?.cartoon?.tubes) rep = 'putty';
+            else rep = 'cartoon';
+          }
           else if (a.style?.line) rep = 'lines';
           else if (a.style?.cross) rep = 'cross';
 
@@ -1159,6 +1169,10 @@ export default function MolStudio() {
             chain: a.chain
           };
         });
+      },
+      setGlobalDisplay: (style?: RenderStyle, scheme?: string) => {
+        if (style) setRenderStyle(style);
+        if (scheme) setColorScheme(scheme);
       },
       setRenderStyle: (style: RenderStyle) => setRenderStyle(style),
       setColorScheme: (scheme: string) => setColorScheme(scheme),

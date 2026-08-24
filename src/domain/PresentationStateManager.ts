@@ -24,7 +24,7 @@ import { getColorFunction } from '../rendering/RepresentationStrategy';
 
 export type RepresentationName =
   | 'lines' | 'sticks' | 'spheres' | 'surface' | 'cartoon'
-  | 'ribbon' | 'mesh' | 'dots' | 'nonbonded' | 'nb_spheres' | 'putty' | 'labels';
+  | 'ribbon' | 'putty' | 'trace' | 'mesh' | 'dots' | 'nonbonded' | 'nb_spheres' | 'labels';
 
 export type VisibilityState = 'visible' | 'hidden';
 
@@ -126,9 +126,10 @@ export function normalizeRepresentationName(rep: string | null | undefined): Rep
   if (norm === 'sphere' || norm === 'spheres' || norm === 'spacefilling' || norm === 'vdw') return 'spheres';
   if (norm === 'line' || norm === 'lines' || norm === 'wireframe') return 'lines';
   if (norm === 'surface' || norm === 'vanderwaalssurface' || norm === 'solventaccessiblesurface' || norm === 'solventexcludedsurface') return 'surface';
-  if (norm === 'ribbon') return 'ribbon';
-  if (norm === 'putty') return 'putty';
-  if (norm === 'mesh') return 'mesh';
+  if (norm === 'ribbon' || norm === 'ribbons') return 'ribbon';
+  if (norm === 'putty' || norm === 'putties') return 'putty';
+  if (norm === 'trace' || norm === 'traces') return 'trace';
+  if (norm === 'mesh' || norm === 'meshes') return 'mesh';
   if (norm === 'dot' || norm === 'dots' || norm === 'dotsurface') return 'dots';
   if (norm === 'nonbonded' || norm === 'cross' || norm === 'crosses') return 'nonbonded';
   if (norm === 'nbspheres' || norm === 'smallspheres') return 'nb_spheres';
@@ -157,8 +158,13 @@ export function get3DmolAtomStyle(
     case 'nb_spheres':
       return { sphere: { ...colorSpec, radius: 0.45, opacity } };
     case 'ribbon':
+      // 3Dmol ribbon: flat ribbon geometry without directional beta arrowheads
       return { cartoon: { ...colorSpec, opacity, style: 'ribbon' } };
+    case 'trace':
+      // 3Dmol trace: single-line spline backbone trace
+      return { cartoon: { ...colorSpec, opacity, style: 'trace' } };
     case 'putty':
+      // 3Dmol putty: variable thickness tube mapped to B-factors
       return { cartoon: { ...colorSpec, opacity, tubes: true, thickness: 0.45 } };
     case 'dots':
       return { dot: { ...colorSpec, radius: 0.35 } };
@@ -166,7 +172,8 @@ export function get3DmolAtomStyle(
       return { stick: { ...colorSpec, radius: 0.15, opacity: 0.3 } };
     case 'cartoon':
     default:
-      return { cartoon: { ...colorSpec, opacity, style: 'oval' } };
+      // 3Dmol cartoon: secondary-structure cartoon with directional beta-sheet arrowheads
+      return { cartoon: { ...colorSpec, opacity, arrows: true, tubes: false } };
   }
 }
 

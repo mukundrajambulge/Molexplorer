@@ -303,6 +303,10 @@ export class DefaultRepresentationStrategy implements IRepresentationStrategy {
         return { sphere: base };
       case "Cartoon":
         return { cartoon: { ...base, arrows: true, tubes: false } };
+      case "Ribbon":
+        return { cartoon: { ...base, style: 'ribbon' } };
+      case "Trace":
+        return { cartoon: { ...base, style: 'trace' } };
       case "Putty":
         // B-Factor Putty: variable thickness tube mapped to B-factor
         return { 
