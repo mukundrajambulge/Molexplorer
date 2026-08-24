@@ -1,28 +1,41 @@
 /**
  * ScientificCommandRouter.ts
- * Dedicated command classification, parsing, and routing layer for Molexplorer.
+ * Authoritative Selection-Aware Command Router for Phase SQ2.
  * 
- * Routes incoming console/API commands to their appropriate subsystem:
- * 1. Geometric measurements -> MeasurementParser -> ScientificMeasurementEngine
- * 2. Biophysical interaction analyses -> MeasurementParser -> ScientificMeasurementEngine
- * 3. Selection queries & editor commands -> SelectionParser / CanonicalSelectionEvaluator
- * 
- * Enforces precise error reporting with explicit syntax classifications:
- * - "Selection syntax error: ..."
- * - "Measurement syntax error: ..."
- * - "Analysis syntax error: ..."
+ * Implements the full pipeline:
+ * Raw Input
+ *   ↓
+ * Command Lexer (CommandLexer.ts)
+ *   ↓
+ * Command AST (CommandAST.ts)
+ *   ↓
+ * Dedicated Command Parser (ScientificCommandParser.ts)
+ *   ↓
+ * Selection Argument Parser
+ *   ↓
+ * SQ1 Canonical Selection AST
+ *   ↓
+ * Canonical Selection Evaluator
+ *   ↓
+ * Command Execution
  */
 
 import { CanonicalAtom, MeasurementResult, InteractionAnalysisResult } from '../types/domain';
 import { SelectionParser, Atom } from '../lib/SelectionParser';
+import { CanonicalSelectionEvaluator } from './CanonicalSelectionEvaluator';
 import { MeasurementParser } from './MeasurementParser';
 import { ScientificMeasurementEngine } from './ScientificMeasurementEngine';
+import { CommandLexer } from './CommandLexer';
+import { ScientificCommandParser } from './ScientificCommandParser';
+import { LabelExpressionEvaluator } from './LabelExpressionEvaluator';
+import { CommandASTNode } from './CommandAST';
 
 export interface CommandRouterResult {
   type: 'measurement' | 'analysis' | 'selection' | 'console_action';
   selectedSerials: Set<number>;
   count: number;
   textOutput: string;
+  commandAST?: CommandASTNode;
   measurementResult?: MeasurementResult;
   analysisResult?: InteractionAnalysisResult;
   addMeasurement?: {
@@ -31,7 +44,7 @@ export interface CommandRouterResult {
     label: string;
     value: number;
   };
-  saveSelection?: { name: string; query: string };
+  saveSelection?: { name: string; query: string; atomIds?: number[] };
   deleteSelectionName?: string;
   removeAtomSerials?: Set<number>;
   bondRequest?: { atomA: number; atomB: number; order?: number };
@@ -53,48 +66,22 @@ export interface CommandRouterResult {
   clearLabels?: number[];
   undoRequest?: boolean;
   redoRequest?: boolean;
+  historyRequest?: boolean;
   ramachandranReport?: any[];
 }
 
 export class ScientificCommandRouter {
   /**
-   * Classifies the command type based on leading keyword tokens.
-   */
-  static classifyCommand(query: string): 'measurement' | 'analysis' | 'selection_or_action' {
-    const qTrim = query.trim();
-    if (!qTrim) return 'selection_or_action';
-
-    const firstWord = qTrim.split(/[\s,]+/)[0].toLowerCase();
-
-    // Measurement verbs
-    const measurementVerbs = ['distance', 'dist', 'angle', 'dihedral'];
-    if (measurementVerbs.includes(firstWord)) {
-      return 'measurement';
-    }
-
-    // Analysis verbs
-    const analysisVerbs = [
-      'polar_contacts', 'salt_bridges', 'pi_stack',
-      'cation_pi', 'halogen_bonds', 'hydrophobic_contacts'
-    ];
-    if (analysisVerbs.includes(firstWord)) {
-      return 'analysis';
-    }
-
-    return 'selection_or_action';
-  }
-
-  /**
-   * Routes and executes a command string against the target atom collection.
+   * Routes and executes single commands or semicolon (;) command sequences.
    */
   static routeAndExecute(
-    query: string,
+    input: string,
     atoms: Atom[] | CanonicalAtom[],
-    namedSelections?: { name: string; query: string; atomIds?: number[] }[],
-    activeObjectName?: string
+    namedSelections: { name: string; query: string; atomIds?: number[] }[] = [],
+    activeObjectName: string = 'molecule'
   ): CommandRouterResult {
-    const qTrim = query.trim();
-    if (!qTrim) {
+    const rawTrim = input.trim();
+    if (!rawTrim) {
       return {
         type: 'selection',
         selectedSerials: new Set(),
@@ -103,128 +90,367 @@ export class ScientificCommandRouter {
       };
     }
 
-    const commandType = this.classifyCommand(qTrim);
-
-    // 1. Route to MeasurementParser & ScientificMeasurementEngine
-    if (commandType === 'measurement') {
-      try {
-        const ast = MeasurementParser.parse(qTrim);
-        const engine = new ScientificMeasurementEngine(atoms, undefined, namedSelections);
-        const res = engine.execute(ast) as MeasurementResult;
-
-        const selectedSerials = new Set<number>();
-        if (res.distances) {
-          res.distances.forEach(d => {
-            selectedSerials.add(d.atom1_id);
-            selectedSerials.add(d.atom2_id);
-          });
-        } else if (res.angle) {
-          selectedSerials.add(res.angle.atom1_id);
-          selectedSerials.add(res.angle.vertex_id);
-          selectedSerials.add(res.angle.atom3_id);
-        } else if (res.dihedral) {
-          selectedSerials.add(res.dihedral.atom1_id);
-          selectedSerials.add(res.dihedral.atom2_id);
-          selectedSerials.add(res.dihedral.atom3_id);
-          selectedSerials.add(res.dihedral.atom4_id);
-        } else if (res.polar_contacts) {
-          res.polar_contacts.forEach(c => {
-            selectedSerials.add(c.donor_atom.id);
-            selectedSerials.add(c.acceptor_atom.id);
-          });
-        }
-
-        return {
-          type: 'measurement',
-          selectedSerials,
-          count: selectedSerials.size,
-          textOutput: res.text_output,
-          measurementResult: res,
-          addMeasurement: res.visual_measurement
-        };
-      } catch (err: any) {
-        if (err.message && err.message.startsWith('Measurement syntax error')) {
-          throw err;
-        }
-        throw new Error(`Measurement syntax error: ${err.message}`);
-      }
-    }
-
-    // 2. Route to Analysis Engine
-    if (commandType === 'analysis') {
-      try {
-        const ast = MeasurementParser.parse(qTrim);
-        const engine = new ScientificMeasurementEngine(atoms, undefined, namedSelections);
-        const res = engine.execute(ast) as InteractionAnalysisResult;
-
-        const selectedSerials = new Set<number>();
-        res.interactions.forEach(r => {
-          selectedSerials.add(r.atom1.serial);
-          selectedSerials.add(r.atom2.serial);
-        });
-
-        return {
-          type: 'analysis',
-          selectedSerials,
-          count: selectedSerials.size,
-          textOutput: res.text_output,
-          analysisResult: res
-        };
-      } catch (err: any) {
-        if (err.message && err.message.startsWith('Analysis syntax error')) {
-          throw err;
-        }
-        throw new Error(`Analysis syntax error: ${err.message}`);
-      }
-    }
-
-    // 3. Route to SelectionParser and Selection Console command handler
-    try {
-      const parser = atoms.length > 0 && 'canonical_id' in atoms[0]
-        ? SelectionParser.fromCanonicalAtoms(atoms as CanonicalAtom[], undefined, namedSelections)
-        : new SelectionParser(atoms as Atom[], namedSelections);
-
-      const res = parser.evaluateCommand(qTrim, namedSelections, activeObjectName);
-
+    const commandLines = CommandLexer.splitCommandSequences(rawTrim);
+    if (commandLines.length === 0) {
       return {
-        type: res.textOutput?.startsWith('Selector:') ? 'selection' : 'console_action',
-        selectedSerials: res.selectedSerials,
-        count: res.selectedSerials.size,
-        textOutput: res.textOutput,
-        saveSelection: res.saveSelection,
-        deleteSelectionName: res.deleteSelectionName,
-        removeAtomSerials: res.removeAtomSerials,
-        bondRequest: res.bondRequest,
-        unbondRequest: res.unbondRequest,
-        setBondOrderRequest: res.setBondOrderRequest,
-        alterRequest: res.alterRequest,
-        alterStateRequest: res.alterStateRequest,
-        cycleValenceRequest: res.cycleValenceRequest,
-        setStyle: res.setStyle,
-        setColorScheme: res.setColorScheme,
-        setHiddenCategory: res.setHiddenCategory,
-        triggerZoom: res.triggerZoom,
-        fetchPdbId: res.fetchPdbId,
-        addHydrogens: res.addHydrogens,
-        removeHydrogens: res.removeHydrogens,
-        addHydrogensRequest: res.addHydrogensRequest,
-        removeHydrogensRequest: res.removeHydrogensRequest,
-        addLabels: res.addLabels,
-        clearLabels: res.clearLabels,
-        addMeasurement: res.addMeasurement,
-        undoRequest: res.undoRequest,
-        redoRequest: res.redoRequest,
-        ramachandranReport: res.ramachandranReport
+        type: 'selection',
+        selectedSerials: new Set(),
+        count: 0,
+        textOutput: ''
       };
-    } catch (err: any) {
-      if (err.message && (err.message.startsWith('Selection syntax error') || err.message.startsWith('Syntax error'))) {
-        if (err.message.startsWith('Syntax error')) {
-          throw new Error(`Selection syntax error: ${err.message.slice(14)}`);
-        }
-        throw err;
-      }
-      throw new Error(`Selection syntax error: ${err.message}`);
     }
+
+    // Single command fast path
+    if (commandLines.length === 1) {
+      return this.executeSingleCommand(commandLines[0], atoms, namedSelections, activeObjectName);
+    }
+
+    // Semicolon Command Sequence: sequential fail-fast execution
+    const combinedSerials = new Set<number>();
+    const textOutputs: string[] = [];
+    let lastResult: CommandRouterResult | null = null;
+    const currentNamedSelections = [...namedSelections];
+
+    let mergedSetStyle: string | undefined;
+    let mergedSetColorScheme: string | undefined;
+    let mergedTriggerZoom: boolean | undefined;
+    let mergedAddLabels: Array<{ serial: number; text: string }> | undefined;
+    let mergedSaveSelection: { name: string; query: string; atomIds?: number[] } | undefined;
+    let mergedDeleteSelectionName: string | undefined;
+
+    for (const cmdLine of commandLines) {
+      const res = this.executeSingleCommand(cmdLine, atoms, currentNamedSelections, activeObjectName);
+      lastResult = res;
+      res.selectedSerials.forEach(s => combinedSerials.add(s));
+      if (res.textOutput) textOutputs.push(res.textOutput);
+
+      if (res.setStyle) mergedSetStyle = res.setStyle;
+      if (res.setColorScheme) mergedSetColorScheme = res.setColorScheme;
+      if (res.triggerZoom) mergedTriggerZoom = true;
+      if (res.addLabels) {
+        mergedAddLabels = mergedAddLabels ? [...mergedAddLabels, ...res.addLabels] : res.addLabels;
+      }
+
+      if (res.saveSelection) {
+        mergedSaveSelection = res.saveSelection;
+        currentNamedSelections.push({
+          name: res.saveSelection.name,
+          query: res.saveSelection.query,
+          atomIds: res.saveSelection.atomIds
+        });
+      }
+      if (res.deleteSelectionName) {
+        mergedDeleteSelectionName = res.deleteSelectionName;
+        const delName = res.deleteSelectionName.toLowerCase();
+        const idx = currentNamedSelections.findIndex(s => s.name.toLowerCase() === delName);
+        if (idx >= 0) currentNamedSelections.splice(idx, 1);
+      }
+    }
+
+    return {
+      type: lastResult?.type || 'console_action',
+      selectedSerials: combinedSerials,
+      count: combinedSerials.size,
+      textOutput: textOutputs.join(' | '),
+      commandAST: lastResult?.commandAST,
+      setStyle: mergedSetStyle,
+      setColorScheme: mergedSetColorScheme,
+      triggerZoom: mergedTriggerZoom,
+      addLabels: mergedAddLabels,
+      saveSelection: mergedSaveSelection,
+      deleteSelectionName: mergedDeleteSelectionName
+    };
+  }
+
+  /**
+   * Evaluates a single command AST and resolves its selection operands via SQ1 engine.
+   */
+  private static executeSingleCommand(
+    commandLine: string,
+    atoms: Atom[] | CanonicalAtom[],
+    namedSelections: { name: string; query: string; atomIds?: number[] }[] = [],
+    activeObjectName: string = 'molecule'
+  ): CommandRouterResult {
+    // Helper to evaluate selection query using SQ1 selection algebra
+    const evaluateSelection = (queryStr: string): Set<number> => {
+      const q = (queryStr || 'all').trim();
+      try {
+        const parser = atoms.length > 0 && 'canonical_id' in atoms[0]
+          ? SelectionParser.fromCanonicalAtoms(atoms as CanonicalAtom[], undefined, namedSelections)
+          : new SelectionParser(atoms as Atom[], namedSelections);
+        return parser.parse(q);
+      } catch (err: any) {
+        if (err.message && (err.message.startsWith('Selection syntax error') || err.message.startsWith('Syntax error'))) {
+          if (err.message.startsWith('Syntax error')) {
+            throw new Error(`Selection syntax error: ${err.message.slice(14)}`);
+          }
+          throw err;
+        }
+        throw new Error(`Selection syntax error: ${err.message}`);
+      }
+    };
+
+    // 1. Parse command into typed CommandASTNode
+    let ast: CommandASTNode;
+    try {
+      ast = ScientificCommandParser.parseCommand(commandLine);
+    } catch (err: any) {
+      throw err;
+    }
+
+    // 2. Dispatch based on AST command_type
+    switch (ast.command_type) {
+      case 'selection_lifecycle': {
+        if (ast.verb === 'select') {
+          const name = ast.target_name || 'sele';
+          const query = ast.selection_query || 'all';
+          const selectedSerials = evaluateSelection(query);
+          return {
+            type: 'selection',
+            commandAST: ast,
+            selectedSerials,
+            count: selectedSerials.size,
+            textOutput: `Selection: ${name} = ${selectedSerials.size} atoms`,
+            saveSelection: { name, query, atomIds: Array.from(selectedSerials) }
+          };
+        }
+        if (ast.verb === 'delete' || ast.verb === 'del') {
+          const name = ast.target_name || '';
+          return {
+            type: 'console_action',
+            commandAST: ast,
+            selectedSerials: new Set(),
+            count: 0,
+            textOutput: `delete: removed named selection '${name}'`,
+            deleteSelectionName: name
+          };
+        }
+        if (ast.verb === 'disable' || ast.verb === 'enable') {
+          return {
+            type: 'console_action',
+            commandAST: ast,
+            selectedSerials: new Set(),
+            count: 0,
+            textOutput: `${ast.verb}: updated state for '${ast.target_name}'`
+          };
+        }
+        break;
+      }
+
+      case 'color': {
+        const color = ast.color_value || 'element';
+        const selQuery = ast.selection_query || 'all';
+        const selectedSerials = evaluateSelection(selQuery);
+        return {
+          type: 'console_action',
+          commandAST: ast,
+          selectedSerials,
+          count: selectedSerials.size,
+          setColorScheme: color,
+          textOutput: `color: applied '${color}' to ${selectedSerials.size} atoms (${selQuery})`
+        };
+      }
+
+      case 'representation': {
+        const rep = ast.representation_value || 'cartoon';
+        const selQuery = ast.selection_query || 'all';
+        const selectedSerials = evaluateSelection(selQuery);
+        return {
+          type: 'console_action',
+          commandAST: ast,
+          selectedSerials,
+          count: selectedSerials.size,
+          setStyle: rep,
+          textOutput: `${ast.verb}: applied '${rep}' to ${selectedSerials.size} atoms (${selQuery})`
+        };
+      }
+
+      case 'view': {
+        const selQuery = ast.selection_query || 'all';
+        const selectedSerials = evaluateSelection(selQuery);
+        return {
+          type: 'console_action',
+          commandAST: ast,
+          selectedSerials,
+          count: selectedSerials.size,
+          triggerZoom: true,
+          textOutput: `${ast.verb}: focused view on ${selectedSerials.size} atoms (${selQuery})`
+        };
+      }
+
+      case 'label': {
+        const selQuery = ast.selection_query || 'all';
+        const selectedSerials = evaluateSelection(selQuery);
+        const addLabels: Array<{ serial: number; text: string }> = [];
+
+        if (ast.label_expression) {
+          for (const a of atoms) {
+            const serial = 'canonical_id' in a ? (a as CanonicalAtom).canonical_id : (a as Atom).serial;
+            if (selectedSerials.has(serial)) {
+              const labelText = LabelExpressionEvaluator.evaluate(ast.label_expression, a);
+              addLabels.push({ serial, text: labelText });
+            }
+          }
+        }
+
+        return {
+          type: 'console_action',
+          commandAST: ast,
+          selectedSerials,
+          count: selectedSerials.size,
+          addLabels,
+          textOutput: `label: created ${addLabels.length} labels for selection (${selQuery})`
+        };
+      }
+
+      case 'spectrum': {
+        const selQuery = ast.selection_query || 'all';
+        const selectedSerials = evaluateSelection(selQuery);
+        const prop = ast.spectrum_args?.property || 'b';
+        const palette = ast.spectrum_args?.palette || 'rainbow';
+        return {
+          type: 'console_action',
+          commandAST: ast,
+          selectedSerials,
+          count: selectedSerials.size,
+          setColorScheme: 'spectrum',
+          textOutput: `spectrum: mapped '${prop}' with palette '${palette}' across ${selectedSerials.size} atoms`
+        };
+      }
+
+      case 'measurement': {
+        try {
+          const measAst = MeasurementParser.parse(commandLine);
+          const engine = new ScientificMeasurementEngine(atoms, undefined, namedSelections);
+          const res = engine.execute(measAst) as MeasurementResult;
+
+          const selectedSerials = new Set<number>();
+          if (res.distances) {
+            res.distances.forEach(d => { selectedSerials.add(d.atom1_id); selectedSerials.add(d.atom2_id); });
+          } else if (res.angle) {
+            selectedSerials.add(res.angle.atom1_id); selectedSerials.add(res.angle.vertex_id); selectedSerials.add(res.angle.atom3_id);
+          } else if (res.dihedral) {
+            selectedSerials.add(res.dihedral.atom1_id); selectedSerials.add(res.dihedral.atom2_id); selectedSerials.add(res.dihedral.atom3_id); selectedSerials.add(res.dihedral.atom4_id);
+          }
+
+          return {
+            type: 'measurement',
+            commandAST: ast,
+            selectedSerials,
+            count: selectedSerials.size,
+            textOutput: res.text_output,
+            measurementResult: res,
+            addMeasurement: res.visual_measurement
+          };
+        } catch (err: any) {
+          if (err.message && err.message.startsWith('Measurement syntax error')) throw err;
+          throw new Error(`Measurement syntax error: ${err.message}`);
+        }
+      }
+
+      case 'analysis': {
+        try {
+          const anaAst = MeasurementParser.parse(commandLine);
+          const engine = new ScientificMeasurementEngine(atoms, undefined, namedSelections);
+          const res = engine.execute(anaAst) as InteractionAnalysisResult;
+
+          const selectedSerials = new Set<number>();
+          res.interactions.forEach(r => {
+            selectedSerials.add(r.atom1.serial);
+            selectedSerials.add(r.atom2.serial);
+          });
+
+          return {
+            type: 'analysis',
+            commandAST: ast,
+            selectedSerials,
+            count: selectedSerials.size,
+            textOutput: res.text_output,
+            analysisResult: res
+          };
+        } catch (err: any) {
+          if (err.message && err.message.startsWith('Analysis syntax error')) throw err;
+          throw new Error(`Analysis syntax error: ${err.message}`);
+        }
+      }
+
+      case 'history': {
+        if (ast.verb === 'undo') {
+          return {
+            type: 'console_action',
+            commandAST: ast,
+            selectedSerials: new Set(),
+            count: 0,
+            undoRequest: true,
+            textOutput: 'undo: navigating to parent scientific revision.'
+          };
+        }
+        if (ast.verb === 'redo') {
+          return {
+            type: 'console_action',
+            commandAST: ast,
+            selectedSerials: new Set(),
+            count: 0,
+            redoRequest: true,
+            textOutput: 'redo: navigating to child scientific revision.'
+          };
+        }
+        if (ast.verb === 'history') {
+          return {
+            type: 'console_action',
+            commandAST: ast,
+            selectedSerials: new Set(),
+            count: 0,
+            historyRequest: true,
+            textOutput: 'history: inspected scientific revision ledger.'
+          };
+        }
+        break;
+      }
+
+      case 'editing': {
+        // Delegate to existing editing handler in SelectionParser / MolStudio
+        const parser = atoms.length > 0 && 'canonical_id' in atoms[0]
+          ? SelectionParser.fromCanonicalAtoms(atoms as CanonicalAtom[], undefined, namedSelections)
+          : new SelectionParser(atoms as Atom[], namedSelections);
+        const legacyRes = parser.evaluateCommand(commandLine, namedSelections, activeObjectName);
+        return {
+          type: 'console_action',
+          commandAST: ast,
+          selectedSerials: legacyRes.selectedSerials,
+          count: legacyRes.selectedSerials.size,
+          textOutput: legacyRes.textOutput || `editing: ${ast.verb} executed.`,
+          removeAtomSerials: legacyRes.removeAtomSerials,
+          bondRequest: legacyRes.bondRequest,
+          unbondRequest: legacyRes.unbondRequest,
+          setBondOrderRequest: legacyRes.setBondOrderRequest,
+          alterRequest: legacyRes.alterRequest,
+          alterStateRequest: legacyRes.alterStateRequest,
+          cycleValenceRequest: legacyRes.cycleValenceRequest,
+          addHydrogensRequest: legacyRes.addHydrogensRequest,
+          removeHydrogensRequest: legacyRes.removeHydrogensRequest
+        };
+      }
+
+      case 'query':
+      default: {
+        const query = ast.selection_query || commandLine;
+        const selectedSerials = evaluateSelection(query);
+        return {
+          type: 'selection',
+          commandAST: ast,
+          selectedSerials,
+          count: selectedSerials.size,
+          textOutput: `Selector: ${selectedSerials.size} atoms selected`
+        };
+      }
+    }
+
+    return {
+      type: 'selection',
+      selectedSerials: new Set(),
+      count: 0,
+      textOutput: ''
+    };
   }
 }
-
