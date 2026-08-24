@@ -88,6 +88,14 @@ export default function MolStudio() {
   useEffect(() => {
     namedSelectionsRef.current = namedSelections;
   }, [namedSelections]);
+  const presentationOverridesRef = useRef(presentationOverrides);
+  useEffect(() => {
+    presentationOverridesRef.current = presentationOverrides;
+  }, [presentationOverrides]);
+  const atomColorMapRef = useRef(atomColorMap);
+  useEffect(() => {
+    atomColorMapRef.current = atomColorMap;
+  }, [atomColorMap]);
 
   // Stage 7 State Variables
   const [showSequenceViewer, setShowSequenceViewer] = useState(false);
@@ -1079,16 +1087,20 @@ export default function MolStudio() {
         setAtomColorMap(null);
         setMolData({ name, data, format: format as any });
       },
+      clearOverrides: () => {
+        setPresentationOverrides([]);
+        setAtomColorMap(null);
+      },
       getPresentationState: () => ({
-        overridesCount: presentationOverrides.length,
-        overrides: presentationOverrides.map(o => ({
+        overridesCount: presentationOverridesRef.current.length,
+        overrides: presentationOverridesRef.current.map(o => ({
           selectionKey: o.selectionKey,
           atomCount: o.atomSerials.size,
           color: o.color,
           representation: o.representation,
           visibility: o.visibility
         })),
-        atomColorMapSize: atomColorMap ? atomColorMap.size : 0
+        atomColorMapSize: atomColorMapRef.current ? atomColorMapRef.current.size : 0
       }),
       getViewerAtomState: (serial: number) => {
         const viewer = viewerRef.current?.getViewer?.();

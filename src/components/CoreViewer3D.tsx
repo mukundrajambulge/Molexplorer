@@ -8,7 +8,7 @@ import { MolecularPicker } from '../interaction/MolecularPicker';
 import { SelectionManager } from '../interaction/SelectionManager';
 import { SelectionHighlight } from '../interaction/SelectionHighlight';
 import { SelectionLevel, PickedAtom } from '../interaction/types';
-import { SelectionPresentationOverride } from '../domain/PresentationStateManager';
+import { SelectionPresentationOverride, ViewerPresentationState, buildViewerRenderState, normalizeRepresentationName } from '../domain/PresentationStateManager';
 import { MousePointer, Layers, Check, X, Sparkles, Ruler } from 'lucide-react';
 import { ContextMenu3D } from './ContextMenu3D';
 
@@ -609,113 +609,43 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         const cScheme = props.colorScheme || "spectrum";
         const currentOpacity = typeof props.surfaceOpacity === 'number' ? props.surfaceOpacity : 0.8;
 
-        // STUDIO MODE PER-ATOM PRESENTATION RENDERING ENGINE
-        // Map every atom to its effective (representation, color, visibility, opacity)
-        const atomPresentationMap = new Map<number, {
-          rep: string;
-          color: string;
-          visibility: 'visible' | 'hidden';
-          opacity: number;
-        }>();
+        // BUILD AUTHORITATIVE DETERMINISTIC PRESENTATION STATE (SQ-RENDER-01)
+        const overridesMap = new Map<string, SelectionPresentationOverride>();
+        if (props.presentationOverrides && props.presentationOverrides.length > 0) {
+          props.presentationOverrides.forEach(o => overridesMap.set(o.selectionKey, o));
+        }
 
-        // 1. Initialize default base presentation for all atoms
-        atoms.forEach((a: any) => {
-          const serial = a.serial;
-          if (serial === undefined) return;
-          let baseRep = 'cartoon';
-          let baseColor = cScheme;
+        const presentationState: ViewerPresentationState = {
+          globalRepresentation: normalizeRepresentationName(rStyle),
+          globalColorScheme: cScheme,
+          globalOpacity: currentOpacity,
+          objectOverrides: new Map(),
+          selectionOverrides: overridesMap,
+          atomColorMap: props.atomColorMap || null
+        };
 
-          if (a.hetflag) {
-            const resnUpper = (a.resn || '').toUpperCase();
-            if (['HOH', 'WAT', 'DOD', 'SOL', 'TIP3', 'TIP4', 'SPC'].includes(resnUpper)) {
-              baseRep = 'cross';
-              baseColor = '#ff4d4d';
-            } else {
-              baseRep = 'sticks';
-              baseColor = 'element';
-            }
-          } else {
-            baseRep = (rStyle || 'Cartoon').toLowerCase();
-            baseColor = cScheme;
+        const resolvedRenderState = buildViewerRenderState({
+          atoms,
+          presentationState,
+          options: {
+            minResi,
+            maxResi,
+            chainMap
           }
-
-          atomPresentationMap.set(serial, {
-            rep: baseRep,
-            color: baseColor,
-            visibility: 'visible',
-            opacity: currentOpacity
-          });
         });
 
-        // 2. Apply SpectrumEngine per-atom colors if present
-        if (props.atomColorMap && props.atomColorMap.size > 0) {
-          for (const [serial, hex] of props.atomColorMap) {
-            const cur = atomPresentationMap.get(serial);
-            if (cur) {
-              cur.color = hex;
-            }
-          }
-        }
-
-        // 3. Apply Presentation Overrides in chronological order (appliedAt ascending)
-        if (props.presentationOverrides && props.presentationOverrides.length > 0) {
-          const sortedOverrides = [...props.presentationOverrides].sort((a, b) => (a.appliedAt || 0) - (b.appliedAt || 0));
-          for (const override of sortedOverrides) {
-            if (!override.atomSerials || override.atomSerials.size === 0) continue;
-            for (const serial of override.atomSerials) {
-              const cur = atomPresentationMap.get(serial);
-              if (!cur) continue;
-              if (override.visibility === 'hidden') {
-                cur.visibility = 'hidden';
-              } else if (override.visibility === 'visible') {
-                cur.visibility = 'visible';
-              }
-              if (override.representation) {
-                cur.rep = override.representation.toLowerCase();
-              }
-              if (override.color) {
-                cur.color = override.color;
-              }
-              if (typeof override.opacity === 'number') {
-                cur.opacity = override.opacity;
-              }
-            }
-          }
-        }
-
-        // 4. Batch atoms by identical 3Dmol style object for high-performance rendering
-        const styleGroups = new Map<string, { style: any; serials: number[] }>();
-        const hiddenSerials: number[] = [];
-        const surfaceSerials: number[] = [];
-
-        for (const [serial, pres] of atomPresentationMap) {
-          if (pres.visibility === 'hidden') {
-            hiddenSerials.push(serial);
-            continue;
-          }
-          if (pres.rep === 'surface') {
-            surfaceSerials.push(serial);
-          }
-          const styleObj = get3DmolStyleForRep(pres.rep, pres.color, pres.opacity, minResi, maxResi, chainMap);
-          const styleKey = JSON.stringify(styleObj);
-          if (!styleGroups.has(styleKey)) {
-            styleGroups.set(styleKey, { style: styleObj, serials: [] });
-          }
-          styleGroups.get(styleKey)!.serials.push(serial);
-        }
-
-        // 5. Apply batch styles to 3Dmol viewer
-        for (const { style, serials } of styleGroups.values()) {
+        // 5. Apply batched styles to 3Dmol viewer
+        for (const { style, serials } of resolvedRenderState.styleGroups.values()) {
           setClickStyle({ serial: serials }, style);
         }
 
-        if (hiddenSerials.length > 0) {
-          setClickStyle({ serial: hiddenSerials }, { hidden: true });
+        if (resolvedRenderState.hiddenSerials.length > 0) {
+          setClickStyle({ serial: resolvedRenderState.hiddenSerials }, { hidden: true });
         }
 
-        if (surfaceSerials.length > 0) {
+        if (resolvedRenderState.surfaceSerials.length > 0) {
           try {
-            viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: currentOpacity, color: cScheme }, { serial: surfaceSerials });
+            viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: currentOpacity, color: cScheme }, { serial: resolvedRenderState.surfaceSerials });
           } catch (e) {}
         }
 
