@@ -104,3 +104,5 @@ export interface LegacyMolStudioSession {
   backgroundColor?: string;
   ssData?: any[];
 }
+
+export type MolStudioSession = MolStudioPSESession;

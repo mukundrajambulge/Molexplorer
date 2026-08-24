@@ -107,8 +107,8 @@ export class ScientificCommandParser {
       };
     }
 
-    // 2. COLORING: color, colour, set_color, recolor
-    if (verb === 'color' || verb === 'colour' || verb === 'set_color' || verb === 'recolor') {
+    // 2. COLORING: color, colour, set_color
+    if (verb === 'color' || verb === 'colour' || verb === 'set_color') {
       if (!lexed.args_raw.trim()) {
         throw new Error("Color syntax error: missing color specification");
       }
@@ -137,6 +137,20 @@ export class ScientificCommandParser {
         positional_args: [validatedColor, selQuery],
         named_args: {},
         color_value: validatedColor,
+        selection_query: selQuery
+      };
+    }
+
+    // SQ3. RECOLOR: recolor [selection] -> resets to element default
+    if (verb === 'recolor') {
+      const selQuery = lexed.args_raw.trim() || 'all';
+      return {
+        verb: 'recolor',
+        raw_input: raw,
+        command_type: 'color',
+        positional_args: ['element', selQuery],
+        named_args: {},
+        color_value: 'element',
         selection_query: selQuery
       };
     }
@@ -318,18 +332,6 @@ export class ScientificCommandParser {
       };
     }
 
-    // SQ3. RECOLOR / SET_COLOR
-    if (verb === 'recolor') {
-      return {
-        verb: 'recolor',
-        raw_input: raw,
-        command_type: 'color',
-        positional_args: [],
-        named_args: {},
-        color_value: 'element',
-        selection_query: 'all'
-      };
-    }
 
     // SQ3. FETCH: fetch <pdb_id>
     if (verb === 'fetch') {

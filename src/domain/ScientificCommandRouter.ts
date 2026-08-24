@@ -75,6 +75,20 @@ export interface CommandRouterResult {
   spectrumResult?: SpectrumResult;
   /** SQ3: global setting name/value */
   settingResult?: { name: string; value?: string; selection?: string };
+  /** Forwarded from SelectionParser.evaluateCommand() editing branch */
+  dipoleResult?: {
+    charge: number;
+    magnitude: number;
+    vector: { x: number; y: number; z: number };
+    com: { x: number; y: number; z: number };
+  };
+  /** Forwarded from SelectionParser.evaluateCommand() editing branch */
+  addHBonds?: {
+    donorSerial: number;
+    acceptorSerial: number;
+    energy: number;
+    distance: number;
+  }[];
 }
 
 export class ScientificCommandRouter {
@@ -483,11 +497,17 @@ export class ScientificCommandRouter {
       }
 
       case 'editing': {
-        // Delegate to existing editing handler in SelectionParser / MolStudio
+        // Delegate to existing editing handler in SelectionParser / MolStudio.
+        // evaluateCommand() requires atomIds: number[] (not optional) — normalize here.
+        const normalizedNamed = namedSelections.map(s => ({
+          name: s.name,
+          query: s.query,
+          atomIds: s.atomIds ?? []
+        }));
         const parser = atoms.length > 0 && 'canonical_id' in atoms[0]
-          ? SelectionParser.fromCanonicalAtoms(atoms as CanonicalAtom[], undefined, namedSelections)
-          : new SelectionParser(atoms as Atom[], namedSelections);
-        const legacyRes = parser.evaluateCommand(commandLine, namedSelections, activeObjectName);
+          ? SelectionParser.fromCanonicalAtoms(atoms as CanonicalAtom[], undefined, normalizedNamed)
+          : new SelectionParser(atoms as Atom[], normalizedNamed);
+        const legacyRes = parser.evaluateCommand(commandLine, normalizedNamed, activeObjectName);
         return {
           type: 'console_action',
           commandAST: ast,
@@ -497,12 +517,22 @@ export class ScientificCommandRouter {
           removeAtomSerials: legacyRes.removeAtomSerials,
           bondRequest: legacyRes.bondRequest,
           unbondRequest: legacyRes.unbondRequest,
-          setBondOrderRequest: legacyRes.setBondOrderRequest,
+          // evaluateCommand returns order: number, but CommandRouterResult needs the union type.
+          // Cast is safe because the editing kernel only produces 1 | 1.5 | 2 | 3.
+          setBondOrderRequest: legacyRes.setBondOrderRequest
+            ? { ...legacyRes.setBondOrderRequest, order: legacyRes.setBondOrderRequest.order as 1 | 1.5 | 2 | 3 }
+            : undefined,
           alterRequest: legacyRes.alterRequest,
           alterStateRequest: legacyRes.alterStateRequest,
           cycleValenceRequest: legacyRes.cycleValenceRequest,
           addHydrogensRequest: legacyRes.addHydrogensRequest,
-          removeHydrogensRequest: legacyRes.removeHydrogensRequest
+          removeHydrogensRequest: legacyRes.removeHydrogensRequest,
+          // SQ3.5: restored fields that MolStudio.tsx depends on
+          dipoleResult: (legacyRes as any).dipoleResult,
+          addHBonds: (legacyRes as any).addHBonds,
+          ramachandranReport: legacyRes.ramachandranReport,
+          addLabels: legacyRes.addLabels,
+          clearLabels: legacyRes.clearLabels
         };
       }
 

@@ -52,6 +52,8 @@ export interface Atom {
   ss?: string; // secondary structure: 'helix' | 'sheet' | 'loop'
   bFactor?: number;
   occupancy?: number;
+  formalCharge?: number;
+  partialCharge?: number;
 }
 
 const COVALENT_RADII: Record<string, number> = {
@@ -506,8 +508,12 @@ export class MolProcessor {
         if (!elem) {
           elem = name.replace(/[0-9]/g, '').trim().substring(0, 1);
         }
+        const occStr = cleanLine.length >= 60 ? cleanLine.substring(54, 60).trim() : "";
+        const occupancy = occStr ? parseFloat(occStr) : 1.0;
+        const bStr = cleanLine.length >= 66 ? cleanLine.substring(60, 66).trim() : "";
+        const bFactor = bStr ? parseFloat(bStr) : 0.0;
         this.atoms.push({
-          serial, name, resName, chainID, resSeq, x, y, z, elem, altLoc, isHetero, bonds: []
+          serial, name, resName, chainID, resSeq, x, y, z, elem, altLoc, isHetero, occupancy, bFactor, bonds: []
         });
       }
     }

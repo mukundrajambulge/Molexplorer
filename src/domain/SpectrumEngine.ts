@@ -125,8 +125,8 @@ export class SpectrumEngine {
    * Validates a spectrum property name.
    */
   static validateProperty(prop: string): SpectrumProperty {
-    const norm = prop.trim().toLowerCase() as SpectrumProperty;
-    if (!SUPPORTED_SPECTRUM_PROPERTIES.includes(norm)) {
+    const norm = (prop || '').trim().toLowerCase() as SpectrumProperty;
+    if (!norm || !SUPPORTED_SPECTRUM_PROPERTIES.includes(norm)) {
       throw new Error(
         `Spectrum syntax error: unsupported property '${prop}'. ` +
         `Supported: ${SUPPORTED_SPECTRUM_PROPERTIES.join(', ')}`
@@ -139,8 +139,8 @@ export class SpectrumEngine {
    * Validates a spectrum palette name.
    */
   static validatePalette(palette: string): SpectrumPalette {
-    const norm = palette.trim().toLowerCase() as SpectrumPalette;
-    if (!SUPPORTED_PALETTES.includes(norm)) {
+    const norm = (palette || '').trim().toLowerCase() as SpectrumPalette;
+    if (!norm || !SUPPORTED_PALETTES.includes(norm)) {
       throw new Error(
         `Spectrum syntax error: unsupported palette '${palette}'. ` +
         `Supported: ${SUPPORTED_PALETTES.join(', ')}`

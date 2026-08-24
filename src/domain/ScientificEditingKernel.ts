@@ -472,9 +472,9 @@ export class ScientificEditingKernel {
       // Update existing bond order
       targetBond = {
         ...existing,
-        order: order,
+        order: order as 1 | 1.5 | 2 | 3,
         is_aromatic: order === 1.5,
-        source: 'edited',
+        source: 'editor',
         is_inferred: false
       };
       updatedBonds = [...mol.topology.bonds];
@@ -485,9 +485,9 @@ export class ScientificEditingKernel {
         bond_id: `bond-${normA}-${normB}`,
         atom_a: normA,
         atom_b: normB,
-        order: order,
+        order: order as 1 | 1.5 | 2 | 3,
         is_aromatic: order === 1.5,
-        source: 'edited',
+        source: 'editor',
         is_inferred: false
       };
       updatedBonds = [...mol.topology.bonds, targetBond];
@@ -914,9 +914,9 @@ export class ScientificEditingKernel {
     // 8. Staging: Update bond order
     const targetBond: CanonicalBond = {
       ...existingBond,
-      order: order,
+      order: order as 1 | 1.5 | 2 | 3,
       is_aromatic: order === 1.5,
-      source: 'edited',
+      source: 'editor',
       is_inferred: false
     };
 
@@ -1244,8 +1244,11 @@ export class ScientificEditingKernel {
 
         const hAtom: CanonicalAtom = {
           canonical_id: hId,
+          source_serial: null,
+          atomic_number: 1,
           element: 'H',
           name: 'H',
+          normalized_name: 'H',
           chain_ref: atom.chain_ref,
           residue_ref: atom.residue_ref,
           residue_name: atom.residue_name,
@@ -1267,9 +1270,9 @@ export class ScientificEditingKernel {
           bond_id: `bond-${Math.min(atom.canonical_id, hId)}-${Math.max(atom.canonical_id, hId)}`,
           atom_a: Math.min(atom.canonical_id, hId),
           atom_b: Math.max(atom.canonical_id, hId),
-          order: 1.0,
+          order: 1.0 as 1,
           is_aromatic: false,
-          source: 'edited',
+          source: 'editor',
           is_inferred: false
         };
 
@@ -1912,6 +1915,7 @@ export class ScientificEditingKernel {
             res_seq: a.residue_ref,
             atom_ids: [a.canonical_id],
             is_standard: classif === 'amino_acid' || classif === 'nucleic_acid',
+            is_hetero: a.is_hetero,
             classification: classif
           });
         } else {
@@ -1927,11 +1931,14 @@ export class ScientificEditingKernel {
         if (!chainMap.has(cId)) {
           chainMap.set(cId, {
             chain_id: cId,
+            source_chain_id: cId,
             residue_ids: [r.residue_id],
+            atom_ids: [...r.atom_ids],
             classification: r.classification === 'amino_acid' ? 'protein' : 'hetero'
           });
         } else {
           chainMap.get(cId)!.residue_ids.push(r.residue_id);
+          chainMap.get(cId)!.atom_ids.push(...r.atom_ids);
         }
       }
 

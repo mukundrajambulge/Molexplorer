@@ -151,6 +151,10 @@ export default function MolStudio() {
     }
   };
 
+  const handleRemoveSolvent = () => {
+    setCleaningState(s => ({ ...s, solvent_stripped: true }));
+  };
+
   const handleDeleteSelectedAtoms = () => {
     if (processorRef.current && selectedAtomSerials.size > 0) {
       try {
@@ -168,12 +172,12 @@ export default function MolStudio() {
         });
         processorRef.current.applyScientificRevision(mutation.revision);
       } catch (err) {
-        // Fallback to legacy delete if canonical transaction encounters non-standard state
+        console.warn('Canonical remove failed, using legacy deletion:', err);
         TopologyEditor.deleteAtoms(processorRef.current, selectedAtomSerials);
       }
-      setSelectedAtomSerials(new Set());
       setAtoms([...processorRef.current.atoms]);
       setProcessedPDB(processorRef.current.toPDB());
+      setSelectedAtomSerials(new Set());
       triggerFocus();
     }
   };
@@ -286,7 +290,7 @@ export default function MolStudio() {
           const mainMol = session.molecules[0];
           setMolData({
             data: mainMol.data,
-            format: mainMol.format,
+            format: (mainMol.format === 'sdf' ? 'pdb' : mainMol.format) as 'pdb' | 'mmtf',
             name: mainMol.name
           });
         }
@@ -584,7 +588,7 @@ export default function MolStudio() {
     }
 
     if (result.deleteSelectionName) {
-      setNamedSelections(prev => prev.filter(s => s.name.toLowerCase() !== result.deleteSelectionName!.toLowerCase()));
+      setNamedSelections(namedSelections.filter(s => s.name.toLowerCase() !== result.deleteSelectionName!.toLowerCase()));
     }
 
     if (result.undoRequest && processorRef.current) {
@@ -642,7 +646,7 @@ export default function MolStudio() {
         setAtoms([...processorRef.current.atoms]);
         setProcessedPDB(processorRef.current.toPDB());
       } else {
-        setAtoms(prev => prev.filter(a => !toRemove.has(a.serial)));
+        setAtoms(atoms.filter(a => !toRemove.has(a.serial)));
       }
       setSelectedAtomSerials(new Set());
       triggerFocus();
@@ -762,7 +766,8 @@ export default function MolStudio() {
         const doc = processorRef.current.getCanonicalDocument();
         const selSerials = parser.parse(result.alterStateRequest.query);
         const reqStateId = result.alterStateRequest.stateId;
-        const targetStateId = doc.states.has(reqStateId) ? reqStateId : (doc.active_state_id || Array.from(doc.states.keys())[0]);
+        const activeObj = doc.active_object_id ? doc.objects.get(doc.active_object_id) : null;
+        const targetStateId = doc.states.has(reqStateId) ? reqStateId : (activeObj?.active_state_id || Array.from(doc.states.keys())[0]);
         const mutation = ScientificEditingKernel.alterState(
           doc,
           targetStateId,
@@ -804,7 +809,7 @@ export default function MolStudio() {
     }
 
     if (result.fetchPdbId) {
-      handleFetchPdb(result.fetchPdbId);
+      handleFetch(result.fetchPdbId);
     }
 
     if (result.addHydrogens || result.addHydrogensRequest) {
@@ -1102,10 +1107,11 @@ export default function MolStudio() {
         const mol = processorRef.current.getCanonicalMolecule();
         const mgr = revisionManagerRef.current;
         const activeRev = mgr ? mgr.getActiveRevision() : null;
+        const activeObj = doc.active_object_id ? doc.objects.get(doc.active_object_id) : null;
         return {
           documentId: doc.document_id,
           objectId: doc.active_object_id,
-          stateId: doc.active_state_id || `${mol.molecule_id}-state-1`,
+          stateId: activeObj?.active_state_id || `${mol.molecule_id}-state-1`,
           activeRevisionId: mgr?.getActiveRevisionId() || null,
           canonicalStateHash: activeRev?.canonical_state_hash || null,
           revisionHash: activeRev?.revision_hash || null,
