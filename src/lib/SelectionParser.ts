@@ -419,7 +419,11 @@ export class SelectionParser {
 
       if (currentToken === 'extend') {
         pos++;
-        const steps = parseInt(tokens[pos++], 10) || 1;
+        const stepTok = tokens[pos++];
+        const steps = parseInt(stepTok, 10);
+        if (isNaN(steps) || steps < 1) {
+          throw new Error(`Syntax error: invalid steps count '${stepTok}' for 'extend' query`);
+        }
         if (tokens[pos]?.toLowerCase() === 'of') pos++; // skip 'of'
         const operand = parseUnary();
         if (!operand) throw new Error("Syntax error: missing expression after 'extend'");
@@ -533,8 +537,38 @@ export class SelectionParser {
         return { type: 'comparison', property: normProp, op, value: val };
       }
 
-      const val = tokens[pos++] || '';
-      if (!val) throw new Error(`Syntax error: missing value for property '${normProp}'`);
+      const valList: string[] = [];
+      const firstVal = tokens[pos++];
+      if (!firstVal) throw new Error(`Syntax error: missing value for property '${normProp}'`);
+      valList.push(firstVal);
+
+      const STATEMENT_BOUNDARY_KEYWORDS = new Set([
+        'and', 'or', 'not', '&', '|', '!', '(', ')',
+        '<=', '>=', '==', '!=', '<', '>', '=',
+        'byres', 'bychain', 'bymolecule', 'bycalpha', 'byca', 'byring', 'byobject', 'bysegi', 'byfragment', 'bycell',
+        'neighbor', 'bound_to', 'extend', 'expand', 'around', 'within', 'beyond', 'of'
+      ]);
+
+      const MULTI_CHAR_PROPERTY_KEYWORDS = new Set([
+        'resn', 'res', 'resi', 'resv', 'chain', 'elem', 'element', 'symbol', 'name', 'atom',
+        'bfactor', 'occupancy', 'formal_charge', 'segid', 'altloc', 'segi', 'alt'
+      ]);
+
+      while (pos < tokens.length) {
+        const candidate = tokens[pos];
+        const candLower = candidate.toLowerCase();
+        if (
+          STATEMENT_BOUNDARY_KEYWORDS.has(candLower) ||
+          candidate.startsWith('/') ||
+          (MULTI_CHAR_PROPERTY_KEYWORDS.has(candLower) && pos + 1 < tokens.length) ||
+          this.namedSelections?.some(s => s.name.toLowerCase() === candLower)
+        ) {
+          break;
+        }
+        valList.push(tokens[pos++]);
+      }
+
+      const val = valList.join('+');
       return { type: 'property', property: normProp, value: val };
     };
 

@@ -147,3 +147,37 @@ Structured AST representation for standard PyMOL 5-tuple slash paths:
 | **Missing Operand** | Throws syntax error | `Syntax error: missing expression after '<op>'` |
 | **Invalid Distance** | Throws syntax error | `Syntax error: invalid distance for '<op>' query` |
 | **Deferred Feature** | Throws explicit deferred notice | `Selection syntax error: '<op>' is currently DEFERRED / RESEARCH...` |
+
+---
+
+## 6. Scientific Verification & Evidence Classification
+
+To maintain scientific integrity across Molexplorer, all query language operators and predicates are classified according to strict verification tiers:
+
+| Tier | Definition | Operators / Features in Tier |
+| :--- | :--- | :--- |
+| **SCIENTIFICALLY VALIDATED** | Proven against formal biophysical / chemical invariants and canonical ground-truth definitions. | `id`, `name CA`, `elem`, `all`, `none`, `protein`, `polymer`, `organic`, `inorganic`, `backbone`, `sidechain`, `formal_charge`, `q`, read-only immutability. |
+| **GEOMETRICALLY / RULE-BASED VALIDATED** | Validated against spatial distance grids and covalent bond topology graph algorithms. | `within`, `around`, `beyond`, `expand`, `neighbor`, `bound_to`, `extend`, `bymolecule`, `byres`, `bychain`, `bycalpha`, `byring`, `b < 10.0`, wildcard matching (`*`, `?`). |
+| **SOFTWARE VERIFIED** | Validated via unit test suites, regression test runners, and browser integration tests. | `index`, `rank`, `first`, `last`, `byobject`, `bysegi`, named selection registry, tokenization, error taxonomy, multi-object document scoping. |
+| **DEFERRED / RESEARCH** | Not yet implemented; fails closed with structured descriptive error messages. | `byfragment`, `bycell`. |
+
+---
+
+## 7. Universal vs Fixture-Specific Query Examples
+
+Molexplorer query algebra operates universally on any arbitrary molecular structure:
+
+### Universal Queries
+- `byres (ligand around 5.0) and not ligand`: Isolates the binding pocket residues around any ligand across all protein-ligand complexes.
+- `protein and name CA`: Isolates the C-alpha trace of any polypeptide chain.
+- `nucleic and name P`: Isolates the phosphate backbone trace of any RNA/DNA structure.
+- `polymer and not backbone`: Isolates sidechain atoms for any polymer.
+- `within 3.5 of metals`: Isolates coordination spheres around any transition metals or divalent ions.
+
+### Representative Fixture-Specific Discoveries
+- **4HHB (Hemoglobin):** `resn HEM` isolates 4 heme groups (172 atoms); `elem FE` isolates 4 iron atoms; `chain A B` isolates alpha-beta dimer subunits.
+- **1CRN (Crambin):** `elem S` isolates 6 sulfur atoms forming 3 disulfide bridges; `resi 1-20` isolates the N-terminal alpha-helix.
+- **1BNA (B-DNA):** `name P` isolates 22 phosphate backbone atoms across 12 base pairs.
+- **1UBQ (Ubiquitin):** `resi 1-76 and name CA` isolates all 76 alpha carbons.
+- **4DJW (Kinase Complex):** `organic and not polymer` isolates all 82 ligand inhibitor atoms.
+
