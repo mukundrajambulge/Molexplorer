@@ -63,25 +63,50 @@ const CHAIN_PALETTE = [
   "#1ABC9C", "#2ECC71", "#34495E", "#E67E22", "#D35400"
 ];
 
-function get3DmolStyleForRep(rep: string, color?: string | null, opacity: number = 1.0) {
+function get3DmolStyleForRep(
+  rep: string,
+  color?: string | null,
+  opacity: number = 1.0,
+  minResi: number = 1,
+  maxResi: number = 100,
+  _chainMap: Record<string, string> = {}
+) {
   const norm = (rep || 'cartoon').toLowerCase();
-  const colorSpec = color && color !== 'element' && color !== 'spectrum' && color !== 'chain'
-    ? { color }
-    : {};
+  let colorSpec: any = {};
+  if (color) {
+    const colNorm = color.toLowerCase();
+    if (colNorm === 'element' || colNorm === 'default' || colNorm === 'cpk' || colNorm === 'jmol') {
+      colorSpec = { colorscheme: 'default' };
+    } else if (colNorm === 'spectrum' || colNorm === 'rainbow') {
+      colorSpec = { colorscheme: { prop: 'resi', gradient: 'rwb', min: minResi, max: maxResi } };
+    } else if (colNorm === 'chain') {
+      colorSpec = { colorscheme: 'chain' };
+    } else {
+      colorSpec = { color };
+    }
+  } else {
+    colorSpec = { colorscheme: 'default' };
+  }
+
   switch (norm) {
     case 'sticks':
     case 'stick':
       return { stick: { ...colorSpec, radius: 0.22, opacity } };
     case 'spheres':
     case 'sphere':
+    case 'vdw':
+    case 'spacefill':
       return { sphere: { ...colorSpec, radius: 0.65, opacity } };
     case 'lines':
     case 'line':
+    case 'wireframe':
       return { line: { ...colorSpec, linewidth: 2.0 } };
     case 'cross':
       return { cross: { ...colorSpec, radius: 0.5, linewidth: 1.5 } };
     case 'ribbon':
       return { cartoon: { ...colorSpec, opacity, style: 'ribbon' } };
+    case 'surface':
+      return { stick: { ...colorSpec, radius: 0.15, opacity: 0.3 } };
     case 'cartoon':
     default:
       return { cartoon: { ...colorSpec, opacity, style: 'oval' } };
@@ -584,69 +609,132 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         const cScheme = props.colorScheme || "spectrum";
         const currentOpacity = typeof props.surfaceOpacity === 'number' ? props.surfaceOpacity : 0.8;
 
-        // Base style for protein/nucleic polymers (non-HETATMs)
-        setClickStyle({ hetflag: false }, getStyleObj(rStyle, cScheme, minResi, maxResi, chainMap, currentOpacity));
+        // STUDIO MODE PER-ATOM PRESENTATION RENDERING ENGINE
+        // Map every atom to its effective (representation, color, visibility, opacity)
+        const atomPresentationMap = new Map<number, {
+          rep: string;
+          color: string;
+          visibility: 'visible' | 'hidden';
+          opacity: number;
+        }>();
 
-        // Base style for organic ligands/inhibitors (non-water HETATMs) - Render as STICKS for high visibility
-        setClickStyle({ hetflag: true, not: { resn: ['HOH', 'WAT', 'DOD', 'SOL'] } }, {
-          stick: { colorscheme: 'default', radius: 0.22, opacity: currentOpacity },
-          sphere: { colorscheme: 'default', radius: 0.45, opacity: currentOpacity }
-        });
+        // 1. Initialize default base presentation for all atoms
+        atoms.forEach((a: any) => {
+          const serial = a.serial;
+          if (serial === undefined) return;
+          let baseRep = 'cartoon';
+          let baseColor = cScheme;
 
-        // Base style for solvent waters - Red Crosses
-        setClickStyle({ hetflag: true, resn: ['HOH', 'WAT', 'DOD', 'SOL'] }, {
-          cross: { radius: 0.5, linewidth: 1.5, color: '#ff4d4d' }
-        });
-
-        // Per-Atom Spectrum Colors (SQ4 Presentation Convergence)
-        if (props.atomColorMap && props.atomColorMap.size > 0) {
-          const colorGroups = new Map<string, number[]>();
-          for (const [serial, hex] of props.atomColorMap) {
-            if (!colorGroups.has(hex)) colorGroups.set(hex, []);
-            colorGroups.get(hex)!.push(serial);
-          }
-          for (const [hex, serials] of colorGroups) {
-            setClickStyle({ serial: serials }, get3DmolStyleForRep(rStyle, hex, currentOpacity));
-          }
-        }
-
-        // Per-Selection Presentation Overrides (SQ4 Presentation Convergence)
-        if (props.presentationOverrides && props.presentationOverrides.length > 0) {
-          for (const override of props.presentationOverrides) {
-            if (override.atomSerials.size === 0) continue;
-            const serials = Array.from(override.atomSerials);
-            if (override.visibility === 'hidden') {
-              setClickStyle({ serial: serials }, { hidden: true });
-              continue;
+          if (a.hetflag) {
+            const resnUpper = (a.resn || '').toUpperCase();
+            if (['HOH', 'WAT', 'DOD', 'SOL', 'TIP3', 'TIP4', 'SPC'].includes(resnUpper)) {
+              baseRep = 'cross';
+              baseColor = '#ff4d4d';
+            } else {
+              baseRep = 'sticks';
+              baseColor = 'element';
             }
-            const rep = override.representation || (rStyle as any);
-            const col = override.color;
-            const op = typeof override.opacity === 'number' ? override.opacity : currentOpacity;
-            setClickStyle({ serial: serials }, get3DmolStyleForRep(rep, col, op));
+          } else {
+            baseRep = (rStyle || 'Cartoon').toLowerCase();
+            baseColor = cScheme;
+          }
+
+          atomPresentationMap.set(serial, {
+            rep: baseRep,
+            color: baseColor,
+            visibility: 'visible',
+            opacity: currentOpacity
+          });
+        });
+
+        // 2. Apply SpectrumEngine per-atom colors if present
+        if (props.atomColorMap && props.atomColorMap.size > 0) {
+          for (const [serial, hex] of props.atomColorMap) {
+            const cur = atomPresentationMap.get(serial);
+            if (cur) {
+              cur.color = hex;
+            }
           }
         }
 
-        // Render Surfaces / Mesh / Dots using Representation Strategy Pattern with true opacity
-        const strategy = RepresentationStrategyFactory.getStrategy(rStyle);
-        strategy.applySurfacesOrShapes(viewer, {
-          colorScheme: cScheme,
-          minResi,
-          maxResi,
-          chainMap,
-          surfaceOpacity: currentOpacity
-        });
+        // 3. Apply Presentation Overrides in chronological order (appliedAt ascending)
+        if (props.presentationOverrides && props.presentationOverrides.length > 0) {
+          const sortedOverrides = [...props.presentationOverrides].sort((a, b) => (a.appliedAt || 0) - (b.appliedAt || 0));
+          for (const override of sortedOverrides) {
+            if (!override.atomSerials || override.atomSerials.size === 0) continue;
+            for (const serial of override.atomSerials) {
+              const cur = atomPresentationMap.get(serial);
+              if (!cur) continue;
+              if (override.visibility === 'hidden') {
+                cur.visibility = 'hidden';
+              } else if (override.visibility === 'visible') {
+                cur.visibility = 'visible';
+              }
+              if (override.representation) {
+                cur.rep = override.representation.toLowerCase();
+              }
+              if (override.color) {
+                cur.color = override.color;
+              }
+              if (typeof override.opacity === 'number') {
+                cur.opacity = override.opacity;
+              }
+            }
+          }
+        }
+
+        // 4. Batch atoms by identical 3Dmol style object for high-performance rendering
+        const styleGroups = new Map<string, { style: any; serials: number[] }>();
+        const hiddenSerials: number[] = [];
+        const surfaceSerials: number[] = [];
+
+        for (const [serial, pres] of atomPresentationMap) {
+          if (pres.visibility === 'hidden') {
+            hiddenSerials.push(serial);
+            continue;
+          }
+          if (pres.rep === 'surface') {
+            surfaceSerials.push(serial);
+          }
+          const styleObj = get3DmolStyleForRep(pres.rep, pres.color, pres.opacity, minResi, maxResi, chainMap);
+          const styleKey = JSON.stringify(styleObj);
+          if (!styleGroups.has(styleKey)) {
+            styleGroups.set(styleKey, { style: styleObj, serials: [] });
+          }
+          styleGroups.get(styleKey)!.serials.push(serial);
+        }
+
+        // 5. Apply batch styles to 3Dmol viewer
+        for (const { style, serials } of styleGroups.values()) {
+          setClickStyle({ serial: serials }, style);
+        }
+
+        if (hiddenSerials.length > 0) {
+          setClickStyle({ serial: hiddenSerials }, { hidden: true });
+        }
+
+        if (surfaceSerials.length > 0) {
+          try {
+            viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: currentOpacity, color: cScheme }, { serial: surfaceSerials });
+          } catch (e) {}
+        }
+
+        // Render global Surfaces / Mesh / Dots if global renderStyle is surface/mesh/dots
+        if (rStyle.includes('Surface') || rStyle === 'Mesh' || rStyle === 'Dots') {
+          const strategy = RepresentationStrategyFactory.getStrategy(rStyle);
+          strategy.applySurfacesOrShapes(viewer, {
+            colorScheme: cScheme,
+            minResi,
+            maxResi,
+            chainMap,
+            surfaceOpacity: currentOpacity
+          });
+        }
 
         // Apply Selection Highlighting Overlay (Glowing Luminous Markers)
         if (selectionLevel !== 'none') {
           if (molecularSelection && molecularSelection.atoms.length > 0) {
             SelectionHighlight.applySelectionOverlay(viewer, molecularSelection, '#00f2ff');
-          } else if (props.selectedAtomSerials && props.selectedAtomSerials.size > 0) {
-            const selArray = Array.from(props.selectedAtomSerials);
-            setClickStyle({ serial: selArray }, { 
-              ...getStyleObj(rStyle, '#00f2ff', minResi, maxResi, chainMap, 1.0),
-              stick: { radius: 0.26, color: '#00f2ff' },
-              sphere: { radius: 0.52, color: '#00f2ff' }
-            });
           }
         }
 
@@ -855,7 +943,7 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
     props.focusTrigger, showDipoleArrow, dipoleMoment, activeMeasurementMode, clickedAtomBuffer,
     props.backgroundColor, props.surfaceOpacity, props.ssData, props.ssMode,
     props.assemblyPDB, props.symmetryPDB, props.alignmentPDB, props.interactions, measurements,
-    selectionLevel, molecularSelection
+    selectionLevel, molecularSelection, props.presentationOverrides, props.atomColorMap
   ]);
 
   const granularityLevels: { id: SelectionLevel; label: string }[] = [

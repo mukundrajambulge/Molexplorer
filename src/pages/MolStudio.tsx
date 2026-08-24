@@ -84,6 +84,10 @@ export default function MolStudio() {
   // SQ4 Presentation Overrides & Per-Atom Colors State
   const [presentationOverrides, setPresentationOverrides] = useState<SelectionPresentationOverride[]>([]);
   const [atomColorMap, setAtomColorMap] = useState<Map<number, string> | null>(null);
+  const namedSelectionsRef = useRef(namedSelections);
+  useEffect(() => {
+    namedSelectionsRef.current = namedSelections;
+  }, [namedSelections]);
 
   // Stage 7 State Variables
   const [showSequenceViewer, setShowSequenceViewer] = useState(false);
@@ -579,21 +583,30 @@ export default function MolStudio() {
   const handleRunQuery = (query: string): { count: number; textOutput?: string } => {
     const parser = new SelectionParser(atoms);
     const activeObjectName = molData?.name || "molecule";
-    const result = ScientificCommandRouter.routeAndExecute(query, atoms, namedSelections, activeObjectName);
-    setSelectedAtomSerials(result.selectedSerials);
+    const result = ScientificCommandRouter.routeAndExecute(query, atoms, namedSelectionsRef.current, activeObjectName);
+    
+    // SQ4: Only update selectedAtomSerials if user explicitly ran a select command or a non-presentation query
+    const isPresentationCommand = result.commandAST && (result.commandAST.command_type === 'representation' || result.commandAST.command_type === 'color' || result.commandAST.command_type === 'view');
+    if (result.saveSelection || !isPresentationCommand) {
+      setSelectedAtomSerials(result.selectedSerials);
+    }
     
     if (result.saveSelection) {
       const name = result.saveSelection.name;
       const expr = result.saveSelection.query;
       const atomIds = Array.from(result.selectedSerials);
-      const exists = namedSelections.some(s => s.name.toLowerCase() === name.toLowerCase());
-      if (!exists) {
-        setNamedSelections([...namedSelections, { name, query: expr, atomIds }]);
-      }
+      const updated = [
+        ...namedSelectionsRef.current.filter(s => s.name.toLowerCase() !== name.toLowerCase()),
+        { name, query: expr, atomIds }
+      ];
+      namedSelectionsRef.current = updated;
+      setNamedSelections(updated);
     }
 
     if (result.deleteSelectionName) {
-      setNamedSelections(namedSelections.filter(s => s.name.toLowerCase() !== result.deleteSelectionName!.toLowerCase()));
+      const updated = namedSelectionsRef.current.filter(s => s.name.toLowerCase() !== result.deleteSelectionName!.toLowerCase());
+      namedSelectionsRef.current = updated;
+      setNamedSelections(updated);
     }
 
     if (result.undoRequest && processorRef.current) {
@@ -795,11 +808,16 @@ export default function MolStudio() {
       triggerFocus();
     }
 
-    if (result.setStyle) {
+    const isGlobalQuery = !result.commandAST?.selection_query || 
+      result.commandAST.selection_query === 'all' || 
+      result.commandAST.selection_query === '*' ||
+      result.selectedSerials.size === atoms.length;
+
+    if (result.setStyle && isGlobalQuery) {
       setRenderStyle(result.setStyle as RenderStyle);
     }
 
-    if (result.setColorScheme) {
+    if (result.setColorScheme && isGlobalQuery) {
       setColorScheme(result.setColorScheme);
     }
 
@@ -812,8 +830,9 @@ export default function MolStudio() {
     if (result.commandAST) {
       if (result.commandAST.command_type === 'color') {
         const colorVal = result.commandAST.color_value || 'element';
-        const selKey = result.commandAST.selection_query || 'selection';
+        const selKey = result.commandAST.selection_query || 'all';
         setPresentationOverrides(prev => {
+          const existing = prev.find(o => o.selectionKey === selKey);
           const next = prev.filter(o => o.selectionKey !== selKey);
           if (result.commandAST?.verb === 'recolor') {
             return next;
@@ -824,29 +843,31 @@ export default function MolStudio() {
             atomSerials: new Set(result.selectedSerials),
             objectScope: null,
             color: colorVal,
-            representation: null,
-            opacity: 1.0,
-            visibility: 'visible',
-            labelState: null,
+            representation: existing?.representation ?? null,
+            opacity: existing?.opacity ?? 1.0,
+            visibility: existing?.visibility ?? 'visible',
+            labelState: existing?.labelState ?? null,
             appliedAt: Date.now()
           });
           return next;
         });
       } else if (result.commandAST.command_type === 'representation') {
         const repVal = (result.commandAST.representation_value || 'cartoon') as RepresentationName;
-        const selKey = result.commandAST.selection_query || 'selection';
+        const selKey = result.commandAST.selection_query || 'all';
+        const isHide = result.commandAST?.verb === 'hide';
         setPresentationOverrides(prev => {
+          const existing = prev.find(o => o.selectionKey === selKey);
           const next = prev.filter(o => o.selectionKey !== selKey);
           next.push({
             selectionKey: selKey,
             selectionQuery: selKey,
             atomSerials: new Set(result.selectedSerials),
             objectScope: null,
-            color: null,
-            representation: repVal,
-            opacity: 1.0,
-            visibility: result.commandAST?.verb === 'hide' ? 'hidden' : 'visible',
-            labelState: null,
+            color: existing?.color ?? null,
+            representation: isHide ? (existing?.representation ?? null) : repVal,
+            opacity: existing?.opacity ?? 1.0,
+            visibility: isHide ? 'hidden' : 'visible',
+            labelState: existing?.labelState ?? null,
             appliedAt: Date.now()
           });
           return next;
@@ -1069,6 +1090,64 @@ export default function MolStudio() {
         })),
         atomColorMapSize: atomColorMap ? atomColorMap.size : 0
       }),
+      getViewerAtomState: (serial: number) => {
+        const viewer = viewerRef.current?.getViewer?.();
+        if (!viewer) return null;
+        const model = typeof viewer.getModel === 'function' ? (viewer.getModel(-1) || viewer.getModel(0) || viewer.getModel()) : null;
+        if (!model || typeof model.selectedAtoms !== 'function') return null;
+        const atomsList = model.selectedAtoms({ serial: [serial] });
+        if (!atomsList || atomsList.length === 0) return null;
+        const a = atomsList[0];
+        let rep = 'unknown';
+        if (a.style?.stick) rep = 'sticks';
+        else if (a.style?.sphere) rep = 'spheres';
+        else if (a.style?.cartoon) rep = 'cartoon';
+        else if (a.style?.line) rep = 'lines';
+        else if (a.style?.cross) rep = 'cross';
+
+        let color = a.style?.stick?.color || a.style?.cartoon?.color || a.style?.sphere?.color || a.style?.line?.color || a.style?.cross?.color || a.color;
+
+        const isHidden = a.style?.hidden === true || (!a.style?.stick && !a.style?.cartoon && !a.style?.sphere && !a.style?.line && !a.style?.cross);
+
+        return {
+          serial: a.serial,
+          style: a.style,
+          color,
+          rep: isHidden ? 'hidden' : rep,
+          hidden: isHidden,
+          resn: a.resn,
+          resi: a.resi,
+          chain: a.chain
+        };
+      },
+      getAllViewerAtoms: () => {
+        const viewer = viewerRef.current?.getViewer?.();
+        if (!viewer) return [];
+        const model = typeof viewer.getModel === 'function' ? (viewer.getModel(-1) || viewer.getModel(0) || viewer.getModel()) : null;
+        if (!model || typeof model.selectedAtoms !== 'function') return [];
+        return model.selectedAtoms({}).map((a: any) => {
+          let rep = 'unknown';
+          if (a.style?.stick) rep = 'sticks';
+          else if (a.style?.sphere) rep = 'spheres';
+          else if (a.style?.cartoon) rep = 'cartoon';
+          else if (a.style?.line) rep = 'lines';
+          else if (a.style?.cross) rep = 'cross';
+
+          let color = a.style?.stick?.color || a.style?.cartoon?.color || a.style?.sphere?.color || a.style?.line?.color || a.style?.cross?.color || a.color;
+          const isHidden = a.style?.hidden === true || (!a.style?.stick && !a.style?.cartoon && !a.style?.sphere && !a.style?.line && !a.style?.cross);
+
+          return {
+            serial: a.serial,
+            style: a.style,
+            color,
+            rep: isHidden ? 'hidden' : rep,
+            hidden: isHidden,
+            resn: a.resn,
+            resi: a.resi,
+            chain: a.chain
+          };
+        });
+      },
       setRenderStyle: (style: RenderStyle) => setRenderStyle(style),
       setColorScheme: (scheme: string) => setColorScheme(scheme),
       setSurfaceOpacity: (val: number) => setSurfaceOpacity(val),
