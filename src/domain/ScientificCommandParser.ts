@@ -174,7 +174,7 @@ export class ScientificCommandParser {
       };
     }
 
-    // 4. VIEW / CAMERA: zoom, center, orient
+    // 4. VIEW / CAMERA: zoom, center, orient (SQ3: typed camera_operation)
     if (verb === 'zoom' || verb === 'center' || verb === 'orient') {
       const selQuery = lexed.args_raw.trim() || 'all';
       return {
@@ -183,7 +183,8 @@ export class ScientificCommandParser {
         command_type: 'view',
         positional_args: [selQuery],
         named_args: {},
-        selection_query: selQuery
+        selection_query: selQuery,
+        camera_operation: verb as 'zoom' | 'center' | 'orient'
       };
     }
 
@@ -298,6 +299,49 @@ export class ScientificCommandParser {
         command_type: 'editing',
         positional_args: lexed.comma_args,
         named_args: {}
+      };
+    }
+
+    // SQ3. GLOBAL SETTINGS: set, unset, bg_color
+    if (verb === 'set' || verb === 'unset' || verb === 'bg_color') {
+      const settingName = lexed.comma_args[0]?.trim() || lexed.args_raw.split(/\s+/)[0] || '';
+      const settingValue = lexed.comma_args[1]?.trim() || lexed.args_raw.split(/\s+/).slice(1).join(' ') || undefined;
+      const settingSelection = lexed.comma_args[2]?.trim() || undefined;
+      if (!settingName) throw new Error(`Command syntax error: '${verb}' requires a setting name`);
+      return {
+        verb,
+        raw_input: raw,
+        command_type: 'set',
+        positional_args: lexed.comma_args,
+        named_args: {},
+        setting_args: { name: settingName, value: settingValue, selection: settingSelection }
+      };
+    }
+
+    // SQ3. RECOLOR / SET_COLOR
+    if (verb === 'recolor') {
+      return {
+        verb: 'recolor',
+        raw_input: raw,
+        command_type: 'color',
+        positional_args: [],
+        named_args: {},
+        color_value: 'element',
+        selection_query: 'all'
+      };
+    }
+
+    // SQ3. FETCH: fetch <pdb_id>
+    if (verb === 'fetch') {
+      const pdbId = lexed.args_raw.trim().split(/[\s,]+/)[0];
+      if (!pdbId) throw new Error("Command syntax error: 'fetch' requires a PDB ID (e.g. 'fetch 4HHB')");
+      return {
+        verb: 'fetch',
+        raw_input: raw,
+        command_type: 'fetch',
+        positional_args: [pdbId],
+        named_args: {},
+        fetch_args: { pdbId }
       };
     }
 

@@ -1,7 +1,7 @@
 /**
  * ScientificCommandRouter.ts
- * Authoritative Selection-Aware Command Router for Phase SQ2.
- * 
+ * Authoritative Selection-Aware Command Router for Phase SQ2/SQ3.
+ *
  * Implements the full pipeline:
  * Raw Input
  *   ↓
@@ -17,7 +17,7 @@
  *   ↓
  * Canonical Selection Evaluator
  *   ↓
- * Command Execution
+ * Command Execution (presentation, editing, measurement, analysis)
  */
 
 import { CanonicalAtom, MeasurementResult, InteractionAnalysisResult } from '../types/domain';
@@ -29,6 +29,7 @@ import { CommandLexer } from './CommandLexer';
 import { ScientificCommandParser } from './ScientificCommandParser';
 import { LabelExpressionEvaluator } from './LabelExpressionEvaluator';
 import { CommandASTNode } from './CommandAST';
+import { SpectrumEngine, SpectrumProperty, SpectrumPalette, SpectrumResult } from './SpectrumEngine';
 
 export interface CommandRouterResult {
   type: 'measurement' | 'analysis' | 'selection' | 'console_action';
@@ -57,6 +58,8 @@ export interface CommandRouterResult {
   setColorScheme?: string;
   setHiddenCategory?: string;
   triggerZoom?: boolean;
+  /** SQ3: typed camera operation */
+  cameraOperation?: 'zoom' | 'center' | 'orient';
   fetchPdbId?: string;
   addHydrogens?: boolean;
   removeHydrogens?: boolean;
@@ -68,6 +71,10 @@ export interface CommandRouterResult {
   redoRequest?: boolean;
   historyRequest?: boolean;
   ramachandranReport?: any[];
+  /** SQ3: per-atom spectrum color assignments */
+  spectrumResult?: SpectrumResult;
+  /** SQ3: global setting name/value */
+  settingResult?: { name: string; value?: string; selection?: string };
 }
 
 export class ScientificCommandRouter {
@@ -268,13 +275,21 @@ export class ScientificCommandRouter {
       case 'view': {
         const selQuery = ast.selection_query || 'all';
         const selectedSerials = evaluateSelection(selQuery);
+        // SQ3: distinct camera operations — zoom frames region, center only resets rotation pivot,
+        // orient aligns principal inertia axes. All are READ-ONLY; none create revisions.
+        const cameraOp = ast.camera_operation || 'zoom';
+        let cameraText = '';
+        if (cameraOp === 'zoom') cameraText = `zoom: reframed view around ${selectedSerials.size} atoms (${selQuery})`;
+        else if (cameraOp === 'center') cameraText = `center: rotation pivot set to centroid of ${selectedSerials.size} atoms (${selQuery})`;
+        else cameraText = `orient: principal axes aligned for ${selectedSerials.size} atoms (${selQuery})`;
         return {
           type: 'console_action',
           commandAST: ast,
           selectedSerials,
           count: selectedSerials.size,
           triggerZoom: true,
-          textOutput: `${ast.verb}: focused view on ${selectedSerials.size} atoms (${selQuery})`
+          cameraOperation: cameraOp,
+          textOutput: cameraText
         };
       }
 
@@ -306,15 +321,74 @@ export class ScientificCommandRouter {
       case 'spectrum': {
         const selQuery = ast.selection_query || 'all';
         const selectedSerials = evaluateSelection(selQuery);
-        const prop = ast.spectrum_args?.property || 'b';
-        const palette = ast.spectrum_args?.palette || 'rainbow';
+        const rawProp = ast.spectrum_args?.property || 'b';
+        const rawPalette = ast.spectrum_args?.palette || 'rainbow';
+
+        // SQ3: validate property and palette through typed SpectrumEngine
+        let prop: SpectrumProperty;
+        let palette: SpectrumPalette;
+        try {
+          prop = SpectrumEngine.validateProperty(rawProp);
+        } catch (e: any) {
+          throw new Error(`Spectrum syntax error: ${e.message}`);
+        }
+        try {
+          palette = SpectrumEngine.validatePalette(rawPalette);
+        } catch (e: any) {
+          throw new Error(`Spectrum syntax error: ${e.message}`);
+        }
+
+        const minOverride = ast.spectrum_args?.min;
+        const maxOverride = ast.spectrum_args?.max;
+
+        const spectrumResult = SpectrumEngine.map(
+          atoms,
+          selectedSerials,
+          prop,
+          palette,
+          minOverride,
+          maxOverride
+        );
+
         return {
           type: 'console_action',
           commandAST: ast,
           selectedSerials,
           count: selectedSerials.size,
           setColorScheme: 'spectrum',
-          textOutput: `spectrum: mapped '${prop}' with palette '${palette}' across ${selectedSerials.size} atoms`
+          spectrumResult,
+          textOutput:
+            `spectrum: property='${prop}' palette='${palette}' ` +
+            `range=[${spectrumResult.minValue.toFixed(2)}, ${spectrumResult.maxValue.toFixed(2)}] ` +
+            `${spectrumResult.coveredCount} atoms colored, ${spectrumResult.missingCount} missing (grey fallback)`
+        };
+      }
+
+      case 'set': {
+        // SQ3: Global setting command — presentation state only, never scientific state
+        const settingName = ast.setting_args?.name || '';
+        const settingValue = ast.setting_args?.value;
+        const settingSelection = ast.setting_args?.selection;
+        return {
+          type: 'console_action',
+          commandAST: ast,
+          selectedSerials: new Set(),
+          count: 0,
+          settingResult: { name: settingName, value: settingValue, selection: settingSelection },
+          textOutput: `set: ${settingName}=${settingValue ?? 'default'}${settingSelection ? ` for (${settingSelection})` : ''}`
+        };
+      }
+
+      case 'fetch': {
+        // SQ3: fetch <pdb_id> — triggers PDB download
+        const pdbId = ast.fetch_args?.pdbId || '';
+        return {
+          type: 'console_action',
+          commandAST: ast,
+          selectedSerials: new Set(),
+          count: 0,
+          fetchPdbId: pdbId,
+          textOutput: `fetch: requesting PDB entry '${pdbId}'`
         };
       }
 

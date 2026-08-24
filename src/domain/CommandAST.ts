@@ -1,6 +1,6 @@
 /**
  * CommandAST.ts
- * Authoritative Typed Command Abstract Syntax Tree for Phase SQ2.
+ * Authoritative Typed Command Abstract Syntax Tree for Phase SQ2/SQ3.
  */
 
 export type CommandType =
@@ -10,11 +10,16 @@ export type CommandType =
   | 'view'
   | 'label'
   | 'spectrum'
+  | 'set'
+  | 'fetch'
   | 'measurement'
   | 'analysis'
   | 'editing'
   | 'history'
   | 'query';
+
+/** SQ3: explicit camera operation kinds */
+export type CameraOperation = 'zoom' | 'center' | 'orient';
 
 export type LabelExpressionNode =
   | { type: 'property'; property: 'name' | 'resn' | 'resi' | 'chain' | 'elem' | 'b' | 'q' | 'formal_charge' | 'id' | 'index' | 'rank' }
@@ -39,6 +44,18 @@ export interface CommandASTNode {
     selection?: string;
     min?: number;
     max?: number;
+  };
+  /** SQ3: typed camera operation */
+  camera_operation?: CameraOperation;
+  /** SQ3: set/unset global settings */
+  setting_args?: {
+    name: string;
+    value?: string;
+    selection?: string;
+  };
+  /** SQ3: fetch PDB ID */
+  fetch_args?: {
+    pdbId: string;
   };
   editing_args?: any;
 }
