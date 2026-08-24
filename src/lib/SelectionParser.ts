@@ -904,6 +904,13 @@ export class SelectionParser {
     undoRequest?: boolean;
     redoRequest?: boolean;
     historyRequest?: boolean;
+    addHydrogensRequest?: {
+      query?: string;
+      fillOnly?: boolean;
+    };
+    removeHydrogensRequest?: {
+      query?: string;
+    };
   } {
     const qTrim = query.trim();
     const qLower = qTrim.toLowerCase();
@@ -934,6 +941,57 @@ export class SelectionParser {
         selectedSerials: new Set<number>(),
         historyRequest: true,
         textOutput: 'history: inspected scientific revision ledger.'
+      };
+    }
+
+    // Hydrogen Operations: h_add, hadd, add_h
+    if (qLower === 'h_add' || qLower === 'hadd' || qLower === 'add_h' || qLower.startsWith('h_add ') || qLower.startsWith('hadd ') || qLower.startsWith('add_h ')) {
+      let sel = '';
+      if (qLower.startsWith('h_add ')) sel = qTrim.slice(6).trim();
+      else if (qLower.startsWith('hadd ')) sel = qTrim.slice(5).trim();
+      else if (qLower.startsWith('add_h ')) sel = qTrim.slice(6).trim();
+
+      const serials = sel ? this.parse(sel) : new Set(this.atoms.map(a => a.serial));
+      return {
+        selectedSerials: serials,
+        addHydrogens: true,
+        addHydrogensRequest: { query: sel || 'all', fillOnly: false },
+        textOutput: `h_add: modeled hydrogens added to selection (${serials.size} target atoms).`
+      };
+    }
+
+    // Hydrogen Operations: h_fill, hfill, fill_h
+    if (qLower === 'h_fill' || qLower === 'hfill' || qLower === 'fill_h' || qLower.startsWith('h_fill ') || qLower.startsWith('hfill ') || qLower.startsWith('fill_h ')) {
+      let sel = '';
+      if (qLower.startsWith('h_fill ')) sel = qTrim.slice(7).trim();
+      else if (qLower.startsWith('hfill ')) sel = qTrim.slice(6).trim();
+      else if (qLower.startsWith('fill_h ')) sel = qTrim.slice(7).trim();
+
+      const serials = sel ? this.parse(sel) : new Set(this.atoms.map(a => a.serial));
+      return {
+        selectedSerials: serials,
+        addHydrogens: true,
+        addHydrogensRequest: { query: sel || 'all', fillOnly: true },
+        textOutput: `h_fill: unsaturated valencies filled with modeled hydrogens (${serials.size} target atoms).`
+      };
+    }
+
+    // Hydrogen Removal: h_remove, remove_h, del_h, hdel, h_del
+    if (qLower === 'h_remove' || qLower === 'remove_h' || qLower === 'del_h' || qLower === 'hdel' || qLower === 'h_del' ||
+        qLower.startsWith('h_remove ') || qLower.startsWith('remove_h ') || qLower.startsWith('del_h ') || qLower.startsWith('hdel ') || qLower.startsWith('h_del ')) {
+      let sel = '';
+      if (qLower.startsWith('h_remove ')) sel = qTrim.slice(9).trim();
+      else if (qLower.startsWith('remove_h ')) sel = qTrim.slice(9).trim();
+      else if (qLower.startsWith('del_h ')) sel = qTrim.slice(6).trim();
+      else if (qLower.startsWith('hdel ')) sel = qTrim.slice(5).trim();
+      else if (qLower.startsWith('h_del ')) sel = qTrim.slice(6).trim();
+
+      const serials = sel ? this.parse(sel) : this.parse('elem H');
+      return {
+        selectedSerials: serials,
+        removeHydrogens: true,
+        removeHydrogensRequest: { query: sel || 'elem H' },
+        textOutput: `h_remove: removed hydrogen atoms matching selection (${serials.size} atoms).`
       };
     }
 

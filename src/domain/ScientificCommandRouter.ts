@@ -47,6 +47,8 @@ export interface CommandRouterResult {
   fetchPdbId?: string;
   addHydrogens?: boolean;
   removeHydrogens?: boolean;
+  addHydrogensRequest?: { query?: string; fillOnly?: boolean };
+  removeHydrogensRequest?: { query?: string };
   addLabels?: Array<{ serial: number; text: string }>;
   clearLabels?: number[];
   undoRequest?: boolean;
@@ -205,6 +207,8 @@ export class ScientificCommandRouter {
         fetchPdbId: res.fetchPdbId,
         addHydrogens: res.addHydrogens,
         removeHydrogens: res.removeHydrogens,
+        addHydrogensRequest: res.addHydrogensRequest,
+        removeHydrogensRequest: res.removeHydrogensRequest,
         addLabels: res.addLabels,
         clearLabels: res.clearLabels,
         addMeasurement: res.addMeasurement,

@@ -30,12 +30,40 @@ export const ELEMENT_VALENCE_LIMITS: Record<string, ValenceLimits> = {
   AR: { standard: 0, max: 0, hardMax: 0 },
   K: { standard: 1, max: 1, hardMax: 1 },
   CA: { standard: 2, max: 2, hardMax: 2 },
+  MN: { standard: 2, max: 4, hardMax: 6 },
+  FE: { standard: 2, max: 3, hardMax: 6 },
+  CO: { standard: 2, max: 3, hardMax: 6 },
+  NI: { standard: 2, max: 2, hardMax: 6 },
+  CU: { standard: 1, max: 2, hardMax: 4 },
+  ZN: { standard: 2, max: 2, hardMax: 4 },
   BR: { standard: 1, max: 1, hardMax: 3 },
   I: { standard: 1, max: 1, hardMax: 5 }
 };
 
+export const COMMON_METALS = new Set([
+  'LI', 'NA', 'K', 'RB', 'CS', 'MG', 'CA', 'SR', 'BA',
+  'AL', 'GA', 'IN', 'SN', 'PB', 'SC', 'TI', 'V', 'CR',
+  'MN', 'FE', 'CO', 'NI', 'CU', 'ZN', 'MO', 'TC', 'RU',
+  'RH', 'PD', 'AG', 'CD', 'PT', 'AU', 'HG'
+]);
+
+export interface HydrogenFillEligibility {
+  eligible: boolean;
+  rejection_reason?:
+    | 'METALS_DEFERRED'
+    | 'NON_HYDROGEN_ACCEPTOR_ELEMENT'
+    | 'VALENCE_SATURATED'
+    | 'UNSUPPORTED_FORMAL_CHARGE'
+    | 'HYPERVALENT_DEFERRED'
+    | 'ALREADY_HYDROGEN';
+  target_valence: number;
+  bond_order_sum: number;
+  remaining_valence: number;
+  needed_hydrogens: number;
+}
+
 /**
- * Calculates the total valence (sum of incident bond orders) for a canonical atom.
+ * Calculates the total incident bond order sum for a canonical atom.
  */
 export function calculateAtomValence(
   atomId: number,
@@ -49,6 +77,106 @@ export function calculateAtomValence(
     }
   }
   return sum;
+}
+
+export const bond_order_sum = calculateAtomValence;
+
+/**
+ * Computes nominal target valence for an atom based on element and formal charge.
+ */
+export function getTargetValence(atom: CanonicalAtom): number {
+  const elem = atom.element.toUpperCase().trim();
+  const charge = atom.formal_charge || 0;
+
+  switch (elem) {
+    case 'C':
+      return 4;
+    case 'N':
+      return charge > 0 ? 4 : 3;
+    case 'O':
+      return charge < 0 ? 1 : (charge > 0 ? 3 : 2);
+    case 'S':
+      return charge < 0 ? 1 : 2;
+    case 'P':
+      return 3;
+    case 'H':
+      return 1;
+    case 'F':
+    case 'CL':
+    case 'BR':
+    case 'I':
+      return 1;
+    default:
+      return ELEMENT_VALENCE_LIMITS[elem]?.standard || 0;
+  }
+}
+
+/**
+ * Formal Hydrogen Fill Eligibility Predicate: hydrogen_fill_eligibility(atom)
+ */
+export function checkHydrogenFillEligibility(
+  atom: CanonicalAtom,
+  topologyBonds: CanonicalBond[]
+): HydrogenFillEligibility {
+  const elem = atom.element.toUpperCase().trim();
+  const boSum = calculateAtomValence(atom.canonical_id, topologyBonds);
+
+  if (elem === 'H') {
+    return {
+      eligible: false,
+      rejection_reason: 'ALREADY_HYDROGEN',
+      target_valence: 1,
+      bond_order_sum: boSum,
+      remaining_valence: 0,
+      needed_hydrogens: 0
+    };
+  }
+
+  if (COMMON_METALS.has(elem)) {
+    return {
+      eligible: false,
+      rejection_reason: 'METALS_DEFERRED',
+      target_valence: ELEMENT_VALENCE_LIMITS[elem]?.standard || 2,
+      bond_order_sum: boSum,
+      remaining_valence: 0,
+      needed_hydrogens: 0
+    };
+  }
+
+  const allowedNonMetals = new Set(['C', 'N', 'O', 'S', 'P']);
+  if (!allowedNonMetals.has(elem)) {
+    return {
+      eligible: false,
+      rejection_reason: 'NON_HYDROGEN_ACCEPTOR_ELEMENT',
+      target_valence: ELEMENT_VALENCE_LIMITS[elem]?.standard || 0,
+      bond_order_sum: boSum,
+      remaining_valence: 0,
+      needed_hydrogens: 0
+    };
+  }
+
+  const targetVal = getTargetValence(atom);
+  const remaining = Math.max(0, targetVal - boSum);
+  const needed = Math.floor(remaining);
+
+  if (boSum >= targetVal || needed <= 0) {
+    return {
+      eligible: false,
+      rejection_reason: 'VALENCE_SATURATED',
+      target_valence: targetVal,
+      bond_order_sum: boSum,
+      remaining_valence: remaining,
+      needed_hydrogens: 0
+    };
+  }
+
+  return {
+    eligible: true,
+    target_valence: targetVal,
+    bond_order_sum: boSum,
+    remaining_valence: remaining,
+    needed_hydrogens: needed
+  };
 }
 
 /**

@@ -123,9 +123,15 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
       });
     }
 
-    const resizeObserver = new ResizeObserver(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
       if (viewerRef.current) {
         viewerRef.current.resize();
+        if (entries[0]?.contentRect && entries[0].contentRect.width > 0 && entries[0].contentRect.height > 0) {
+          if (!lastZoomedData.current && props.pdbData) {
+            viewerRef.current.zoomTo();
+            lastZoomedData.current = props.pdbData;
+          }
+        }
         viewerRef.current.render();
       }
     });

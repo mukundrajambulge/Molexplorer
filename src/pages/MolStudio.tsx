@@ -807,12 +807,65 @@ export default function MolStudio() {
       handleFetchPdb(result.fetchPdbId);
     }
 
-    if (result.addHydrogens) {
-      handleAddHydrogens(result.selectedSerials);
+    if (result.addHydrogens || result.addHydrogensRequest) {
+      const fillOnly = result.addHydrogensRequest?.fillOnly;
+      const targetSerials = result.selectedSerials;
+      if (processorRef.current) {
+        try {
+          const mgr = getOrCreateRevisionManager(processorRef.current);
+          const doc = processorRef.current.getCanonicalDocument();
+          const targetIds = targetSerials && targetSerials.size > 0
+            ? Array.from(targetSerials)
+            : processorRef.current.atoms.map(a => a.serial);
+          const mutation = fillOnly
+            ? ScientificEditingKernel.fillHydrogens(doc, targetIds, {
+                objectId: doc.active_object_id,
+                author: 'User',
+                currentRevision: mgr.getActiveRevision()
+              })
+            : ScientificEditingKernel.addHydrogens(doc, targetIds, {
+                objectId: doc.active_object_id,
+                author: 'User',
+                currentRevision: mgr.getActiveRevision()
+              });
+          processorRef.current.applyScientificRevision(mutation.revision);
+          mgr.addRevision(mutation.revision, mutation.provenance);
+          setAtoms([...processorRef.current.atoms]);
+          setProcessedPDB(processorRef.current.toPDB());
+        } catch (err: any) {
+          console.warn('Add/fill hydrogens error:', err.message);
+        }
+        triggerFocus();
+      } else {
+        handleAddHydrogens(result.selectedSerials);
+      }
     }
 
-    if (result.removeHydrogens) {
-      handleRemoveHydrogens(result.selectedSerials);
+    if (result.removeHydrogens || result.removeHydrogensRequest) {
+      const targetSerials = result.selectedSerials;
+      if (processorRef.current) {
+        try {
+          const mgr = getOrCreateRevisionManager(processorRef.current);
+          const doc = processorRef.current.getCanonicalDocument();
+          const targetIds = targetSerials && targetSerials.size > 0
+            ? Array.from(targetSerials)
+            : undefined;
+          const mutation = ScientificEditingKernel.removeHydrogens(doc, targetIds, {
+            objectId: doc.active_object_id,
+            author: 'User',
+            currentRevision: mgr.getActiveRevision()
+          });
+          processorRef.current.applyScientificRevision(mutation.revision);
+          mgr.addRevision(mutation.revision, mutation.provenance);
+          setAtoms([...processorRef.current.atoms]);
+          setProcessedPDB(processorRef.current.toPDB());
+        } catch (err: any) {
+          console.warn('Remove hydrogens error:', err.message);
+        }
+        triggerFocus();
+      } else {
+        handleRemoveHydrogens(result.selectedSerials);
+      }
     }
 
     if (result.addLabels) {

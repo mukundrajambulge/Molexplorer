@@ -236,6 +236,34 @@ export function getColorFunction(
       }
     }
 
+    // Named Color Map Lookup
+    const NAMED_COLOR_MAP: Record<string, string> = {
+      'yellow': '#ffff00',
+      'cyan': '#00ffff',
+      'green': '#22c55e',
+      'forest': '#15803d',
+      'lime': '#84cc16',
+      'red': '#ef4444',
+      'blue': '#3b82f6',
+      'deepblue': '#1d4ed8',
+      'marine': '#0284c7',
+      'orange': '#f97316',
+      'magenta': '#ec4899',
+      'purple': '#a855f7',
+      'violet': '#7c3aed',
+      'pink': '#f472b6',
+      'teal': '#14b8a6',
+      'gray': '#94a3b8',
+      'grey': '#94a3b8',
+      'white': '#ffffff',
+      'black': '#000000',
+      'gold': '#eab308',
+      'silver': '#cbd5e1'
+    };
+    if (NAMED_COLOR_MAP[csLower]) {
+      return NAMED_COLOR_MAP[csLower];
+    }
+
     // Custom Hex String Fallback
     const isHex = /^#[0-9A-F]{6}$/i.test(colorScheme);
     return isHex ? colorScheme : '#94a3b8';
