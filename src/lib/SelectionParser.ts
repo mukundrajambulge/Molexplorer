@@ -18,6 +18,11 @@ export interface Atom {
   altLoc?: string;
   isHetero?: boolean;
   ss?: string;
+  formalCharge?: number;
+  index?: number;
+  rank?: number;
+  model?: string;
+  segi?: string;
 }
 
 class SpatialHashGrid {
@@ -116,7 +121,7 @@ export class SelectionParser {
     const idToIdx = new Map<number, number>();
     canonicalAtoms.forEach((a, idx) => idToIdx.set(a.canonical_id, idx));
 
-    const parserAtoms: Atom[] = canonicalAtoms.map(ca => ({
+    const parserAtoms: Atom[] = canonicalAtoms.map((ca, idx) => ({
       serial: ca.canonical_id,
       name: ca.name,
       resName: ca.residue_name,
@@ -134,7 +139,10 @@ export class SelectionParser {
       bFactor: ca.b_factor,
       occupancy: ca.occupancy,
       ss: ca.secondary_structure,
-      isModeledH: ca.modeled_hydrogen
+      formalCharge: ca.formal_charge,
+      index: idx,
+      rank: idx + 1,
+      segi: ca.alt_loc
     }));
     return new SelectionParser(parserAtoms, namedSelections);
   }
@@ -190,28 +198,106 @@ export class SelectionParser {
   }
 
   tokenize(query: string): string[] {
-    const tokenRegex = /\b(and|or|not|byres|bychain|bymolecule|bycalpha|byca|byring|byfragment|bycell|neighbor|bound_to|extend|expand|around|within|beyond|of|resn|resi|chain|elem|name|b|q|id|alt|segi|metals|donors?|acceptors?|polymer\.protein|polymer\.nucleic|polymer|backbone|sidechain|organic|inorganic|solvent|hetatm|hydrogens|guide|visible|enabled|all|none)\b|<=|>=|==|!=|<|>|=|\(|\)|[a-zA-Z0-9_\-\*\.\+]+/gi;
+    // Regex matches words, slash macros, comparisons, operators, and parenthetical delimiters
+    const tokenRegex = /\/[a-zA-Z0-9_\-\*\.\+\:\,\/]+|\b(and|or|not|byres|bychain|bymolecule|bycalpha|byca|byring|byobject|bysegi|byfragment|bycell|neighbor|bound_to|extend|expand|around|within|beyond|of|resn|res|resi|resv|chain|elem|element|symbol|name|atom|b|bfactor|q|occupancy|formal_charge|fc|id|index|rank|alt|altloc|segi|segid|ss|first|last|metals|donors?|acceptors?|polymer\.protein|polymer\.nucleic|polymer|protein|nucleic|backbone|sidechain|organic|inorganic|solvent|waters?|hetatm|hydrogens?|hydro|h|guide|visible|enabled|all|none)\b|<=|>=|==|!=|<|>|=|\(|\)|&|\||!|[a-zA-Z0-9_\-\*\.\+\:\,]+/gi;
     return query.match(tokenRegex) || [];
   }
 
   buildExpression(tokens: string[]): any {
     let pos = 0;
 
-    const parseExpression = (): any => {
-      let left = parseTerm();
-      while (pos < tokens.length && tokens[pos]?.toLowerCase() === 'or') {
+    // Helper to parse slash macros: /[model]/[segi]/[chain]/[resi]/[name]
+    const parseMacro = (tok: string): any => {
+      const raw = tok.startsWith('/') ? tok.slice(1) : tok;
+      const parts = raw.split('/');
+      if (parts.length === 5) {
+        return {
+          type: 'macro',
+          model: parts[0] || undefined,
+          segi: parts[1] || undefined,
+          chain: parts[2] || undefined,
+          resi: parts[3] || undefined,
+          name: parts[4] || undefined
+        };
+      }
+      if (parts.length === 4) {
+        // Shorthand //chain/resi/name or /segi/chain/resi/
+        if (parts[0] === '') {
+          return {
+            type: 'macro',
+            chain: parts[1] || undefined,
+            resi: parts[2] || undefined,
+            name: parts[3] || undefined
+          };
+        }
+        return {
+          type: 'macro',
+          model: parts[0] || undefined,
+          chain: parts[1] || undefined,
+          resi: parts[2] || undefined,
+          name: parts[3] || undefined
+        };
+      }
+      if (parts.length === 3) {
+        // Shorthand ///resi/ or //chain/resi
+        if (parts[0] === '' && parts[1] === '') {
+          return {
+            type: 'macro',
+            resi: parts[2] || undefined
+          };
+        }
+        return {
+          type: 'macro',
+          chain: parts[0] || undefined,
+          resi: parts[1] || undefined,
+          name: parts[2] || undefined
+        };
+      }
+      return {
+        type: 'macro',
+        name: parts[parts.length - 1] || undefined
+      };
+    };
+
+    // Level 0 (Weakest prefix): byres, bychain, bymolecule, bycalpha, byca, byring, byobject, bysegi
+    const parseHierarchy = (): any => {
+      if (pos < tokens.length) {
+        const tok = tokens[pos].toLowerCase();
+        if (['byres', 'bychain', 'bymolecule', 'bycalpha', 'byca', 'byring', 'byobject', 'bysegi'].includes(tok)) {
+          pos++;
+          const operand = parseHierarchy();
+          if (!operand) throw new Error(`Syntax error: missing expression after '${tok}'`);
+          const opType = tok === 'byca' ? 'bycalpha' : tok;
+          return { type: opType, operand };
+        }
+        if (tok === 'byfragment') {
+          throw new Error("Selection syntax error: 'byfragment' is currently DEFERRED / RESEARCH pending fragment partition specification. Use 'bymolecule' for covalent connected components.");
+        }
+        if (tok === 'bycell') {
+          throw new Error("Selection syntax error: 'bycell' is currently DEFERRED / RESEARCH pending crystallographic symmetry infrastructure.");
+        }
+      }
+      return parseDisjunction();
+    };
+
+    // Level 1: or, |
+    const parseDisjunction = (): any => {
+      let left = parseConjunction();
+      while (pos < tokens.length && (tokens[pos]?.toLowerCase() === 'or' || tokens[pos] === '|')) {
         pos++;
-        const right = parseTerm();
+        const right = parseConjunction();
         if (!right) throw new Error("Syntax error: missing expression after 'or'");
         left = { type: 'or', left, right };
       }
       return left;
     };
 
-    const parseTerm = (): any => {
-      let left = parseFactor();
-      while (pos < tokens.length && tokens[pos]?.toLowerCase() !== 'or' && tokens[pos] !== ')') {
+    // Level 2: and, &, and whitespace implicit juxtaposition
+    const parseConjunction = (): any => {
+      let left = parseUnary();
+      while (pos < tokens.length && tokens[pos]?.toLowerCase() !== 'or' && tokens[pos] !== '|' && tokens[pos] !== ')') {
         const tok = tokens[pos]?.toLowerCase();
+        // Postfix spatial modifiers: <S> around <d>, <S> within <d>, <S> beyond <d>, <S> expand <d>
         if (tok === 'around' || tok === 'within' || tok === 'beyond' || tok === 'expand') {
           pos++;
           const dist = parseFloat(tokens[pos++]);
@@ -219,29 +305,74 @@ export class SelectionParser {
           left = { type: tok, distance: dist, operand: left };
           continue;
         }
-        if (tok === 'and') {
+        if (tok === 'and' || tok === '&') {
           pos++;
         }
-        const right = parseFactor();
+        const right = parseUnary();
         if (!right) throw new Error("Syntax error: missing expression after 'and'");
         left = { type: 'and', left, right };
       }
       return left;
     };
 
-    const parseFactor = (): any => {
+    // Level 3: Unary operators (not, !, neighbor, bound_to, extend <N>, prefix within/around/beyond/expand)
+    const parseUnary = (): any => {
       if (pos >= tokens.length) return null;
       const currentToken = tokens[pos].toLowerCase();
 
-      if (currentToken === 'not') {
+      if (currentToken === 'not' || currentToken === '!') {
         pos++;
-        const operand = parseFactor();
+        const operand = parseUnary();
         if (!operand) throw new Error("Syntax error: missing expression after 'not'");
         return { type: 'not', operand };
       }
+
+      if (currentToken === 'neighbor') {
+        pos++;
+        const operand = parseUnary();
+        if (!operand) throw new Error("Syntax error: missing expression after 'neighbor'");
+        return { type: 'neighbor', operand };
+      }
+
+      if (currentToken === 'bound_to') {
+        pos++;
+        const operand = parseUnary();
+        if (!operand) throw new Error("Syntax error: missing expression after 'bound_to'");
+        return { type: 'bound_to', operand };
+      }
+
+      if (currentToken === 'extend') {
+        pos++;
+        const steps = parseInt(tokens[pos++], 10) || 1;
+        if (tokens[pos]?.toLowerCase() === 'of') pos++; // skip 'of'
+        const operand = parseUnary();
+        if (!operand) throw new Error("Syntax error: missing expression after 'extend'");
+        return { type: 'extend', steps, operand };
+      }
+
+      if (currentToken === 'around' || currentToken === 'within' || currentToken === 'beyond' || currentToken === 'expand') {
+        pos++;
+        const dist = parseFloat(tokens[pos++]);
+        if (isNaN(dist)) throw new Error(`Syntax error: invalid distance for '${currentToken}' query`);
+        if (tokens[pos]?.toLowerCase() === 'of') pos++; // skip 'of'
+        const operand = parseUnary();
+        if (!operand) throw new Error(`Syntax error: missing target expression after '${currentToken} ${dist}'`);
+        return { type: currentToken, distance: dist, operand };
+      }
+
+      return parsePrimary();
+    };
+
+    // Level 4: Primary expressions (parentheses, macros, property selectors, comparisons, flags, named selections)
+    const parsePrimary = (): any => {
+      if (pos >= tokens.length) return null;
+      const rawToken = tokens[pos];
+      const currentToken = rawToken.toLowerCase();
+
+      // Parentheses
       if (currentToken === '(') {
         pos++;
-        const expr = parseExpression();
+        const expr = parseHierarchy();
         if (pos >= tokens.length || tokens[pos] !== ')') {
           throw new Error("Syntax error: unmatched opening parenthesis '('");
         }
@@ -251,97 +382,56 @@ export class SelectionParser {
       if (currentToken === ')') {
         throw new Error("Syntax error: unexpected closing parenthesis ')'");
       }
-      if (currentToken === 'byres') {
+
+      // Selection macro (/model/segi/chain/resi/name)
+      if (rawToken.startsWith('/') && rawToken.length > 1) {
         pos++;
-        const operand = parseFactor();
-        if (!operand) throw new Error("Syntax error: missing expression after 'byres'");
-        return { type: 'byres', operand };
-      }
-      if (currentToken === 'bychain') {
-        pos++;
-        const operand = parseFactor();
-        if (!operand) throw new Error("Syntax error: missing expression after 'bychain'");
-        return { type: 'bychain', operand };
-      }
-      if (currentToken === 'bymolecule') {
-        pos++;
-        const operand = parseFactor();
-        if (!operand) throw new Error("Syntax error: missing expression after 'bymolecule'");
-        return { type: 'bymolecule', operand };
-      }
-      if (currentToken === 'bycalpha' || currentToken === 'byca') {
-        pos++;
-        const operand = parseFactor();
-        if (!operand) throw new Error(`Syntax error: missing expression after '${currentToken}'`);
-        return { type: 'bycalpha', operand };
-      }
-      if (currentToken === 'byring') {
-        pos++;
-        const operand = parseFactor();
-        if (!operand) throw new Error("Syntax error: missing expression after 'byring'");
-        return { type: 'byring', operand };
-      }
-      if (currentToken === 'byfragment') {
-        throw new Error("Selection syntax error: 'byfragment' is currently DEFERRED / RESEARCH pending fragment partition specification. Use 'bymolecule' for covalent connected components.");
-      }
-      if (currentToken === 'bycell') {
-        throw new Error("Selection syntax error: 'bycell' is currently DEFERRED / RESEARCH pending crystallographic symmetry infrastructure.");
-      }
-      if (currentToken === 'neighbor') {
-        pos++;
-        const operand = parseFactor();
-        if (!operand) throw new Error("Syntax error: missing expression after 'neighbor'");
-        return { type: 'neighbor', operand };
-      }
-      if (currentToken === 'bound_to') {
-        pos++;
-        const operand = parseFactor();
-        if (!operand) throw new Error("Syntax error: missing expression after 'bound_to'");
-        return { type: 'bound_to', operand };
-      }
-      if (currentToken === 'extend') {
-        pos++;
-        const steps = parseInt(tokens[pos++], 10) || 1;
-        if (tokens[pos]?.toLowerCase() === 'of') pos++; // skip 'of'
-        const operand = parseFactor();
-        if (!operand) throw new Error("Syntax error: missing expression after 'extend'");
-        return { type: 'extend', steps, operand };
-      }
-      if (currentToken === 'around' || currentToken === 'within' || currentToken === 'beyond' || currentToken === 'expand') {
-        pos++;
-        const dist = parseFloat(tokens[pos++]);
-        if (isNaN(dist)) throw new Error(`Syntax error: invalid distance for '${currentToken}' query`);
-        if (tokens[pos]?.toLowerCase() === 'of') pos++; // skip 'of'
-        const operand = parseFactor();
-        if (!operand) throw new Error(`Syntax error: missing target expression after '${currentToken} ${dist}'`);
-        return { type: currentToken, distance: dist, operand };
+        return parseMacro(rawToken);
       }
 
-      if (currentToken === 'select' || currentToken === 'sele') {
-        pos++;
-        return parseFactor();
-      }
+      // Global flag keywords & aliases
+      const flagAliases: Record<string, string> = {
+        'protein': 'polymer.protein',
+        'nucleic': 'polymer.nucleic',
+        'waters': 'solvent',
+        'water': 'solvent',
+        'hydro': 'hydrogens',
+        'h': 'hydrogens',
+        'donors': 'donor',
+        'acceptors': 'acceptor'
+      };
 
-
-      // Global flag keywords
       if ([
-        'organic', 'inorganic', 'polymer', 'polymer.protein', 'polymer.nucleic',
-        'backbone', 'sidechain', 'solvent', 'hetatm', 'hydrogens', 'metals',
+        'organic', 'inorganic', 'polymer', 'polymer.protein', 'polymer.nucleic', 'protein', 'nucleic',
+        'backbone', 'sidechain', 'solvent', 'waters', 'water', 'hetatm', 'hydrogens', 'hydro', 'h', 'metals',
         'donor', 'donors', 'acceptor', 'acceptors', 'guide', 'visible', 'enabled',
-        'all', 'none'
+        'all', 'none', 'first', 'last'
       ].includes(currentToken)) {
         pos++;
-        return { type: 'flag', flag: currentToken };
+        const resolvedFlag = flagAliases[currentToken] || currentToken;
+        return { type: 'flag', flag: resolvedFlag };
       }
 
-      // Property selector or Named Selection Reference
-      const rawToken = tokens[pos];
-      const prop = rawToken.toLowerCase();
-      const validProps = ['resn', 'resi', 'chain', 'elem', 'name', 'id', 'b', 'q', 'ss', 'alt', 'segi'];
+      // Property aliases normalization
+      const propAliases: Record<string, string> = {
+        'atom': 'name',
+        'element': 'elem',
+        'symbol': 'elem',
+        'res': 'resn',
+        'resv': 'resi',
+        'segid': 'segi',
+        'altloc': 'alt',
+        'bfactor': 'b',
+        'occupancy': 'q',
+        'fc': 'formal_charge'
+      };
 
-      if (!validProps.includes(prop)) {
+      const normProp = propAliases[currentToken] || currentToken;
+      const validProps = ['resn', 'resi', 'chain', 'elem', 'name', 'id', 'index', 'rank', 'b', 'q', 'ss', 'alt', 'segi', 'formal_charge'];
+
+      if (!validProps.includes(normProp)) {
         // Check if this token matches a registered named selection
-        const namedMatch = this.namedSelections?.find(s => s.name.toLowerCase() === prop);
+        const namedMatch = this.namedSelections?.find(s => s.name.toLowerCase() === currentToken);
         if (namedMatch) {
           pos++;
           return {
@@ -359,16 +449,16 @@ export class SelectionParser {
       if (nextToken && ['<=', '>=', '==', '!=', '<', '>', '='].includes(nextToken)) {
         const op = tokens[pos++];
         const val = tokens[pos++];
-        if (!val) throw new Error(`Syntax error: missing comparison value after '${prop} ${op}'`);
-        return { type: 'comparison', property: prop, op, value: val };
+        if (!val) throw new Error(`Syntax error: missing comparison value after '${normProp} ${op}'`);
+        return { type: 'comparison', property: normProp, op, value: val };
       }
 
       const val = tokens[pos++] || '';
-      if (!val) throw new Error(`Syntax error: missing value for property '${prop}'`);
-      return { type: 'property', property: prop, value: val };
+      if (!val) throw new Error(`Syntax error: missing value for property '${normProp}'`);
+      return { type: 'property', property: normProp, value: val };
     };
 
-    const rootExpr = parseExpression();
+    const rootExpr = parseHierarchy();
     if (pos < tokens.length) {
       throw new Error(`Syntax error: unexpected trailing token '${tokens[pos]}'`);
     }
@@ -634,6 +724,31 @@ export class SelectionParser {
             });
             return resultExpand;
         }
+        case 'macro': {
+            const resultMacro = new Set<number>();
+            this.atoms.forEach(atom => {
+                if (this.matchMacro(atom, expr)) {
+                    resultMacro.add(atom.serial);
+                }
+            });
+            return resultMacro;
+        }
+        case 'byobject': {
+            const sObj = this.evaluate(expr.operand);
+            if (sObj.size === 0) return new Set();
+            return new Set(this.atoms.map(a => a.serial));
+        }
+        case 'bysegi': {
+            const sSeg = this.evaluate(expr.operand);
+            const selectedSegs = new Set(this.atoms.filter(a => sSeg.has(a.serial)).map(a => a.segi || a.altLoc || ''));
+            const resultSeg = new Set<number>();
+            this.atoms.forEach(atom => {
+                if (selectedSegs.has(atom.segi || atom.altLoc || '')) {
+                    resultSeg.add(atom.serial);
+                }
+            });
+            return resultSeg;
+        }
         case 'beyond': {
             const sBeyond = this.evaluate(expr.operand);
             const gridBeyond = new SpatialHashGrid(expr.distance, this.atoms, sBeyond);
@@ -648,46 +763,74 @@ export class SelectionParser {
     }
     return new Set();
   }
+
+  matchMacro(atom: Atom, expr: { model?: string; segi?: string; chain?: string; resi?: string; name?: string }): boolean {
+    if (expr.model && atom.model && !this.matchPattern(atom.model, expr.model)) return false;
+    if (expr.segi && !this.matchPattern(atom.segi || atom.altLoc || '', expr.segi)) return false;
+    if (expr.chain && !this.matchPattern(atom.chainID, expr.chain)) return false;
+    if (expr.resi && !this.matchNumericOrRange(atom.resSeq, expr.resi)) return false;
+    if (expr.name && !this.matchPattern(atom.name, expr.name)) return false;
+    return true;
+  }
+
+  matchPattern(target: string, pattern: string): boolean {
+    const p = pattern.trim();
+    if (!p) return true;
+    const t = (target || '').trim();
+    if (!p.includes('*') && !p.includes('?')) {
+      return t.toLowerCase() === p.toLowerCase();
+    }
+    const regexStr = '^' + p.replace(/\*/g, '.*').replace(/\?/g, '.') + '$';
+    return new RegExp(regexStr, 'i').test(t);
+  }
+
+  matchNumericOrRange(atomNum: number, item: string): boolean {
+    const trimmed = item.trim();
+    const rangeMatch = trimmed.match(/^(-?\d+)[-:](\d+)$/);
+    if (rangeMatch) {
+      const min = parseInt(rangeMatch[1], 10);
+      const max = parseInt(rangeMatch[2], 10);
+      return atomNum >= min && atomNum <= max;
+    }
+    // Handle alphanumeric insertion codes (e.g. 52A -> matches resSeq 52)
+    const insMatch = trimmed.match(/^(\d+)[a-zA-Z]$/);
+    if (insMatch) {
+      const num = parseInt(insMatch[1], 10);
+      return atomNum === num;
+    }
+    const num = parseInt(trimmed, 10);
+    return !isNaN(num) && atomNum === num;
+  }
   
   matchProperty(atom: Atom, expr: any): boolean {
     const prop = expr.property.toLowerCase();
     const rawVal = (expr.value || '').trim();
     if (!rawVal) return false;
 
-    const matchSinglePattern = (target: string, pattern: string): boolean => {
-      const p = pattern.trim();
-      if (!p) return false;
-      const t = target.trim();
-      if (!p.includes('*')) {
-        return t.toLowerCase() === p.toLowerCase();
-      }
-      const regexStr = '^' + p.replace(/\*/g, '.*') + '$';
-      const regex = new RegExp(regexStr, 'i');
-      return regex.test(t);
-    };
+    // Support + or , separated list of values (e.g. "A+B", "LYS+ARG", "CA+CB", "10,20,30", "10+20+30")
+    const parts = rawVal.split(/[+,]/).map(s => s.trim()).filter(Boolean);
 
-    const matchSingleNumeric = (atomNum: number, item: string): boolean => {
-      const rangeMatch = item.trim().match(/^(\d+)-(\d+)$/);
-      if (rangeMatch) {
-        const min = parseInt(rangeMatch[1], 10);
-        const max = parseInt(rangeMatch[2], 10);
-        return atomNum >= min && atomNum <= max;
-      }
-      const num = parseInt(item.trim(), 10);
-      return !isNaN(num) && atomNum === num;
-    };
+    if (prop === 'resn' || prop === 'res') return parts.some(p => this.matchPattern(atom.resName, p));
+    if (prop === 'chain') return parts.some(p => this.matchPattern(atom.chainID, p));
+    if (prop === 'elem' || prop === 'element' || prop === 'symbol') return parts.some(p => this.matchPattern(atom.elem, p));
+    if (prop === 'name' || prop === 'atom') return parts.some(p => this.matchPattern(atom.name, p));
+    if (prop === 'segi' || prop === 'segid') return parts.some(p => this.matchPattern(atom.segi || atom.altLoc || '', p));
+    if (prop === 'alt' || prop === 'altloc') return parts.some(p => this.matchPattern(atom.altLoc || '', p));
 
-    // Support + separated list of values (e.g. "A+B", "LYS+ARG", "CA+CB", "10+20+30")
-    const parts = rawVal.split('+').map(s => s.trim()).filter(Boolean);
-
-    if (prop === 'resn') return parts.some(p => matchSinglePattern(atom.resName, p));
-    if (prop === 'chain') return parts.some(p => matchSinglePattern(atom.chainID, p));
-    if (prop === 'elem') return parts.some(p => matchSinglePattern(atom.elem, p));
-    if (prop === 'name') return parts.some(p => matchSinglePattern(atom.name, p));
-    if (prop === 'segi') return parts.some(p => matchSinglePattern(atom.altLoc || '', p));
-
-    if (prop === 'resi') return parts.some(p => matchSingleNumeric(atom.resSeq, p));
-    if (prop === 'id') return parts.some(p => matchSingleNumeric(atom.serial, p));
+    if (prop === 'resi' || prop === 'resv') return parts.some(p => this.matchNumericOrRange(atom.resSeq, p));
+    if (prop === 'id') return parts.some(p => this.matchNumericOrRange(atom.serial, p));
+    if (prop === 'index') {
+      const atomIdx = atom.index !== undefined ? atom.index : 0;
+      return parts.some(p => this.matchNumericOrRange(atomIdx, p));
+    }
+    if (prop === 'rank') {
+      const atomRank = atom.rank !== undefined ? atom.rank : (atom.index !== undefined ? atom.index + 1 : atom.serial);
+      return parts.some(p => this.matchNumericOrRange(atomRank, p));
+    }
+    if (prop === 'formal_charge' || prop === 'fc') {
+      const fc = atom.formalCharge !== undefined ? atom.formalCharge : 0;
+      return parts.some(p => this.matchNumericOrRange(fc, p));
+    }
 
     if (prop === 'ss') {
       const atomSS = (atom.ss || '').toLowerCase();
@@ -696,7 +839,7 @@ export class SelectionParser {
         if (valLower === 'h' || valLower === 'helix') return atomSS === 'h' || atomSS === 'helix';
         if (valLower === 's' || valLower === 'sheet' || valLower === 'strand' || valLower === 'e') return atomSS === 's' || atomSS === 'sheet' || atomSS === 'e';
         if (valLower === 'l' || valLower === 'loop' || valLower === 'c' || valLower === 'coil') return atomSS === 'l' || atomSS === 'loop' || atomSS === 'c' || atomSS === 'coil';
-        return matchSinglePattern(atomSS, valLower);
+        return this.matchPattern(atomSS, valLower);
       });
     }
 
@@ -709,14 +852,20 @@ export class SelectionParser {
     const valNum = parseFloat(expr.value);
     
     let atomVal = 0.0;
-    if (prop === 'b') {
+    if (prop === 'b' || prop === 'bfactor') {
       atomVal = atom.bFactor !== undefined ? atom.bFactor : 0.0;
-    } else if (prop === 'q') {
+    } else if (prop === 'q' || prop === 'occupancy') {
       atomVal = atom.occupancy !== undefined ? atom.occupancy : 1.0;
     } else if (prop === 'id') {
       atomVal = atom.serial;
-    } else if (prop === 'resi') {
+    } else if (prop === 'resi' || prop === 'resv') {
       atomVal = atom.resSeq;
+    } else if (prop === 'formal_charge' || prop === 'fc') {
+      atomVal = atom.formalCharge !== undefined ? atom.formalCharge : 0;
+    } else if (prop === 'index') {
+      atomVal = atom.index !== undefined ? atom.index : 0;
+    } else if (prop === 'rank') {
+      atomVal = atom.rank !== undefined ? atom.rank : (atom.index !== undefined ? atom.index + 1 : atom.serial);
     } else {
       return false;
     }
@@ -767,9 +916,11 @@ export class SelectionParser {
         return isPolymerRes && !isSolvent(atom);
 
       case 'polymer.protein':
+      case 'protein':
         return isProteinRes && !isSolvent(atom);
 
       case 'polymer.nucleic':
+      case 'nucleic':
         return isNucleicRes && !isSolvent(atom);
 
       case 'backbone':
@@ -790,16 +941,26 @@ export class SelectionParser {
         return atomNameUpper === 'CA' || atomNameUpper === 'P';
 
       case 'solvent':
+      case 'waters':
+      case 'water':
         return isSolvent(atom);
 
       case 'hetatm':
         return !!atom.isHetero;
 
       case 'hydrogens':
+      case 'hydro':
+      case 'h':
         return elemUpper === 'H' || elemUpper === 'D';
 
       case 'metals':
-        return ['MG', 'ZN', 'FE', 'CA', 'NA', 'K', 'CU', 'MN', 'NI', 'CO'].includes(elemUpper);
+        return ['MG', 'ZN', 'FE', 'CA', 'NA', 'K', 'CU', 'MN', 'NI', 'CO', 'CD', 'HG', 'PT', 'AU', 'AG'].includes(elemUpper);
+
+      case 'first':
+        return atom.serial === this.atoms[0]?.serial;
+
+      case 'last':
+        return atom.serial === this.atoms[this.atoms.length - 1]?.serial;
 
       case 'donor':
       case 'donors': {

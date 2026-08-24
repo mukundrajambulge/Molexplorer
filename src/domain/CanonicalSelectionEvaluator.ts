@@ -142,6 +142,10 @@ export class CanonicalSelectionEvaluator {
       bFactor: ca.b_factor,
       occupancy: ca.occupancy,
       ss: ca.secondary_structure,
+      formalCharge: ca.formal_charge,
+      index: idx,
+      rank: idx + 1,
+      segi: ca.alt_loc,
       isModeledH: ca.modeled_hydrogen
     }));
     this.dummyParser = new SelectionParser(this.legacyAtoms, this.namedSelections);
@@ -517,6 +521,38 @@ export class CanonicalSelectionEvaluator {
         }
         return result;
       }
+
+        case 'macro': {
+          const result = new Set<number>();
+          for (let i = 0; i < this.legacyAtoms.length; i++) {
+            if (this.dummyParser.matchMacro(this.legacyAtoms[i], expr)) {
+              result.add(this.atoms[i].canonical_id);
+            }
+          }
+          return result;
+        }
+
+        case 'byobject': {
+          const operand = this.evaluateAST(expr.operand);
+          if (operand.size === 0) return new Set();
+          return new Set(this.atoms.map(a => a.canonical_id));
+        }
+
+        case 'bysegi': {
+          const operand = this.evaluateAST(expr.operand);
+          const selectedSegs = new Set<string>();
+          for (const aId of operand) {
+            const atom = this.molecule.atom_map.get(aId);
+            if (atom) selectedSegs.add(atom.alt_loc || '');
+          }
+          const result = new Set<number>();
+          for (let i = 0; i < this.atoms.length; i++) {
+            if (selectedSegs.has(this.atoms[i].alt_loc || '')) {
+              result.add(this.atoms[i].canonical_id);
+            }
+          }
+          return result;
+        }
 
       default:
         return new Set();
