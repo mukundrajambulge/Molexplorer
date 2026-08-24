@@ -64,23 +64,34 @@ The grammar is structured into strict mathematical precedence levels (evaluated 
 - `formal_charge` / `fc <op> <value>`: Formal charges (e.g. `fc > 0`, `fc == -1`).
 - `ss <type>`: Secondary structure (`ss h` helix, `ss s` sheet, `ss l` loop).
 
-### 3.3. Classification Flags
+### 3.3. Classification Flags & Single-Word Semantic Selectors
 - `all`: Universal set $\mathcal{V}$.
 - `none`: Empty set $\emptyset$.
-- `polymer`: All standard amino acids and nucleic acids.
+- `polymer`: All standard/modified amino acids and nucleic acids.
 - `protein` / `polymer.protein`: Standard and modified amino acid residues.
 - `nucleic` / `polymer.nucleic`: Ribonucleotide and deoxyribonucleotide residues.
+- `ligand` / `ligands`: Non-polymer, non-solvent, non-ion components (authoritatively classified from `CanonicalResidue.classification === 'ligand'` or non-solvent non-ion HETATM).
+- `ion` / `ions`: Inorganic and monoatomic metal/halogen ions (`CanonicalResidue.classification === 'ion'`).
 - `organic`: Non-solvent hetero groups containing carbon.
-- `inorganic`: Non-solvent hetero groups lacking carbon (e.g. metal clusters, sulfate ions).
-- `solvent` / `waters` / `water`: Water molecules (`HOH`, `WAT`, `DOD`, `SOL`, `TIP3`, `TIP4`).
-- `hetatm`: Non-polymer hetero atoms.
+- `inorganic`: Non-solvent hetero groups lacking carbon (e.g. metal clusters, phosphate/sulfate ions).
+- `solvent` / `waters` / `water`: Water molecules (`HOH`, `WAT`, `DOD`, `SOL`, `TIP3`, `TIP4`, `SPC`).
+- `hetatm` / `het`: Non-polymer hetero atoms (`is_hetero === true`).
 - `hydrogens` / `hydro` / `h`: Hydrogen and deuterium isotopes (`H`, `D`).
-- `metals`: Metallic elements (`MG`, `ZN`, `FE`, `CA`, `NA`, `K`, `CU`, `MN`, `NI`, `CO`, `CD`, `HG`, `PT`, `AU`, `AG`).
-- `backbone`: Peptide backbone (`N, CA, C, O, OXT, H, HA`) and nucleic backbone (`P, OP1, OP2, OP3, O3', O5', C3', C4', C5', O4', C1', C2'`).
-- `sidechain`: Amino acid and nucleotide atoms excluding backbone and solvent.
+- `metals` / `metal`: Metallic elements (`MG`, `ZN`, `FE`, `CA`, `NA`, `K`, `CU`, `MN`, `NI`, `CO`, `CD`, `HG`, `PT`, `AU`, `AG`, `LI`, `CS`, `RB`, `SR`, `BA`, `PB`).
+- `backbone`: Peptide backbone (`N, CA, C, O, OXT, H, HA, H1..H3`) and nucleic backbone (`P, OP1, OP2, OP3, O3', O5', C3', C4', C5', O4', C1', C2'`).
+- `sidechain`: Amino acid and nucleotide atoms excluding backbone and solvent/ions (`protein and not backbone`).
 - `guide`: Alpha carbons (`CA`) for proteins and phosphorus (`P`) for nucleic acids.
 - `donor` / `donors`: Hydrogen bond donors (electronegative atoms bonded to H).
 - `acceptor` / `acceptors`: Hydrogen bond acceptors (`O, N, F, S`).
+
+### 3.4. Single-Word Resolution Precedence
+When parsing a single-word identifier, Molexplorer resolves the token using the following strict deterministic precedence:
+1. **Built-in Semantic Selectors:** Global flags (`protein`, `ligand`, `polymer`, `solvent`, `metals`, `backbone`, `sidechain`, `hetatm`, `all`, `none`, etc.).
+2. **Property Selectors with Operands:** (`name CA`, `resn HEM`, `resi 1-50`, `chain A`, `elem S`, `b > 20`, etc.).
+3. **Registered Named Selections:** Dynamically defined user selections (e.g. `pocket`, `active_site`).
+4. **Fail Closed:** Any unrecognized identifier throws `Selection syntax error: Unknown selection reference '<token>'`.
+
+Built-in semantic selectors are immutable keywords that cannot be shadowed or overridden by named selections. If a user executes `select ligand, elem FE` followed by `show sticks, ligand`, the command deterministically resolves the built-in `ligand` selector (172 atoms in 4HHB). If `delete ligand` is called, `show sticks, ligand` continues to function with 100% fidelity.
 
 ### 3.4. Topological Operators
 - `neighbor <S>`: Directly bonded atoms strictly outside $S$:

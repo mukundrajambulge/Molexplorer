@@ -90,9 +90,11 @@ Molexplorer maintains a strictly typed four-way distinction between atom identif
 | :--- | :--- | :--- | :--- |
 | **`polymer` / `protein`** | Standard 20 L-amino acids + modified residues (MSE, PTR, TPO, SEP, etc.) | 4HHB = 4,384 atoms; 1CRN = 327 atoms | `SCIENTIFICALLY VALIDATED` |
 | **`nucleic`** | Standard RNA/DNA bases (A, C, G, T, U, DA, DC, DG, DT) | 1BNA = 486 atoms | `SCIENTIFICALLY VALIDATED` |
-| **`organic`** | Carbon-containing non-polymer molecules (HETATM ligands, cofactors, inhibitors) | 4HHB = 172 atoms (HEM cofactors); 1HVR = 84 atoms (XK263) | `SCIENTIFICALLY VALIDATED` |
-| **`inorganic`** | Non-carbon, non-solvent ligands (e.g. PO4, SO4) | 4HHB = 10 atoms (PO4) | `SCIENTIFICALLY VALIDATED` |
-| **`solvent` / `waters`** | Crystallographic water molecules (HOH, WAT, DOD, SOL, TIP3, TIP4) | 4HHB = 221 atoms; 1BNA = 80 atoms | `SCIENTIFICALLY VALIDATED` |
+| **`ligand` / `ligands`** | Non-polymer, non-solvent, non-ion components (`CanonicalResidue.classification === 'ligand'`) | 4HHB = 172 atoms (HEM); 4DJW = 82 atoms (GVE); 1HVR = 64 atoms (XK2) | `SCIENTIFICALLY VALIDATED` |
+| **`ion` / `ions`** | Inorganic and monoatomic metal/halogen ions (`CanonicalResidue.classification === 'ion'`) | 4HHB = 2 atoms (PO4) | `SCIENTIFICALLY VALIDATED` |
+| **`organic`** | Carbon-containing non-polymer molecules (HETATM ligands, cofactors, inhibitors) | 4HHB = 172 atoms (HEM cofactors); 1HVR = 64 atoms (XK2) | `SCIENTIFICALLY VALIDATED` |
+| **`inorganic`** | Non-carbon, non-solvent ligands (e.g. PO4, SO4) | 4HHB = 2 atoms (PO4) | `SCIENTIFICALLY VALIDATED` |
+| **`solvent` / `waters`** | Crystallographic water molecules (HOH, WAT, DOD, SOL, TIP3, TIP4, SPC) | 4HHB = 221 atoms; 1BNA = 80 atoms; 1UBQ = 58 atoms | `SCIENTIFICALLY VALIDATED` |
 | **`metals`** | Transition metals and metal ions (FE, MG, ZN, CA, MN, NA, K, etc.) | 4HHB = 4 atoms (FE); 1CRN = 0 | `SCIENTIFICALLY VALIDATED` |
 | **`backbone`** | Protein peptide backbone (`N`, `CA`, `C`, `O`, `OXT`, `H`, `HA`, `H1..H3`) and nucleic phosphate-sugar backbone | 4HHB = 2,300 atoms; 1CRN = 184 atoms | `SCIENTIFICALLY VALIDATED` |
 | **`sidechain`** | Amino acid sidechains (`protein and not backbone`) | 4HHB = 2,084 atoms; 1CRN = 143 atoms | `SCIENTIFICALLY VALIDATED` |

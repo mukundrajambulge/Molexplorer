@@ -5,7 +5,8 @@ import {
   CanonicalMolecularDocument,
   SelectionResult,
   ScopedSelectionResult,
-  createScopedAtomKey
+  createScopedAtomKey,
+  ResidueClassification
 } from '../types/domain';
 import { SelectionParser, Atom } from '../lib/SelectionParser';
 
@@ -112,10 +113,12 @@ export class CanonicalSelectionEvaluator {
 
     this.atomIdToResidueId = new Map();
     this.atomIdToChainId = new Map();
+    const atomIdToResClassification = new Map<number, ResidueClassification>();
 
     for (const res of molecule.residues) {
       for (const aId of res.atom_ids) {
         this.atomIdToResidueId.set(aId, res.residue_id);
+        atomIdToResClassification.set(aId, res.classification);
       }
     }
 
@@ -146,7 +149,8 @@ export class CanonicalSelectionEvaluator {
       index: idx,
       rank: idx + 1,
       segi: ca.alt_loc,
-      isModeledH: ca.modeled_hydrogen
+      isModeledH: ca.modeled_hydrogen,
+      resClassification: atomIdToResClassification.get(ca.canonical_id)
     }));
     this.dummyParser = new SelectionParser(this.legacyAtoms, this.namedSelections);
   }

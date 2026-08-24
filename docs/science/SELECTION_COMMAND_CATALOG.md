@@ -191,6 +191,33 @@ zoom lig                   -- identical to: zoom (resn HEM)
 
 ---
 
+## Single-Word Semantic Selectors & Precedence
+
+Molexplorer commands accept direct built-in single-word semantic selectors without requiring `select <name>`:
+
+```
+show sticks, ligand
+show cartoon, protein
+color cyan, ligand
+colour yellow, protein
+zoom ligand
+center ligand
+orient ligand
+label ligand, name
+spectrum b, rainbow, protein
+select pocket, byres (ligand around 5.0) and not ligand
+```
+
+### Identifier Resolution Precedence:
+1. **Built-in Semantic Selectors:** `protein`, `ligand`, `polymer`, `nucleic`, `organic`, `inorganic`, `ion`, `solvent`, `waters`, `metals`, `backbone`, `sidechain`, `hetatm`, `hydrogens`, `all`, `none`, `first`, `last`, `guide`.
+2. **Property Selectors with Operands:** `name CA`, `elem FE`, `resi 1-50`, `chain A`, `resn HEM`, `b > 20`.
+3. **Registered Named Selections:** Dynamically defined user selections (`pocket`, `active_site`).
+4. **Fail Closed:** Unknown identifiers fail closed with structured error `Selection syntax error: Unknown selection reference '<name>'`.
+
+Built-in semantic selectors are immutable keywords that take strict precedence over named selections and are never shadowed.
+
+---
+
 ## Read-Only Scientific Invariant
 
 All display commands (`color`, `colour`, `show`, `hide`, `zoom`, `center`, `orient`, `label`, `spectrum`) are strictly read-only:
@@ -199,3 +226,4 @@ All display commands (`color`, `colour`, `show`, `hide`, `zoom`, `center`, `orie
 - Zero covalent topology mutations
 - Zero scientific revisions emitted
 - `H(before) == H(after)` across all display operations
+

@@ -37,9 +37,11 @@
 | :--- | :--- | :--- | :--- | :--- |
 | **`polymer` / `protein`** | Amino acid polymers | Standard 20 AA + common modified residues | `SCIENTIFICALLY VALIDATED` | **IMPLEMENTED** |
 | **`nucleic`** | RNA / DNA | Standard ribonucleotides and deoxyribonucleotides | `SCIENTIFICALLY VALIDATED` | **IMPLEMENTED** |
+| **`ligand` / `ligands`** | Bound non-polymer ligands | Non-polymer, non-solvent, non-ion components (`CanonicalResidue.classification === 'ligand'`) | `SCIENTIFICALLY VALIDATED` | **IMPLEMENTED** |
+| **`ion` / `ions`** | Solvent and metal ions | Inorganic and monoatomic metal/halogen ions (`CanonicalResidue.classification === 'ion'`) | `SCIENTIFICALLY VALIDATED` | **IMPLEMENTED** |
 | **`organic`** | Non-polymer organic ligands | Carbon-containing non-polymer molecules (e.g. HEM, XK263) | `SCIENTIFICALLY VALIDATED` | **IMPLEMENTED** |
 | **`inorganic`** | Non-carbon inorganic molecules | Non-carbon, non-solvent ligands (e.g. PO4, SO4) | `SCIENTIFICALLY VALIDATED` | **IMPLEMENTED** |
-| **`solvent` / `waters`** | Water molecules | HOH, WAT, DOD, SOL, TIP3, TIP4 | `SCIENTIFICALLY VALIDATED` | **IMPLEMENTED** |
+| **`solvent` / `waters`** | Water molecules | HOH, WAT, DOD, SOL, TIP3, TIP4, SPC | `SCIENTIFICALLY VALIDATED` | **IMPLEMENTED** |
 | **`metals`** | Metal ions | Transition metals and metal ions (FE, ZN, MG, CA, MN, NA, K, etc.) | `SCIENTIFICALLY VALIDATED` | **IMPLEMENTED** |
 | **`backbone`** | Polymer backbone atoms | Protein (`N`, `CA`, `C`, `O`, `OXT`, `H`, `HA`, `H1..H3`) and nucleic phosphate-sugar backbone | `SCIENTIFICALLY VALIDATED` | **IMPLEMENTED** |
 | **`sidechain`** | Amino acid sidechains | `protein and not backbone` | `SCIENTIFICALLY VALIDATED` | **IMPLEMENTED** |

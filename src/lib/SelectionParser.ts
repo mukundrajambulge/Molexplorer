@@ -1,4 +1,4 @@
-import { CanonicalAtom, CanonicalMolecule, CanonicalMolecularDocument, SelectionResult, ScopedSelectionResult } from '../types/domain';
+import { CanonicalAtom, CanonicalMolecule, CanonicalMolecularDocument, SelectionResult, ScopedSelectionResult, ResidueClassification } from '../types/domain';
 import { CanonicalSelectionEvaluator } from '../domain/CanonicalSelectionEvaluator';
 
 // Minimal Atom interface corresponding to MolProcessor structures
@@ -23,6 +23,7 @@ export interface Atom {
   rank?: number;
   model?: string;
   segi?: string;
+  resClassification?: ResidueClassification;
 }
 
 class SpatialHashGrid {
@@ -84,9 +85,46 @@ class SpatialHashGrid {
   }
 }
 
-function isSolvent(atom: Atom): boolean {
-  const name = (atom.resName || '').toUpperCase();
-  return ['HOH', 'WAT', 'DOD', 'SOL', 'TIP3', 'TIP', 'TIP4'].includes(name);
+export const STANDARD_AMINO_ACIDS = new Set<string>([
+  'ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS', 'ILE',
+  'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL',
+  'MSE', 'SEC', 'PYL', 'HYP'
+]);
+
+export const STANDARD_NUCLEIC_ACIDS = new Set<string>([
+  'A', 'C', 'G', 'T', 'U', 'DA', 'DC', 'DG', 'DT', 'DU',
+  '+A', '+C', '+G', '+T', '+U', 'RA', 'RC', 'RG', 'RU'
+]);
+
+export const SOLVENT_NAMES = new Set<string>([
+  'HOH', 'WAT', 'DOD', 'SOL', 'TIP', 'TIP3', 'TIP4', 'SPC'
+]);
+
+export const ION_NAMES = new Set<string>([
+  'NA', 'K', 'MG', 'CA', 'ZN', 'FE', 'CL', 'BR', 'MN', 'CO', 'NI', 'CU',
+  'LI', 'CS', 'RB', 'SR', 'BA', 'CD', 'HG', 'PB', 'I', 'F', 'SO4', 'PO4', 'NO3'
+]);
+
+export const METAL_ELEMENTS = new Set<string>([
+  'MG', 'ZN', 'FE', 'CA', 'NA', 'K', 'CU', 'MN', 'NI', 'CO', 'CD', 'HG', 'PT', 'AU', 'AG', 'LI', 'CS', 'RB', 'SR', 'BA', 'PB'
+]);
+
+export function isSolvent(atom: Atom): boolean {
+  if (atom.resClassification === 'solvent') return true;
+  const name = (atom.resName || '').trim().toUpperCase();
+  return SOLVENT_NAMES.has(name);
+}
+
+export function isIon(atom: Atom, atoms: Atom[]): boolean {
+  if (atom.resClassification === 'ion') return true;
+  const resName = (atom.resName || '').trim().toUpperCase();
+  const elemUpper = (atom.elem || '').trim().toUpperCase();
+  if (ION_NAMES.has(resName)) return true;
+  if (atom.isHetero && METAL_ELEMENTS.has(elemUpper)) {
+    const resAtoms = atoms.filter(a => a.chainID === atom.chainID && a.resSeq === atom.resSeq);
+    if (resAtoms.length <= 2) return true;
+  }
+  return false;
 }
 
 function hasCarbons(atom: Atom, atoms: Atom[]): boolean {
@@ -155,7 +193,42 @@ export class SelectionParser {
     molecule: CanonicalMolecule,
     namedSelections: { name: string; query: string; atomIds?: number[] }[] = []
   ): SelectionParser {
-    return this.fromCanonicalAtoms(molecule.atoms, molecule.topology, namedSelections);
+    const resMap = new Map<number, ResidueClassification>();
+    if (molecule.residues) {
+      for (const res of molecule.residues) {
+        for (const aId of res.atom_ids) {
+          resMap.set(aId, res.classification);
+        }
+      }
+    }
+    const idToIdx = new Map<number, number>();
+    molecule.atoms.forEach((a, idx) => idToIdx.set(a.canonical_id, idx));
+
+    const parserAtoms: Atom[] = molecule.atoms.map((ca, idx) => ({
+      serial: ca.canonical_id,
+      name: ca.name,
+      resName: ca.residue_name,
+      chainID: ca.chain_ref,
+      resSeq: ca.residue_ref,
+      x: ca.x,
+      y: ca.y,
+      z: ca.z,
+      elem: ca.element,
+      altLoc: ca.alt_loc,
+      isHetero: ca.is_hetero,
+      bonds: molecule.topology
+        ? (molecule.topology.adjacency_map.get(ca.canonical_id) || []).map(nId => idToIdx.get(nId)!).filter(idx => idx !== undefined)
+        : [],
+      bFactor: ca.b_factor,
+      occupancy: ca.occupancy,
+      ss: ca.secondary_structure,
+      formalCharge: ca.formal_charge,
+      index: idx + 1,
+      rank: idx,
+      segi: ca.alt_loc,
+      resClassification: resMap.get(ca.canonical_id)
+    }));
+    return new SelectionParser(parserAtoms, namedSelections);
   }
 
   /**
@@ -203,7 +276,7 @@ export class SelectionParser {
 
   tokenize(query: string): string[] {
     // Regex matches words, slash macros, comparisons, operators, and parenthetical delimiters
-    const tokenRegex = /\/[a-zA-Z0-9_\-\*\.\+\:\,\/]+|\b(and|or|not|byres|bychain|bymolecule|bycalpha|byca|byring|byobject|bysegi|byfragment|bycell|neighbor|bound_to|extend|expand|around|within|beyond|of|resn|res|resi|resv|chain|elem|element|symbol|name|atom|b|bfactor|q|occupancy|formal_charge|fc|id|index|rank|alt|altloc|segi|segid|ss|first|last|metals|donors?|acceptors?|polymer\.protein|polymer\.nucleic|polymer|protein|nucleic|backbone|sidechain|organic|inorganic|solvent|waters?|hetatm|hydrogens?|hydro|h|guide|visible|enabled|all|none)\b|<=|>=|==|!=|<|>|=|\(|\)|&|\||!|[a-zA-Z0-9_\-\*\.\+\:\,]+/gi;
+    const tokenRegex = /\/[a-zA-Z0-9_\-\*\.\+\:\,\/]+|\b(and|or|not|byres|bychain|bymolecule|bycalpha|byca|byring|byobject|bysegi|byfragment|bycell|neighbor|bound_to|extend|expand|around|within|beyond|of|resn|res|resi|resv|chain|elem|element|symbol|name|atom|b|bfactor|q|occupancy|formal_charge|fc|id|index|rank|alt|altloc|segi|segid|ss|first|last|metals?|donors?|acceptors?|polymer\.protein|polymer\.nucleic|polymer|protein|nucleic|backbone|sidechain|organic|inorganic|ligands?|ions?|solvent|waters?|hetatm|het|hydrogens?|hydro|h|guide|visible|enabled|all|none)\b|<=|>=|==|!=|<|>|=|\(|\)|&|\||!|[a-zA-Z0-9_\-\*\.\+\:\,]+/gi;
     return query.match(tokenRegex) || [];
   }
 
@@ -225,25 +298,17 @@ export class SelectionParser {
         };
       }
       if (parts.length === 4) {
-        // Shorthand //chain/resi/name or /segi/chain/resi/
-        if (parts[0] === '') {
-          return {
-            type: 'macro',
-            chain: parts[1] || undefined,
-            resi: parts[2] || undefined,
-            name: parts[3] || undefined
-          };
-        }
+        // Shorthand /segi/chain/resi/name
         return {
           type: 'macro',
-          model: parts[0] || undefined,
+          segi: parts[0] || undefined,
           chain: parts[1] || undefined,
           resi: parts[2] || undefined,
           name: parts[3] || undefined
         };
       }
       if (parts.length === 3) {
-        // Shorthand ///resi/ or //chain/resi
+        // Shorthand ///resi/ or //chain/resi/
         if (parts[0] === '' && parts[1] === '') {
           return {
             type: 'macro',
@@ -257,9 +322,16 @@ export class SelectionParser {
           name: parts[2] || undefined
         };
       }
+      if (parts.length === 2) {
+        return {
+          type: 'macro',
+          chain: parts[0] || undefined,
+          resi: parts[1] || undefined
+        };
+      }
       return {
         type: 'macro',
-        name: parts[parts.length - 1] || undefined
+        name: raw
       };
     };
 
@@ -402,12 +474,16 @@ export class SelectionParser {
         'hydro': 'hydrogens',
         'h': 'hydrogens',
         'donors': 'donor',
-        'acceptors': 'acceptor'
+        'acceptors': 'acceptor',
+        'ligands': 'ligand',
+        'ions': 'ion',
+        'metal': 'metals',
+        'het': 'hetatm'
       };
 
       if ([
-        'organic', 'inorganic', 'polymer', 'polymer.protein', 'polymer.nucleic', 'protein', 'nucleic',
-        'backbone', 'sidechain', 'solvent', 'waters', 'water', 'hetatm', 'hydrogens', 'hydro', 'h', 'metals',
+        'organic', 'inorganic', 'ligand', 'ligands', 'ion', 'ions', 'polymer', 'polymer.protein', 'polymer.nucleic', 'protein', 'nucleic',
+        'backbone', 'sidechain', 'solvent', 'waters', 'water', 'hetatm', 'het', 'hydrogens', 'hydro', 'h', 'metals', 'metal',
         'donor', 'donors', 'acceptor', 'acceptors', 'guide', 'visible', 'enabled',
         'all', 'none', 'first', 'last'
       ].includes(currentToken)) {
@@ -889,22 +965,13 @@ export class SelectionParser {
   matchFlag(atom: Atom, flag: string): boolean {
     const fl = flag.toLowerCase();
 
-    const aminoAcids = new Set([
-      'ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS', 'ILE',
-      'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL',
-      'MSE', 'SEC', 'PYL', 'HYP'
-    ]);
-    const nucleicAcids = new Set([
-      'A', 'C', 'G', 'T', 'U', 'DA', 'DC', 'DG', 'DT', 'DU', 'RA', 'RC', 'RG', 'RU'
-    ]);
-
     const resNameUpper = (atom.resName || '').trim().toUpperCase();
     const elemUpper = (atom.elem || '').trim().toUpperCase();
     const atomNameUpper = (atom.name || '').trim().toUpperCase();
 
-    const isProteinRes = aminoAcids.has(resNameUpper);
-    const isNucleicRes = nucleicAcids.has(resNameUpper);
-    const isPolymerRes = isProteinRes || isNucleicRes || !atom.isHetero;
+    const isProteinRes = atom.resClassification === 'amino_acid' || STANDARD_AMINO_ACIDS.has(resNameUpper);
+    const isNucleicRes = atom.resClassification === 'nucleic_acid' || STANDARD_NUCLEIC_ACIDS.has(resNameUpper);
+    const isPolymerRes = isProteinRes || isNucleicRes || (!atom.isHetero && atom.resClassification !== 'solvent' && atom.resClassification !== 'ion' && atom.resClassification !== 'ligand');
 
     const proteinBackboneAtoms = new Set(['N', 'CA', 'C', 'O', 'OXT', 'H', 'HA', 'H1', 'H2', 'H3']);
     const nucleicBackboneAtoms = new Set(['P', 'OP1', 'OP2', 'OP3', "O3'", "O5'", "C3'", "C4'", "C5'", "O4'", "C1'", "C2'"]);
@@ -916,25 +983,37 @@ export class SelectionParser {
       case 'inorganic':
         return !!atom.isHetero && !isSolvent(atom) && !hasCarbons(atom, this.atoms);
 
+      case 'ligand':
+      case 'ligands':
+        if (atom.resClassification === 'ligand') return true;
+        if (atom.resClassification === 'amino_acid' || atom.resClassification === 'nucleic_acid' || atom.resClassification === 'solvent' || atom.resClassification === 'ion') {
+          return false;
+        }
+        return !!atom.isHetero && !isSolvent(atom) && !isIon(atom, this.atoms) && !isProteinRes && !isNucleicRes;
+
+      case 'ion':
+      case 'ions':
+        return isIon(atom, this.atoms);
+
       case 'polymer':
-        return isPolymerRes && !isSolvent(atom);
+        return isPolymerRes && !isSolvent(atom) && !isIon(atom, this.atoms);
 
       case 'polymer.protein':
       case 'protein':
-        return isProteinRes && !isSolvent(atom);
+        return isProteinRes && !isSolvent(atom) && !isIon(atom, this.atoms);
 
       case 'polymer.nucleic':
       case 'nucleic':
-        return isNucleicRes && !isSolvent(atom);
+        return isNucleicRes && !isSolvent(atom) && !isIon(atom, this.atoms);
 
       case 'backbone':
-        if (isSolvent(atom)) return false;
+        if (isSolvent(atom) || isIon(atom, this.atoms)) return false;
         if (isProteinRes) return proteinBackboneAtoms.has(atomNameUpper);
         if (isNucleicRes) return nucleicBackboneAtoms.has(atomNameUpper);
         return false;
 
       case 'sidechain':
-        if (isSolvent(atom)) return false;
+        if (isSolvent(atom) || isIon(atom, this.atoms)) return false;
         if (isProteinRes) return !proteinBackboneAtoms.has(atomNameUpper);
         if (isNucleicRes) return !nucleicBackboneAtoms.has(atomNameUpper);
         return false;
@@ -942,7 +1021,7 @@ export class SelectionParser {
       case 'guide':
         if (isProteinRes) return atomNameUpper === 'CA';
         if (isNucleicRes) return atomNameUpper === 'P';
-        return atomNameUpper === 'CA' || atomNameUpper === 'P';
+        return false;
 
       case 'solvent':
       case 'waters':
@@ -950,6 +1029,7 @@ export class SelectionParser {
         return isSolvent(atom);
 
       case 'hetatm':
+      case 'het':
         return !!atom.isHetero;
 
       case 'hydrogens':
@@ -958,7 +1038,8 @@ export class SelectionParser {
         return elemUpper === 'H' || elemUpper === 'D';
 
       case 'metals':
-        return ['MG', 'ZN', 'FE', 'CA', 'NA', 'K', 'CU', 'MN', 'NI', 'CO', 'CD', 'HG', 'PT', 'AU', 'AG'].includes(elemUpper);
+      case 'metal':
+        return METAL_ELEMENTS.has(elemUpper);
 
       case 'first':
         return atom.serial === this.atoms[0]?.serial;
