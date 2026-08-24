@@ -32,8 +32,8 @@ export const SequenceViewer: React.FC<SequenceViewerProps> = ({
     (ssData || []).forEach(ss => ssMap.set(`${ss.chainID}:${ss.resi}`, ss.ss_type));
 
     atoms.forEach(atom => {
-      const chain = atom.chain || 'A';
-      const resSeq = atom.resSeq || atom.resi || 1;
+      const chain = atom.chainID || atom.chain || 'A';
+      const resSeq = atom.resSeq !== undefined ? atom.resSeq : (atom.resi !== undefined ? atom.resi : 1);
       const resName = (atom.resName || atom.resname || 'UNK').toUpperCase();
       const code = THREE_TO_ONE[resName] || (resName.length === 1 ? resName : '?');
 

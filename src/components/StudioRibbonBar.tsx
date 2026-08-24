@@ -144,6 +144,8 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
     { id: "Dots", label: "Dots" },
     { id: "Dot Surface", label: "Dot Surface" },
     { id: "Cartoon", label: "Cartoon" },
+    { id: "Ribbon", label: "Ribbon" },
+    { id: "Trace", label: "Trace" },
     { id: "Putty", label: "Putty" },
     { id: "Non-bonded (crosses)", label: "Non-bonded (crosses)" },
     { id: "Non-bonded (small spheres)", label: "Non-bonded (spheres)" }
@@ -581,6 +583,25 @@ export const StudioRibbonBar: React.FC<StudioRibbonBarProps & { onOpenWizard?: (
                   </button>
                 </div>
               </div>
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/10"></div>
+
+            {/* Sequence Viewer Entry Point */}
+            <div className="flex flex-col gap-1">
+              <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider">Sequence</span>
+              <button
+                onClick={onToggleSequenceViewer}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                  showSequenceViewer
+                    ? "border-[#F27D26] bg-[#F27D26]/20 text-[#F27D26]"
+                    : "border-white/10 bg-white/[0.04] text-white/70 hover:text-white hover:bg-white/[0.08]"
+                }`}
+                title="Toggle 1D Sequence Viewer residue strip"
+              >
+                <Layers className="w-3.5 h-3.5 text-[#F27D26]" />
+                <span>Sequence Viewer ({showSequenceViewer ? "ON" : "OFF"})</span>
+              </button>
             </div>
           </div>
         )}

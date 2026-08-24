@@ -38,7 +38,8 @@ import { StudioExportModal } from "../components/StudioExportModal";
 import { Command, Ruler, CheckCircle2, History } from "lucide-react";
 import { ScientificHistoryInspector } from "../components/ScientificHistoryInspector";
 import { ScientificCommandRouter } from "../domain/ScientificCommandRouter";
-import { SelectionPresentationOverride, RepresentationName } from "../domain/PresentationStateManager";
+import { SelectionPresentationOverride, RepresentationName, normalizeRepresentationName } from "../domain/PresentationStateManager";
+import { ColorRegistry } from "../domain/ColorRegistry";
 
 export default function MolStudio() {
   const [isConsoleOpen, setIsConsoleOpen] = useState(false);
@@ -483,34 +484,153 @@ export default function MolStudio() {
   }, [molData, atoms.length, renderStyle, alignmentResult, alignMol, selectedAtomSerials.size, namedSelections, hiddenObjectIds]);
 
   const handleObjectSetStyle = (id: string, newStyle: RenderStyle) => {
-    const prevStyle = renderStyle;
-    HistoryManager.getInstance().record({
-      description: `Change representation to ${newStyle}`,
-      undo: () => setRenderStyle(prevStyle),
-      redo: () => setRenderStyle(newStyle)
-    });
-    setRenderStyle(newStyle);
+    if (id === "main_mol" || id === "all") {
+      const prevStyle = renderStyle;
+      HistoryManager.getInstance().record({
+        description: `Change representation to ${newStyle}`,
+        undo: () => setRenderStyle(prevStyle),
+        redo: () => setRenderStyle(newStyle)
+      });
+      setRenderStyle(newStyle);
+      return;
+    }
+
+    // Target active selection or named selection
+    let targetSerials: Set<number> | null = null;
+    let selKey = id;
+    if (id === "sele" || id === "sele_active") {
+      targetSerials = new Set(selectedAtomSerials);
+      selKey = "active_selection";
+    } else if (id.startsWith("sele_")) {
+      const selName = id.replace("sele_", "");
+      const match = namedSelections.find(s => s.name === selName);
+      if (match) {
+        targetSerials = new Set(match.atomIds);
+        selKey = selName;
+      }
+    }
+
+    if (targetSerials && targetSerials.size > 0) {
+      const repName = normalizeRepresentationName(newStyle);
+      setPresentationOverrides(prev => {
+        const existing = prev.find(o => o.selectionKey === selKey);
+        const next = prev.filter(o => o.selectionKey !== selKey);
+        next.push({
+          selectionKey: selKey,
+          selectionQuery: selKey,
+          atomSerials: targetSerials!,
+          objectScope: null,
+          color: existing?.color ?? null,
+          representation: repName,
+          opacity: existing?.opacity ?? 1.0,
+          visibility: existing?.visibility ?? 'visible',
+          labelState: existing?.labelState ?? null,
+          appliedAt: Date.now()
+        });
+        return next;
+      });
+    }
   };
 
   const handleObjectSetColor = (id: string, colorSchemeName: string) => {
-    const prevColor = colorScheme;
-    HistoryManager.getInstance().record({
-      description: `Change color scheme to ${colorSchemeName}`,
-      undo: () => setColorScheme(prevColor),
-      redo: () => setColorScheme(colorSchemeName)
-    });
-    setColorScheme(colorSchemeName);
+    if (id === "main_mol" || id === "all") {
+      const prevColor = colorScheme;
+      HistoryManager.getInstance().record({
+        description: `Change color scheme to ${colorSchemeName}`,
+        undo: () => setColorScheme(prevColor),
+        redo: () => setColorScheme(colorSchemeName)
+      });
+      setColorScheme(colorSchemeName);
+      return;
+    }
+
+    // Target active selection or named selection
+    let targetSerials: Set<number> | null = null;
+    let selKey = id;
+    if (id === "sele" || id === "sele_active") {
+      targetSerials = new Set(selectedAtomSerials);
+      selKey = "active_selection";
+    } else if (id.startsWith("sele_")) {
+      const selName = id.replace("sele_", "");
+      const match = namedSelections.find(s => s.name === selName);
+      if (match) {
+        targetSerials = new Set(match.atomIds);
+        selKey = selName;
+      }
+    }
+
+    if (targetSerials && targetSerials.size > 0) {
+      const validatedColor = ColorRegistry.isColor(colorSchemeName) || colorSchemeName.startsWith('#') || colorSchemeName.startsWith('rgb')
+        ? colorSchemeName
+        : (ColorRegistry.validate(colorSchemeName) || colorSchemeName);
+
+      setPresentationOverrides(prev => {
+        const existing = prev.find(o => o.selectionKey === selKey);
+        const next = prev.filter(o => o.selectionKey !== selKey);
+        next.push({
+          selectionKey: selKey,
+          selectionQuery: selKey,
+          atomSerials: targetSerials!,
+          objectScope: null,
+          color: validatedColor,
+          representation: existing?.representation ?? null,
+          opacity: existing?.opacity ?? 1.0,
+          visibility: existing?.visibility ?? 'visible',
+          labelState: existing?.labelState ?? null,
+          appliedAt: Date.now()
+        });
+        return next;
+      });
+    }
   };
 
   const handleObjectHideStyle = (id: string, target: 'all' | 'ribbon' | 'surface' | 'waters' | 'hydrogens') => {
-    if (target === 'all') {
-      setHiddenObjectIds((prev) => new Set(prev).add(id));
-    } else if (target === 'waters') {
-      handleRemoveSolvent();
-    } else if (target === 'hydrogens') {
-      handleRemoveHydrogens();
-    } else if (target === 'surface') {
-      setSurfaceOpacity(0.0);
+    if (id === "main_mol" || id === "all") {
+      if (target === 'all') {
+        setHiddenObjectIds((prev) => new Set(prev).add(id));
+      } else if (target === 'waters') {
+        handleRemoveSolvent();
+      } else if (target === 'hydrogens') {
+        handleRemoveHydrogens();
+      } else if (target === 'surface') {
+        setSurfaceOpacity(0.0);
+      }
+      return;
+    }
+
+    // Target active selection or named selection
+    let targetSerials: Set<number> | null = null;
+    let selKey = id;
+    if (id === "sele" || id === "sele_active") {
+      targetSerials = new Set(selectedAtomSerials);
+      selKey = "active_selection";
+    } else if (id.startsWith("sele_")) {
+      const selName = id.replace("sele_", "");
+      const match = namedSelections.find(s => s.name === selName);
+      if (match) {
+        targetSerials = new Set(match.atomIds);
+        selKey = selName;
+      }
+    }
+
+    if (targetSerials && targetSerials.size > 0) {
+      setPresentationOverrides(prev => {
+        const existing = prev.find(o => o.selectionKey === selKey);
+        const next = prev.filter(o => o.selectionKey !== selKey);
+        next.push({
+          selectionKey: selKey,
+          selectionQuery: selKey,
+          atomSerials: targetSerials!,
+          objectScope: null,
+          color: existing?.color ?? null,
+          representation: existing?.representation ?? null,
+          opacity: existing?.opacity ?? 1.0,
+          visibility: target === 'all' ? 'hidden' : (existing?.visibility ?? 'hidden'),
+          labelState: existing?.labelState ?? null,
+          appliedAt: Date.now()
+        });
+        return next;
+      });
     }
   };
 
@@ -1174,6 +1294,21 @@ export default function MolStudio() {
         if (style) setRenderStyle(style);
         if (scheme) setColorScheme(scheme);
       },
+      setObjectStyle: (id: string, style: RenderStyle) => handleObjectSetStyle(id, style),
+      setObjectColor: (id: string, schemeOrHex: string) => handleObjectSetColor(id, schemeOrHex),
+      selectSequenceResidue: (chain: string, resSeq: number, isToggle = false) => {
+        const matching = atoms.filter(a => (a.chain || 'A') === chain && (a.resSeq || a.resi || 1) === resSeq);
+        const serials = matching.map(a => a.serial);
+        const next = isToggle ? new Set(selectedAtomSerials) : new Set<number>();
+        const isAlreadySelected = serials.length > 0 && serials.every(s => selectedAtomSerials.has(s));
+        if (isToggle && isAlreadySelected) {
+          serials.forEach(s => next.delete(s));
+        } else {
+          serials.forEach(s => next.add(s));
+        }
+        setSelectedAtomSerials(next);
+      },
+      setSelectedAtomSerials: (serials: number[]) => setSelectedAtomSerials(new Set(serials)),
       setRenderStyle: (style: RenderStyle) => setRenderStyle(style),
       setColorScheme: (scheme: string) => setColorScheme(scheme),
       setSurfaceOpacity: (val: number) => setSurfaceOpacity(val),
@@ -1188,6 +1323,7 @@ export default function MolStudio() {
       toggleOrthographic: () => setOrthographic(prev => !prev),
       setStereoMode: (mode: 'none' | 'cross-eye' | 'anaglyph') => setStereoMode(mode),
       toggleSequenceViewer: () => setShowSequenceViewer(prev => !prev),
+      setShowSequenceViewer: (val: boolean) => setShowSequenceViewer(val),
       setShowDipoleArrow: (val: boolean) => setShowDipoleArrow(val),
       saveSession: () => handleSaveSession(),
       exportSessionString: () => {
@@ -1608,7 +1744,12 @@ useEffect(() => {
                 selectedAtomSerials={selectedAtomSerials}
                 onSelectResidue={(serials, isToggle) => {
                   const next = isToggle ? new Set(selectedAtomSerials) : new Set<number>();
-                  serials.forEach(s => next.add(s));
+                  const isAlreadySelected = serials.length > 0 && serials.every(s => selectedAtomSerials.has(s));
+                  if (isToggle && isAlreadySelected) {
+                    serials.forEach(s => next.delete(s));
+                  } else {
+                    serials.forEach(s => next.add(s));
+                  }
                   setSelectedAtomSerials(next);
                 }}
                 onClose={() => setShowSequenceViewer(false)}

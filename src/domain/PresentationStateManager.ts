@@ -23,7 +23,7 @@
 import { getColorFunction } from '../rendering/RepresentationStrategy';
 
 export type RepresentationName =
-  | 'lines' | 'sticks' | 'spheres' | 'surface' | 'cartoon'
+  | 'lines' | 'sticks' | 'spheres' | 'ball_and_stick' | 'surface' | 'cartoon'
   | 'ribbon' | 'putty' | 'trace' | 'mesh' | 'dots' | 'nonbonded' | 'nb_spheres' | 'labels';
 
 export type VisibilityState = 'visible' | 'hidden';
@@ -122,7 +122,8 @@ export interface ResolvedViewerRenderState {
 export function normalizeRepresentationName(rep: string | null | undefined): RepresentationName {
   if (!rep) return 'cartoon';
   const norm = rep.toLowerCase().trim().replace(/[-_\s]+/g, '');
-  if (norm === 'stick' || norm === 'sticks' || norm === 'ballandstick') return 'sticks';
+  if (norm === 'ballandstick' || norm === 'ball_and_stick' || norm === 'ballstick') return 'ball_and_stick';
+  if (norm === 'stick' || norm === 'sticks') return 'sticks';
   if (norm === 'sphere' || norm === 'spheres' || norm === 'spacefilling' || norm === 'vdw') return 'spheres';
   if (norm === 'line' || norm === 'lines' || norm === 'wireframe') return 'lines';
   if (norm === 'surface' || norm === 'vanderwaalssurface' || norm === 'solventaccessiblesurface' || norm === 'solventexcludedsurface') return 'surface';
@@ -151,6 +152,8 @@ export function get3DmolAtomStyle(
       return { stick: { ...colorSpec, radius: 0.22, opacity } };
     case 'spheres':
       return { sphere: { ...colorSpec, radius: 0.65, opacity } };
+    case 'ball_and_stick':
+      return { stick: { ...colorSpec, radius: 0.15, opacity }, sphere: { ...colorSpec, radius: 0.35, opacity } };
     case 'lines':
       return { line: { ...colorSpec, linewidth: 2.0 } };
     case 'nonbonded':
@@ -455,6 +458,13 @@ export class PresentationStateManager {
    */
   clearOverride(selectionKey: string): void {
     this.state.selectionOverrides.delete(selectionKey);
+  }
+
+  /**
+   * Remove an override for a specific selection key (alias for clearOverride).
+   */
+  removeOverride(selectionKey: string): void {
+    this.clearOverride(selectionKey);
   }
 
   /**
