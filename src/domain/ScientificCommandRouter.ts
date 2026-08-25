@@ -89,6 +89,15 @@ export interface CommandRouterResult {
     energy: number;
     distance: number;
   }[];
+  presentationOverrides?: Array<{
+    selectionKey: string;
+    selectionQuery: string;
+    atomSerials: Set<number>;
+    color?: string | null;
+    representation?: string | null;
+    visibility?: 'visible' | 'hidden';
+    appliedAt: number;
+  }>;
 }
 
 export class ScientificCommandRouter {
@@ -138,6 +147,15 @@ export class ScientificCommandRouter {
     let mergedAddLabels: Array<{ serial: number; text: string }> | undefined;
     let mergedSaveSelection: { name: string; query: string; atomIds?: number[] } | undefined;
     let mergedDeleteSelectionName: string | undefined;
+    const mergedPresentationOverrides: Array<{
+      selectionKey: string;
+      selectionQuery: string;
+      atomSerials: Set<number>;
+      color?: string | null;
+      representation?: string | null;
+      visibility?: 'visible' | 'hidden';
+      appliedAt: number;
+    }> = [];
 
     for (const cmdLine of commandLines) {
       const res = this.executeSingleCommand(cmdLine, atoms, currentNamedSelections, activeObjectName);
@@ -150,6 +168,9 @@ export class ScientificCommandRouter {
       if (res.triggerZoom) mergedTriggerZoom = true;
       if (res.addLabels) {
         mergedAddLabels = mergedAddLabels ? [...mergedAddLabels, ...res.addLabels] : res.addLabels;
+      }
+      if (res.presentationOverrides) {
+        mergedPresentationOverrides.push(...res.presentationOverrides);
       }
 
       if (res.saveSelection) {
@@ -179,7 +200,8 @@ export class ScientificCommandRouter {
       triggerZoom: mergedTriggerZoom,
       addLabels: mergedAddLabels,
       saveSelection: mergedSaveSelection,
-      deleteSelectionName: mergedDeleteSelectionName
+      deleteSelectionName: mergedDeleteSelectionName,
+      presentationOverrides: mergedPresentationOverrides.length > 0 ? mergedPresentationOverrides : undefined
     };
   }
 
@@ -262,12 +284,20 @@ export class ScientificCommandRouter {
         const color = ast.color_value || 'element';
         const selQuery = ast.selection_query || 'all';
         const selectedSerials = evaluateSelection(selQuery);
+        const isGlobal = !ast.selection_query || ast.selection_query === 'all' || ast.selection_query === '*';
         return {
           type: 'console_action',
           commandAST: ast,
           selectedSerials,
           count: selectedSerials.size,
-          setColorScheme: color,
+          setColorScheme: isGlobal ? color : undefined,
+          presentationOverrides: [{
+            selectionKey: selQuery,
+            selectionQuery: selQuery,
+            atomSerials: new Set(selectedSerials),
+            color: color,
+            appliedAt: Date.now()
+          }],
           textOutput: `color: applied '${color}' to ${selectedSerials.size} atoms (${selQuery})`
         };
       }
@@ -276,12 +306,22 @@ export class ScientificCommandRouter {
         const rep = ast.representation_value || 'cartoon';
         const selQuery = ast.selection_query || 'all';
         const selectedSerials = evaluateSelection(selQuery);
+        const isHide = ast.verb === 'hide';
+        const isGlobal = !ast.selection_query || ast.selection_query === 'all' || ast.selection_query === '*';
         return {
           type: 'console_action',
           commandAST: ast,
           selectedSerials,
           count: selectedSerials.size,
-          setStyle: rep,
+          setStyle: isGlobal ? (isHide ? 'hidden' : rep) : undefined,
+          presentationOverrides: [{
+            selectionKey: selQuery,
+            selectionQuery: selQuery,
+            atomSerials: new Set(selectedSerials),
+            representation: isHide ? null : rep,
+            visibility: isHide ? 'hidden' : 'visible',
+            appliedAt: Date.now()
+          }],
           textOutput: `${ast.verb}: applied '${rep}' to ${selectedSerials.size} atoms (${selQuery})`
         };
       }

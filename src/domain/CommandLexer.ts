@@ -42,7 +42,12 @@ export class CommandLexer {
 
       if (!inSingleQuote && !inDoubleQuote) {
         if (char === '(') parenDepth++;
-        else if (char === ')' && parenDepth > 0) parenDepth--;
+        else if (char === ')') {
+          if (parenDepth === 0) {
+            throw new Error("Command syntax error: unexpected closing parenthesis ')' in command sequence");
+          }
+          parenDepth--;
+        }
         else if (char === ';' && parenDepth === 0) {
           if (current.trim()) {
             commands.push(current.trim());
@@ -53,6 +58,10 @@ export class CommandLexer {
       }
 
       current += char;
+    }
+
+    if (parenDepth !== 0 || inSingleQuote || inDoubleQuote) {
+      throw new Error("Command syntax error: unbalanced parentheses or quotes in command sequence");
     }
 
     if (current.trim()) {
@@ -92,7 +101,12 @@ export class CommandLexer {
 
       if (!inSingleQuote && !inDoubleQuote) {
         if (char === '(') parenDepth++;
-        else if (char === ')' && parenDepth > 0) parenDepth--;
+        else if (char === ')') {
+          if (parenDepth === 0) {
+            throw new Error("Command syntax error: unexpected closing parenthesis ')' in arguments");
+          }
+          parenDepth--;
+        }
         else if (char === ',' && parenDepth === 0) {
           args.push(current.trim());
           current = '';
@@ -101,6 +115,10 @@ export class CommandLexer {
       }
 
       current += char;
+    }
+
+    if (parenDepth !== 0 || inSingleQuote || inDoubleQuote) {
+      throw new Error("Command syntax error: unbalanced parentheses or quotes in arguments");
     }
 
     if (current.trim()) {

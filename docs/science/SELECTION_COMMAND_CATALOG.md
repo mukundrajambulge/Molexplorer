@@ -1,7 +1,7 @@
-# Selection Command Catalog (Phase SQ2)
+# Selection Command Catalog (Phase SQ3 Verified)
 
 **Status:** `AUTHORITATIVE`  
-**Phase:** `SQ2 — Selection-Aware Command Language`
+**Phase:** `SQ3 — Advanced Selection Composition, PyMOL Compatibility, and Query Chaining`
 
 ---
 

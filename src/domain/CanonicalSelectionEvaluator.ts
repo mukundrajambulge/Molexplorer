@@ -88,6 +88,7 @@ export class CanonicalSelectionEvaluator {
   atomIdToResidueId: Map<number, string>;
   atomIdToChainId: Map<number, string>;
   namedSelections: { name: string; query: string; atomIds?: number[] }[];
+  private resolvingNamedSelections: Set<string> = new Set();
 
   constructor(
     molecule: CanonicalMolecule,
@@ -155,6 +156,39 @@ export class CanonicalSelectionEvaluator {
     this.dummyParser = new SelectionParser(this.legacyAtoms, this.namedSelections);
   }
 
+  evaluateNamedSelection(name: string, expr?: any): Set<number> {
+    const key = name.toLowerCase();
+    if (this.resolvingNamedSelections.has(key)) {
+      const cyclePath = Array.from(this.resolvingNamedSelections).concat(key).join(' -> ');
+      throw new Error(`Selection syntax error: Cyclic named selection reference detected: '${cyclePath}'`);
+    }
+
+    if (expr && expr.atomIds !== undefined) {
+      return new Set(expr.atomIds);
+    }
+
+    const match = this.namedSelections.find(s => s.name.toLowerCase() === key);
+    if (!match && !expr?.query) {
+      throw new Error(`Selection syntax error: Unknown selection reference '${name}'`);
+    }
+
+    if (match && match.atomIds !== undefined) {
+      return new Set(match.atomIds);
+    }
+
+    const queryToEval = expr?.query || match?.query;
+    if (!queryToEval) {
+      return new Set();
+    }
+
+    this.resolvingNamedSelections.add(key);
+    try {
+      return this.evaluateQuery(queryToEval).selected_ids;
+    } finally {
+      this.resolvingNamedSelections.delete(key);
+    }
+  }
+
   /**
    * Evaluates a selection query string against the canonical molecule.
    */
@@ -213,20 +247,7 @@ export class CanonicalSelectionEvaluator {
 
     switch (expr.type) {
       case 'named_selection': {
-        if (expr.atomIds && expr.atomIds.length > 0) {
-          return new Set(expr.atomIds);
-        }
-        if (expr.query) {
-          return this.evaluateQuery(expr.query).selected_ids;
-        }
-        const match = this.namedSelections.find(s => s.name.toLowerCase() === expr.name.toLowerCase());
-        if (match) {
-          if (match.atomIds && match.atomIds.length > 0) {
-            return new Set(match.atomIds);
-          }
-          return this.evaluateQuery(match.query).selected_ids;
-        }
-        throw new Error(`Unknown selection reference '${expr.name}'`);
+        return this.evaluateNamedSelection(expr.name, expr);
       }
 
       case 'flag':

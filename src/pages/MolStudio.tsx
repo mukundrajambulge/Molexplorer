@@ -954,8 +954,30 @@ export default function MolStudio() {
       setAtomColorMap(new Map(result.spectrumResult.atomColors));
     }
 
-    // SQ4: Per-selection presentation overrides
-    if (result.commandAST) {
+    // SQ3/SQ4: Per-selection presentation overrides (supporting single & chained command sequences)
+    if (result.presentationOverrides && result.presentationOverrides.length > 0) {
+      setPresentationOverrides(prev => {
+        let next = [...prev];
+        for (const ov of result.presentationOverrides!) {
+          const selKey = ov.selectionKey;
+          const existing = next.find(o => o.selectionKey === selKey);
+          next = next.filter(o => o.selectionKey !== selKey);
+          next.push({
+            selectionKey: selKey,
+            selectionQuery: ov.selectionQuery || selKey,
+            atomSerials: new Set(ov.atomSerials),
+            objectScope: null,
+            color: ov.color !== undefined ? ov.color : (existing?.color ?? null),
+            representation: ov.representation !== undefined ? (ov.representation as RepresentationName) : (existing?.representation ?? null),
+            opacity: existing?.opacity ?? 1.0,
+            visibility: ov.visibility ?? (existing?.visibility ?? 'visible'),
+            labelState: existing?.labelState ?? null,
+            appliedAt: Date.now()
+          });
+        }
+        return next;
+      });
+    } else if (result.commandAST) {
       if (result.commandAST.command_type === 'color') {
         const colorVal = result.commandAST.color_value || 'element';
         const selKey = result.commandAST.selection_query || 'all';
@@ -1211,6 +1233,7 @@ export default function MolStudio() {
         setPresentationOverrides([]);
         setAtomColorMap(null);
       },
+      getPresentationOverrides: () => presentationOverridesRef.current,
       getPresentationState: () => ({
         overridesCount: presentationOverridesRef.current.length,
         overrides: presentationOverridesRef.current.map(o => ({

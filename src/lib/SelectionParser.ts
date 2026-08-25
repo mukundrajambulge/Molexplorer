@@ -131,9 +131,20 @@ function hasCarbons(atom: Atom, atoms: Atom[]): boolean {
   return atoms.some(a => a.chainID === atom.chainID && a.resSeq === atom.resSeq && a.elem.toUpperCase() === 'C');
 }
 
+export interface SelectionMacroNode {
+  type: 'macro';
+  raw: string;
+  model?: string;
+  segi?: string;
+  chain?: string;
+  resi?: string;
+  name?: string;
+}
+
 export class SelectionParser {
   atoms: Atom[];
   namedSelections: { name: string; query: string; atomIds?: number[] }[];
+  private resolvingNamedSelections: Set<string> = new Set();
 
   constructor(
     atoms: Atom[],
@@ -149,6 +160,39 @@ export class SelectionParser {
 
   setNamedSelections(namedSelections: { name: string; query: string; atomIds?: number[] }[]) {
     this.namedSelections = namedSelections;
+  }
+
+  evaluateNamedSelection(name: string, expr?: any): Set<number> {
+    const key = name.toLowerCase();
+    if (this.resolvingNamedSelections.has(key)) {
+      const cyclePath = Array.from(this.resolvingNamedSelections).concat(key).join(' -> ');
+      throw new Error(`Selection syntax error: Cyclic named selection reference detected: '${cyclePath}'`);
+    }
+
+    if (expr && expr.atomIds !== undefined) {
+      return new Set(expr.atomIds);
+    }
+
+    const match = this.namedSelections?.find(s => s.name.toLowerCase() === key);
+    if (!match && !expr?.query) {
+      throw new Error(`Selection syntax error: Unknown selection reference '${name}'`);
+    }
+
+    if (match && match.atomIds !== undefined) {
+      return new Set(match.atomIds);
+    }
+
+    const queryToEval = expr?.query || match?.query;
+    if (!queryToEval) {
+      return new Set();
+    }
+
+    this.resolvingNamedSelections.add(key);
+    try {
+      return this.parse(queryToEval);
+    } finally {
+      this.resolvingNamedSelections.delete(key);
+    }
   }
 
   /**
@@ -284,117 +328,128 @@ export class SelectionParser {
     let pos = 0;
 
     // Helper to parse slash macros: /[model]/[segi]/[chain]/[resi]/[name]
-    const parseMacro = (tok: string): any => {
-      const raw = tok.startsWith('/') ? tok.slice(1) : tok;
-      const parts = raw.split('/');
-      if (parts.length === 5) {
-        return {
-          type: 'macro',
-          model: parts[0] || undefined,
-          segi: parts[1] || undefined,
-          chain: parts[2] || undefined,
-          resi: parts[3] || undefined,
-          name: parts[4] || undefined
-        };
+    const parseMacro = (rawToken: string): SelectionMacroNode => {
+      let leadingSlashes = 0;
+      while (leadingSlashes < rawToken.length && rawToken[leadingSlashes] === '/') {
+        leadingSlashes++;
       }
-      if (parts.length === 4) {
-        // Shorthand /segi/chain/resi/name
-        return {
-          type: 'macro',
-          segi: parts[0] || undefined,
-          chain: parts[1] || undefined,
-          resi: parts[2] || undefined,
-          name: parts[3] || undefined
-        };
+
+      if (leadingSlashes === rawToken.length && leadingSlashes >= 4) {
+        return { type: 'macro', raw: rawToken };
       }
-      if (parts.length === 3) {
-        // Shorthand ///resi/ or //chain/resi/
-        if (parts[0] === '' && parts[1] === '') {
-          return {
-            type: 'macro',
-            resi: parts[2] || undefined
-          };
-        }
-        return {
-          type: 'macro',
-          chain: parts[0] || undefined,
-          resi: parts[1] || undefined,
-          name: parts[2] || undefined
-        };
+
+      let model: string | undefined;
+      let segi: string | undefined;
+      let chain: string | undefined;
+      let resi: string | undefined;
+      let name: string | undefined;
+
+      if (leadingSlashes === 1) {
+        // Starts at slot 0: model
+        const parts = rawToken.slice(1).split('/');
+        model = parts[0] || undefined;
+        segi = parts[1] || undefined;
+        chain = parts[2] || undefined;
+        resi = parts[3] || undefined;
+        name = parts[4] || undefined;
+      } else if (leadingSlashes === 2) {
+        // Starts at slot 2: chain (skips model and segi)
+        const parts = rawToken.slice(2).split('/');
+        chain = parts[0] || undefined;
+        resi = parts[1] || undefined;
+        name = parts[2] || undefined;
+      } else if (leadingSlashes === 3) {
+        // Starts at slot 3: resi (skips model, segi, chain)
+        const parts = rawToken.slice(3).split('/');
+        resi = parts[0] || undefined;
+        name = parts[1] || undefined;
+      } else if (leadingSlashes === 4) {
+        // Starts at slot 4: name (skips model, segi, chain, resi)
+        const parts = rawToken.slice(4).split('/');
+        name = parts[0] || undefined;
       }
-      if (parts.length === 2) {
-        return {
-          type: 'macro',
-          chain: parts[0] || undefined,
-          resi: parts[1] || undefined
-        };
-      }
+
       return {
         type: 'macro',
-        name: raw
+        raw: rawToken,
+        model: model === '*' ? undefined : model,
+        segi: segi === '*' ? undefined : segi,
+        chain: chain === '*' ? undefined : chain,
+        resi: resi === '*' ? undefined : resi,
+        name: name === '*' ? undefined : name
       };
     };
 
-    // Level 0 (Weakest prefix): byres, bychain, bymolecule, bycalpha, byca, byring, byobject, bysegi
-    const parseHierarchy = (): any => {
-      if (pos < tokens.length) {
-        const tok = tokens[pos].toLowerCase();
-        if (['byres', 'bychain', 'bymolecule', 'bycalpha', 'byca', 'byring', 'byobject', 'bysegi'].includes(tok)) {
-          pos++;
-          const operand = parseHierarchy();
-          if (!operand) throw new Error(`Syntax error: missing expression after '${tok}'`);
-          const opType = tok === 'byca' ? 'bycalpha' : tok;
-          return { type: opType, operand };
-        }
-        if (tok === 'byfragment') {
-          throw new Error("Selection syntax error: 'byfragment' is currently DEFERRED / RESEARCH pending fragment partition specification. Use 'bymolecule' for covalent connected components.");
-        }
-        if (tok === 'bycell') {
-          throw new Error("Selection syntax error: 'bycell' is currently DEFERRED / RESEARCH pending crystallographic symmetry infrastructure.");
-        }
-      }
-      return parseDisjunction();
-    };
-
-    // Level 1: or, |
+    // Level 1: or, |, and implicit whitespace juxtaposition (DisjunctionOperator)
     const parseDisjunction = (): any => {
       let left = parseConjunction();
-      while (pos < tokens.length && (tokens[pos]?.toLowerCase() === 'or' || tokens[pos] === '|')) {
-        pos++;
-        const right = parseConjunction();
-        if (!right) throw new Error("Syntax error: missing expression after 'or'");
-        left = { type: 'or', left, right };
+      while (pos < tokens.length && tokens[pos] !== ')') {
+        const tok = tokens[pos].toLowerCase();
+        if (tok === 'or' || tok === '|') {
+          pos++;
+          const right = parseConjunction();
+          if (!right) throw new Error("Syntax error: missing expression after 'or'");
+          left = { type: 'or', left, right };
+        } else {
+          // Implicit whitespace juxtaposition = OR per PyMOL selection algebra
+          const right = parseConjunction();
+          if (!right) break;
+          left = { type: 'or', left, right };
+        }
       }
       return left;
     };
 
-    // Level 2: and, &, and whitespace implicit juxtaposition
+    // Level 2: and, & (Explicit intersection)
     const parseConjunction = (): any => {
-      let left = parseUnary();
-      while (pos < tokens.length && tokens[pos]?.toLowerCase() !== 'or' && tokens[pos] !== '|' && tokens[pos] !== ')') {
-        const tok = tokens[pos]?.toLowerCase();
-        // Postfix spatial modifiers: <S> around <d>, <S> within <d>, <S> beyond <d>, <S> expand <d>
-        if (tok === 'around' || tok === 'within' || tok === 'beyond' || tok === 'expand') {
-          pos++;
-          const dist = parseFloat(tokens[pos++]);
-          if (isNaN(dist)) throw new Error(`Syntax error: invalid distance for '${tok}' query`);
-          left = { type: tok, distance: dist, operand: left };
-          continue;
-        }
-        if (tok === 'and' || tok === '&') {
-          pos++;
-        }
-        const right = parseUnary();
+      let left = parseSpatialPostfix();
+      while (pos < tokens.length && (tokens[pos]?.toLowerCase() === 'and' || tokens[pos] === '&')) {
+        pos++;
+        const right = parseSpatialPostfix();
         if (!right) throw new Error("Syntax error: missing expression after 'and'");
         left = { type: 'and', left, right };
       }
       return left;
     };
 
-    // Level 3: Unary operators (not, !, neighbor, bound_to, extend <N>, prefix within/around/beyond/expand)
+    // Spatial postfix operators: <expr> around <d>, <expr> within <d>, <expr> beyond <d>, <expr> expand <d>
+    const parseSpatialPostfix = (): any => {
+      let expr = parseUnary();
+      while (pos < tokens.length) {
+        const tok = tokens[pos]?.toLowerCase();
+        if (['around', 'within', 'beyond', 'expand'].includes(tok)) {
+          pos++;
+          const distStr = tokens[pos++];
+          const dist = parseFloat(distStr);
+          if (isNaN(dist)) throw new Error(`Syntax error: invalid distance for '${tok}' query`);
+          expr = { type: tok, distance: dist, operand: expr };
+        } else {
+          break;
+        }
+      }
+      return expr;
+    };
+
+    // Level 3: Unary operators (not, !, neighbor, bound_to, extend <N>, prefix within/around/beyond/expand, byres/bychain/...)
     const parseUnary = (): any => {
       if (pos >= tokens.length) return null;
       const currentToken = tokens[pos].toLowerCase();
+
+      // Hierarchical prefix operators: byres, bychain, bymolecule, bycalpha, byca, byring, byobject, bysegi
+      if (['byres', 'bychain', 'bymolecule', 'bycalpha', 'byca', 'byring', 'byobject', 'bysegi'].includes(currentToken)) {
+        pos++;
+        const operand = parseSpatialPostfix();
+        if (!operand) throw new Error(`Syntax error: missing expression after '${currentToken}'`);
+        const opType = currentToken === 'byca' ? 'bycalpha' : currentToken;
+        return { type: opType, operand };
+      }
+
+      if (currentToken === 'byfragment') {
+        throw new Error("Selection syntax error: 'byfragment' is currently DEFERRED / RESEARCH pending fragment partition specification. Use 'bymolecule' for covalent connected components.");
+      }
+      if (currentToken === 'bycell') {
+        throw new Error("Selection syntax error: 'bycell' is currently DEFERRED / RESEARCH pending crystallographic symmetry infrastructure.");
+      }
 
       if (currentToken === 'not' || currentToken === '!') {
         pos++;
@@ -452,7 +507,7 @@ export class SelectionParser {
       // Parentheses
       if (currentToken === '(') {
         pos++;
-        const expr = parseHierarchy();
+        const expr = parseDisjunction();
         if (pos >= tokens.length || tokens[pos] !== ')') {
           throw new Error("Syntax error: unmatched opening parenthesis '('");
         }
@@ -467,6 +522,20 @@ export class SelectionParser {
       if (rawToken.startsWith('/') && rawToken.length > 1) {
         pos++;
         return parseMacro(rawToken);
+      }
+
+      // Check if this token matches a user-defined named selection first (unless reserved all/none)
+      if (currentToken !== 'all' && currentToken !== 'none') {
+        const namedMatch = this.namedSelections?.find(s => s.name.toLowerCase() === currentToken);
+        if (namedMatch) {
+          pos++;
+          return {
+            type: 'named_selection',
+            name: namedMatch.name,
+            query: namedMatch.query,
+            atomIds: namedMatch.atomIds
+          };
+        }
       }
 
       // Global flag keywords & aliases
@@ -514,17 +583,6 @@ export class SelectionParser {
       const validProps = ['resn', 'resi', 'chain', 'elem', 'name', 'id', 'index', 'rank', 'b', 'q', 'ss', 'alt', 'segi', 'formal_charge'];
 
       if (!validProps.includes(normProp)) {
-        // Check if this token matches a registered named selection
-        const namedMatch = this.namedSelections?.find(s => s.name.toLowerCase() === currentToken);
-        if (namedMatch) {
-          pos++;
-          return {
-            type: 'named_selection',
-            name: namedMatch.name,
-            query: namedMatch.query,
-            atomIds: namedMatch.atomIds
-          };
-        }
         throw new Error(`Unknown selection reference '${rawToken}'`);
       }
 
@@ -572,7 +630,7 @@ export class SelectionParser {
       return { type: 'property', property: normProp, value: val };
     };
 
-    const rootExpr = parseHierarchy();
+    const rootExpr = parseDisjunction();
     if (pos < tokens.length) {
       throw new Error(`Syntax error: unexpected trailing token '${tokens[pos]}'`);
     }
@@ -584,20 +642,7 @@ export class SelectionParser {
 
     switch (expr.type) {
         case 'named_selection': {
-            if (expr.atomIds && expr.atomIds.length > 0) {
-                return new Set(expr.atomIds);
-            }
-            if (expr.query) {
-                return this.parse(expr.query);
-            }
-            const match = this.namedSelections?.find(s => s.name.toLowerCase() === expr.name.toLowerCase());
-            if (match) {
-                if (match.atomIds && match.atomIds.length > 0) {
-                    return new Set(match.atomIds);
-                }
-                return this.parse(match.query);
-            }
-            throw new Error(`Unknown selection reference '${expr.name}'`);
+            return this.evaluateNamedSelection(expr.name, expr);
         }
         case 'property': {
             const result = new Set<number>();
@@ -900,6 +945,10 @@ export class SelectionParser {
 
   matchNumericOrRange(atomNum: number, item: string): boolean {
     const trimmed = item.trim();
+    if (trimmed.includes('+') || trimmed.includes(',')) {
+      const parts = trimmed.split(/[+,]/).map(s => s.trim()).filter(Boolean);
+      return parts.some(p => this.matchNumericOrRange(atomNum, p));
+    }
     const rangeMatch = trimmed.match(/^(-?\d+)[-:](\d+)$/);
     if (rangeMatch) {
       const min = parseInt(rangeMatch[1], 10);
