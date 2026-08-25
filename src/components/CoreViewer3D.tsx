@@ -104,7 +104,7 @@ function get3DmolStyleForRep(
     case 'cross':
       return { cross: { ...colorSpec, radius: 0.5, linewidth: 1.5 } };
     case 'ribbon':
-      return { cartoon: { ...colorSpec, opacity, style: 'ribbon' } };
+      return { cartoon: { ...colorSpec, opacity, ribbon: true, arrows: false, tubes: false, style: 'oval' } };
     case 'surface':
       return { stick: { ...colorSpec, radius: 0.15, opacity: 0.3 } };
     case 'cartoon':
@@ -634,13 +634,24 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
           }
         });
 
-        // 5. Apply batched styles to 3Dmol viewer
+        // 5. Apply batched styles to 3Dmol viewer (O(N) direct assignment)
+        const atomMap = new Map<number, any>();
+        atoms.forEach((a: any) => atomMap.set(a.serial, a));
+
         for (const { style, serials } of resolvedRenderState.styleGroups.values()) {
-          setClickStyle({ serial: serials }, style);
+          const interactiveStyle = wrapInteractiveStyle(style);
+          for (const s of serials) {
+            const a = atomMap.get(s);
+            if (a) a.style = interactiveStyle;
+          }
         }
 
         if (resolvedRenderState.hiddenSerials.length > 0) {
-          setClickStyle({ serial: resolvedRenderState.hiddenSerials }, { hidden: true });
+          const hiddenStyle = wrapInteractiveStyle({ hidden: true });
+          for (const s of resolvedRenderState.hiddenSerials) {
+            const a = atomMap.get(s);
+            if (a) a.style = hiddenStyle;
+          }
         }
 
         if (resolvedRenderState.surfaceSerials.length > 0) {
@@ -855,6 +866,7 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         try {
           viewer.render();
         } catch (renderErr) {
+          console.warn('3Dmol render error:', renderErr);
           try {
             viewer.setStyle({}, { stick: { colorscheme: 'default', radius: 0.2 }, sphere: { colorscheme: 'default', radius: 0.3 } });
             viewer.render();

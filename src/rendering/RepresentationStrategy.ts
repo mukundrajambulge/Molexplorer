@@ -304,7 +304,7 @@ export class DefaultRepresentationStrategy implements IRepresentationStrategy {
       case "Cartoon":
         return { cartoon: { ...base, arrows: true, tubes: false } };
       case "Ribbon":
-        return { cartoon: { ...base, style: 'ribbon' } };
+        return { cartoon: { ...base, ribbon: true, arrows: false, tubes: false, style: 'oval' } };
       case "Trace":
         return { cartoon: { ...base, style: 'trace' } };
       case "Putty":

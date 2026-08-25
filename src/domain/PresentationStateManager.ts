@@ -162,7 +162,7 @@ export function get3DmolAtomStyle(
       return { sphere: { ...colorSpec, radius: 0.45, opacity } };
     case 'ribbon':
       // 3Dmol ribbon: flat ribbon geometry without directional beta arrowheads
-      return { cartoon: { ...colorSpec, opacity, style: 'ribbon' } };
+      return { cartoon: { ...colorSpec, opacity, ribbon: true, arrows: false, tubes: false, style: 'oval' } };
     case 'trace':
       // 3Dmol trace: single-line spline backbone trace
       return { cartoon: { ...colorSpec, opacity, style: 'trace' } };

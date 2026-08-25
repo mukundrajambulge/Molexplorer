@@ -722,7 +722,7 @@ export default function MolStudio() {
     if (result.saveSelection) {
       const name = result.saveSelection.name;
       const expr = result.saveSelection.query;
-      const atomIds = Array.from(result.selectedSerials);
+      const atomIds = result.saveSelection.atomIds || Array.from(result.selectedSerials);
       const updated = [
         ...namedSelectionsRef.current.filter(s => s.name.toLowerCase() !== name.toLowerCase()),
         { name, query: expr, atomIds }
@@ -1233,7 +1233,10 @@ export default function MolStudio() {
         setPresentationOverrides([]);
         setAtomColorMap(null);
       },
-      getPresentationOverrides: () => presentationOverridesRef.current,
+      getPresentationOverrides: () => presentationOverridesRef.current.map(o => ({
+        ...o,
+        atomSerials: Array.from(o.atomSerials)
+      })),
       getPresentationState: () => ({
         overridesCount: presentationOverridesRef.current.length,
         overrides: presentationOverridesRef.current.map(o => ({
@@ -1248,16 +1251,17 @@ export default function MolStudio() {
       getViewerAtomState: (serial: number) => {
         const viewer = viewerRef.current?.getViewer?.();
         if (!viewer) return null;
-        const model = typeof viewer.getModel === 'function' ? (viewer.getModel(-1) || viewer.getModel(0) || viewer.getModel()) : null;
+        const model = typeof viewer.getModel === 'function' ? (viewer.getModel(0) || viewer.getModel()) : null;
         if (!model || typeof model.selectedAtoms !== 'function') return null;
         const atomsList = model.selectedAtoms({ serial: [serial] });
         if (!atomsList || atomsList.length === 0) return null;
         const a = atomsList[0];
         let rep = 'unknown';
-        if (a.style?.stick) rep = 'sticks';
+        if (a.style?.stick && a.style?.sphere) rep = 'ball_and_stick';
+        else if (a.style?.stick) rep = 'sticks';
         else if (a.style?.sphere) rep = 'spheres';
         else if (a.style?.cartoon) {
-          if (a.style?.cartoon?.style === 'ribbon') rep = 'ribbon';
+          if (a.style?.cartoon?.style === 'ribbon' || a.style?.cartoon?.ribbon) rep = 'ribbon';
           else if (a.style?.cartoon?.style === 'trace') rep = 'trace';
           else if (a.style?.cartoon?.tubes) rep = 'putty';
           else rep = 'cartoon';
@@ -1283,14 +1287,15 @@ export default function MolStudio() {
       getAllViewerAtoms: () => {
         const viewer = viewerRef.current?.getViewer?.();
         if (!viewer) return [];
-        const model = typeof viewer.getModel === 'function' ? (viewer.getModel(-1) || viewer.getModel(0) || viewer.getModel()) : null;
+        const model = typeof viewer.getModel === 'function' ? (viewer.getModel(0) || viewer.getModel()) : null;
         if (!model || typeof model.selectedAtoms !== 'function') return [];
         return model.selectedAtoms({}).map((a: any) => {
           let rep = 'unknown';
-          if (a.style?.stick) rep = 'sticks';
+          if (a.style?.stick && a.style?.sphere) rep = 'ball_and_stick';
+          else if (a.style?.stick) rep = 'sticks';
           else if (a.style?.sphere) rep = 'spheres';
           else if (a.style?.cartoon) {
-            if (a.style?.cartoon?.style === 'ribbon') rep = 'ribbon';
+            if (a.style?.cartoon?.style === 'ribbon' || a.style?.cartoon?.ribbon) rep = 'ribbon';
             else if (a.style?.cartoon?.style === 'trace') rep = 'trace';
             else if (a.style?.cartoon?.tubes) rep = 'putty';
             else rep = 'cartoon';
