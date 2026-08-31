@@ -335,6 +335,22 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
     setHoveredAtom
   };
 
+  // Typed Studio Auxiliary Model Registry (Eliminates positional index assumptions)
+  interface StudioModelRegistry {
+    main: any | null;
+    assembly: any | null;
+    symmetry: any | null;
+    alignment: any | null;
+    ligand: any | null;
+  }
+  const studioModelsRef = useRef<StudioModelRegistry>({
+    main: null,
+    assembly: null,
+    symmetry: null,
+    alignment: null,
+    ligand: null
+  });
+
   // Unified Atom Picking & Hover Handlers
   const handleAtomPicked = (rawAtom: any, _viewer?: any, event?: any) => {
     if (!rawAtom) return;
@@ -436,6 +452,15 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
     viewer.removeAllShapes();
     viewer.removeAllLabels();
 
+    // Reset model registry
+    studioModelsRef.current = {
+      main: null,
+      assembly: null,
+      symmetry: null,
+      alignment: null,
+      ligand: null
+    };
+
     if (mode === 'explorer' && props.molecule?.rawContent) {
       const format = props.molecule.format.toLowerCase();
       const molContent = props.molecule.rawContent;
@@ -465,6 +490,7 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
     } else if (mode === 'studio' && props.pdbData) {
       setIsRendering(true);
       const m = viewer.addModel(props.pdbData, "pdb", { keepH: true });
+      studioModelsRef.current.main = m;
       
       try { m.computeSecondaryStructure(); } catch (e) {}
 
@@ -502,18 +528,18 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         });
       }
 
-      // Assembly, Symmetry, Alignment & Ligand auxiliary models
+      // Exact Auxiliary Model References
       if (props.assemblyPDB) {
-        viewer.addModel(props.assemblyPDB, "pdb");
+        studioModelsRef.current.assembly = viewer.addModel(props.assemblyPDB, "pdb");
       }
       if (props.symmetryPDB) {
-        viewer.addModel(props.symmetryPDB, "pdb");
+        studioModelsRef.current.symmetry = viewer.addModel(props.symmetryPDB, "pdb");
       }
       if (props.alignmentPDB) {
-        viewer.addModel(props.alignmentPDB, "pdb");
+        studioModelsRef.current.alignment = viewer.addModel(props.alignmentPDB, "pdb");
       }
       if (props.ligandData) {
-        viewer.addModel(props.ligandData.data, props.ligandData.format);
+        studioModelsRef.current.ligand = viewer.addModel(props.ligandData.data, props.ligandData.format);
       }
 
       // Attach viewer & model picking listeners
@@ -567,6 +593,11 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
     }
 
     if (mode === 'explorer' && props.molecule?.rawContent) {
+      // 1. Clear previous presentation overlays without touching molecular models
+      viewer.removeAllSurfaces();
+      viewer.removeAllShapes();
+      viewer.removeAllLabels();
+
       const vs = props.viewState;
       if (vs) {
         const rawOpacity = typeof vs.surfaceOpacity === 'number' ? vs.surfaceOpacity : 0.8;
@@ -587,9 +618,6 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         } else if (vs.renderStyle.includes("Surface")) {
           baseStyle.stick = { opacity: Math.min(opacity, 0.4), radius: isStickRadius * 0.7 };
           baseStyle.sphere = { hidden: true };
-          try {
-            viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity, color: 'spectrum' });
-          } catch (e) {}
         } else {
           baseStyle.stick = { opacity, radius: isStickRadius };
         }
@@ -599,9 +627,10 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         if (vs.colorTheme === "Monochrome") { baseStyle.color = "#B0B0B0"; }
         else { baseStyle.colorscheme = colorscheme; }
 
+        // 2. Apply atom/base styles
         viewer.setStyle({}, wrapInteractiveStyle(baseStyle));
         
-        // 1. Hydrogen Styling
+        // Hydrogen Styling
         if (vs.showHydrogens) {
           const hStyle: any = {};
           if (baseStyle.line) hStyle.line = { color: '#FFFFFF', opacity };
@@ -612,12 +641,13 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
           viewer.setStyle({ elem: 'H' }, { hidden: true });
         }
 
-        // 2. Clear previous overlays without touching models
-        viewer.removeAllSurfaces();
-        viewer.removeAllShapes();
-        viewer.removeAllLabels();
+        // 3. Rebuild CURRENT requested surfaces/electron-cloud/shapes/labels
+        if (vs.renderStyle.includes("Surface")) {
+          try {
+            viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity, color: 'spectrum' });
+          } catch (e) {}
+        }
 
-        // 3. Electron Cloud Rendering Mode
         if (vs.electronCloudMode === "Illustrative Approximation") {
           try {
             viewer.addSurface($3Dmol.SurfaceType.VDW, {
@@ -671,7 +701,13 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         }
       }
 
-      viewer.render();
+      try {
+        viewer.render();
+        (window as any).__lastPresentationRenderTimestamp = performance.now();
+        (window as any).__presentationRenderCount = ((window as any).__presentationRenderCount || 0) + 1;
+      } catch (renderErr) {
+        console.warn('3Dmol render error in Explorer mode:', renderErr);
+      }
 
     } else if (mode === 'studio' && props.pdbData) {
       const m = viewer.getModel(0);
@@ -779,18 +815,35 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         });
       }
 
-      // Auxiliary model styles
-      if (props.assemblyPDB) {
-        viewer.setStyle({ model: 1 }, wrapInteractiveStyle(getStyleObj(rStyle, 'cyan', minResi, maxResi, chainMap, 1.0)));
+      // Exact Auxiliary Model Styling via Typed Registry
+      const reg = studioModelsRef.current;
+      if (reg.assembly) {
+        if (typeof reg.assembly.setStyle === 'function') {
+          reg.assembly.setStyle({}, wrapInteractiveStyle(getStyleObj(rStyle, 'cyan', minResi, maxResi, chainMap, 1.0)));
+        } else if (reg.assembly.getID) {
+          viewer.setStyle({ model: reg.assembly.getID() }, wrapInteractiveStyle(getStyleObj(rStyle, 'cyan', minResi, maxResi, chainMap, 1.0)));
+        }
       }
-      if (props.symmetryPDB) {
-        viewer.setStyle({ model: 2 }, wrapInteractiveStyle(getStyleObj(rStyle, '#FFD700', minResi, maxResi, chainMap, 0.7)));
+      if (reg.symmetry) {
+        if (typeof reg.symmetry.setStyle === 'function') {
+          reg.symmetry.setStyle({}, wrapInteractiveStyle(getStyleObj(rStyle, '#FFD700', minResi, maxResi, chainMap, 0.7)));
+        } else if (reg.symmetry.getID) {
+          viewer.setStyle({ model: reg.symmetry.getID() }, wrapInteractiveStyle(getStyleObj(rStyle, '#FFD700', minResi, maxResi, chainMap, 0.7)));
+        }
       }
-      if (props.alignmentPDB) {
-        viewer.setStyle({ model: 3 }, wrapInteractiveStyle({ cartoon: { color: 'orange' } }));
+      if (reg.alignment) {
+        if (typeof reg.alignment.setStyle === 'function') {
+          reg.alignment.setStyle({}, wrapInteractiveStyle({ cartoon: { color: 'orange' } }));
+        } else if (reg.alignment.getID) {
+          viewer.setStyle({ model: reg.alignment.getID() }, wrapInteractiveStyle({ cartoon: { color: 'orange' } }));
+        }
       }
-      if (props.ligandData) {
-        viewer.setStyle({ model: 4 }, wrapInteractiveStyle({ stick: { colorscheme: 'greenCarbon' } }));
+      if (reg.ligand) {
+        if (typeof reg.ligand.setStyle === 'function') {
+          reg.ligand.setStyle({}, wrapInteractiveStyle({ stick: { colorscheme: 'greenCarbon' } }));
+        } else if (reg.ligand.getID) {
+          viewer.setStyle({ model: reg.ligand.getID() }, wrapInteractiveStyle({ stick: { colorscheme: 'greenCarbon' } }));
+        }
       }
 
       // Apply Selection Highlighting Overlay (Glowing Luminous Markers)
@@ -942,6 +995,8 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
 
       try {
         viewer.render();
+        (window as any).__lastPresentationRenderTimestamp = performance.now();
+        (window as any).__presentationRenderCount = ((window as any).__presentationRenderCount || 0) + 1;
       } catch (renderErr) {
         console.warn('3Dmol render error:', renderErr);
       }

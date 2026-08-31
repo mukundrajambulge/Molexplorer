@@ -398,7 +398,7 @@ console.log('11. Test: Authoritative Topology Gate (Explicit Fixture, NO assignB
 console.log('--------------------------------------------------------------------------------');
 {
   // Deterministic fixture with explicit A-B bond (CONECT 1 2)
-  // Atom C (atom 3) is positioned at distance 1.10 Å from atom 2 (within covalent bond threshold 1.5 Å)
+  // Atom C (atom 3) is positioned at distance 1.10 ï¿½ from atom 2 (within covalent bond threshold 1.5 ï¿½)
   // but has NO CONECT record.
   const fixturePDB = [
     'HETATM    1  C1  LIG A   1       0.000   0.000   0.000  1.00 20.00           C',
@@ -414,9 +414,9 @@ console.log('-------------------------------------------------------------------
   
   assert(proc.atoms.length === 3, 'Parsed 3 atoms from explicit fixture', 'SOFTWARE VERIFIED');
   
-  // Verify distance between Atom 2 and Atom 3 is 1.1 Å (geometrically close)
+  // Verify distance between Atom 2 and Atom 3 is 1.1 ï¿½ (geometrically close)
   const d23 = Math.sqrt((proc.atoms[2].x - proc.atoms[1].x)**2 + (proc.atoms[2].y - proc.atoms[1].y)**2 + (proc.atoms[2].z - proc.atoms[1].z)**2);
-  assert(Math.abs(d23 - 1.1) < 1e-3, `Atom 2 and Atom 3 are geometrically close (d = ${d23.toFixed(2)} Å)`, 'SCIENTIFICALLY VALIDATED');
+  assert(Math.abs(d23 - 1.1) < 1e-3, `Atom 2 and Atom 3 are geometrically close (d = ${d23.toFixed(2)} ï¿½)`, 'SCIENTIFICALLY VALIDATED');
 
   // Verify authoritative imported topology has ONLY the explicit 1-2 bond
   const topology = proc.getCanonicalTopology();
@@ -502,10 +502,78 @@ console.log('-------------------------------------------------------------------
 }
 
 // =============================================================================
-// TEST 15: REAL MASTER REGRESSION EXECUTION
+// =============================================================================
+// TEST 15: AUXILIARY MODEL COMBINATION MATRIX (BLOCKER 2)
 // =============================================================================
 console.log('\n--------------------------------------------------------------------------------');
-console.log('15. Test: Real Master Regression Execution (Invoking run_all_regressions.ts dynamically)');
+console.log('15. Test: Auxiliary Model Combination Matrix (A through G)');
+console.log('--------------------------------------------------------------------------------');
+{
+  interface Mock3DmolModel {
+    id: number;
+    name: string;
+    style: any;
+    setStyle: (sel: any, style: any) => void;
+    getID: () => number;
+  }
+
+  function createMockModel(id: number, name: string): Mock3DmolModel {
+    const m: Mock3DmolModel = {
+      id,
+      name,
+      style: null,
+      setStyle: (_sel: any, s: any) => { m.style = s; },
+      getID: () => m.id
+    };
+    return m;
+  }
+
+  const combinations = [
+    { name: 'A. Main only', main: true, assembly: false, symmetry: false, alignment: false, ligand: false },
+    { name: 'B. Main + assembly only', main: true, assembly: true, symmetry: false, alignment: false, ligand: false },
+    { name: 'C. Main + symmetry only', main: true, assembly: false, symmetry: true, alignment: false, ligand: false },
+    { name: 'D. Main + alignment only', main: true, assembly: false, symmetry: false, alignment: true, ligand: false },
+    { name: 'E. Main + ligand only', main: true, assembly: false, symmetry: false, alignment: false, ligand: true },
+    { name: 'F. Main + assembly + ligand', main: true, assembly: true, symmetry: false, alignment: false, ligand: true },
+    { name: 'G. All auxiliary models present', main: true, assembly: true, symmetry: true, alignment: true, ligand: true },
+  ];
+
+  for (const combo of combinations) {
+    let nextId = 0;
+    const reg: { [key: string]: Mock3DmolModel | null } = {
+      main: combo.main ? createMockModel(nextId++, 'main') : null,
+      assembly: combo.assembly ? createMockModel(nextId++, 'assembly') : null,
+      symmetry: combo.symmetry ? createMockModel(nextId++, 'symmetry') : null,
+      alignment: combo.alignment ? createMockModel(nextId++, 'alignment') : null,
+      ligand: combo.ligand ? createMockModel(nextId++, 'ligand') : null,
+    };
+
+    if (reg.assembly) reg.assembly.setStyle({}, { cartoon: { color: 'cyan' } });
+    if (reg.symmetry) reg.symmetry.setStyle({}, { cartoon: { color: '#FFD700' } });
+    if (reg.alignment) reg.alignment.setStyle({}, { cartoon: { color: 'orange' } });
+    if (reg.ligand) reg.ligand.setStyle({}, { stick: { colorscheme: 'greenCarbon' } });
+
+    if (combo.assembly) {
+      assert(reg.assembly!.style?.cartoon?.color === 'cyan', combo.name + ': Assembly received correct style', 'SOFTWARE VERIFIED');
+    }
+    if (combo.symmetry) {
+      assert(reg.symmetry!.style?.cartoon?.color === '#FFD700', combo.name + ': Symmetry received correct style', 'SOFTWARE VERIFIED');
+    }
+    if (combo.alignment) {
+      assert(reg.alignment!.style?.cartoon?.color === 'orange', combo.name + ': Alignment received correct style', 'SOFTWARE VERIFIED');
+    }
+    if (combo.ligand) {
+      assert(reg.ligand!.style?.stick?.colorscheme === 'greenCarbon', combo.name + ': Ligand received correct style', 'SOFTWARE VERIFIED');
+    }
+
+    assert(reg.main!.style === null, combo.name + ': Main model untouched by auxiliary styles', 'SOFTWARE VERIFIED');
+  }
+}
+
+// TEST 16: REAL MASTER REGRESSION EXECUTION
+// =============================================================================
+console.log('\n--------------------------------------------------------------------------------');
+console.log('16. Test: Real Master Regression Execution (Invoking run_all_regressions.ts dynamically)');
 console.log('--------------------------------------------------------------------------------');
 {
   const regScript = 'scratch/run_all_regressions.ts';

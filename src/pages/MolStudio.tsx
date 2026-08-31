@@ -91,6 +91,10 @@ export default function MolStudio() {
   useEffect(() => {
     namedSelectionsRef.current = namedSelections;
   }, [namedSelections]);
+  const selectedAtomSerialsRef = useRef(selectedAtomSerials);
+  useEffect(() => {
+    selectedAtomSerialsRef.current = selectedAtomSerials;
+  }, [selectedAtomSerials]);
   const presentationOverridesRef = useRef(presentationOverrides);
   useEffect(() => {
     presentationOverridesRef.current = presentationOverrides;
@@ -103,6 +107,9 @@ export default function MolStudio() {
   useEffect(() => {
     atomRepMasksRef.current = atomRepMasks;
   }, [atomRepMasks]);
+
+  const [testAlignmentPDB, setTestAlignmentPDB] = useState<string | null>(null);
+  const [testLigandData, setTestLigandData] = useState<any | null>(null);
 
   // Stage 7 State Variables
   const [showSequenceViewer, setShowSequenceViewer] = useState(false);
@@ -1437,6 +1444,12 @@ export default function MolStudio() {
         setSelectedAtomSerials(next);
       },
       setSelectedAtomSerials: (serials: number[]) => setSelectedAtomSerials(new Set(serials)),
+      getSelectedSerials: () => Array.from(selectedAtomSerialsRef.current),
+      getNamedSelections: () => namedSelectionsRef.current,
+      setAssemblyPDB: (pdb: string | null) => setAssemblyPDB(pdb),
+      setSymmetryPDB: (pdb: string | null) => setSymmetryPDB(pdb),
+      setAlignmentPDB: (pdb: string | null) => setTestAlignmentPDB(pdb),
+      setLigandData: (data: any | null) => setTestLigandData(data),
       setRenderStyle: (style: RenderStyle) => setRenderStyle(style),
       setColorScheme: (scheme: string) => setColorScheme(scheme),
       setSurfaceOpacity: (val: number) => setSurfaceOpacity(val),
@@ -1844,7 +1857,8 @@ useEffect(() => {
               ssMode={cleaningState.ss_mode}
               assemblyPDB={assemblyPDB} 
               symmetryPDB={symmetryPDB} 
-              alignmentPDB={alignmentResult?.alignedPdbB} 
+              alignmentPDB={testAlignmentPDB || alignmentResult?.alignedPdbB} 
+              ligandData={testLigandData}
               assemblyState={assemblyState}
               renderStyle={renderStyle}
               colorScheme={colorScheme}
