@@ -56,6 +56,7 @@ interface CoreViewer3DProps {
   // SQ4 Presentation Overrides & Per-Atom Colors
   presentationOverrides?: SelectionPresentationOverride[];
   atomColorMap?: Map<number, string> | null;
+  atomRepMasks?: Map<string | number, number> | null;
 }
 
 const CHAIN_PALETTE = [
@@ -621,7 +622,8 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
           globalOpacity: currentOpacity,
           objectOverrides: new Map(),
           selectionOverrides: overridesMap,
-          atomColorMap: props.atomColorMap || null
+          atomColorMap: props.atomColorMap || null,
+          atomRepresentationMasks: props.atomRepMasks ? (props.atomRepMasks as any) : null
         };
 
         const resolvedRenderState = buildViewerRenderState({
@@ -879,13 +881,13 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
     }, 10);
 
     return () => clearTimeout(renderTimer);
-  }, [
+    }, [
     mode, props.molecule, props.compareMolecule, props.viewState, props.filters,
     props.pdbData, props.renderStyle, props.colorScheme, props.selectedAtomSerials, props.ligandData,
     props.focusTrigger, showDipoleArrow, dipoleMoment, activeMeasurementMode, clickedAtomBuffer,
     props.backgroundColor, props.surfaceOpacity, props.ssData, props.ssMode,
     props.assemblyPDB, props.symmetryPDB, props.alignmentPDB, props.interactions, measurements,
-    selectionLevel, molecularSelection, props.presentationOverrides, props.atomColorMap
+    selectionLevel, molecularSelection, props.presentationOverrides, props.atomColorMap, props.atomRepMasks
   ]);
 
   const granularityLevels: { id: SelectionLevel; label: string }[] = [

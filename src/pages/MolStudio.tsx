@@ -38,7 +38,8 @@ import { StudioExportModal } from "../components/StudioExportModal";
 import { Command, Ruler, CheckCircle2, History } from "lucide-react";
 import { ScientificHistoryInspector } from "../components/ScientificHistoryInspector";
 import { ScientificCommandRouter } from "../domain/ScientificCommandRouter";
-import { SelectionPresentationOverride, RepresentationName, normalizeRepresentationName } from "../domain/PresentationStateManager";
+import { SelectionPresentationOverride, RepresentationName, normalizeRepresentationName, defaultMaskForAtom, makeAtomIdentityKey } from "../domain/PresentationStateManager";
+import { RepresentationBit, representationToBit } from "../domain/RepresentationRegistry";
 import { ColorRegistry } from "../domain/ColorRegistry";
 
 export default function MolStudio() {
@@ -85,6 +86,7 @@ export default function MolStudio() {
   // SQ4 Presentation Overrides & Per-Atom Colors State
   const [presentationOverrides, setPresentationOverrides] = useState<SelectionPresentationOverride[]>([]);
   const [atomColorMap, setAtomColorMap] = useState<Map<number, string> | null>(null);
+  const [atomRepMasks, setAtomRepMasks] = useState<Map<string, number>>(new Map());
   const namedSelectionsRef = useRef(namedSelections);
   useEffect(() => {
     namedSelectionsRef.current = namedSelections;
@@ -97,6 +99,10 @@ export default function MolStudio() {
   useEffect(() => {
     atomColorMapRef.current = atomColorMap;
   }, [atomColorMap]);
+  const atomRepMasksRef = useRef(atomRepMasks);
+  useEffect(() => {
+    atomRepMasksRef.current = atomRepMasks;
+  }, [atomRepMasks]);
 
   // Stage 7 State Variables
   const [showSequenceViewer, setShowSequenceViewer] = useState(false);
@@ -512,6 +518,16 @@ export default function MolStudio() {
 
     if (targetSerials && targetSerials.size > 0) {
       const repName = normalizeRepresentationName(newStyle);
+      const bit = representationToBit(repName);
+      setAtomRepMasks(prev => {
+        const next = new Map(prev);
+        for (const s of targetSerials!) {
+          const key = makeAtomIdentityKey(s, 'main_mol');
+          next.set(key, bit);
+          next.set(`default:${s}`, bit);
+        }
+        return next;
+      });
       setPresentationOverrides(prev => {
         const existing = prev.find(o => o.selectionKey === selKey);
         const next = prev.filter(o => o.selectionKey !== selKey);
@@ -614,6 +630,19 @@ export default function MolStudio() {
     }
 
     if (targetSerials && targetSerials.size > 0) {
+      let hideBit = RepresentationBit.ALL;
+      if (target === 'ribbon') hideBit = RepresentationBit.CARTOON | RepresentationBit.RIBBON;
+      else if (target === 'surface') hideBit = RepresentationBit.SURFACE;
+      setAtomRepMasks(prev => {
+        const next = new Map(prev);
+        for (const s of targetSerials!) {
+          const key = makeAtomIdentityKey(s, 'main_mol');
+          const cur = next.has(key) ? next.get(key)! : (next.has(`default:${s}`) ? next.get(`default:${s}`)! : defaultMaskForAtom(atoms.find(a => a.serial === s), renderStyle ? normalizeRepresentationName(renderStyle) : 'cartoon'));
+          next.set(key, cur & ~hideBit);
+          next.set(`default:${s}`, cur & ~hideBit);
+        }
+        return next;
+      });
       setPresentationOverrides(prev => {
         const existing = prev.find(o => o.selectionKey === selKey);
         const next = prev.filter(o => o.selectionKey !== selKey);
@@ -954,6 +983,54 @@ export default function MolStudio() {
       setAtomColorMap(new Map(result.spectrumResult.atomColors));
     }
 
+    // I-PYMOL-01: Apply representation mutations directly to atomRepMasks
+    const repMutations = result.representationMutations || (result.representationMutation ? [result.representationMutation] : []);
+    if (repMutations.length > 0) {
+      setAtomRepMasks(prev => {
+        const next = new Map(prev);
+        for (const mut of repMutations) {
+          const bit = mut.representation === 'everything' || mut.representation === 'all'
+            ? RepresentationBit.ALL
+            : representationToBit(mut.representation);
+          
+          if (mut.action === 'show') {
+            for (const serial of mut.atomSerials) {
+              const key = makeAtomIdentityKey(serial, 'main_mol');
+              const current = next.has(key)
+                ? next.get(key)!
+                : (next.has(`default:${serial}`)
+                  ? next.get(`default:${serial}`)!
+                  : (next.has(String(serial))
+                    ? next.get(String(serial))!
+                    : defaultMaskForAtom(atoms.find(a => a.serial === serial), renderStyle ? normalizeRepresentationName(renderStyle) : 'cartoon')));
+              next.set(key, current | bit);
+              next.set(`default:${serial}`, current | bit);
+            }
+          } else if (mut.action === 'hide') {
+            for (const serial of mut.atomSerials) {
+              const key = makeAtomIdentityKey(serial, 'main_mol');
+              const current = next.has(key)
+                ? next.get(key)!
+                : (next.has(`default:${serial}`)
+                  ? next.get(`default:${serial}`)!
+                  : (next.has(String(serial))
+                    ? next.get(String(serial))!
+                    : defaultMaskForAtom(atoms.find(a => a.serial === serial), renderStyle ? normalizeRepresentationName(renderStyle) : 'cartoon')));
+              next.set(key, current & ~bit);
+              next.set(`default:${serial}`, current & ~bit);
+            }
+          } else if (mut.action === 'show_as') {
+            for (const serial of mut.atomSerials) {
+              const key = makeAtomIdentityKey(serial, 'main_mol');
+              next.set(key, bit);
+              next.set(`default:${serial}`, bit);
+            }
+          }
+        }
+        return next;
+      });
+    }
+
     // SQ3/SQ4: Per-selection presentation overrides (supporting single & chained command sequences)
     if (result.presentationOverrides && result.presentationOverrides.length > 0) {
       setPresentationOverrides(prev => {
@@ -1227,11 +1304,28 @@ export default function MolStudio() {
       loadMolecule: (name: string, data: string, format = 'pdb') => {
         setPresentationOverrides([]);
         setAtomColorMap(null);
+        setAtomRepMasks(new Map());
         setMolData({ name, data, format: format as any });
       },
       clearOverrides: () => {
         setPresentationOverrides([]);
         setAtomColorMap(null);
+        setAtomRepMasks(new Map());
+      },
+      getAtomRepMask: (serial: number, scope: string = 'main_mol') => {
+        const key = makeAtomIdentityKey(serial, scope);
+        return atomRepMasksRef.current.get(key) ??
+               atomRepMasksRef.current.get(`default:${serial}`) ??
+               atomRepMasksRef.current.get(String(serial));
+      },
+      getAtomRepMasks: () => Array.from(atomRepMasksRef.current.entries()),
+      getViewer: () => viewerRef.current?.getViewer?.(),
+      getViewMatrix: () => {
+        const viewer = viewerRef.current?.getViewer?.();
+        if (viewer && typeof viewer.getView === 'function') {
+          return viewer.getView();
+        }
+        return null;
       },
       getPresentationOverrides: () => presentationOverridesRef.current.map(o => ({
         ...o,
@@ -1246,7 +1340,8 @@ export default function MolStudio() {
           representation: o.representation,
           visibility: o.visibility
         })),
-        atomColorMapSize: atomColorMapRef.current ? atomColorMapRef.current.size : 0
+        atomColorMapSize: atomColorMapRef.current ? atomColorMapRef.current.size : 0,
+        atomRepMasksSize: atomRepMasksRef.current.size
       }),
       getViewerAtomState: (serial: number) => {
         const viewer = viewerRef.current?.getViewer?.();
@@ -1279,6 +1374,11 @@ export default function MolStudio() {
           color,
           rep: isHidden ? 'hidden' : rep,
           hidden: isHidden,
+          hasSticks: Boolean(a.style?.stick),
+          hasSpheres: Boolean(a.style?.sphere),
+          hasCartoon: Boolean(a.style?.cartoon),
+          hasLines: Boolean(a.style?.line),
+          hasNonbonded: Boolean(a.style?.cross),
           resn: a.resn,
           resi: a.resi,
           chain: a.chain
@@ -1312,6 +1412,11 @@ export default function MolStudio() {
             color,
             rep: isHidden ? 'hidden' : rep,
             hidden: isHidden,
+            hasSticks: Boolean(a.style?.stick),
+            hasSpheres: Boolean(a.style?.sphere),
+            hasCartoon: Boolean(a.style?.cartoon),
+            hasLines: Boolean(a.style?.line),
+            hasNonbonded: Boolean(a.style?.cross),
             resn: a.resn,
             resi: a.resi,
             chain: a.chain
@@ -1760,6 +1865,7 @@ useEffect(() => {
               stereoMode={stereoMode}
               presentationOverrides={presentationOverrides}
               atomColorMap={atomColorMap}
+              atomRepMasks={atomRepMasks}
             />
           </div>
 

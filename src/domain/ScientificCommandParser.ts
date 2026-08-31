@@ -155,9 +155,21 @@ export class ScientificCommandParser {
       };
     }
 
-    // 3. REPRESENTATION: show, hide, show_as
-    if (verb === 'show' || verb === 'hide' || verb === 'show_as') {
+    // 3. REPRESENTATION: show, hide, show_as, as
+    if (verb === 'show' || verb === 'hide' || verb === 'show_as' || verb === 'as') {
+      const canonicalVerb = verb === 'as' ? 'show_as' : verb;
       if (!lexed.args_raw.trim()) {
+        if (canonicalVerb === 'hide') {
+          return {
+            verb: 'hide',
+            raw_input: raw,
+            command_type: 'representation',
+            positional_args: ['everything', 'all'],
+            named_args: {},
+            representation_value: 'everything',
+            selection_query: 'all'
+          };
+        }
         throw new Error(`Representation syntax error: missing representation name for '${verb}'`);
       }
 
@@ -175,10 +187,10 @@ export class ScientificCommandParser {
         }
       }
 
-      const validatedRep = RepresentationRegistry.validate(repVal);
+      const validatedRep = RepresentationRegistry.validate(repVal, canonicalVerb === 'hide');
 
       return {
-        verb,
+        verb: canonicalVerb,
         raw_input: raw,
         command_type: 'representation',
         positional_args: [validatedRep, selQuery],
