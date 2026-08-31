@@ -1,6 +1,6 @@
 /**
  * test_i_pymol_01_representation_state.ts
- * Authoritative Automated Test Gate Suite for I-PYMOL-01 and I-PYMOL-01A Hardening.
+ * Authoritative Automated Test Gate Suite for I-PYMOL-01, I-PYMOL-01A, and I-PYMOL-01B Hardening.
  * 
  * Verifies:
  * 1. show sticks all
@@ -11,13 +11,13 @@
  * 6. show_as sticks chain A changes only chain A (and "as" alias)
  * 7. valid-empty produces no-op (affected_count = 0, does not become "all")
  * 8. invalid selection produces no mutation
- * 9. Real Multi-Object Collision Gate (Object A atom 1 vs Object B atom 1 - BLOCKER 1)
+ * 9. Real Multi-Object Collision & Integration Gate (Object A atom 1 vs Object B atom 1, NO default:1 alias written)
  * 10. Renderer index change does not change stable membership
- * 11. Authoritative Topology Gate (Explicit fixture, NO assignBonds, NO distance guessing - BLOCKER 2)
+ * 11. Authoritative Topology Gate (Explicit fixture, NO assignBonds, NO distance guessing)
  * 12. show/hide leaves scientific revision/hash unchanged
  * 13. Camera operation invariants (pure representation commands)
  * 14. In-memory presentation state resolution determinism
- * 15. Real Master Regression Execution (BLOCKER 5 - dynamically executed)
+ * 15. Real Master Regression Execution (dynamically executed)
  */
 
 import * as fs from 'fs';
@@ -50,7 +50,7 @@ function loadFixture(filename: string): string {
 }
 
 console.log('================================================================================');
-console.log('       I-PYMOL-01 / I-PYMOL-01A: REPRESENTATION STATE HARDENING GATE            ');
+console.log('       I-PYMOL-01 / I-PYMOL-01B: REPRESENTATION STATE HARDENING GATE            ');
 console.log('================================================================================\n');
 
 let totalTests = 0;
@@ -298,10 +298,10 @@ console.log('-------------------------------------------------------------------
 }
 
 // =============================================================================
-// TEST 9: REAL MULTI-OBJECT COLLISION TEST (BLOCKER 1)
+// TEST 9: REAL MULTI-OBJECT PRODUCTION & INTEGRATION TEST (BLOCKER B)
 // =============================================================================
 console.log('\n--------------------------------------------------------------------------------');
-console.log('9. Test: Real Multi-Object Collision Test (Object A serial 1 vs Object B serial 1)');
+console.log('9. Test: Real Multi-Object Production & Integration Test (Object A serial 1 vs Object B serial 1)');
 console.log('--------------------------------------------------------------------------------');
 {
   // Create Object A and Object B with identical local serials (serial = 1)
@@ -345,7 +345,7 @@ console.log('-------------------------------------------------------------------
   assert(maskABefore === RepresentationBit.CARTOON, 'Object A atom 1 starts with CARTOON', 'SCIENTIFICALLY VALIDATED');
   assert(maskBBefore === RepresentationBit.CARTOON, 'Object B atom 1 starts with CARTOON', 'SCIENTIFICALLY VALIDATED');
 
-  // Apply "show sticks" TARGETING OBJECT A ONLY
+  // Apply "show sticks" TARGETING OBJECT A ONLY (Using MolStudio production path)
   psm.showRepresentation([1], 'sticks', 'object_A', [atomA]);
 
   // Verify Object A changed
@@ -356,6 +356,12 @@ console.log('-------------------------------------------------------------------
   const maskBAfter = psm.getAtomMask(1, 'object_B', [atomB]);
   assert((maskBAfter & RepresentationBit.STICKS) === 0, 'Object B atom 1 (same serial 1) did NOT acquire STICKS (No Collision)', 'SCIENTIFICALLY VALIDATED');
   assert(maskBAfter === RepresentationBit.CARTOON, 'Object B atom 1 remains strictly CARTOON', 'SCIENTIFICALLY VALIDATED');
+
+  // Verify NO default:1 alias was newly written to the presentation map
+  const internalMap = (psm as any).state.atomRepresentationMasks as Map<string, number>;
+  assert(internalMap.has('object_A:1'), 'object_A:1 written explicitly', 'SOFTWARE VERIFIED');
+  assert(!internalMap.has('default:1'), 'default:1 alias was NOT newly written', 'SCIENTIFICALLY VALIDATED');
+  assert(!internalMap.has('1'), 'bare serial 1 was NOT newly written', 'SCIENTIFICALLY VALIDATED');
 
   // Multi-object render state resolution test
   const rsA = psm.buildRenderState([atomA], { activeObjectId: 'object_A' });
@@ -385,7 +391,7 @@ console.log('-------------------------------------------------------------------
 }
 
 // =============================================================================
-// TEST 11: AUTHORITATIVE TOPOLOGY GATE (NO DISTANCE INFERENCE - BLOCKER 2)
+// TEST 11: AUTHORITATIVE TOPOLOGY GATE (NO DISTANCE INFERENCE)
 // =============================================================================
 console.log('\n--------------------------------------------------------------------------------');
 console.log('11. Test: Authoritative Topology Gate (Explicit Fixture, NO assignBonds, NO Distance Guessing)');
@@ -496,7 +502,7 @@ console.log('-------------------------------------------------------------------
 }
 
 // =============================================================================
-// TEST 15: REAL MASTER REGRESSION EXECUTION (BLOCKER 5)
+// TEST 15: REAL MASTER REGRESSION EXECUTION
 // =============================================================================
 console.log('\n--------------------------------------------------------------------------------');
 console.log('15. Test: Real Master Regression Execution (Invoking run_all_regressions.ts dynamically)');
@@ -514,7 +520,7 @@ console.log('-------------------------------------------------------------------
 }
 
 console.log('\n================================================================================');
-console.log(`I-PYMOL-01 / I-PYMOL-01A TEST GATE RESULTS: ${passedTests} / ${totalTests} Tests Passed (100.0%)`);
+console.log(`I-PYMOL-01 / I-PYMOL-01B TEST GATE RESULTS: ${passedTests} / ${totalTests} Tests Passed (100.0%)`);
 console.log('================================================================================');
 
 if (passedTests !== totalTests) {

@@ -524,7 +524,6 @@ export default function MolStudio() {
         for (const s of targetSerials!) {
           const key = makeAtomIdentityKey(s, 'main_mol');
           next.set(key, bit);
-          next.set(`default:${s}`, bit);
         }
         return next;
       });
@@ -639,7 +638,6 @@ export default function MolStudio() {
           const key = makeAtomIdentityKey(s, 'main_mol');
           const cur = next.has(key) ? next.get(key)! : (next.has(`default:${s}`) ? next.get(`default:${s}`)! : defaultMaskForAtom(atoms.find(a => a.serial === s), renderStyle ? normalizeRepresentationName(renderStyle) : 'cartoon'));
           next.set(key, cur & ~hideBit);
-          next.set(`default:${s}`, cur & ~hideBit);
         }
         return next;
       });
@@ -1004,7 +1002,6 @@ export default function MolStudio() {
                     ? next.get(String(serial))!
                     : defaultMaskForAtom(atoms.find(a => a.serial === serial), renderStyle ? normalizeRepresentationName(renderStyle) : 'cartoon')));
               next.set(key, current | bit);
-              next.set(`default:${serial}`, current | bit);
             }
           } else if (mut.action === 'hide') {
             for (const serial of mut.atomSerials) {
@@ -1017,13 +1014,11 @@ export default function MolStudio() {
                     ? next.get(String(serial))!
                     : defaultMaskForAtom(atoms.find(a => a.serial === serial), renderStyle ? normalizeRepresentationName(renderStyle) : 'cartoon')));
               next.set(key, current & ~bit);
-              next.set(`default:${serial}`, current & ~bit);
             }
           } else if (mut.action === 'show_as') {
             for (const serial of mut.atomSerials) {
               const key = makeAtomIdentityKey(serial, 'main_mol');
               next.set(key, bit);
-              next.set(`default:${serial}`, bit);
             }
           }
         }
@@ -1866,6 +1861,7 @@ useEffect(() => {
               presentationOverrides={presentationOverrides}
               atomColorMap={atomColorMap}
               atomRepMasks={atomRepMasks}
+              activeObjectId="main_mol"
             />
           </div>
 

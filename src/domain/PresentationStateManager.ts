@@ -37,7 +37,7 @@ export type VisibilityState = 'visible' | 'hidden';
 export type AtomIdentityKey = string;
 
 export function makeAtomIdentityKey(serial: number, objectScope: string | null = null): AtomIdentityKey {
-  const scope = (objectScope && objectScope.trim()) || 'default';
+  const scope = (objectScope && objectScope.trim()) || 'main_mol';
   return `${scope}:${serial}`;
 }
 
@@ -287,7 +287,7 @@ export function buildViewerRenderState(params: BuildRenderStateParams): Resolved
     let mask: number;
     let source: string;
 
-    const objScope = atom.objectScope || atom.objectId || atom.object_id || atom.molecule_ref || atom.moleculeRef || options.activeObjectId || 'default';
+    const objScope = atom.objectScope || atom.objectId || atom.object_id || atom.molecule_ref || atom.moleculeRef || options.activeObjectId || 'main_mol';
     const atomKey = makeAtomIdentityKey(serial, objScope);
 
     if (presentationState.atomRepresentationMasks && presentationState.atomRepresentationMasks.has(atomKey)) {
@@ -408,7 +408,7 @@ export function buildViewerRenderState(params: BuildRenderStateParams): Resolved
       continue;
     }
 
-    const objScope = options.activeObjectId || 'default';
+    const objScope = options.activeObjectId || 'main_mol';
     const atomKey = makeAtomIdentityKey(serial, objScope);
 
     const mask = atomState.representationMask !== undefined

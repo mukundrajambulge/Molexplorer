@@ -53,6 +53,7 @@ interface CoreViewer3DProps {
   focusTrigger?: number;
   orthographic?: boolean;
   stereoMode?: 'none' | 'cross-eye' | 'anaglyph';
+  activeObjectId?: string;
   // SQ4 Presentation Overrides & Per-Atom Colors
   presentationOverrides?: SelectionPresentationOverride[];
   atomColorMap?: Map<number, string> | null;
@@ -312,582 +313,663 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
     return () => resizeObserver.disconnect();
   }, [mode]);
 
-  // Main rendering effect
+  const [structureVersion, setStructureVersion] = useState(0);
+  const propsRef = useRef(props);
+  propsRef.current = props;
+  const storeRef = useRef({
+    activeMeasurementMode,
+    clickedAtomBuffer,
+    addClickedAtom,
+    selectionLevel,
+    molecularSelection,
+    setMolecularSelection,
+    setHoveredAtom
+  });
+  storeRef.current = {
+    activeMeasurementMode,
+    clickedAtomBuffer,
+    addClickedAtom,
+    selectionLevel,
+    molecularSelection,
+    setMolecularSelection,
+    setHoveredAtom
+  };
+
+  // Unified Atom Picking & Hover Handlers
+  const handleAtomPicked = (rawAtom: any, _viewer?: any, event?: any) => {
+    if (!rawAtom) return;
+    const currentProps = propsRef.current;
+    const currentStore = storeRef.current;
+    const structureId = currentProps.mode === 'explorer'
+      ? (currentProps.molecule?.id || currentProps.molecule?.name || 'explorer_mol')
+      : 'studio_mol';
+
+    const pickedAtom = MolecularPicker.normalizeAtom(rawAtom, structureId);
+
+    // 1. Measurement mode intercept
+    if (currentStore.activeMeasurementMode) {
+      currentStore.addClickedAtom({
+        serial: pickedAtom.serial,
+        x: pickedAtom.x,
+        y: pickedAtom.y,
+        z: pickedAtom.z,
+        name: pickedAtom.atomName,
+        resName: pickedAtom.residueName,
+        resSeq: pickedAtom.residueNumber,
+        chainID: pickedAtom.chainId
+      });
+      return;
+    }
+
+    // 2. Custom onAtomClick prop callback
+    if (currentProps.onAtomClick) {
+      currentProps.onAtomClick(pickedAtom);
+    }
+
+    // 3. Selection expansion & toggle (Disabled if selectionLevel is 'none')
+    if (currentStore.selectionLevel === 'none') {
+      return;
+    }
+
+    const viewer = viewerRef.current;
+    if (!viewer) return;
+    const allAtoms = MolecularPicker.extractAllAtoms(viewer, structureId);
+    const isMulti = Boolean(event?.shiftKey || event?.ctrlKey || event?.metaKey);
+    const nextSelection = SelectionManager.toggle(
+      pickedAtom,
+      currentStore.selectionLevel,
+      allAtoms,
+      currentStore.molecularSelection,
+      isMulti
+    );
+
+    currentStore.setMolecularSelection(nextSelection);
+  };
+
+  const handleAtomHovered = (rawAtom: any) => {
+    if (!rawAtom) {
+      storeRef.current.setHoveredAtom(null);
+      return;
+    }
+    const currentProps = propsRef.current;
+    const structureId = currentProps.mode === 'explorer'
+      ? (currentProps.molecule?.id || currentProps.molecule?.name || 'explorer_mol')
+      : 'studio_mol';
+    const pickedAtom = MolecularPicker.normalizeAtom(rawAtom, structureId);
+    storeRef.current.setHoveredAtom(pickedAtom);
+  };
+
+  const handleAtomUnhovered = () => {
+    storeRef.current.setHoveredAtom(null);
+  };
+
+  const wrapInteractiveStyle = (baseStyle: any) => {
+    return {
+      ...baseStyle,
+      clickable: true,
+      callback: handleAtomPicked,
+      hoverable: true,
+      hover_callback: handleAtomHovered,
+      unhover_callback: handleAtomUnhovered
+    };
+  };
+
+  // =========================================================================
+  // EFFECT A: STRUCTURAL / MODEL LIFECYCLE EFFECT
+  // Triggered ONLY on structural changes (PDB data load, assembly/symmetry load)
+  // =========================================================================
   useEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer) return;
 
-    const renderTimer = setTimeout(async () => {
-      const bgColor = mode === 'explorer' 
-        ? (props.viewState?.canvasBackground || '#0b0f19')
-        : (props.backgroundColor || '#0b0f19');
-      viewer.setBackgroundColor(bgColor);
-      if (typeof viewer.setProjection === 'function') {
-        try { viewer.setProjection(props.orthographic ? 'orthographic' : 'perspective'); } catch (e) {}
+    const bgColor = mode === 'explorer' 
+      ? (props.viewState?.canvasBackground || '#0b0f19')
+      : (props.backgroundColor || '#0b0f19');
+    viewer.setBackgroundColor(bgColor);
+    if (typeof viewer.setProjection === 'function') {
+      try { viewer.setProjection(props.orthographic ? 'orthographic' : 'perspective'); } catch (e) {}
+    }
+
+    viewer.clear();
+    if (typeof viewer.removeAllModels === 'function') viewer.removeAllModels();
+    viewer.removeAllSurfaces();
+    viewer.removeAllShapes();
+    viewer.removeAllLabels();
+
+    if (mode === 'explorer' && props.molecule?.rawContent) {
+      const format = props.molecule.format.toLowerCase();
+      const molContent = props.molecule.rawContent;
+
+      const m1 = viewer.addModel(molContent, format);
+      if (m1 && typeof m1.setClickable === 'function') {
+        m1.setClickable({}, true, handleAtomPicked);
+        m1.setHoverable({}, true, handleAtomHovered, handleAtomUnhovered);
       }
 
-      viewer.clear();
-      if (typeof viewer.removeAllModels === 'function') viewer.removeAllModels();
-      viewer.removeAllSurfaces();
-      viewer.removeAllShapes();
-      viewer.removeAllLabels();
-
-      // Unified Atom Picking & Hover Handlers
-      const handleAtomPicked = (rawAtom: any, _viewer?: any, event?: any) => {
-        if (!rawAtom) return;
-        const structureId = mode === 'explorer'
-          ? (props.molecule?.id || props.molecule?.name || 'explorer_mol')
-          : 'studio_mol';
-
-        const pickedAtom = MolecularPicker.normalizeAtom(rawAtom, structureId);
-
-        // 1. Measurement mode intercept
-        if (activeMeasurementMode) {
-          addClickedAtom({
-            serial: pickedAtom.serial,
-            x: pickedAtom.x,
-            y: pickedAtom.y,
-            z: pickedAtom.z,
-            name: pickedAtom.atomName,
-            resName: pickedAtom.residueName,
-            resSeq: pickedAtom.residueNumber,
-            chainID: pickedAtom.chainId
-          });
-          return;
+      if (props.compareMolecule?.rawContent) {
+        const m2 = viewer.addModel(props.compareMolecule.rawContent, props.compareMolecule.format.toLowerCase());
+        m2.setStyle({}, { stick: { colorscheme: 'greenCarbon', radius: 0.15 }, sphere: { hidden: true } });
+        if (m2 && typeof m2.setClickable === 'function') {
+          m2.setClickable({}, true, handleAtomPicked);
         }
+      }
 
-        // 2. Custom onAtomClick prop callback
-        if (props.onAtomClick) {
-          props.onAtomClick(pickedAtom);
+      if (typeof viewer.setClickable === 'function') {
+        viewer.setClickable({}, true, handleAtomPicked);
+        viewer.setHoverable({}, true, handleAtomHovered, handleAtomUnhovered);
+      }
+
+      viewer.zoomTo();
+      setStructureVersion(v => v + 1);
+
+    } else if (mode === 'studio' && props.pdbData) {
+      setIsRendering(true);
+      const m = viewer.addModel(props.pdbData, "pdb", { keepH: true });
+      
+      try { m.computeSecondaryStructure(); } catch (e) {}
+
+      const atoms = m.selectedAtoms({});
+      
+      // DSSP Secondary Structure Mapping Override
+      if (props.ssData && props.ssData.length > 0) {
+        const ssMap = new Map();
+        for (let i = 0; i < props.ssData.length; i++) {
+           const ss = props.ssData[i];
+           const prev = props.ssData[i-1];
+           const next = props.ssData[i+1];
+           let ssbegin = false;
+           let ssend = false;
+           if (ss.ss_type !== 'loop' && ss.ss_type !== 'undetermined') {
+               if (!prev || prev.chainID !== ss.chainID || prev.ss_type !== ss.ss_type) {
+                   ssbegin = true;
+               }
+               if (!next || next.chainID !== ss.chainID || next.ss_type !== ss.ss_type) {
+                   ssend = true;
+               }
+           }
+           ssMap.set(`${ss.chainID}:${ss.resi}`, { type: ss.ss_type, ssbegin, ssend });
         }
-
-        // 3. Selection expansion & toggle (Disabled if selectionLevel is 'none')
-        if (selectionLevel === 'none') {
-          return;
-        }
-
-        const allAtoms = MolecularPicker.extractAllAtoms(viewer, structureId);
-        const isMulti = Boolean(event?.shiftKey || event?.ctrlKey || event?.metaKey);
-        const nextSelection = SelectionManager.toggle(
-          pickedAtom,
-          selectionLevel,
-          allAtoms,
-          molecularSelection,
-          isMulti
-        );
-
-        setMolecularSelection(nextSelection);
-      };
-
-      const handleAtomHovered = (rawAtom: any) => {
-        if (!rawAtom) {
-          setHoveredAtom(null);
-          return;
-        }
-        const structureId = mode === 'explorer'
-          ? (props.molecule?.id || props.molecule?.name || 'explorer_mol')
-          : 'studio_mol';
-        const pickedAtom = MolecularPicker.normalizeAtom(rawAtom, structureId);
-        setHoveredAtom(pickedAtom);
-      };
-
-      const handleAtomUnhovered = () => {
-        setHoveredAtom(null);
-      };
-
-      const wrapInteractiveStyle = (baseStyle: any) => {
-        return {
-          ...baseStyle,
-          clickable: true,
-          callback: handleAtomPicked,
-          hoverable: true,
-          hover_callback: handleAtomHovered,
-          unhover_callback: handleAtomUnhovered
-        };
-      };
-
-      if (mode === 'explorer' && props.molecule?.rawContent) {
-        // EXPLORER MODE RENDERING
-        const format = props.molecule.format.toLowerCase();
-        const molContent = props.molecule.rawContent;
-
-        // Add main molecule
-        const m1 = viewer.addModel(molContent, format);
-        if (m1 && typeof m1.setClickable === 'function') {
-          m1.setClickable({}, true, handleAtomPicked);
-          m1.setHoverable({}, true, handleAtomHovered, handleAtomUnhovered);
-        }
-
-        // Add compare molecule
-        if (props.compareMolecule?.rawContent) {
-          const m2 = viewer.addModel(props.compareMolecule.rawContent, props.compareMolecule.format.toLowerCase());
-          m2.setStyle({}, { stick: { colorscheme: 'greenCarbon', radius: 0.15 }, sphere: { hidden: true } });
-          if (m2 && typeof m2.setClickable === 'function') {
-            m2.setClickable({}, true, handleAtomPicked);
-          }
-        }
-
-        // Apply Explorer Styles with full Opacity, Hydrogen, Label, and Electron Cloud support
-        const vs = props.viewState;
-        if (vs) {
-          const rawOpacity = typeof vs.surfaceOpacity === 'number' ? vs.surfaceOpacity : 0.8;
-          const opacity = vs.performanceMode ? Math.min(rawOpacity, 0.9) : rawOpacity;
-          const isStickRadius = vs.performanceMode ? 0.12 : 0.20;
-          const isSphereScale = vs.performanceMode ? 0.22 : 0.30;
-          let baseStyle: any = {};
-
-          if (vs.renderStyle === "Line") {
-            baseStyle.line = { opacity };
-          } else if (vs.renderStyle === "Stick") {
-            baseStyle.stick = { opacity, radius: isStickRadius };
-          } else if (vs.renderStyle === "Ball-and-Stick") {
-            baseStyle.stick = { opacity, radius: isStickRadius * 0.8 };
-            baseStyle.sphere = { scale: isSphereScale, opacity };
-          } else if (vs.renderStyle === "Space-Filling") {
-            baseStyle.sphere = { opacity };
-          } else if (vs.renderStyle.includes("Surface")) {
-            baseStyle.stick = { opacity: Math.min(opacity, 0.4), radius: isStickRadius * 0.7 };
-            baseStyle.sphere = { hidden: true };
-            try {
-              viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity, color: 'spectrum' });
-            } catch (e) {}
-          } else {
-            baseStyle.stick = { opacity, radius: isStickRadius };
-          }
-
-          let colorscheme = 'Jmol';
-          if (vs.colorTheme === "Classic CPK") colorscheme = 'rasmol';
-          if (vs.colorTheme === "Monochrome") { baseStyle.color = "#B0B0B0"; }
-          else { baseStyle.colorscheme = colorscheme; }
-
-          viewer.setStyle({}, wrapInteractiveStyle(baseStyle));
-          
-          // 1. Hydrogen Styling (Standard pure white CPK convention)
-          if (vs.showHydrogens) {
-            const hStyle: any = {};
-            if (baseStyle.line) hStyle.line = { color: '#FFFFFF', opacity };
-            if (baseStyle.stick) hStyle.stick = { color: '#FFFFFF', radius: isStickRadius * 0.75, opacity };
-            if (baseStyle.sphere) hStyle.sphere = { color: '#FFFFFF', scale: isSphereScale * 0.75, opacity };
-            viewer.setStyle({ elem: 'H' }, wrapInteractiveStyle(hStyle));
-          } else {
-            viewer.setStyle({ elem: 'H' }, { hidden: true });
-          }
-
-          // 2. Electron Cloud Rendering Mode
-          if (vs.electronCloudMode === "Illustrative Approximation") {
-            try {
-              viewer.addSurface($3Dmol.SurfaceType.VDW, {
-                opacity: 0.32 * opacity,
-                color: '#38bdf8'
-              });
-            } catch (e) {}
-          } else if (vs.electronCloudMode === "Computed Density (Demo)") {
-            try {
-              viewer.addSurface($3Dmol.SurfaceType.SAS, {
-                opacity: 0.42 * opacity,
-                color: '#c084fc'
-              });
-            } catch (e) {}
-          }
-
-          // 3. Atom Labels Display
-          if (vs.showLabels) {
-            const model = viewer.getModel();
-            const atoms = model ? model.selectedAtoms({}) : [];
-            atoms.forEach((a: any) => {
-              if (!vs.showHydrogens && (a.elem === 'H' || a.element === 'H')) return;
-              const sym = a.elem || a.element || (a.atom || '').replace(/[0-9]/g, '').trim() || 'C';
-              const num = a.serial !== undefined ? a.serial : (a.index !== undefined ? a.index + 1 : '');
-              const labelText = `${sym}${num}`;
-              viewer.addLabel(labelText, {
-                position: { x: a.x, y: a.y + 0.35, z: a.z },
-                backgroundColor: 'rgba(15, 23, 42, 0.90)',
-                borderColor: '#00f2ff',
-                fontColor: '#FFFFFF',
-                font: 'monospace',
-                fontSize: 10,
-                backgroundOpacity: 0.90
-              });
-            });
-          }
-
-          // 4. Selection Highlighting Overlay
-          if (molecularSelection && molecularSelection.atoms.length > 0) {
-            SelectionHighlight.applySelectionOverlay(viewer, molecularSelection, '#00f2ff');
-          }
-
-          // 5. Active Measurement Markers in Viewport
-          if (clickedAtomBuffer && clickedAtomBuffer.length > 0) {
-            SelectionHighlight.applyMeasurementMarkers(viewer, clickedAtomBuffer, activeMeasurementMode as any);
-          }
-
-          // 6. Auto-Spin 3D rotation
-          if (typeof viewer.spin === 'function') {
-            viewer.spin(vs.isSpinning ? 'y' : false, 1.0);
-          }
-        }
-
-        // Attach viewer level click/hover listeners
-        if (typeof viewer.setClickable === 'function') {
-          viewer.setClickable({}, true, handleAtomPicked);
-          viewer.setHoverable({}, true, handleAtomHovered, handleAtomUnhovered);
-        }
-
-        viewer.zoomTo();
-        viewer.render();
-
-      } else if (mode === 'studio' && props.pdbData) {
-        // STUDIO MODE RENDERING
-        setIsRendering(true);
-        const m = viewer.addModel(props.pdbData, "pdb", { keepH: true });
-        
-        try { m.computeSecondaryStructure(); } catch (e) {}
-
-        const atoms = m.selectedAtoms({});
-        
-        // DSSP Secondary Structure Mapping Override
-        if (props.ssData && props.ssData.length > 0) {
-          const ssMap = new Map();
-          for (let i = 0; i < props.ssData.length; i++) {
-             const ss = props.ssData[i];
-             const prev = props.ssData[i-1];
-             const next = props.ssData[i+1];
-             let ssbegin = false;
-             let ssend = false;
-             if (ss.ss_type !== 'loop' && ss.ss_type !== 'undetermined') {
-                 if (!prev || prev.chainID !== ss.chainID || prev.ss_type !== ss.ss_type) {
-                     ssbegin = true;
-                 }
-                 if (!next || next.chainID !== ss.chainID || next.ss_type !== ss.ss_type) {
-                     ssend = true;
-                 }
-             }
-             ssMap.set(`${ss.chainID}:${ss.resi}`, { type: ss.ss_type, ssbegin, ssend });
-          }
-          atoms.forEach((a: any) => {
-             const key = `${a.chain}:${a.resi}`;
-             if (ssMap.has(key)) {
-                const info = ssMap.get(key);
-                if (info.type === 'helix') a.ss = 'h';
-                else if (info.type === 'sheet') a.ss = 's';
-                else a.ss = 'c';
-                if (info.ssbegin) a.ssbegin = true; else delete a.ssbegin;
-                if (info.ssend) a.ssend = true; else delete a.ssend;
-             }
-          });
-        }
-
-        let minResi = Infinity;
-        let maxResi = -Infinity;
-        const presentChains = new Set<string>();
-
         atoms.forEach((a: any) => {
-          if (typeof a.resi === 'number' && !a.hetflag) {
-            if (a.resi < minResi) minResi = a.resi;
-            if (a.resi > maxResi) maxResi = a.resi;
-          }
-          if (a.chain) {
-            presentChains.add(a.chain);
-          }
+           const key = `${a.chain}:${a.resi}`;
+           if (ssMap.has(key)) {
+              const info = ssMap.get(key);
+              if (info.type === 'helix') a.ss = 'h';
+              else if (info.type === 'sheet') a.ss = 's';
+              else a.ss = 'c';
+              if (info.ssbegin) a.ssbegin = true; else delete a.ssbegin;
+              if (info.ssend) a.ssend = true; else delete a.ssend;
+           }
         });
+      }
 
-        if (minResi === Infinity) minResi = 1;
-        if (maxResi === -Infinity) maxResi = 100;
+      // Assembly, Symmetry, Alignment & Ligand auxiliary models
+      if (props.assemblyPDB) {
+        viewer.addModel(props.assemblyPDB, "pdb");
+      }
+      if (props.symmetryPDB) {
+        viewer.addModel(props.symmetryPDB, "pdb");
+      }
+      if (props.alignmentPDB) {
+        viewer.addModel(props.alignmentPDB, "pdb");
+      }
+      if (props.ligandData) {
+        viewer.addModel(props.ligandData.data, props.ligandData.format);
+      }
 
-        const chainArray = Array.from(presentChains).sort();
-        const chainMap: Record<string, string> = {};
-        chainArray.forEach((ch, idx) => {
-          chainMap[ch] = CHAIN_PALETTE[idx % CHAIN_PALETTE.length];
-        });
-        chainMap[''] = CHAIN_PALETTE[0];
-        chainMap[' '] = CHAIN_PALETTE[0];
+      // Attach viewer & model picking listeners
+      if (typeof m.setClickable === 'function') {
+        m.setClickable({}, true, handleAtomPicked);
+        m.setHoverable({}, true, handleAtomHovered, handleAtomUnhovered);
+      }
+      if (typeof viewer.setClickable === 'function') {
+        viewer.setClickable({}, true, handleAtomPicked);
+        viewer.setHoverable({}, true, handleAtomHovered, handleAtomUnhovered);
+      }
 
-        const setClickStyle = (sel: any, style: any) => {
-          viewer.setStyle(sel, wrapInteractiveStyle(style));
-        };
+      if (props.pdbData !== lastZoomedData.current) {
+        viewer.zoomTo();
+        lastZoomedData.current = props.pdbData;
+      }
 
-        const rStyle = props.renderStyle || "Cartoon";
-        const cScheme = props.colorScheme || "spectrum";
-        const currentOpacity = typeof props.surfaceOpacity === 'number' ? props.surfaceOpacity : 0.8;
+      setIsRendering(false);
+      setStructureVersion(v => v + 1);
+    }
+  }, [
+    mode,
+    props.pdbData,
+    props.molecule?.rawContent,
+    props.molecule?.format,
+    props.compareMolecule?.rawContent,
+    props.compareMolecule?.format,
+    props.assemblyPDB,
+    props.symmetryPDB,
+    props.alignmentPDB,
+    props.ligandData?.data,
+    props.ligandData?.format,
+    props.ssData,
+    props.ssMode
+  ]);
 
-        // BUILD AUTHORITATIVE DETERMINISTIC PRESENTATION STATE (SQ-RENDER-01)
-        const overridesMap = new Map<string, SelectionPresentationOverride>();
-        if (props.presentationOverrides && props.presentationOverrides.length > 0) {
-          props.presentationOverrides.forEach(o => overridesMap.set(o.selectionKey, o));
-        }
+  // =========================================================================
+  // EFFECT B: PRESENTATION / REPRESENTATION UPDATE EFFECT
+  // Triggered by representation/style mutations without reloading models
+  // =========================================================================
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer) return;
 
-        const presentationState: ViewerPresentationState = {
-          globalRepresentation: normalizeRepresentationName(rStyle),
-          globalColorScheme: cScheme,
-          globalOpacity: currentOpacity,
-          objectOverrides: new Map(),
-          selectionOverrides: overridesMap,
-          atomColorMap: props.atomColorMap || null,
-          atomRepresentationMasks: props.atomRepMasks ? (props.atomRepMasks as any) : null
-        };
+    const bgColor = mode === 'explorer' 
+      ? (props.viewState?.canvasBackground || '#0b0f19')
+      : (props.backgroundColor || '#0b0f19');
+    viewer.setBackgroundColor(bgColor);
+    if (typeof viewer.setProjection === 'function') {
+      try { viewer.setProjection(props.orthographic ? 'orthographic' : 'perspective'); } catch (e) {}
+    }
 
-        const resolvedRenderState = buildViewerRenderState({
-          atoms,
-          presentationState,
-          options: {
-            minResi,
-            maxResi,
-            chainMap
-          }
-        });
+    if (mode === 'explorer' && props.molecule?.rawContent) {
+      const vs = props.viewState;
+      if (vs) {
+        const rawOpacity = typeof vs.surfaceOpacity === 'number' ? vs.surfaceOpacity : 0.8;
+        const opacity = vs.performanceMode ? Math.min(rawOpacity, 0.9) : rawOpacity;
+        const isStickRadius = vs.performanceMode ? 0.12 : 0.20;
+        const isSphereScale = vs.performanceMode ? 0.22 : 0.30;
+        let baseStyle: any = {};
 
-        // 5. Apply batched styles to 3Dmol viewer (O(N) direct assignment)
-        const atomMap = new Map<number, any>();
-        atoms.forEach((a: any) => atomMap.set(a.serial, a));
-
-        for (const { style, serials } of resolvedRenderState.styleGroups.values()) {
-          const interactiveStyle = wrapInteractiveStyle(style);
-          for (const s of serials) {
-            const a = atomMap.get(s);
-            if (a) a.style = interactiveStyle;
-          }
-        }
-
-        if (resolvedRenderState.hiddenSerials.length > 0) {
-          const hiddenStyle = wrapInteractiveStyle({ hidden: true });
-          for (const s of resolvedRenderState.hiddenSerials) {
-            const a = atomMap.get(s);
-            if (a) a.style = hiddenStyle;
-          }
-        }
-
-        if (resolvedRenderState.surfaceSerials.length > 0) {
+        if (vs.renderStyle === "Line") {
+          baseStyle.line = { opacity };
+        } else if (vs.renderStyle === "Stick") {
+          baseStyle.stick = { opacity, radius: isStickRadius };
+        } else if (vs.renderStyle === "Ball-and-Stick") {
+          baseStyle.stick = { opacity, radius: isStickRadius * 0.8 };
+          baseStyle.sphere = { scale: isSphereScale, opacity };
+        } else if (vs.renderStyle === "Space-Filling") {
+          baseStyle.sphere = { opacity };
+        } else if (vs.renderStyle.includes("Surface")) {
+          baseStyle.stick = { opacity: Math.min(opacity, 0.4), radius: isStickRadius * 0.7 };
+          baseStyle.sphere = { hidden: true };
           try {
-            viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: currentOpacity, color: cScheme }, { serial: resolvedRenderState.surfaceSerials });
+            viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity, color: 'spectrum' });
+          } catch (e) {}
+        } else {
+          baseStyle.stick = { opacity, radius: isStickRadius };
+        }
+
+        let colorscheme = 'Jmol';
+        if (vs.colorTheme === "Classic CPK") colorscheme = 'rasmol';
+        if (vs.colorTheme === "Monochrome") { baseStyle.color = "#B0B0B0"; }
+        else { baseStyle.colorscheme = colorscheme; }
+
+        viewer.setStyle({}, wrapInteractiveStyle(baseStyle));
+        
+        // 1. Hydrogen Styling
+        if (vs.showHydrogens) {
+          const hStyle: any = {};
+          if (baseStyle.line) hStyle.line = { color: '#FFFFFF', opacity };
+          if (baseStyle.stick) hStyle.stick = { color: '#FFFFFF', radius: isStickRadius * 0.75, opacity };
+          if (baseStyle.sphere) hStyle.sphere = { color: '#FFFFFF', scale: isSphereScale * 0.75, opacity };
+          viewer.setStyle({ elem: 'H' }, wrapInteractiveStyle(hStyle));
+        } else {
+          viewer.setStyle({ elem: 'H' }, { hidden: true });
+        }
+
+        // 2. Clear previous overlays without touching models
+        viewer.removeAllSurfaces();
+        viewer.removeAllShapes();
+        viewer.removeAllLabels();
+
+        // 3. Electron Cloud Rendering Mode
+        if (vs.electronCloudMode === "Illustrative Approximation") {
+          try {
+            viewer.addSurface($3Dmol.SurfaceType.VDW, {
+              opacity: 0.32 * opacity,
+              color: '#38bdf8'
+            });
+          } catch (e) {}
+        } else if (vs.electronCloudMode === "Computed Density (Demo)") {
+          try {
+            viewer.addSurface($3Dmol.SurfaceType.SAS, {
+              opacity: 0.42 * opacity,
+              color: '#c084fc'
+            });
           } catch (e) {}
         }
 
-        // Render global Surfaces / Mesh / Dots if global renderStyle is surface/mesh/dots
-        if (rStyle.includes('Surface') || rStyle === 'Mesh' || rStyle === 'Dots') {
-          const strategy = RepresentationStrategyFactory.getStrategy(rStyle);
-          strategy.applySurfacesOrShapes(viewer, {
-            colorScheme: cScheme,
-            minResi,
-            maxResi,
-            chainMap,
-            surfaceOpacity: currentOpacity
+        // 4. Atom Labels Display
+        if (vs.showLabels) {
+          const model = viewer.getModel();
+          const atoms = model ? model.selectedAtoms({}) : [];
+          atoms.forEach((a: any) => {
+            if (!vs.showHydrogens && (a.elem === 'H' || a.element === 'H')) return;
+            const sym = a.elem || a.element || (a.atom || '').replace(/[0-9]/g, '').trim() || 'C';
+            const num = a.serial !== undefined ? a.serial : (a.index !== undefined ? a.index + 1 : '');
+            const labelText = `${sym}${num}`;
+            viewer.addLabel(labelText, {
+              position: { x: a.x, y: a.y + 0.35, z: a.z },
+              backgroundColor: 'rgba(15, 23, 42, 0.90)',
+              borderColor: '#00f2ff',
+              fontColor: '#FFFFFF',
+              font: 'monospace',
+              fontSize: 10,
+              backgroundOpacity: 0.90
+            });
           });
         }
 
-        // Apply Selection Highlighting Overlay (Glowing Luminous Markers)
-        if (selectionLevel !== 'none') {
-          if (molecularSelection && molecularSelection.atoms.length > 0) {
-            SelectionHighlight.applySelectionOverlay(viewer, molecularSelection, '#00f2ff');
-          }
+        // 5. Selection Highlighting Overlay
+        if (molecularSelection && molecularSelection.atoms.length > 0) {
+          SelectionHighlight.applySelectionOverlay(viewer, molecularSelection, '#00f2ff');
         }
 
-        // Active Measurement In-Progress Markers (P1, P2, P3, P4)
+        // 6. Active Measurement Markers
         if (clickedAtomBuffer && clickedAtomBuffer.length > 0) {
           SelectionHighlight.applyMeasurementMarkers(viewer, clickedAtomBuffer, activeMeasurementMode as any);
         }
 
-        // Assembly, Symmetry, Alignment & Ligand overlays
-        if (props.assemblyPDB) {
-          viewer.addModel(props.assemblyPDB, "pdb");
-          setClickStyle({ model: 1 }, getStyleObj(rStyle, 'cyan', minResi, maxResi, chainMap, 1.0));
+        // 7. Auto-Spin
+        if (typeof viewer.spin === 'function') {
+          viewer.spin(vs.isSpinning ? 'y' : false, 1.0);
         }
+      }
 
-        if (props.symmetryPDB) {
-          const sm = viewer.addModel(props.symmetryPDB, "pdb");
-          setClickStyle({ model: sm.getID() }, getStyleObj(rStyle, '#FFD700', minResi, maxResi, chainMap, 0.7));
-        }
+      viewer.render();
 
-        if (props.alignmentPDB) {
-          const am = viewer.addModel(props.alignmentPDB, "pdb");
-          setClickStyle({ model: am.getID() }, { cartoon: { color: 'orange' } });
+    } else if (mode === 'studio' && props.pdbData) {
+      const m = viewer.getModel(0);
+      if (!m) return;
+
+      const atoms = m.selectedAtoms({});
+      if (!atoms || atoms.length === 0) return;
+
+      // Clean presentation-only overlays without removing molecular models
+      viewer.removeAllSurfaces();
+      viewer.removeAllShapes();
+      viewer.removeAllLabels();
+
+      let minResi = Infinity;
+      let maxResi = -Infinity;
+      const presentChains = new Set<string>();
+
+      atoms.forEach((a: any) => {
+        if (typeof a.resi === 'number' && !a.hetflag) {
+          if (a.resi < minResi) minResi = a.resi;
+          if (a.resi > maxResi) maxResi = a.resi;
         }
+        if (a.chain) {
+          presentChains.add(a.chain);
+        }
+      });
+
+      if (minResi === Infinity) minResi = 1;
+      if (maxResi === -Infinity) maxResi = 100;
+
+      const chainArray = Array.from(presentChains).sort();
+      const chainMap: Record<string, string> = {};
+      chainArray.forEach((ch, idx) => {
+        chainMap[ch] = CHAIN_PALETTE[idx % CHAIN_PALETTE.length];
+      });
+      chainMap[''] = CHAIN_PALETTE[0];
+      chainMap[' '] = CHAIN_PALETTE[0];
+
+      const rStyle = props.renderStyle || "Cartoon";
+      const cScheme = props.colorScheme || "spectrum";
+      const currentOpacity = typeof props.surfaceOpacity === 'number' ? props.surfaceOpacity : 0.8;
+
+      // BUILD AUTHORITATIVE DETERMINISTIC PRESENTATION STATE (SQ-RENDER-01)
+      const overridesMap = new Map<string, SelectionPresentationOverride>();
+      if (props.presentationOverrides && props.presentationOverrides.length > 0) {
+        props.presentationOverrides.forEach(o => overridesMap.set(o.selectionKey, o));
+      }
+
+      const presentationState: ViewerPresentationState = {
+        globalRepresentation: normalizeRepresentationName(rStyle),
+        globalColorScheme: cScheme,
+        globalOpacity: currentOpacity,
+        objectOverrides: new Map(),
+        selectionOverrides: overridesMap,
+        atomColorMap: props.atomColorMap || null,
+        atomRepresentationMasks: props.atomRepMasks ? (props.atomRepMasks as any) : null
+      };
+
+      const resolvedRenderState = buildViewerRenderState({
+        atoms,
+        presentationState,
+        options: {
+          minResi,
+          maxResi,
+          chainMap,
+          activeObjectId: props.activeObjectId || 'main_mol'
+        }
+      });
+
+      // Apply batched styles to existing 3Dmol model atoms (O(N) direct assignment)
+      const atomMap = new Map<number, any>();
+      atoms.forEach((a: any) => atomMap.set(a.serial, a));
+
+      for (const { style, serials } of resolvedRenderState.styleGroups.values()) {
+        const interactiveStyle = wrapInteractiveStyle(style);
+        for (const s of serials) {
+          const a = atomMap.get(s);
+          if (a) a.style = interactiveStyle;
+        }
+      }
+
+      if (resolvedRenderState.hiddenSerials.length > 0) {
+        const hiddenStyle = wrapInteractiveStyle({ hidden: true });
+        for (const s of resolvedRenderState.hiddenSerials) {
+          const a = atomMap.get(s);
+          if (a) a.style = hiddenStyle;
+        }
+      }
+
+      if (resolvedRenderState.surfaceSerials.length > 0) {
+        try {
+          viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: currentOpacity, color: cScheme }, { serial: resolvedRenderState.surfaceSerials });
+        } catch (e) {}
+      }
+
+      // Render global Surfaces / Mesh / Dots if global renderStyle is surface/mesh/dots
+      if (rStyle.includes('Surface') || rStyle === 'Mesh' || rStyle === 'Dots') {
+        const strategy = RepresentationStrategyFactory.getStrategy(rStyle);
+        strategy.applySurfacesOrShapes(viewer, {
+          colorScheme: cScheme,
+          minResi,
+          maxResi,
+          chainMap,
+          surfaceOpacity: currentOpacity
+        });
+      }
+
+      // Auxiliary model styles
+      if (props.assemblyPDB) {
+        viewer.setStyle({ model: 1 }, wrapInteractiveStyle(getStyleObj(rStyle, 'cyan', minResi, maxResi, chainMap, 1.0)));
+      }
+      if (props.symmetryPDB) {
+        viewer.setStyle({ model: 2 }, wrapInteractiveStyle(getStyleObj(rStyle, '#FFD700', minResi, maxResi, chainMap, 0.7)));
+      }
+      if (props.alignmentPDB) {
+        viewer.setStyle({ model: 3 }, wrapInteractiveStyle({ cartoon: { color: 'orange' } }));
+      }
+      if (props.ligandData) {
+        viewer.setStyle({ model: 4 }, wrapInteractiveStyle({ stick: { colorscheme: 'greenCarbon' } }));
+      }
+
+      // Apply Selection Highlighting Overlay (Glowing Luminous Markers)
+      if (selectionLevel !== 'none') {
+        if (molecularSelection && molecularSelection.atoms.length > 0) {
+          SelectionHighlight.applySelectionOverlay(viewer, molecularSelection, '#00f2ff');
+        }
+      }
+
+      // Active Measurement In-Progress Markers (P1, P2, P3, P4)
+      if (clickedAtomBuffer && clickedAtomBuffer.length > 0) {
+        SelectionHighlight.applyMeasurementMarkers(viewer, clickedAtomBuffer, activeMeasurementMode as any);
+      }
+
+      // Render Dipole Arrow
+      if (showDipoleArrow && dipoleMoment && dipoleMoment.magnitude > 0) {
+        const com = dipoleMoment.com;
+        const vec = dipoleMoment.vector;
+        const mag = dipoleMoment.magnitude;
+        const scale = 0.5;
+        const end = {
+          x: com.x + vec.x * scale,
+          y: com.y + vec.y * scale,
+          z: com.z + vec.z * scale
+        };
         
-        if (props.ligandData) {
-           const lm = viewer.addModel(props.ligandData.data, props.ligandData.format);
-           setClickStyle({ model: lm.getID() }, { stick: { colorscheme: 'greenCarbon' } });
-        }
-
-        // Render Dipole Arrow
-        if (showDipoleArrow && dipoleMoment && dipoleMoment.magnitude > 0) {
-          const com = dipoleMoment.com;
-          const vec = dipoleMoment.vector;
-          const mag = dipoleMoment.magnitude;
-          const scale = 0.5;
-          const end = {
-            x: com.x + vec.x * scale,
-            y: com.y + vec.y * scale,
-            z: com.z + vec.z * scale
-          };
-          
-          viewer.addCylinder({
-            start: com,
-            end: end,
-            radius: 0.12,
-            color: '#06b6d4',
-            fromCap: true,
-            toCap: false
-          });
-
-          const norm = { x: vec.x / mag, y: vec.y / mag, z: vec.z / mag };
-          const tip = {
-            x: end.x + norm.x * 0.8,
-            y: end.y + norm.y * 0.8,
-            z: end.z + norm.z * 0.8
-          };
-          
-          viewer.addCylinder({
-            start: end,
-            end: tip,
-            radius: 0.30,
-            toRadius: 0.0,
-            color: '#06b6d4',
-            fromCap: true,
-            toCap: true
-          });
-        }
-
-        // Render Committed 3D Measurements
-        measurements.forEach((m: any) => {
-          if (m.type === 'distance' && m.coordinates && m.coordinates.length >= 2) {
-            const [p1, p2] = m.coordinates;
-            if (!p1 || !p2 || typeof p1.x !== 'number' || typeof p2.x !== 'number') return;
-            // High-visibility measurement cylinder
-            viewer.addCylinder({
-              start: p1,
-              end: p2,
-              radius: 0.10,
-              color: '#00f2ff',
-              fromCap: 1,
-              toCap: 1
-            });
-            // Marker spheres at endpoints
-            viewer.addSphere({ center: p1, radius: 0.35, color: '#00f2ff', opacity: 0.95 });
-            viewer.addSphere({ center: p2, radius: 0.35, color: '#00f2ff', opacity: 0.95 });
-
-            const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2, z: (p1.z + p2.z) / 2 };
-            viewer.addLabel(m.label, {
-              position: mid,
-              backgroundColor: 'rgba(15, 23, 42, 0.95)',
-              borderColor: '#00f2ff',
-              fontColor: '#ffffff',
-              font: 'monospace',
-              fontSize: 11,
-              backgroundOpacity: 0.95
-            });
-          } else if (m.type === 'angle' && m.coordinates && m.coordinates.length >= 3) {
-            const [p1, p2, p3] = m.coordinates;
-            if (!p1 || !p2 || !p3 || typeof p1.x !== 'number' || typeof p2.x !== 'number' || typeof p3.x !== 'number') return;
-            viewer.addCylinder({ start: p1, end: p2, radius: 0.08, color: '#f59e0b', fromCap: 1, toCap: 1 });
-            viewer.addCylinder({ start: p2, end: p3, radius: 0.08, color: '#f59e0b', fromCap: 1, toCap: 1 });
-            viewer.addSphere({ center: p1, radius: 0.30, color: '#f59e0b', opacity: 0.95 });
-            viewer.addSphere({ center: p2, radius: 0.35, color: '#f59e0b', opacity: 0.95 });
-            viewer.addSphere({ center: p3, radius: 0.30, color: '#f59e0b', opacity: 0.95 });
-            viewer.addLabel(m.label, {
-              position: p2,
-              backgroundColor: 'rgba(15, 23, 42, 0.95)',
-              borderColor: '#f59e0b',
-              fontColor: '#ffffff',
-              font: 'monospace',
-              fontSize: 11,
-              backgroundOpacity: 0.95
-            });
-          } else if (m.type === 'dihedral' && m.coordinates && m.coordinates.length >= 4) {
-            const [p1, p2, p3, p4] = m.coordinates;
-            if (!p1 || !p2 || !p3 || !p4 || typeof p1.x !== 'number' || typeof p2.x !== 'number' || typeof p3.x !== 'number' || typeof p4.x !== 'number') return;
-            viewer.addCylinder({ start: p1, end: p2, radius: 0.06, color: '#a855f7', fromCap: 1, toCap: 1 });
-            viewer.addCylinder({ start: p2, end: p3, radius: 0.10, color: '#a855f7', fromCap: 1, toCap: 1 });
-            viewer.addCylinder({ start: p3, end: p4, radius: 0.06, color: '#a855f7', fromCap: 1, toCap: 1 });
-            const mid = { x: (p2.x + p3.x) / 2, y: (p2.y + p3.y) / 2, z: (p2.z + p3.z) / 2 };
-            viewer.addLabel(m.label, {
-              position: mid,
-              backgroundColor: 'rgba(15, 23, 42, 0.95)',
-              borderColor: '#a855f7',
-              fontColor: '#ffffff',
-              font: 'monospace',
-              fontSize: 11,
-              backgroundOpacity: 0.95
-            });
-          } else if (m.type === 'label' && m.coordinates && m.coordinates.length >= 1) {
-            const [p1] = m.coordinates;
-            if (!p1 || typeof p1.x !== 'number') return;
-            viewer.addLabel(m.label, {
-              position: p1,
-              backgroundColor: 'rgba(15, 23, 42, 0.95)',
-              borderColor: '#10b981',
-              fontColor: '#ffffff',
-              font: 'monospace',
-              fontSize: 11,
-              backgroundOpacity: 0.95
-            });
-          }
+        viewer.addCylinder({
+          start: com,
+          end: end,
+          radius: 0.12,
+          color: '#06b6d4',
+          fromCap: true,
+          toCap: false
         });
 
-        // Render Interactions (HBonds, Salt Bridges, etc.)
-        if (props.interactions && props.interactions.length > 0) {
-          props.interactions.forEach(int => {
-            viewer.addCylinder({
-              start: { x: int.atom1.x, y: int.atom1.y, z: int.atom1.z },
-              end: { x: int.atom2.x, y: int.atom2.y, z: int.atom2.z },
-              radius: 0.05,
-              color: int.type === 'hbond' ? 'yellow' :
-                     int.type === 'hydrophobic' ? '#a855f7' :
-                     int.type === 'pistacking' ? '#06b6d4' :
-                     int.type === 'saltbridge' ? '#ef4444' :
-                     int.type === 'halogen' ? '#f97316' :
-                     int.type === 'cationpi' ? '#ec4899' :
-                     '#10b981',
-              dashed: true,
-              fromCap: 1,
-              toCap: 1
-            });
+        const norm = { x: vec.x / mag, y: vec.y / mag, z: vec.z / mag };
+        const tip = {
+          x: end.x + norm.x * 0.8,
+          y: end.y + norm.y * 0.8,
+          z: end.z + norm.z * 0.8
+        };
+        
+        viewer.addCylinder({
+          start: end,
+          end: tip,
+          radius: 0.30,
+          toRadius: 0.0,
+          color: '#06b6d4',
+          fromCap: true,
+          toCap: true
+        });
+      }
+
+      // Render Committed 3D Measurements
+      measurements.forEach((m: any) => {
+        if (m.type === 'distance' && m.coordinates && m.coordinates.length >= 2) {
+          const [p1, p2] = m.coordinates;
+          if (!p1 || !p2 || typeof p1.x !== 'number' || typeof p2.x !== 'number') return;
+          viewer.addCylinder({ start: p1, end: p2, radius: 0.10, color: '#00f2ff', fromCap: 1, toCap: 1 });
+          viewer.addSphere({ center: p1, radius: 0.35, color: '#00f2ff', opacity: 0.95 });
+          viewer.addSphere({ center: p2, radius: 0.35, color: '#00f2ff', opacity: 0.95 });
+          const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2, z: (p1.z + p2.z) / 2 };
+          viewer.addLabel(m.label, {
+            position: mid,
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            borderColor: '#00f2ff',
+            fontColor: '#ffffff',
+            font: 'monospace',
+            fontSize: 11,
+            backgroundOpacity: 0.95
+          });
+        } else if (m.type === 'angle' && m.coordinates && m.coordinates.length >= 3) {
+          const [p1, p2, p3] = m.coordinates;
+          if (!p1 || !p2 || !p3 || typeof p1.x !== 'number' || typeof p2.x !== 'number' || typeof p3.x !== 'number') return;
+          viewer.addCylinder({ start: p1, end: p2, radius: 0.08, color: '#f59e0b', fromCap: 1, toCap: 1 });
+          viewer.addCylinder({ start: p2, end: p3, radius: 0.08, color: '#f59e0b', fromCap: 1, toCap: 1 });
+          viewer.addSphere({ center: p1, radius: 0.30, color: '#f59e0b', opacity: 0.95 });
+          viewer.addSphere({ center: p2, radius: 0.35, color: '#f59e0b', opacity: 0.95 });
+          viewer.addSphere({ center: p3, radius: 0.30, color: '#f59e0b', opacity: 0.95 });
+          viewer.addLabel(m.label, {
+            position: p2,
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            borderColor: '#f59e0b',
+            fontColor: '#ffffff',
+            font: 'monospace',
+            fontSize: 11,
+            backgroundOpacity: 0.95
+          });
+        } else if (m.type === 'dihedral' && m.coordinates && m.coordinates.length >= 4) {
+          const [p1, p2, p3, p4] = m.coordinates;
+          if (!p1 || !p2 || !p3 || !p4 || typeof p1.x !== 'number' || typeof p2.x !== 'number' || typeof p3.x !== 'number' || typeof p4.x !== 'number') return;
+          viewer.addCylinder({ start: p1, end: p2, radius: 0.06, color: '#a855f7', fromCap: 1, toCap: 1 });
+          viewer.addCylinder({ start: p2, end: p3, radius: 0.10, color: '#a855f7', fromCap: 1, toCap: 1 });
+          viewer.addCylinder({ start: p3, end: p4, radius: 0.06, color: '#a855f7', fromCap: 1, toCap: 1 });
+          const mid = { x: (p2.x + p3.x) / 2, y: (p2.y + p3.y) / 2, z: (p2.z + p3.z) / 2 };
+          viewer.addLabel(m.label, {
+            position: mid,
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            borderColor: '#a855f7',
+            fontColor: '#ffffff',
+            font: 'monospace',
+            fontSize: 11,
+            backgroundOpacity: 0.95
+          });
+        } else if (m.type === 'label' && m.coordinates && m.coordinates.length >= 1) {
+          const [p1] = m.coordinates;
+          if (!p1 || typeof p1.x !== 'number') return;
+          viewer.addLabel(m.label, {
+            position: p1,
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            borderColor: '#10b981',
+            fontColor: '#ffffff',
+            font: 'monospace',
+            fontSize: 11,
+            backgroundOpacity: 0.95
           });
         }
+      });
 
-        // Attach viewer & model picking listeners
-        if (typeof m.setClickable === 'function') {
-          m.setClickable({}, true, handleAtomPicked);
-          m.setHoverable({}, true, handleAtomHovered, handleAtomUnhovered);
-        }
-        if (typeof viewer.setClickable === 'function') {
-          viewer.setClickable({}, true, handleAtomPicked);
-          viewer.setHoverable({}, true, handleAtomHovered, handleAtomUnhovered);
-        }
-
-        // Apply Zoom / Center Focus
-        if (props.pdbData !== lastZoomedData.current) {
-          viewer.zoomTo();
-          lastZoomedData.current = props.pdbData;
-        } else if (props.focusTrigger) {
-          if (props.selectedAtomSerials && props.selectedAtomSerials.size > 0) {
-             viewer.zoomTo({ serial: Array.from(props.selectedAtomSerials) });
-          } else {
-             viewer.zoomTo();
-          }
-        }
-        
-        try {
-          viewer.render();
-        } catch (renderErr) {
-          console.warn('3Dmol render error:', renderErr);
-          try {
-            viewer.setStyle({}, { stick: { colorscheme: 'default', radius: 0.2 }, sphere: { colorscheme: 'default', radius: 0.3 } });
-            viewer.render();
-          } catch (fallbackErr) {
-            console.warn('3Dmol render fallback warning:', fallbackErr);
-          }
-        }
-        setIsRendering(false);
+      // Render Interactions
+      if (props.interactions && props.interactions.length > 0) {
+        props.interactions.forEach(int => {
+          viewer.addCylinder({
+            start: { x: int.atom1.x, y: int.atom1.y, z: int.atom1.z },
+            end: { x: int.atom2.x, y: int.atom2.y, z: int.atom2.z },
+            radius: 0.05,
+            color: int.type === 'hbond' ? 'yellow' :
+                   int.type === 'hydrophobic' ? '#a855f7' :
+                   int.type === 'pistacking' ? '#06b6d4' :
+                   int.type === 'saltbridge' ? '#ef4444' :
+                   int.type === 'halogen' ? '#f97316' :
+                   int.type === 'cationpi' ? '#ec4899' :
+                   '#10b981',
+            dashed: true,
+            fromCap: 1,
+            toCap: 1
+          });
+        });
       }
-    }, 10);
 
-    return () => clearTimeout(renderTimer);
-    }, [
-    mode, props.molecule, props.compareMolecule, props.viewState, props.filters,
-    props.pdbData, props.renderStyle, props.colorScheme, props.selectedAtomSerials, props.ligandData,
-    props.focusTrigger, showDipoleArrow, dipoleMoment, activeMeasurementMode, clickedAtomBuffer,
-    props.backgroundColor, props.surfaceOpacity, props.ssData, props.ssMode,
-    props.assemblyPDB, props.symmetryPDB, props.alignmentPDB, props.interactions, measurements,
-    selectionLevel, molecularSelection, props.presentationOverrides, props.atomColorMap, props.atomRepMasks
+      // Apply Focus Trigger if requested
+      if (props.focusTrigger) {
+        if (props.selectedAtomSerials && props.selectedAtomSerials.size > 0) {
+          viewer.zoomTo({ serial: Array.from(props.selectedAtomSerials) });
+        } else {
+          viewer.zoomTo();
+        }
+      }
+
+      try {
+        viewer.render();
+      } catch (renderErr) {
+        console.warn('3Dmol render error:', renderErr);
+      }
+    }
+  }, [
+    structureVersion,
+    props.renderStyle,
+    props.colorScheme,
+    props.surfaceOpacity,
+    props.presentationOverrides,
+    props.atomColorMap,
+    props.atomRepMasks,
+    props.activeObjectId,
+    props.hiddenObjectIds,
+    props.selectedAtomSerials,
+    props.interactions,
+    measurements,
+    selectionLevel,
+    molecularSelection,
+    showDipoleArrow,
+    dipoleMoment,
+    activeMeasurementMode,
+    clickedAtomBuffer,
+    props.backgroundColor,
+    props.orthographic,
+    props.focusTrigger,
+    props.viewState,
+    props.filters
   ]);
 
   const granularityLevels: { id: SelectionLevel; label: string }[] = [
