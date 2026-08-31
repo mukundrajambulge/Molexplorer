@@ -61,6 +61,16 @@ export default function MolExplorer() {
     getRDKit().then(() => setIsRDKitReady(true));
   }, []);
 
+  // Expose automated browser test API for Explorer mode
+  useEffect(() => {
+    (window as any).__molExplorerTestApi = {
+      setMolecule: (mol: MoleculeData) => setMolecule(mol),
+      setViewState: (vs: Partial<ViewState>) => setViewState(prev => ({ ...prev, ...vs })),
+      getViewState: () => viewState,
+      getViewer: () => viewerRef.current?.getViewer?.()
+    };
+  }, [viewState, setMolecule]);
+
   const handleLoadMolecule = async (mols: MoleculeData | MoleculeData[]) => {
     const newMols = Array.isArray(mols) ? mols : [mols];
     if (newMols.length === 0) return;

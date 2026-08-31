@@ -98,6 +98,17 @@ export interface CommandRouterResult {
     visibility?: 'visible' | 'hidden';
     appliedAt: number;
   }>;
+  /** I-PYMOL-01: Explicit Representation Mutation */
+  representationMutation?: {
+    action: 'show' | 'hide' | 'show_as';
+    representation: string;
+    atomSerials: Set<number>;
+  };
+  representationMutations?: Array<{
+    action: 'show' | 'hide' | 'show_as';
+    representation: string;
+    atomSerials: Set<number>;
+  }>;
 }
 
 export class ScientificCommandRouter {
@@ -157,6 +168,12 @@ export class ScientificCommandRouter {
       appliedAt: number;
     }> = [];
 
+    const mergedRepresentationMutations: Array<{
+      action: 'show' | 'hide' | 'show_as';
+      representation: string;
+      atomSerials: Set<number>;
+    }> = [];
+
     for (const cmdLine of commandLines) {
       const res = this.executeSingleCommand(cmdLine, atoms, currentNamedSelections, activeObjectName);
       lastResult = res;
@@ -171,6 +188,12 @@ export class ScientificCommandRouter {
       }
       if (res.presentationOverrides) {
         mergedPresentationOverrides.push(...res.presentationOverrides);
+      }
+      if (res.representationMutation) {
+        mergedRepresentationMutations.push(res.representationMutation);
+      }
+      if (res.representationMutations) {
+        mergedRepresentationMutations.push(...res.representationMutations);
       }
 
       if (res.saveSelection) {
@@ -201,7 +224,9 @@ export class ScientificCommandRouter {
       addLabels: mergedAddLabels,
       saveSelection: mergedSaveSelection,
       deleteSelectionName: mergedDeleteSelectionName,
-      presentationOverrides: mergedPresentationOverrides.length > 0 ? mergedPresentationOverrides : undefined
+      presentationOverrides: mergedPresentationOverrides.length > 0 ? mergedPresentationOverrides : undefined,
+      representationMutations: mergedRepresentationMutations.length > 0 ? mergedRepresentationMutations : undefined,
+      representationMutation: mergedRepresentationMutations.length === 1 ? mergedRepresentationMutations[0] : undefined
     };
   }
 
@@ -306,7 +331,8 @@ export class ScientificCommandRouter {
         const rep = ast.representation_value || 'cartoon';
         const selQuery = ast.selection_query || 'all';
         const selectedSerials = evaluateSelection(selQuery);
-        const isHide = ast.verb === 'hide';
+        const action: 'show' | 'hide' | 'show_as' = ast.verb === 'hide' ? 'hide' : (ast.verb === 'show_as' ? 'show_as' : 'show');
+        const isHide = action === 'hide';
         const isGlobal = !ast.selection_query || ast.selection_query === 'all' || ast.selection_query === '*';
         return {
           type: 'console_action',
@@ -314,12 +340,17 @@ export class ScientificCommandRouter {
           selectedSerials,
           count: selectedSerials.size,
           setStyle: isGlobal ? (isHide ? 'hidden' : rep) : undefined,
+          representationMutation: {
+            action,
+            representation: rep,
+            atomSerials: new Set(selectedSerials)
+          },
           presentationOverrides: [{
             selectionKey: selQuery,
             selectionQuery: selQuery,
             atomSerials: new Set(selectedSerials),
             representation: isHide ? null : rep,
-            visibility: isHide ? 'hidden' : 'visible',
+            visibility: (isHide && (rep === 'everything' || rep === 'all')) ? 'hidden' : 'visible',
             appliedAt: Date.now()
           }],
           textOutput: `${ast.verb}: applied '${rep}' to ${selectedSerials.size} atoms (${selQuery})`
