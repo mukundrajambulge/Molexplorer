@@ -137,8 +137,8 @@ export class CommandLexer {
       return { raw_input: '', verb: '', args_raw: '', comma_args: [] };
     }
 
-    // Identify first word / verb
-    const match = raw.match(/^([a-zA-Z0-9_\-\.\/]+)(.*)$/);
+    // Identify first word / verb (including PyMOL wildcard *)
+    const match = raw.match(/^([a-zA-Z0-9_\-\.\/\*]+)(.*)$/);
     if (!match) {
       return { raw_input: raw, verb: '', args_raw: '', comma_args: [] };
     }

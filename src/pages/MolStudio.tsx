@@ -504,6 +504,7 @@ export default function MolStudio() {
         undo: () => setRenderStyle(prevStyle),
         redo: () => setRenderStyle(newStyle)
       });
+      setAtomRepMasks(new Map());
       setRenderStyle(newStyle);
       return;
     }

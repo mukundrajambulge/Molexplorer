@@ -16,6 +16,15 @@ import { RepresentationRegistry } from './RepresentationRegistry';
 import { ColorRegistry } from './ColorRegistry';
 import { LabelExpressionEvaluator } from './LabelExpressionEvaluator';
 
+export function normalizeSelectionExpression(expr?: string | null): string {
+  if (!expr) return 'all';
+  const trimmed = expr.trim();
+  if (!trimmed || trimmed === '*' || trimmed.toLowerCase() === 'all' || trimmed.toLowerCase() === 'everything') {
+    return 'all';
+  }
+  return trimmed;
+}
+
 export class ScientificCommandParser {
   /**
    * Parses a single command line into a typed CommandASTNode.
@@ -33,6 +42,18 @@ export class ScientificCommandParser {
         positional_args: [],
         named_args: {},
         selection_query: ''
+      };
+    }
+
+    // 0. Standalone all / * / everything selection query
+    if (verb === 'all' || verb === '*' || verb === 'everything') {
+      return {
+        verb: 'query',
+        raw_input: raw,
+        command_type: 'query',
+        positional_args: ['all'],
+        named_args: {},
+        selection_query: 'all'
       };
     }
 
@@ -129,21 +150,22 @@ export class ScientificCommandParser {
       }
 
       const validatedColor = ColorRegistry.validate(colorVal);
+      const normalizedSel = normalizeSelectionExpression(selQuery);
 
       return {
         verb: 'color',
         raw_input: raw,
         command_type: 'color',
-        positional_args: [validatedColor, selQuery],
+        positional_args: [validatedColor, normalizedSel],
         named_args: {},
         color_value: validatedColor,
-        selection_query: selQuery
+        selection_query: normalizedSel
       };
     }
 
     // SQ3. RECOLOR: recolor [selection] -> resets to element default
     if (verb === 'recolor') {
-      const selQuery = lexed.args_raw.trim() || 'all';
+      const selQuery = normalizeSelectionExpression(lexed.args_raw.trim());
       return {
         verb: 'recolor',
         raw_input: raw,
@@ -188,21 +210,22 @@ export class ScientificCommandParser {
       }
 
       const validatedRep = RepresentationRegistry.validate(repVal, canonicalVerb === 'hide');
+      const normalizedSel = normalizeSelectionExpression(selQuery);
 
       return {
         verb: canonicalVerb,
         raw_input: raw,
         command_type: 'representation',
-        positional_args: [validatedRep, selQuery],
+        positional_args: [validatedRep, normalizedSel],
         named_args: {},
         representation_value: validatedRep,
-        selection_query: selQuery
+        selection_query: normalizedSel
       };
     }
 
     // 4. VIEW / CAMERA: zoom, center, orient (SQ3: typed camera_operation)
     if (verb === 'zoom' || verb === 'center' || verb === 'orient') {
-      const selQuery = lexed.args_raw.trim() || 'all';
+      const selQuery = normalizeSelectionExpression(lexed.args_raw.trim());
       return {
         verb,
         raw_input: raw,

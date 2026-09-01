@@ -23,10 +23,15 @@
 import { getColorFunction } from '../rendering/RepresentationStrategy';
 import {
   SupportedRepresentation,
+  CanonicalRepresentation,
+  normalizeRepresentation,
   RepresentationBit,
   representationToBit,
   bitmaskToRepresentations
 } from './RepresentationRegistry';
+
+export type { CanonicalRepresentation };
+export { normalizeRepresentation };
 
 export type RepresentationName = SupportedRepresentation;
 export type VisibilityState = 'visible' | 'hidden';

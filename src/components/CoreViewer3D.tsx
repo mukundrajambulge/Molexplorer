@@ -785,7 +785,12 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         const interactiveStyle = wrapInteractiveStyle(style);
         for (const s of serials) {
           const a = atomMap.get(s);
-          if (a) a.style = interactiveStyle;
+          if (a) {
+            a.style = interactiveStyle;
+            if (a.clickable || a.hoverable) {
+              a.intersectionShape = { sphere: [], cylinder: [], line: [], triangle: [] };
+            }
+          }
         }
       }
 
@@ -793,8 +798,32 @@ export const CoreViewer3D = forwardRef<CoreViewer3DRef, CoreViewer3DProps>((prop
         const hiddenStyle = wrapInteractiveStyle({ hidden: true });
         for (const s of resolvedRenderState.hiddenSerials) {
           const a = atomMap.get(s);
-          if (a) a.style = hiddenStyle;
+          if (a) {
+            a.style = hiddenStyle;
+            if (a.clickable || a.hoverable) {
+              a.intersectionShape = { sphere: [], cylinder: [], line: [], triangle: [] };
+            }
+          }
         }
+      }
+
+      // 3Dmol WebGL Mesh Invalidation:
+      // In 3Dmol.js GLModel, geometry is cached in `molObj`. Direct mutation of atom.style
+      // does NOT trigger rebuild during viewer.render() unless `molObj` is explicitly invalidated.
+      (m as any).molObj = null;
+      for (let i = 0; i < atoms.length; i++) {
+        if (atoms[i]) atoms[i].capDrawn = false;
+      }
+
+      // Diagnostic telemetry for presentation adapter verification
+      if (typeof window !== 'undefined') {
+        (window as any).__lastPresentationDiagnostic = {
+          renderedAtomCount: atoms.length,
+          styleGroupCount: resolvedRenderState.styleGroups.size,
+          hiddenCount: resolvedRenderState.hiddenSerials.length,
+          surfaceCount: resolvedRenderState.surfaceSerials.length,
+          timestamp: performance.now()
+        };
       }
 
       if (resolvedRenderState.surfaceSerials.length > 0) {

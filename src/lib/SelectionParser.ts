@@ -320,7 +320,7 @@ export class SelectionParser {
 
   tokenize(query: string): string[] {
     // Regex matches words, slash macros, comparisons, operators, and parenthetical delimiters
-    const tokenRegex = /\/[a-zA-Z0-9_\-\*\.\+\:\,\/]+|\b(and|or|not|byres|bychain|bymolecule|bycalpha|byca|byring|byobject|bysegi|byfragment|bycell|neighbor|bound_to|extend|expand|around|within|beyond|of|resn|res|resi|resv|chain|elem|element|symbol|name|atom|b|bfactor|q|occupancy|formal_charge|fc|id|index|rank|alt|altloc|segi|segid|ss|first|last|metals?|donors?|acceptors?|polymer\.protein|polymer\.nucleic|polymer|protein|nucleic|backbone|sidechain|organic|inorganic|ligands?|ions?|solvent|waters?|hetatm|het|hydrogens?|hydro|h|guide|visible|enabled|all|none)\b|<=|>=|==|!=|<|>|=|\(|\)|&|\||!|[a-zA-Z0-9_\-\*\.\+\:\,]+/gi;
+    const tokenRegex = /\/[a-zA-Z0-9_\-\*\.\+\:\,\/]+|\b(and|or|not|byres|bychain|bymolecule|bycalpha|byca|byring|byobject|bysegi|byfragment|bycell|neighbor|bound_to|extend|expand|around|within|beyond|of|resn|res|resi|resv|chain|elem|element|symbol|name|atom|b|bfactor|q|occupancy|formal_charge|fc|id|index|rank|alt|altloc|segi|segid|ss|first|last|metals?|donors?|acceptors?|polymer\.protein|polymer\.nucleic|polymer|protein|nucleic|backbone|sidechain|organic|inorganic|ligands?|ions?|solvent|waters?|hetatm|het|hydrogens?|hydro|h|guide|visible|enabled|all|none|everything)\b|<=|>=|==|!=|<|>|=|\(|\)|&|\||!|\*|[a-zA-Z0-9_\-\*\.\+\:\,]+/gi;
     return query.match(tokenRegex) || [];
   }
 
@@ -551,14 +551,16 @@ export class SelectionParser {
         'ligands': 'ligand',
         'ions': 'ion',
         'metal': 'metals',
-        'het': 'hetatm'
+        'het': 'hetatm',
+        '*': 'all',
+        'everything': 'all'
       };
 
       if ([
         'organic', 'inorganic', 'ligand', 'ligands', 'ion', 'ions', 'polymer', 'polymer.protein', 'polymer.nucleic', 'protein', 'nucleic',
         'backbone', 'sidechain', 'solvent', 'waters', 'water', 'hetatm', 'het', 'hydrogens', 'hydro', 'h', 'metals', 'metal',
         'donor', 'donors', 'acceptor', 'acceptors', 'guide', 'visible', 'enabled',
-        'all', 'none', 'first', 'last'
+        'all', 'none', 'first', 'last', '*', 'everything'
       ].includes(currentToken)) {
         pos++;
         const resolvedFlag = flagAliases[currentToken] || currentToken;

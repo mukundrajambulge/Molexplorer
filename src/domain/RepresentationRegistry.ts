@@ -22,6 +22,42 @@ export const SUPPORTED_REPRESENTATIONS = [
 
 export type SupportedRepresentation = typeof SUPPORTED_REPRESENTATIONS[number];
 
+export type CanonicalRepresentation =
+  | 'line'
+  | 'stick'
+  | 'sphere'
+  | 'cartoon'
+  | 'ribbon'
+  | 'trace'
+  | 'putty'
+  | 'surface'
+  | 'mesh'
+  | 'dots'
+  | 'nonbonded'
+  | 'nb_spheres'
+  | 'labels'
+  | 'ball_and_stick';
+
+export function normalizeRepresentation(rep: string | null | undefined): CanonicalRepresentation {
+  if (!rep) return 'cartoon';
+  const norm = rep.toLowerCase().trim().replace(/[-_\s]+/g, '');
+  if (norm === 'line' || norm === 'lines' || norm === 'wireframe') return 'line';
+  if (norm === 'stick' || norm === 'sticks') return 'stick';
+  if (norm === 'sphere' || norm === 'spheres' || norm === 'spacefilling' || norm === 'vdw') return 'sphere';
+  if (norm === 'cartoon' || norm === 'cartoons') return 'cartoon';
+  if (norm === 'ribbon' || norm === 'ribbons') return 'ribbon';
+  if (norm === 'trace' || norm === 'traces') return 'trace';
+  if (norm === 'putty' || norm === 'putties') return 'putty';
+  if (norm === 'surface' || norm === 'surfaces' || norm === 'vanderwaalssurface' || norm === 'solventaccessiblesurface' || norm === 'solventexcludedsurface') return 'surface';
+  if (norm === 'mesh' || norm === 'meshes') return 'mesh';
+  if (norm === 'dot' || norm === 'dots' || norm === 'dotsurface') return 'dots';
+  if (norm === 'nonbonded' || norm === 'cross' || norm === 'crosses') return 'nonbonded';
+  if (norm === 'nbspheres' || norm === 'smallspheres') return 'nb_spheres';
+  if (norm === 'label' || norm === 'labels') return 'labels';
+  if (norm === 'ballandstick' || norm === 'ball_and_stick' || norm === 'ballstick') return 'ball_and_stick';
+  return 'cartoon';
+}
+
 const REPRESENTATION_ALIASES: Record<string, SupportedRepresentation> = {
   'line': 'lines',
   'lines': 'lines',
@@ -78,21 +114,31 @@ export enum RepresentationBit {
 export function representationToBit(repName: string): number {
   const norm = (repName || '').trim().toLowerCase();
   if (norm === 'all' || norm === 'everything' || norm === '*') return RepresentationBit.ALL;
-  const canonical = REPRESENTATION_ALIASES[norm];
-  if (!canonical) return RepresentationBit.NONE;
+  const canonical = REPRESENTATION_ALIASES[norm] || norm;
   switch (canonical) {
+    case 'line':
     case 'lines': return RepresentationBit.LINES;
+    case 'stick':
     case 'sticks': return RepresentationBit.STICKS;
+    case 'sphere':
     case 'spheres': return RepresentationBit.SPHERES;
-    case 'cartoon': return RepresentationBit.CARTOON;
-    case 'ribbon': return RepresentationBit.RIBBON;
-    case 'trace': return RepresentationBit.TRACE;
-    case 'putty': return RepresentationBit.PUTTY;
-    case 'surface': return RepresentationBit.SURFACE;
-    case 'mesh': return RepresentationBit.MESH;
+    case 'cartoon':
+    case 'cartoons': return RepresentationBit.CARTOON;
+    case 'ribbon':
+    case 'ribbons': return RepresentationBit.RIBBON;
+    case 'trace':
+    case 'traces': return RepresentationBit.TRACE;
+    case 'putty':
+    case 'putties': return RepresentationBit.PUTTY;
+    case 'surface':
+    case 'surfaces': return RepresentationBit.SURFACE;
+    case 'mesh':
+    case 'meshes': return RepresentationBit.MESH;
+    case 'dot':
     case 'dots': return RepresentationBit.DOTS;
     case 'nonbonded': return RepresentationBit.NONBONDED;
     case 'nb_spheres': return RepresentationBit.NB_SPHERES;
+    case 'label':
     case 'labels': return RepresentationBit.LABELS;
     case 'ball_and_stick': return RepresentationBit.BALL_AND_STICK;
     default: return RepresentationBit.NONE;

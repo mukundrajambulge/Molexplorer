@@ -26,10 +26,12 @@ import { CanonicalSelectionEvaluator } from './CanonicalSelectionEvaluator';
 import { MeasurementParser } from './MeasurementParser';
 import { ScientificMeasurementEngine } from './ScientificMeasurementEngine';
 import { CommandLexer } from './CommandLexer';
-import { ScientificCommandParser } from './ScientificCommandParser';
+import { ScientificCommandParser, normalizeSelectionExpression } from './ScientificCommandParser';
 import { LabelExpressionEvaluator } from './LabelExpressionEvaluator';
 import { CommandASTNode } from './CommandAST';
 import { SpectrumEngine, SpectrumProperty, SpectrumPalette, SpectrumResult } from './SpectrumEngine';
+
+export { normalizeSelectionExpression };
 
 export interface CommandRouterResult {
   type: 'measurement' | 'analysis' | 'selection' | 'console_action';
@@ -241,7 +243,7 @@ export class ScientificCommandRouter {
   ): CommandRouterResult {
     // Helper to evaluate selection query using SQ1 selection algebra
     const evaluateSelection = (queryStr: string): Set<number> => {
-      const q = (queryStr || 'all').trim();
+      const q = normalizeSelectionExpression(queryStr);
       try {
         const parser = atoms.length > 0 && 'canonical_id' in atoms[0]
           ? SelectionParser.fromCanonicalAtoms(atoms as CanonicalAtom[], undefined, namedSelections)

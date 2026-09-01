@@ -55,6 +55,17 @@ export const SelectionQueryConsole: React.FC<QueryConsoleProps> = ({
   }, [lastMeasurementLog]);
 
   useEffect(() => {
+    setLogs(prev => {
+      if (prev.length >= 1 && prev[0].id === "1" && prev[0].count !== totalAtomCount && totalAtomCount > 0) {
+        const next = [...prev];
+        next[0] = { ...next[0], count: totalAtomCount };
+        return next;
+      }
+      return prev;
+    });
+  }, [totalAtomCount]);
+
+  useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
 
